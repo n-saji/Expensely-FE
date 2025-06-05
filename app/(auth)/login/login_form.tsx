@@ -34,7 +34,7 @@ export default function LoginForm() {
         console.error("Auth check failed:", error);
         router.push("/login");
       });
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
