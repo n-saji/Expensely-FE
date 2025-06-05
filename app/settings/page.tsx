@@ -4,7 +4,7 @@ import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 import { useState } from "react";
 
-export default function DashboardPage() {
+export default function SettingsPage() {
   const [enableSideBar, setEnableSidebar] = useState(true);
   return (
     <div className="w-full min-h-screen flex  justify-center bg-gray-200 relative">
@@ -18,9 +18,9 @@ export default function DashboardPage() {
         } transition-all duration-300`}
       >
         {/* Navbar */}
-        <Navbar setEnableSidebar={setEnableSidebar} title="Dashboard" />
+        <Navbar setEnableSidebar={setEnableSidebar} title="Settings" />
         <div className="m-8 flex flex-col items-start space-y-4">
-          <h1 className="text-gray-700 text-4xl">Welcome to your dashboard!</h1>
+          <h1 className="text-gray-700 text-4xl">Welcome to your Settings!</h1>
           <Card
             title="Card Title"
             description="This is a description for the card."

@@ -8,8 +8,10 @@ import { useState } from "react";
 
 export default function Navbar({
   setEnableSidebar,
+  title,
 }: {
   setEnableSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  title?: string;
 }) {
   const router = useRouter();
   const [profileDropDown, setProfileDropdown] = useState(false);
@@ -35,7 +37,7 @@ export default function Navbar({
           onClick={() => setEnableSidebar((prev) => !prev)}
         />
         <div className="flex justify-between w-full text-lg">
-          <p>Dashboard</p>
+          <p>{title || "Dashboard"}</p>
 
           <div className="relative">
             <p
