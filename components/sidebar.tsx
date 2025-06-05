@@ -2,7 +2,7 @@
 import Logo from "@/components/logo";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-export default function Sidebar() {
+export default function Sidebar({ classname }: { classname?: string }) {
   const param = usePathname();
   const [active, setActive] = useState(param || "dashboard");
 
@@ -15,7 +15,9 @@ export default function Sidebar() {
     }
   };
   return (
-    <aside className="w-64 primary-bg-color shadow-md">
+    <aside
+      className={`w-64 bg-primary-color shadow-md ${classname} transform transition-transform duration-300 ease-in-out absolute top-0 left-0 h-screen `}
+    >
       <Logo
         disableIcon={true}
         className="text-2xl border-b border-gray-200 py-4 px-4 w-full justify-start text-white"

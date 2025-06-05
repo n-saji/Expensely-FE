@@ -6,7 +6,7 @@
 }
 
 @layer components {
-  .primary-bg-color {
+  .bg-primary-color {
     @apply bg-green-600;
   }
   .button-blue {
