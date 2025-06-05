@@ -1,7 +1,8 @@
 "use client";
-import Logo from "@/components/logo";
+
 import Logout from "../(auth)/logout/logout";
 import { useRouter } from "next/navigation";
+import Sidebar from "@/components/sidebar";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -9,32 +10,12 @@ export default function DashboardPage() {
   return (
     <div className="w-full min-h-screen flex  justify-center bg-gray-200">
       {/* sidebar */}
-      <aside className="w-64 bg-white shadow-md p-4">
-        <h2 className="text-lg font-semibold text-gray-700">Sidebar</h2>
-        <ul className="mt-2 space-y-2">
-          <li>
-            <a
-              href="/profile"
-              className="text-sm text-gray-600 hover:underline"
-            >
-              Profile
-            </a>
-          </li>
-          <li>
-            <a
-              href="/settings"
-              className="text-sm text-gray-600 hover:underline"
-            >
-              Settings
-            </a>
-          </li>
-        </ul>
-      </aside>
+      <Sidebar />
       <div className="w-full">
         {/* Navbar */}
-        <nav className="w-full px-6 py-4 bg-white shadow-md flex justify-between items-center">
-          <Logo />
-          <div className="space-x-4">
+        <nav className="w-full px-6 py-5 bg-white shadow-md flex justify-between items-center">
+          <div className="space-x-4 flex">
+            <img alt="hamburger menu" className="w-6 h-6" />
             <a href="/dashboard" className="text-sm hover:underline">
               Dashboard
             </a>
