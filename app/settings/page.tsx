@@ -10,11 +10,12 @@ export default function SettingsPage() {
     <div className="w-full min-h-screen flex  justify-center bg-gray-200 relative">
       <Sidebar
         classname={enableSideBar ? "translate-x-0" : "-translate-x-full"}
+        setEnableSidebar={setEnableSidebar}
       />
 
       <div
         className={`w-full ${
-          enableSideBar ? "ml-64" : "ml-0"
+          enableSideBar ? "min-sm:ml-64" : "min-sm:ml-0"
         } transition-all duration-300`}
       >
         {/* Navbar */}

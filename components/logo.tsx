@@ -6,14 +6,16 @@ export default function Logo({
   className,
   dimension,
   disableIcon,
+  redirect = true,
 }: {
   className?: string;
   dimension?: { width: number; height: number };
   disableIcon?: boolean;
+  redirect?: boolean;
 }) {
   return (
     <Link
-      href="/"
+      href={redirect ? "/dashboard" : ""}
       className={`flex justify-evenly items-center cursor-pointer text-gray-500 ${className}`}
     >
       <div

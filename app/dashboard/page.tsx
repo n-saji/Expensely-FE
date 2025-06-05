@@ -7,14 +7,15 @@ import { useState } from "react";
 export default function DashboardPage() {
   const [enableSideBar, setEnableSidebar] = useState(true);
   return (
-    <div className="w-full min-h-screen flex  justify-center bg-gray-200 relative">
+    <div className="w-full min-h-screen flex  justify-center bg-gray-200 min-sm:relative">
       <Sidebar
-        classname={enableSideBar ? "translate-x-0" : "-translate-x-full"}
+        classname={enableSideBar ? "translate-x-0 " : "-translate-x-full"}
+        setEnableSidebar={setEnableSidebar}
       />
 
       <div
         className={`w-full ${
-          enableSideBar ? "ml-64" : "ml-0"
+          enableSideBar ? "min-sm:ml-64" : "min-sm:ml-0"
         } transition-all duration-300`}
       >
         {/* Navbar */}
