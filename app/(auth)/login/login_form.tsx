@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { API_URL } from "@/config/config";
+import validateToken from "@/utils/validate_token";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -13,27 +14,11 @@ export default function LoginForm() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (!token) return;
-
-    fetch(`${API_URL}/users/check-auth`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (res.ok) {
-          router.push("/dashboard");
-          return res.json();
-        }
-      })
-      .catch((error) => {
-        console.error("Auth check failed:", error);
-        router.push("/login");
-      });
+    validateToken().then((isValid) => {
+      if (isValid) {
+        router.push("/dashboard");
+      }
+    });
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,7 +124,7 @@ export default function LoginForm() {
 
       <button
         type="submit"
-        className="primary-button w-full"
+        className="button-blue w-full"
         onClick={(event) => handleSubmit(event)}
         disabled={loading}
         style={{ cursor: loading ? "not-allowed" : "pointer" }}

@@ -6,7 +6,16 @@
 }
 
 @layer components {
-  .primary-button {
-    @apply bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 cursor-pointer transition duration-200;
+  .button-blue {
+    @apply bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 cursor-pointer transition duration-200 font-medium;
+  }
+  .button-green {
+    @apply bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 cursor-pointer transition duration-200;
+  }
+  .button-green-outline {
+    @apply border border-green-600 text-green-600 px-6 py-3 rounded-md font-medium hover:bg-green-600 hover:text-white transition duration-200 cursor-pointer;
+  }
+  .button-white {
+    @apply border bg-white text-green-600 px-6 py-3 rounded-md font-medium hover:bg-green-600 hover:text-white hover:border-white  transition duration-200 cursor-pointer;
   }
 }
