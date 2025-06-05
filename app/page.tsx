@@ -13,6 +13,8 @@ export default function Home() {
     validateToken().then((isValid) => {
       if (isValid) {
         setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
       }
     });
   }, [router]);
@@ -22,17 +24,17 @@ export default function Home() {
       {/* Navbar */}
       <nav className="flex justify-between items-center px-6 py-4 shadow">
         <Logo
-          className="text-2xl font-bold text-green-600"
+          className="text-3xl font-bold text-green-600"
           dimension={{ width: 30, height: 30 }}
         />
         <div className="space-x-4">
           {loggedIn ? (
-            <Link href="/dashboard" className="text-sm hover:underline">
+            <Link href="/dashboard" className="text-medium hover:underline">
               Dashboard
             </Link>
           ) : (
             <>
-              <Link href="/login" className="text-sm hover:underline">
+              <Link href="/login" className="text-medium hover:underline">
                 Login
               </Link>
               <Link

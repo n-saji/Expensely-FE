@@ -124,7 +124,7 @@ export default function LoginForm() {
 
       <button
         type="submit"
-        className="button-blue w-full"
+        className="button-green w-full"
         onClick={(event) => handleSubmit(event)}
         disabled={loading}
         style={{ cursor: loading ? "not-allowed" : "pointer" }}
