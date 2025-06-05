@@ -132,7 +132,7 @@ export default function LoginForm() {
         {loading ? "Logging in..." : "Log In"}
       </button>
       <p className="mt-4 text-sm text-gray-600">
-        Don't have an account?{" "}
+        {`Don't have an account?`}
         <a href="/register" className="text-blue-500 hover:underline">
           Sign up
         </a>
