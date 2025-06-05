@@ -131,6 +131,13 @@ export default function LoginForm() {
       >
         {loading ? "Logging in..." : "Log In"}
       </button>
+      <p className="mt-4 text-sm text-gray-600">
+        Don't have an account?{" "}
+        <a href="/register" className="text-blue-500 hover:underline">
+          Sign up
+        </a>
+      </p>
+
       <div className={`text-red-500 absolute ${error ? "block" : "hidden"}`}>
         {error.charAt(0).toUpperCase() + error.slice(1)}
       </div>

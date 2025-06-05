@@ -1,9 +1,17 @@
+"use client";
+import Logo from "@/components/logo";
+import SignUpForm from "./signup_form";
+
 export default function SignUpPage() {
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <p>Welcome to the sign-up page!</p>
-      {/* Add your sign-up form or components here */}
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-200">
+      <Logo className="text-4xl p-4" />
+      <div className="max-sm:w-85 bg-gray-50 max-sm:p-8 p-16 rounded-2xl shadow-lg w-full max-w-md mt-10 flex flex-col items-center my-4">
+        <h1 className="text-3xl font-semibold text-gray-600 pb-8">
+          Create An Account
+        </h1>
+        <SignUpForm />
+      </div>
     </div>
   );
 }

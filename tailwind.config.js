@@ -4,12 +4,16 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
+        poppins: ["Poppins", "sans-serif"],
       },
+    },
+    colors: {
+      background: "var(--background)",
+      foreground: "var(--foreground)",
     },
   },
   variants: {
     extend: {},
   },
   plugins: [],
-}
+};
