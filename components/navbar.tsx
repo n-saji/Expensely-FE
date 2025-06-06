@@ -18,6 +18,7 @@ export default function Navbar({ title }: { title?: string }) {
   const user = useSelector((state: RootState) => state.user);
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
+
   const handleLogout = async () => {
     try {
       await Logout();

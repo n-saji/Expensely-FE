@@ -101,6 +101,15 @@ export default function ProfilePage() {
         if (!response.ok) {
           throw new Error("Failed to update profile.");
         }
+        dispatch(
+          setUser({
+            email: email,
+            name: name,
+            country_code: countryCode,
+            phone: phone,
+            currency: currency,
+          })
+        );
       })
       .catch((error) => {
         setError(`Error updating profile: ${error}`);
@@ -113,18 +122,18 @@ export default function ProfilePage() {
 
   return (
     <>
-      <h1 className="text-gray-700 text-4xl">Welcome to your Profile!</h1>
+      {/* <h1 className="text-gray-700 text-4xl">Welcome to your Profile!</h1> */}
       <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center relative">
         <Image
           alt="Profile Picture"
           src="/path/to/profile-picture.jpg"
           width={150}
           height={150}
-          className="rounded-full mb-4 bg-gray-300"
+          className="rounded-full mb-4 bg-gray-300 text-center"
         />
         <div className="flex flex-col items-center space-y-2">
-          <h2 className="text-2xl font-semibold text-gray-800 ">{name}</h2>
-          <p className="text-gray-600">{email}</p>
+          <h2 className="text-2xl font-semibold text-gray-800 ">{user.name}</h2>
+          <p className="text-gray-600">{user.email}</p>
         </div>
         <div className="bg-gray-200 w-full mt-4 flex justify-center flex-col items-center space-y-2 p-4 rounded-lg">
           <div className="w-full flex items-start">
