@@ -1,13 +1,34 @@
-// redux/store.ts
-import { configureStore } from "@reduxjs/toolkit";
-import sidebarReducer from "./slices/sidebarSlice";
+"use client";
 
-export const store = configureStore({
-  reducer: {
-    sidebar: sidebarReducer,
-  },
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage
+import sidebarReducer from "./slices/sidebarSlice";
+import userReducer from "./slices/userSlice";
+
+const rootReducer = combineReducers({
+  sidebar: sidebarReducer,
+  user: userReducer,
 });
 
-// Types for useSelector and useDispatch
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["user"], // persist only the user slice
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // required for redux-persist
+    }),
+});
+
+export const persistor = persistStore(store);
+
+// Types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

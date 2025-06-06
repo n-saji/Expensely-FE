@@ -9,11 +9,12 @@ import { useState } from "react";
 import { toggleSidebar } from "@/redux/slices/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-
 export default function Navbar({ title }: { title?: string }) {
   const router = useRouter();
   const [profileDropDown, setProfileDropdown] = useState(false);
   const dispatch = useDispatch();
+  const user = useSelector((state: any) => state.user);
+  console.log("User from Navbar:", user);
 
   const handleLogout = async () => {
     try {
@@ -45,7 +46,7 @@ export default function Navbar({ title }: { title?: string }) {
                 setProfileDropdown((prev) => !prev);
               }}
             >
-              Hi, User
+              Hi, {user.name || "User"}
             </p>
           </div>
           <div

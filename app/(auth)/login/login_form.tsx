@@ -5,6 +5,10 @@ import React, { useEffect, useState } from "react";
 import { API_URL } from "@/config/config";
 import validateToken from "@/utils/validate_token";
 
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { setUser } from "@/redux/slices/userSlice";
+
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -12,6 +16,8 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     validateToken().then((isValid) => {
@@ -48,6 +54,34 @@ export default function LoginForm() {
           sessionStorage.setItem("token", data.token);
         }
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        const response = await fetch(`${API_URL}/users/${data.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          dispatch(
+            setUser({
+              email: data.user.email,
+              isAuthenticated: true,
+              id: data.user.id,
+              name: data.user.name,
+              country_code: data.user.country_code,
+              phone_number: data.user.phone_number,
+              currency: data.user.currency,
+            })
+          );
+        } else {
+          const error = await response.json();
+          console.error("Error fetching user data:", error);
+          setError(error.error || "Failed to fetch user data");
+          return;
+        }
+
         router.push("/dashboard");
       } else {
         setError(data.message || "Login failed");
