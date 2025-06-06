@@ -1,12 +1,16 @@
 "use client";
-import Card from "@/components/card";
+import React from "react";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
-export default function DashboardPage() {
+export default function DashboardPage({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
   return (
@@ -19,14 +23,8 @@ export default function DashboardPage() {
         } transition-all duration-300`}
       >
         <Navbar title="Dashboard" />
-        <div className="p-8 flex flex-col space-y-4 w-full items-center overflow-auto">
-          <h1 className="text-gray-700 text-4xl">Welcome to your dashboard!</h1>
-          <Card
-            title="Card Title"
-            description="This is a description for the card."
-            className=""
-          />
-        </div>
+
+        {children}
       </div>
     </div>
   );
