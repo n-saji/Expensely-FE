@@ -6,7 +6,7 @@ import Sidebar from "@/components/sidebar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
-export default function DashboardPage() {
+export default function SettingsPage() {
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
   return (
