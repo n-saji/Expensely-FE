@@ -15,7 +15,7 @@ export default function Logo({
 }) {
   return (
     <Link
-      href={redirect ? "/dashboard" : ""}
+      href={redirect ? "/" : ""}
       className={`flex justify-evenly items-center cursor-pointer text-gray-500 ${className}`}
     >
       <div

@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import { toggleSidebar } from "@/redux/slices/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { clearUser } from "@/redux/slices/userSlice";
 
 export default function Navbar({ title }: { title?: string }) {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function Navbar({ title }: { title?: string }) {
   const handleLogout = async () => {
     try {
       await Logout();
+      dispatch(clearUser());
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);

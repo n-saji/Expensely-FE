@@ -5,8 +5,7 @@ import React, { useEffect, useState } from "react";
 import { API_URL } from "@/config/config";
 import validateToken from "@/utils/validate_token";
 
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 
 export default function LoginForm() {
