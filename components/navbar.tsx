@@ -9,12 +9,13 @@ import { useState } from "react";
 import { toggleSidebar } from "@/redux/slices/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "@/redux/slices/userSlice";
+import { RootState } from "@/redux/store";
 
 export default function Navbar({ title }: { title?: string }) {
   const router = useRouter();
   const [profileDropDown, setProfileDropdown] = useState(false);
   const dispatch = useDispatch();
-  const user = useSelector((state: any) => state.user);
+  const user = useSelector((state: RootState) => state.user);
   console.log("User from Navbar:", user);
 
   const handleLogout = async () => {
