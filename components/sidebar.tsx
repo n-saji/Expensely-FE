@@ -1,32 +1,25 @@
 "use client";
 import Logo from "@/components/logo";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import Image from "next/image";
 import closeIcone from "@/app/assets/icon/close.png";
 
-export default function Sidebar({
-  classname,
-  setEnableSidebar,
-}: {
-  setEnableSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-  classname?: string;
-}) {
-  const param = usePathname();
-  const [active, setActive] = useState(param || "dashboard");
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { setSidebar } from "@/redux/slices/sidebarSlice";
+import Link from "next/link";
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const target = e.currentTarget.getAttribute("href");
-    if (target) {
-      setActive(target);
-      window.location.href = target;
-    }
-    // setEnableSidebar((prev) => false);
-  };
+export default function Sidebar() {
+  const param = usePathname();
+
+  const dispatch = useDispatch();
+  const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
+
   return (
     <aside
-      className={`w-64 bg-primary-color shadow-md ${classname} max-sm:fixed max-sm:z-50 min-sm:absolute min-sm:transform transition-transform duration-300 ease-in-out  top-0 left-0 h-screen `}
+      className={`w-64 bg-primary-color shadow-md max-sm:fixed max-sm:z-50 min-sm:absolute 
+        min-sm:transform transition-transform duration-300 ease-in-out  top-0 left-0 h-screen 
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
       <Image
         src={closeIcone}
@@ -34,7 +27,7 @@ export default function Sidebar({
         width={35}
         height={35}
         className="absolute top-4 right-1 min-sm:hidden"
-        onClick={() => setEnableSidebar((prev) => !prev)}
+        onClick={() => dispatch(setSidebar(false))}
       />
       <Logo
         disableIcon={true}
@@ -44,37 +37,34 @@ export default function Sidebar({
       />
       <ul className="space-y-4 w-full px-8 py-4 text-lg text-gray-600 font-semibold">
         <li>
-          <a
+          <Link
             href="/dashboard"
             className={`${
-              active === "/dashboard" ? "text-gray-200" : ""
+              param === "/dashboard" ? "text-gray-200" : ""
             }  hover:underline`}
-            onClick={handleClick}
           >
             Dashboard
-          </a>
+          </Link>
         </li>
         <li>
-          <a
+          <Link
             href="/profile"
             className={`${
-              active === "/profile" ? "text-gray-200" : ""
+              param === "/profile" ? "text-gray-200" : ""
             }  hover:underline`}
-            onClick={handleClick}
           >
             Profile
-          </a>
+          </Link>
         </li>
         <li>
-          <a
+          <Link
             href="/settings"
             className={`${
-              active === "/settings" ? "text-gray-200" : ""
+              param === "/settings" ? "text-gray-200" : ""
             }  hover:underline`}
-            onClick={handleClick}
           >
             Settings
-          </a>
+          </Link>
         </li>
       </ul>
     </aside>

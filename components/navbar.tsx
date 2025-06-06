@@ -6,15 +6,14 @@ import Image from "next/image";
 import Logout from "@/app/(auth)/logout/logout";
 import { useState } from "react";
 
-export default function Navbar({
-  setEnableSidebar,
-  title,
-}: {
-  setEnableSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-  title?: string;
-}) {
+import { toggleSidebar } from "@/redux/slices/sidebarSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+
+export default function Navbar({ title }: { title?: string }) {
   const router = useRouter();
   const [profileDropDown, setProfileDropdown] = useState(false);
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
     try {
@@ -34,7 +33,7 @@ export default function Navbar({
           width={30}
           height={30}
           className="cursor-pointer"
-          onClick={() => setEnableSidebar((prev) => !prev)}
+          onClick={() => dispatch(toggleSidebar())}
         />
         <div className="flex justify-between w-full text-lg">
           <p>{title || "Dashboard"}</p>
