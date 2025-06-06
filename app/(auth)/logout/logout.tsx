@@ -17,5 +17,5 @@ export default async function Logout() {
 
   localStorage.removeItem("token");
   sessionStorage.removeItem("token");
-  console.log("Logged out successfully");
+  localStorage.removeItem("user_id");
 }

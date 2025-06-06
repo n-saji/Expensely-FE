@@ -52,7 +52,7 @@ export default function LoginForm() {
         } else {
           sessionStorage.setItem("token", data.token);
         }
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user_id", data.id);
 
         const response = await fetch(`${API_URL}/users/${data.id}`, {
           method: "GET",
