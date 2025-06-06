@@ -70,7 +70,7 @@ export default function LoginForm() {
               id: data.user.id,
               name: data.user.name,
               country_code: data.user.country_code,
-              phone_number: data.user.phone_number,
+              phone: data.user.phone,
               currency: data.user.currency,
             })
           );

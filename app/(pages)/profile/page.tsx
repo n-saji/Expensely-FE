@@ -1,18 +1,19 @@
 "use client";
 
-import Navbar from "@/components/navbar";
-import Sidebar from "@/components/sidebar";
-
 import Image from "next/image";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store"; // Adjust the import path as necessary
+import "./styles.css";
 
 export default function ProfilePage() {
   const [edit, setEdit] = useState(false);
+  const user = useSelector((state: RootState) => state.user);
 
   return (
-    <div className="p-8 flex flex-col space-y-4 w-full items-center overflow-auto">
+    <>
       <h1 className="text-gray-700 text-4xl">Welcome to your Profile!</h1>
-      <div className="min-w-1/2 max-md:w-2/3 max-sm:w-3/4 bg-white shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center">
+      <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center">
         <Image
           alt="Profile Picture"
           src="/path/to/profile-picture.jpg"
@@ -21,8 +22,8 @@ export default function ProfilePage() {
           className="rounded-full mb-4 bg-gray-300"
         />
         <div className="flex flex-col items-center space-y-2">
-          <h2 className="text-2xl font-semibold text-gray-800 ">John Doe</h2>
-          <p className="text-gray-600">test@example.com</p>
+          <h2 className="text-2xl font-semibold text-gray-800 ">{user.name}</h2>
+          <p className="text-gray-600">{user.email}</p>
         </div>
         <div className="bg-gray-200 w-full mt-4 flex justify-center flex-col items-center space-y-2 p-4 rounded-lg">
           <div className="w-full flex items-start">
@@ -32,23 +33,77 @@ export default function ProfilePage() {
           </div>
           <div
             className="flex flex-col max-sm:gap-3 min-md:gap-4 w-full
-                max-sm:justify-center max-sm:items-center max-sm:text-center"
+                "
           >
-            <div className="grid max-sm:grid-cols-1 min-md:grid-cols-2 max-sm:gap-2 w-full max-sm:text-center max-sm:items-center">
+            <div className="grid_input">
               <p className="font-semibold">Full Name</p>
-              <p>John Doe</p>
+              <p>
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    defaultValue={user.name}
+                  />
+                ) : (
+                  user.name
+                )}
+              </p>
             </div>
-            <div className="grid max-sm:grid-cols-1 min-md:grid-cols-2 max-sm:gap-2 w-full">
+            <div className="grid_input">
               <p className="font-semibold">Email</p>
-              <p>test@example.com</p>
+              <p>
+                {edit ? (
+                  <input
+                    type="email"
+                    className="edit_input"
+                    defaultValue={user.email}
+                  />
+                ) : (
+                  user.email
+                )}
+              </p>
             </div>
-            <div className="grid max-sm:grid-cols-1 min-md:grid-cols-2 max-sm:gap-2 w-full">
+            <div className="grid_input">
+              <p className="font-semibold">Country Code</p>
+              <p>
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    defaultValue={user.country_code}
+                  />
+                ) : (
+                  user.country_code
+                )}
+              </p>
+            </div>
+            <div className="grid_input">
               <p className="font-semibold">Phone</p>
-              <p>+1234567890</p>
+              <p>
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    defaultValue={user.phone}
+                  />
+                ) : (
+                  user.phone
+                )}
+              </p>
             </div>
-            <div className="grid max-sm:grid-cols-1 min-md:grid-cols-2 max-sm:gap-2 w-full">
+            <div className="grid_input">
               <p className="font-semibold">Currency</p>
-              <p>USD</p>
+              <p>
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    defaultValue={user.currency}
+                  />
+                ) : (
+                  user.currency
+                )}
+              </p>
             </div>
           </div>
           <div className="w-full flex justify-end mt-4">
@@ -61,6 +116,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

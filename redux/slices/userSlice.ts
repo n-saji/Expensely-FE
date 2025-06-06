@@ -7,7 +7,7 @@ const userSlice = createSlice({
     id: "",
     name: "",
     country_code: "",
-    phone_number: "",
+    phone: "",
     currency: "",
   },
   reducers: {
@@ -17,7 +17,7 @@ const userSlice = createSlice({
       state.id = action.payload.id;
       state.name = action.payload.name;
       state.country_code = action.payload.country_code;
-      state.phone_number = action.payload.phone_number;
+      state.phone = action.payload.phone;
       state.currency = action.payload.currency;
     },
     clearUser: (state) => {
@@ -26,7 +26,7 @@ const userSlice = createSlice({
       state.id = "";
       state.name = "";
       state.country_code = "";
-      state.phone_number = "";
+      state.phone = "";
       state.currency = "";
     },
   },

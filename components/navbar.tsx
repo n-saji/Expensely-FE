@@ -16,7 +16,7 @@ export default function Navbar({ title }: { title?: string }) {
   const [profileDropDown, setProfileDropdown] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
-  console.log("User from Navbar:", user);
+  const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
   const handleLogout = async () => {
     try {
@@ -29,7 +29,12 @@ export default function Navbar({ title }: { title?: string }) {
   };
 
   return (
-    <nav className="w-full px-6 py-5 bg-white shadow-md flex justify-between items-center sticky top-0">
+    <nav
+      className={`px-6 py-5 bg-white shadow-md flex justify-between items-center 
+        fixed top-0 right-0  duration-300 ease-in-out
+    ${isOpen ? "min-sm: w-[calc(100%-16rem)] max-sm:w-full" : "w-full"}
+    `}
+    >
       <div className="space-x-4 flex items-center w-full">
         <Image
           src={menubar}

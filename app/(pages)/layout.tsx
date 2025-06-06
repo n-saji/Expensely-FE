@@ -14,7 +14,7 @@ export default function DashboardPage({
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
   return (
-    <div className="w-full flex h-screen   justify-center bg-gray-200 min-sm:relative">
+    <div className="w-full flex h-screen bg-gray-200 min-sm:relative">
       <Sidebar />
 
       <div
@@ -24,7 +24,9 @@ export default function DashboardPage({
       >
         <Navbar title="Dashboard" />
 
-        {children}
+        <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto">
+          {children}
+        </div>
       </div>
     </div>
   );

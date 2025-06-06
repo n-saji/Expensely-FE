@@ -6,6 +6,7 @@
 }
 
 @layer components {
+
   .bg-primary-color {
     @apply bg-green-600;
   }
