@@ -39,7 +39,7 @@ export default function ProfilePage() {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
     console.log("Fetching user profile data...");
-    
+
     const fetchData = async () => {
       const response = await fetch(`${API_URL}/users/${userId}`, {
         method: "GET",
@@ -82,28 +82,33 @@ export default function ProfilePage() {
     setLoading(true);
     setError("");
 
-    try {
-      await fetch(`${API_URL}/users/update-profile`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          country_code: countryCode,
-          phone,
-          currency,
-          id: userId,
-        }),
+    await fetch(`${API_URL}/users/update-profile`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        country_code: countryCode,
+        phone,
+        currency,
+        id: userId,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update profile.");
+        }
+      })
+      .catch((error) => {
+        setError(`Error updating profile: ${error}`);
+        setEdit(true);
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    } catch (error) {
-      setError("Failed to update profile.");
-      setEdit(true);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

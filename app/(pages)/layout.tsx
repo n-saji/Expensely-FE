@@ -14,6 +14,7 @@ export default function DashboardPage({
 }) {
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
   const user = useSelector((state: RootState) => state.user);
+  const pathname = usePathname();
 
   if (!user.isAuthenticated) {
     return (
@@ -23,7 +24,6 @@ export default function DashboardPage({
     );
   }
 
-  const pathname = usePathname();
 
   return (
     <div className="w-full flex h-screen bg-gray-200 min-sm:relative">
