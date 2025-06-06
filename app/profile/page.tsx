@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const [edit, setEdit] = useState(false);
 
   return (
-    <div className="w-full min-h-screen flex  justify-center bg-gray-200 min-sm:relative">
+    <div className="w-full flex h-screen   justify-center bg-gray-200 min-sm:relative">
       <Sidebar />
 
       <div
@@ -22,9 +22,9 @@ export default function ProfilePage() {
         } transition-all duration-300`}
       >
         <Navbar title="Profile" />
-        <div className="p-8 flex flex-col space-y-4 w-full items-center">
+        <div className="p-8 flex flex-col space-y-4 w-full items-center overflow-auto">
           <h1 className="text-gray-700 text-4xl">Welcome to your Profile!</h1>
-          <div className="min-w-1/2 max-md:w-2/3 max-sm:w-3/4 bg-white shadow-md rounded-lg p-6 flex flex-col items-center space-y-4">
+          <div className="min-w-1/2 max-md:w-2/3 max-sm:w-3/4 bg-white shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center">
             <Image
               alt="Profile Picture"
               src="/path/to/profile-picture.jpg"
@@ -66,7 +66,12 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="w-full flex justify-end mt-4">
-                <button className={`${edit ? "button-green" : "button-green-outline"}`} onClick={() => setEdit(!edit)}>
+                <button
+                  className={`${
+                    edit ? "button-green" : "button-green-outline"
+                  }`}
+                  onClick={() => setEdit(!edit)}
+                >
                   {edit ? "Save" : "Edit"}
                 </button>
               </div>

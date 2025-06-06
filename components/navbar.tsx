@@ -26,7 +26,7 @@ export default function Navbar({ title }: { title?: string }) {
   };
 
   return (
-    <nav className="w-full px-6 py-5 bg-white shadow-md flex justify-between items-center relative">
+    <nav className="w-full px-6 py-5 bg-white shadow-md flex justify-between items-center sticky top-0">
       <div className="space-x-4 flex items-center w-full">
         <Image
           src={menubar}

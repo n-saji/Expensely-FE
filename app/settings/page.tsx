@@ -10,7 +10,7 @@ export default function SettingsPage() {
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
   return (
-    <div className="w-full min-h-screen flex  justify-center bg-gray-200 min-sm:relative">
+    <div className="w-full flex h-screen   justify-center bg-gray-200 min-sm:relative">
       <Sidebar />
 
       <div
@@ -19,7 +19,7 @@ export default function SettingsPage() {
         } transition-all duration-300`}
       >
         <Navbar title="Settings" />
-        <div className="m-8 flex flex-col items-start space-y-4">
+        <div className="p-8 flex flex-col space-y-4 w-full items-center overflow-auto">
           <h1 className="text-gray-700 text-4xl">Welcome to Settings!</h1>
           <Card
             title="Card Title"
