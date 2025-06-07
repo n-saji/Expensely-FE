@@ -5,10 +5,12 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage
 import sidebarReducer from "./slices/sidebarSlice";
 import userReducer from "./slices/userSlice";
+import categoryReducer from "./slices/category";
 
 const rootReducer = combineReducers({
   sidebar: sidebarReducer,
   user: userReducer,
+  categoryExpense: categoryReducer,
 });
 
 const persistConfig = {

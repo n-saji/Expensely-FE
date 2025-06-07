@@ -24,7 +24,6 @@ export default function DashboardPage({
     );
   }
 
-
   return (
     <div className="w-full flex h-screen bg-gray-200 min-sm:relative">
       <Sidebar />
@@ -34,17 +33,7 @@ export default function DashboardPage({
           isOpen ? "min-sm:ml-64" : "min-sm:ml-0"
         } transition-all duration-300`}
       >
-        <Navbar
-          title={
-            pathname === "/dashboard"
-              ? "Dashboard"
-              : pathname === "/profile"
-              ? "Profile"
-              : pathname === "/settings"
-              ? "Settings"
-              : "Page"
-          }
-        />
+        <Navbar title={pathname.charAt(1).toUpperCase() + pathname.slice(2)} />
 
         <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto">
           {children}

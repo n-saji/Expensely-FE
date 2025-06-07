@@ -58,46 +58,7 @@ export default function Sidebar() {
             </li>
           );
         })}
-        {/* <li>
-          <Link
-            href="/dashboard"
-            className={`${
-              param === "/dashboard" ? "text-gray-200" : ""
-            }  hover:underline`}
-          >
-            Dashboard
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/expense"
-            className={`${
-              param === "/expense" ? "text-gray-200" : ""
-            }  hover:underline`}
-          >
-            Expense
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/profile"
-            className={`${
-              param === "/profile" ? "text-gray-200" : ""
-            }  hover:underline`}
-          >
-            Profile
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/settings"
-            className={`${
-              param === "/settings" ? "text-gray-200" : ""
-            }  hover:underline`}
-          >
-            Settings
-          </Link>
-        </li> */}
+
       </ul>
     </aside>
   );
