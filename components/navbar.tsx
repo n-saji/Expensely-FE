@@ -32,7 +32,7 @@ export default function Navbar({ title }: { title?: string }) {
   return (
     <nav
       className={`px-6 py-5 bg-white shadow-md flex justify-between items-center 
-        fixed top-0 right-0  duration-300 ease-in-out
+        fixed top-0 right-0  duration-300 ease-in-out z-50
     ${isOpen ? "min-sm: w-[calc(100%-16rem)] max-sm:w-full" : "w-full"}
     `}
     >

@@ -17,7 +17,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-64 bg-primary-color shadow-md max-sm:z-50 fixed 
+      className={`w-64 bg-primary-color shadow-md max-sm:z-60 fixed 
         transform transition-transform duration-300 ease-in-out top-0 left-0 h-screen 
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
