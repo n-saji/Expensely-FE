@@ -8,6 +8,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setSidebar } from "@/redux/slices/sidebarSlice";
 import Link from "next/link";
+import { link } from "fs";
+
+const navLinks = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/expense", label: "Expense" },
+  { href: "/profile", label: "Profile" },
+  { href: "/settings", label: "Settings" },
+];
 
 export default function Sidebar() {
   const param = usePathname();
@@ -36,7 +44,21 @@ export default function Sidebar() {
         redirect={false}
       />
       <ul className="space-y-4 w-full px-8 py-4 text-lg text-gray-600 font-semibold">
-        <li>
+        {navLinks.map((link) => {
+          return (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className={`${
+                  param === link.href ? "text-gray-200" : ""
+                }  hover:underline`}
+              >
+                {link.label}
+              </Link>
+            </li>
+          );
+        })}
+        {/* <li>
           <Link
             href="/dashboard"
             className={`${
@@ -44,6 +66,16 @@ export default function Sidebar() {
             }  hover:underline`}
           >
             Dashboard
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/expense"
+            className={`${
+              param === "/expense" ? "text-gray-200" : ""
+            }  hover:underline`}
+          >
+            Expense
           </Link>
         </li>
         <li>
@@ -65,7 +97,7 @@ export default function Sidebar() {
           >
             Settings
           </Link>
-        </li>
+        </li> */}
       </ul>
     </aside>
   );

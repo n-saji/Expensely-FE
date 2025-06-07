@@ -73,14 +73,24 @@ export default function DashboardPage() {
             </Card>
           </>
         ) : (
-          <p className="text-gray-500">Loading data...</p>
+          <Card
+            title="Expenses Summary"
+            description="Loading your expenses overview..."
+            className=""
+            loading={true}
+          />
         )}
         {overview ? (
           <>
             <ExpensesChartCard amountByCategory={overview.amountByCategory} />
           </>
         ) : (
-          <p className="text-gray-500">Loading data...</p>
+          <Card
+            title="Expenses by Category"
+            description="Loading your expenses by category..."
+            className=""
+            loading={true}
+          />
         )}
 
         {overview ? (
@@ -90,7 +100,12 @@ export default function DashboardPage() {
             />
           </>
         ) : (
-          <p className="text-gray-500">Loading data...</p>
+          <Card
+            title="Monthly Expenses (Bar)"
+            description="Loading your monthly expenses..."
+            className=""
+            loading={true}
+          />
         )}
         {overview ? (
           <>
@@ -99,7 +114,12 @@ export default function DashboardPage() {
             />
           </>
         ) : (
-          <p className="text-gray-500">Loading data...</p>
+          <Card
+            title="Monthly Expenses (Line)"
+            description="Loading your monthly expenses..."
+            className=""
+            loading={true}
+          />
         )}
       </div>
     </>
