@@ -1,8 +1,20 @@
 "use client";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import { LineChart, Line } from "recharts";
+
 import React from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  LineChart,
+  Line,
+} from "recharts";
 import Card from "@/components/card";
 
 const COLORS = [
@@ -14,6 +26,7 @@ const COLORS = [
   "#AA66CC",
 ];
 
+// ========== Props Interfaces ==========
 interface ExpensesChartCardProps {
   amountByCategory: Record<string, number>;
 }
@@ -26,6 +39,7 @@ interface ExpensesTop10MonthlyProps {
   amountByItem: Record<string, number>;
 }
 
+// ========== Pie Chart: Category-wise Spending ==========
 export default function ExpensesChartCard({
   amountByCategory,
 }: ExpensesChartCardProps) {
@@ -67,6 +81,7 @@ export default function ExpensesChartCard({
   );
 }
 
+// ========== Bar Chart: Monthly Spending ==========
 export function ExpensesMonthlyBarChartCard({
   amountByMonth,
 }: ExpensesMonthlyChartProps) {
@@ -96,6 +111,7 @@ export function ExpensesMonthlyBarChartCard({
   );
 }
 
+// ========== Line Chart: Monthly Expense Trend ==========
 export function ExpensesMonthlyLineChartCard({
   amountByMonth,
 }: ExpensesMonthlyChartProps) {
@@ -131,6 +147,7 @@ export function ExpensesMonthlyLineChartCard({
   );
 }
 
+// ========== Bar Chart: Top 10 Items This Month ==========
 export function ExpensesTop10Monthly({
   amountByItem,
 }: ExpensesTop10MonthlyProps) {

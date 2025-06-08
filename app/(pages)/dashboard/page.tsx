@@ -28,39 +28,6 @@ interface ExpenseOverview {
   topTenMostExpenseiveItemThisMonth: Record<string, number>;
 }
 
-// {
-//     "userId": "5c0ae527-da68-4da1-9714-f6a31edf009d",
-//     "amountByCategory": {
-//         "Utilities": 984.0,
-//         "Groceries": 18.0,
-//         "Hair Cut": 101.0
-//     },
-//     "amountByMonth": {
-//         "January": 21.0,
-//         "April": 30.0,
-//         "June": 1052.0
-//     },
-//     "totalCount": 7,
-//     "mostFrequentCategory": "Hair Cut",
-//     "totalCategories": 3,
-//     "mostFrequentCategoryCount": 3,
-//     "thisMonthTotalExpense": 1052.0,
-//     "comparedToLastMonthExpense": 1052.0,
-//     "categoryCount": {
-//         "Utilities": 2,
-//         "Groceries": 2,
-//         "Hair Cut": 3
-//     },
-//     "averageMonthlyExpense": 367.6666666666667,
-//     "topTenMostExpenseiveItemThisMonth": {
-//         "Laptop": 884.0,
-//         "Electricity Bill": 100.0,
-//         "Hair Cut": 50.0,
-//         "Meals": 12.0,
-//         "Eggs": 6.0
-//     },
-//     "totalAmount": 1103.0
-// }
 
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
@@ -109,39 +76,39 @@ export default function DashboardPage() {
             className="space-y-4"
           >
             <div className="flex justify-between text-gray-700">
-              <span>Total Spent This Year</span>
+              <span>Total Spent This Year &nbsp;</span>
               <span className="font-semibold">
-                {currencyMapper(user?.currency || "USD")}
+                {currencyMapper(user?.currency || "USD")}{" "}
                 {overview.totalAmount.toFixed(2)}
               </span>
             </div>
 
             <div className="flex justify-between text-gray-700">
-              <span>Total Transactions</span>
+              <span>Total Transactions &nbsp;</span>
               <span className="font-semibold">{overview.totalCount}</span>
             </div>
 
             <div className="flex justify-between text-gray-700">
-              <span>Most Frequent Category</span>
+              <span>Most Frequent Category &nbsp;</span>
               <span className="font-semibold">
                 {overview.mostFrequentCategory || "N/A"}
               </span>
             </div>
 
             <div className="flex justify-between text-gray-700">
-              <span>Most Frequent Category Count</span>
+              <span>Most Frequent Category Count &nbsp;</span>
               <span className="font-semibold">
                 {overview.mostFrequentCategoryCount}
               </span>
             </div>
 
             <div className="flex justify-between text-gray-700">
-              <span>Total Categories</span>
+              <span>Total Categories &nbsp;</span>
               <span className="font-semibold">{overview.totalCategories}</span>
             </div>
 
             <div className="flex justify-between text-gray-700">
-              <span>Avg Monthly Expense</span>
+              <span>Avg Monthly Expense &nbsp;</span>
               <span className="font-semibold">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.averageMonthlyExpense.toFixed(2)}
@@ -195,7 +162,7 @@ export default function DashboardPage() {
             className="space-y-4"
           >
             <div className="flex justify-between text-gray-700">
-              <span>This Month's Expense</span>
+              <span>This Month's Expense &nbsp;</span>
               <span className="font-semibold">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.thisMonthTotalExpense.toFixed(2)}
@@ -203,7 +170,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex justify-between text-gray-700">
-              <span>Change from Last Month</span>
+              <span>Change from Last Month &nbsp;</span>
               <span
                 className={`font-semibold ${
                   overview.comparedToLastMonthExpense >= 0
@@ -217,13 +184,6 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="flex justify-between text-gray-700">
-              <span>Avg Monthly Expense</span>
-              <span className="font-semibold">
-                {currencyMapper(user?.currency || "USD")}
-                {overview.averageMonthlyExpense.toFixed(2)}
-              </span>
-            </div>
           </Card>
         ) : (
           <Card
