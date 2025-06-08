@@ -63,12 +63,28 @@ export default function Expense() {
   const [loading, setLoading] = useState(false);
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [pageNumber, setPageNumber] = useState(1);
+  console.log("number", pageNumber);
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = async ({
+    fromDate,
+    toDate,
+    category,
+    order = "desc",
+    page = pageNumber,
+    limit = 10,
+  }: {
+    fromDate: string;
+    toDate: string;
+    category: string;
+    order?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+  }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${API_URL}/expenses/user/${user.id}/timeframe?order=desc`,
+        `${API_URL}/expenses/user/${user.id}/fetch-with-conditions?order=${order}&start_date=${fromDate}&end_date=${toDate}&category_id=${category}&page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -90,9 +106,14 @@ export default function Expense() {
   useEffect(() => {
     if (!isExpenseMounted.current) {
       isExpenseMounted.current = true;
-      fetchExpenses();
+      fetchExpenses({
+        fromDate: "",
+        toDate: "",
+        category: "",
+        order: "desc",
+      });
     }
-  }, []);
+  }, [pageNumber]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -200,7 +221,12 @@ export default function Expense() {
       console.error("Error adding expense:", error);
     } finally {
       setLoading(false);
-      await fetchExpenses();
+      await fetchExpenses({
+        fromDate: "",
+        toDate: "",
+        category: "",
+        order: "desc",
+      });
     }
   };
 
@@ -299,14 +325,15 @@ export default function Expense() {
       </div>
       {loading ? (
         <div className="mt-4 text-gray-500">Loading expenses...</div>
-      ) : expenses.length === 0 ? (
-        <div className="mt-4 text-gray-500">No expenses found.</div>
       ) : (
         <ExpenseList
           expenses={expenses}
           setExpenses={setExpenses}
           fetchExpenses={fetchExpenses}
           categories={categories.categories}
+          showTable={expenses.length > 0}
+          setPageNumber={setPageNumber}
+          pageNumber={pageNumber}
         />
       )}
     </div>
@@ -318,15 +345,33 @@ function ExpenseList({
   setExpenses,
   fetchExpenses,
   categories,
+  showTable = true,
+  setPageNumber,
+  pageNumber,
 }: {
   expenses: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
-  fetchExpenses: () => void;
+  fetchExpenses: ({
+    fromDate,
+    toDate,
+    category,
+    order,
+    page,
+  }: {
+    fromDate: string;
+    toDate: string;
+    category: string;
+    order: "asc" | "desc";
+    page?: number;
+  }) => void;
   categories: {
     id: string;
     type: string;
     name: string;
   }[];
+  showTable: boolean;
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>;
+  pageNumber: number;
 }) {
   const user = useSelector((state: RootState) => state.user);
   const token = FetchToken();
@@ -433,7 +478,12 @@ function ExpenseList({
       const result = await response.json();
       console.log("Update result:", result);
       // Optionally, refresh the expense list after update
-      fetchExpenses();
+      fetchExpenses({
+        fromDate: "",
+        toDate: "",
+        category: "",
+        order: "desc",
+      });
     } catch (error) {
       console.error("Error updating expense:", error);
     } finally {
@@ -449,25 +499,6 @@ function ExpenseList({
           Recent Transactions
         </h1>
         <div>
-          {selectedExpenses.length > 0 && (
-            <button
-              className={`${
-                selectedExpenses.length === 0 || selectedExpenses.length > 1
-                  ? "opacity-40 cursor-not-allowed"
-                  : "cursor-pointer"
-              }  `}
-              disabled={
-                selectedExpenses.length === 0 || selectedExpenses.length > 1
-              }
-              onClick={() => dispatch(togglePopUp())}
-            >
-              <Image
-                src={editIcon}
-                alt="Edit"
-                className="inline-block w-5 h-5"
-              />
-            </button>
-          )}
           {selectedExpenses.length > 0 && (
             <button
               className={`ml-4 ${
@@ -493,6 +524,38 @@ function ExpenseList({
           />
         </div>
       </div>
+      {filter && (
+        <div className="mb-4">
+          <select
+            className="p-2 border border-gray-400 rounded cursor-pointer"
+            onChange={(e) => {
+              const categoryId = e.target.value;
+              if (categoryId) {
+                fetchExpenses({
+                  fromDate: "",
+                  toDate: "",
+                  category: categoryId,
+                  order: "desc",
+                });
+              } else {
+                fetchExpenses({
+                  fromDate: "",
+                  toDate: "",
+                  category: "",
+                  order: "desc",
+                });
+              }
+            }}
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-300 shadow-lg rounded-lg overflow-hidden">
@@ -505,47 +568,115 @@ function ExpenseList({
               <th className="px-4 py-3 font-semibold ">Date</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200 text-sm">
-            {expenses.map((expense) => (
-              <tr key={expense.id} className="hover:bg-gray-100 py-3">
-                <td className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    className="cursor-pointer"
-                    checked={selectedExpenses.some((e) => e.id === expense.id)}
-                    onChange={() => {
-                      const isSelected = selectedExpenses.some(
+          {showTable && (
+            <tbody className="bg-white divide-y divide-gray-200 text-sm">
+              {expenses.map((expense) => (
+                <tr
+                  key={expense.id}
+                  className="hover:bg-gray-100 py-3 group relative "
+                  onClick={() => {
+                    if (window.innerWidth < 640) {
+                      setSelectedExpenses([expense]);
+                      dispatch(togglePopUp());
+                      return;
+                    }
+                  }}
+                >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="cursor-pointer"
+                      checked={selectedExpenses.some(
                         (e) => e.id === expense.id
-                      );
-                      if (isSelected) {
-                        setSelectedExpenses(
-                          selectedExpenses.filter((e) => e.id !== expense.id)
+                      )}
+                      onChange={() => {
+                        const isSelected = selectedExpenses.some(
+                          (e) => e.id === expense.id
                         );
-                      } else {
-                        setSelectedExpenses([...selectedExpenses, expense]);
-                      }
-                    }}
-                  />
-                </td>
-                <td className="px-4 py-3">{expense.categoryName}</td>
-                <td className="px-4 py-3 font-medium text-green-600">
-                  {`${currencyMapper(
-                    expense?.currency || "USD"
-                  )}${expense.amount.toFixed(2)}`}
-                </td>
-                <td className="px-4 py-3">{expense.description}</td>
-                <td className="px-4 py-3 text-gray-500">
-                  {new Date(expense.expenseDate).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                        if (isSelected) {
+                          setSelectedExpenses(
+                            selectedExpenses.filter((e) => e.id !== expense.id)
+                          );
+                        } else {
+                          setSelectedExpenses([...selectedExpenses, expense]);
+                        }
+                      }}
+                    />
+                  </td>
+                  <td className="px-4 py-3">{expense.categoryName}</td>
+                  <td className="px-4 py-3 font-medium text-green-600">
+                    {`${currencyMapper(
+                      expense?.currency || "USD"
+                    )}${expense.amount.toFixed(2)}`}
+                  </td>
+                  <td className="px-4 py-3">{expense.description}</td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {new Date(expense.expenseDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </td>
 
-                </td>
-              </tr>
-            ))}
-          </tbody>
+                  <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Image
+                      src={editIcon}
+                      alt="Edit"
+                      className="w-4 h-4"
+                      onClick={() => {
+                        setSelectedExpenses([expense]);
+                        dispatch(togglePopUp());
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
+        <div className="flex justify-between items-center py-4 w-full">
+          <div className="flex items-center space-x-2 w-full justify-center">
+            <button
+              className={`px-4 py-2 bg-gray-200 rounded-l ${
+                pageNumber <= 1 ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              disabled={pageNumber <= 1}
+              aria-disabled={pageNumber <= 1}
+              onClick={() => {
+                setPageNumber((prev) => Math.max(prev - 1, 1));
+                fetchExpenses({
+                  fromDate: "",
+                  toDate: "",
+                  category: "",
+                  order: "desc",
+                  page: Math.max(pageNumber - 1, 1),
+                });
+              }}
+            >
+              {`< Prev`}
+            </button>
+            <span className="px-4">Page {pageNumber}</span>
+            <button
+              className={`px-4 py-2 bg-gray-200 rounded-r ${
+                expenses.length < 10 ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              disabled={expenses.length < 10} // Disable if less than 10 items
+              aria-disabled={expenses.length < 10}
+              onClick={() => {
+                setPageNumber((prev) => prev + 1);
+                fetchExpenses({
+                  fromDate: "",
+                  toDate: "",
+                  category: "",
+                  order: "desc",
+                  page: pageNumber + 1,
+                });
+              }}
+            >
+              {`Next >`}
+            </button>
+          </div>
+        </div>
         {popUp && (
           <PopUp title="Edit Expense" showButton={false}>
             <div className="p-4">
@@ -629,7 +760,12 @@ function ExpenseList({
                   onClick={async (event) => {
                     await handleUpdateExpense(event);
                     dispatch(togglePopUp());
-                    fetchExpenses();
+                    fetchExpenses({
+                      fromDate: "",
+                      toDate: "",
+                      category: "",
+                      order: "desc",
+                    });
                   }}
                 >
                   Save Changes
