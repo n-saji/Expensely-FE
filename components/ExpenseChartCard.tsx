@@ -22,6 +22,10 @@ interface ExpensesMonthlyChartProps {
   amountByMonth: Record<string, number>;
 }
 
+interface ExpensesTop10MonthlyProps {
+  amountByItem: Record<string, number>;
+}
+
 export default function ExpensesChartCard({
   amountByCategory,
 }: ExpensesChartCardProps) {
@@ -122,6 +126,35 @@ export function ExpensesMonthlyLineChartCard({
             dot
           />
         </LineChart>
+      </ResponsiveContainer>
+    </Card>
+  );
+}
+
+export function ExpensesTop10Monthly({
+  amountByItem,
+}: ExpensesTop10MonthlyProps) {
+  const chartData = Object.entries(amountByItem || {}).map(
+    ([item, amount]) => ({
+      name: item,
+      value: amount,
+    })
+  );
+
+  return (
+    <Card
+      title="Top 10 Most Expensive Items This Month"
+      description="Your highest spending items this month"
+      className="w-full"
+    >
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="value" fill="#4ade80" radius={[4, 4, 0, 0]} />
+        </BarChart>
       </ResponsiveContainer>
     </Card>
   );
