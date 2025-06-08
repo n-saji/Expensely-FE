@@ -61,6 +61,7 @@ export default function Expense() {
     expenseDate: new Date().toISOString().slice(0, 16),
   });
   const [loading, setLoading] = useState(false);
+  const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
@@ -200,7 +201,7 @@ export default function Expense() {
       return;
     }
 
-    setLoading(true);
+    setAddingExpenseLoading(true);
     try {
       const response = await fetch(`${API_URL}/expenses/create`, {
         method: "POST",
@@ -229,7 +230,7 @@ export default function Expense() {
     } catch (error) {
       console.error("Error adding expense:", error);
     } finally {
-      setLoading(false);
+      setAddingExpenseLoading(false);
       setError("");
       await fetchExpenses({
         fromDate: "",
@@ -321,8 +322,12 @@ export default function Expense() {
                   })
                 }
               />
-              <button type="submit" className="button-green" disabled={loading}>
-                {loading ? "Adding..." : "Add Expense"}
+              <button
+                type="submit"
+                className="button-green"
+                disabled={adding_expense_loading}
+              >
+                {adding_expense_loading ? "Adding..." : "Add Expense"}
               </button>
             </form>
           </div>
@@ -333,27 +338,24 @@ export default function Expense() {
           </div>
         )}
       </div>
-      {loading ? (
-        <div className="mt-4 text-gray-500">Loading expenses...</div>
-      ) : (
-        <ExpenseList
-          expenses={expenses}
-          setExpenses={setExpenses}
-          fetchExpenses={fetchExpenses}
-          categories={categories.categories}
-          showTable={expenses.length > 0}
-          setPageNumber={setPageNumber}
-          pageNumber={pageNumber}
-          user={user}
-          token={token}
-          setSelectedExpenses={setSelectedExpenses}
-          selectedExpenses={selectedExpenses}
-          setFilter={setFilter}
-          filter={filter}
-          setCategoryFilter={setCategoryFilter}
-          categoryFilter={categoryFilter}
-        />
-      )}
+
+      <ExpenseList
+        expenses={expenses}
+        setExpenses={setExpenses}
+        fetchExpenses={fetchExpenses}
+        categories={categories.categories}
+        showTable={expenses.length > 0}
+        setPageNumber={setPageNumber}
+        pageNumber={pageNumber}
+        user={user}
+        token={token}
+        setSelectedExpenses={setSelectedExpenses}
+        selectedExpenses={selectedExpenses}
+        setFilter={setFilter}
+        filter={filter}
+        setCategoryFilter={setCategoryFilter}
+        categoryFilter={categoryFilter}
+      />
     </div>
   );
 }
@@ -475,7 +477,7 @@ function ExpenseList({
       fetchExpenses({
         fromDate: "",
         toDate: "",
-        category: "",
+        category: categoryFilter || "",
         order: "desc",
       });
     }
