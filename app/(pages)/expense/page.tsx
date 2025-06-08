@@ -64,7 +64,6 @@ export default function Expense() {
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
-  console.log("number", pageNumber);
 
   const fetchExpenses = async ({
     fromDate,
@@ -121,7 +120,7 @@ export default function Expense() {
         order: "desc",
       });
     }
-  }, [pageNumber]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,7 +148,6 @@ export default function Expense() {
         if (!data || !Array.isArray(data)) {
           throw new Error("Invalid categories data");
         }
-        console.log("Fetched categories:", data);
         data.forEach((category: Category) => {
           const alreadyExists = categories.categories.some(
             (c) => c.id === category.id
@@ -213,7 +211,6 @@ export default function Expense() {
         throw new Error("Failed to add expense");
       }
       const data = await response.json();
-      console.log("Expense added successfully:", data);
       setExpense({
         user: {
           id: user.id,
@@ -223,12 +220,13 @@ export default function Expense() {
         },
         amount: 0,
         description: "",
-        expenseDate: getLocalDateTime(),
+        expenseDate: new Date().toISOString().slice(0, 16),
       });
     } catch (error) {
       console.error("Error adding expense:", error);
     } finally {
       setLoading(false);
+      setError("");
       await fetchExpenses({
         fromDate: "",
         toDate: "",
@@ -236,12 +234,6 @@ export default function Expense() {
         order: "desc",
       });
     }
-  };
-
-  const getLocalDateTime = () => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    return now.toISOString().slice(0, 16);
   };
 
   return (
@@ -257,7 +249,13 @@ export default function Expense() {
         <div className="w-80 sm:w-1/2 text-center">
           <h1 className="text-2xl font-semibold">Add New Expense</h1>
           <div className="p-4">
-            <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
+            <form
+              className="flex flex-col space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleSubmit(event);
+              }}
+            >
               <input
                 type="text"
                 placeholder="Expense Name"
@@ -412,7 +410,6 @@ function ExpenseList({
       console.error("No token found for authentication");
       return;
     }
-    console.log("Selected Expenses for Deletion:", selectedExpenses);
 
     try {
       setLoading(true);
@@ -433,7 +430,7 @@ function ExpenseList({
       }
 
       const result = await response.json();
-      console.log("Delete result:", result);
+
       // Optionally, refresh the expense list after deletion
       setExpenses(
         expenses.filter((expense) => !selectedExpenses.includes(expense))
@@ -443,6 +440,12 @@ function ExpenseList({
       console.error("Error deleting expenses:", error);
     } finally {
       setLoading(false);
+      fetchExpenses({
+        fromDate: "",
+        toDate: "",
+        category: "",
+        order: "desc",
+      });
     }
   };
 
@@ -484,8 +487,7 @@ function ExpenseList({
       }
 
       const result = await response.json();
-      console.log("Update result:", result);
-      // Optionally, refresh the expense list after update
+
       fetchExpenses({
         fromDate: "",
         toDate: "",
@@ -646,7 +648,9 @@ function ExpenseList({
           <div className="flex items-center space-x-2 w-full justify-center">
             <button
               className={`px-4 py-2 bg-gray-200 rounded-l ${
-                pageNumber <= 1 ? "cursor-not-allowed opacity-50" : ""
+                pageNumber <= 1
+                  ? "cursor-not-allowed opacity-50"
+                  : "cursor-pointer"
               }`}
               disabled={pageNumber <= 1}
               aria-disabled={pageNumber <= 1}
@@ -666,7 +670,9 @@ function ExpenseList({
             <span className="px-4">Page {pageNumber}</span>
             <button
               className={`px-4 py-2 bg-gray-200 rounded-r ${
-                expenses.length < 10 ? "cursor-not-allowed opacity-50" : ""
+                expenses.length < 10
+                  ? "cursor-not-allowed opacity-50"
+                  : "cursor-pointer"
               }`}
               disabled={expenses.length < 10} // Disable if less than 10 items
               aria-disabled={expenses.length < 10}
@@ -690,9 +696,16 @@ function ExpenseList({
             <div className="p-4">
               <form
                 className="flex flex-col space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  await handleUpdateExpense(event);
                   dispatch(togglePopUp());
+                  fetchExpenses({
+                    fromDate: "",
+                    toDate: "",
+                    category: "",
+                    order: "desc",
+                  });
                 }}
               >
                 <input
@@ -762,20 +775,7 @@ function ExpenseList({
                     ])
                   }
                 />
-                <button
-                  type="submit"
-                  className="button-green"
-                  onClick={async (event) => {
-                    await handleUpdateExpense(event);
-                    dispatch(togglePopUp());
-                    fetchExpenses({
-                      fromDate: "",
-                      toDate: "",
-                      category: "",
-                      order: "desc",
-                    });
-                  }}
-                >
+                <button type="submit" className="button-green">
                   Save Changes
                 </button>
               </form>
