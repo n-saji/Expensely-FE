@@ -162,7 +162,7 @@ export default function DashboardPage() {
             className="space-y-4"
           >
             <div className="flex justify-between text-gray-700">
-              <span>This Month's Expense &nbsp;</span>
+              <span>{`This Month's Expense &nbsp;`}</span>
               <span className="font-semibold">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.thisMonthTotalExpense.toFixed(2)}
