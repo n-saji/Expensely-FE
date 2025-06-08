@@ -59,20 +59,21 @@ export default function DashboardPage() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
         {overview ? (
-          <>
-            <Card
-              title="Expenses Summary"
-              description="Overview of your expenses"
-              className=""
-            >
-              <p className="text-gray-600">
-                Total Money Spent: {`${currencyMapper(user?.currency || "USD")} ${overview.totalAmount.toFixed(2)}`}
-              </p>
-              <p className="text-gray-600">
-                Total Transactions: {overview.totalCount}
-              </p>
-            </Card>
-          </>
+          <Card
+            title="Expenses Summary"
+            description="Overview of your expenses"
+            className=""
+          >
+            <p className="text-gray-600">
+              Total Money Spent:{" "}
+              {`${currencyMapper(
+                user?.currency || "USD"
+              )} ${overview.totalAmount.toFixed(2)}`}
+            </p>
+            <p className="text-gray-600">
+              Total Transactions: {overview.totalCount}
+            </p>
+          </Card>
         ) : (
           <Card
             title="Expenses Summary"
@@ -82,9 +83,7 @@ export default function DashboardPage() {
           />
         )}
         {overview ? (
-          <>
-            <ExpensesChartCard amountByCategory={overview.amountByCategory} />
-          </>
+          <ExpensesChartCard amountByCategory={overview.amountByCategory} />
         ) : (
           <Card
             title="Expenses by Category"
@@ -95,11 +94,11 @@ export default function DashboardPage() {
         )}
 
         {overview ? (
-          <>
+          <div className="col-span-1 md:col-span-2 lg:col-span-2">
             <ExpensesMonthlyBarChartCard
               amountByMonth={overview.amountByMonth}
             />
-          </>
+          </div>
         ) : (
           <Card
             title="Monthly Expenses (Bar)"
@@ -109,11 +108,11 @@ export default function DashboardPage() {
           />
         )}
         {overview ? (
-          <>
+          <div className="col-span-1 md:col-span-2 lg:col-span-2">
             <ExpensesMonthlyLineChartCard
               amountByMonth={overview.amountByMonth}
             />
-          </>
+          </div>
         ) : (
           <Card
             title="Monthly Expenses (Line)"
