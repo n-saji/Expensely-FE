@@ -5,6 +5,7 @@ import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ExpenseList from "./expense_list";
 
 const CategoryTypeExpense = "expense";
 interface Category {
@@ -20,7 +21,6 @@ export default function Expense() {
   const token = FetchToken();
   const isMounted = useRef(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [expense, setExpense] = useState({
     user: {
       id: user.id,
@@ -81,7 +81,7 @@ export default function Expense() {
     fetchData();
   }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent) => {
     if (!expense.category.id) {
       setError("Please select a category");
       return;
@@ -98,7 +98,7 @@ export default function Expense() {
       setError("Please select a date");
       return;
     }
-
+    event.preventDefault();
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/expenses/create`, {
@@ -115,12 +115,6 @@ export default function Expense() {
       }
       const data = await response.json();
       console.log("Expense added successfully:", data);
-      setSuccess(true);
-      // Reset the form or handle success as needed
-    } catch (error) {
-      console.error("Error adding expense:", error);
-    } finally {
-      setLoading(false);
       setExpense({
         user: {
           id: user.id,
@@ -128,10 +122,14 @@ export default function Expense() {
         category: {
           id: "",
         },
-        amount: 0,
+        amount: NaN,
         description: "",
         expenseDate: new Date().toISOString().slice(0, 16),
       });
+    } catch (error) {
+      console.error("Error adding expense:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,7 +140,7 @@ export default function Expense() {
     >
       <div
         className="bg-gray-300 shadow-md rounded-lg p-4 w-full
-        absolute top-0 left-0 right-0 flex flex-col items-center justify-center
+         flex flex-col items-center justify-center
      "
       >
         <div className="w-1/2 text-center">
@@ -165,6 +163,7 @@ export default function Expense() {
                 type="number"
                 placeholder="Amount"
                 className="p-2 border border-gray-400 rounded"
+                value={expense.amount}
                 onChange={(e) =>
                   setExpense({
                     ...expense,
@@ -175,7 +174,11 @@ export default function Expense() {
 
               <select
                 className="p-2 border border-gray-400 rounded cursor-pointer"
-                defaultValue=""
+                value={
+                  categories.categories.find(
+                    (cat) => cat.id === expense.category.id
+                  )?.id || ""
+                }
                 onChange={(e) =>
                   setExpense({
                     ...expense,
@@ -184,10 +187,9 @@ export default function Expense() {
                     },
                   })
                 }
-                // value={expense.category.id}
               >
                 <option
-                  value={expense.category.id}
+                  value=""
                   disabled
                   className="text-gray-400"
                 >
@@ -214,8 +216,8 @@ export default function Expense() {
                 type="submit"
                 className="button-green"
                 disabled={loading}
-                onClick={() => {
-                  handleSubmit();
+                onClick={(event) => {
+                  handleSubmit(event);
                 }}
               >
                 {loading ? "Adding..." : "Add Expense"}
@@ -229,6 +231,7 @@ export default function Expense() {
           </div>
         )}
       </div>
+      <ExpenseList />
     </div>
   );
 }
