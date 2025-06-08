@@ -60,7 +60,6 @@ export default function Expense() {
     description: "",
     expenseDate: new Date().toISOString().slice(0, 16),
   });
-  const [loading, setLoading] = useState(false);
   const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -85,7 +84,6 @@ export default function Expense() {
     page?: number;
     limit?: number;
   }) => {
-    setLoading(true);
 
     const urlBuilder = new URL(
       `${API_URL}/expenses/user/${user.id}/fetch-with-conditions`
@@ -110,9 +108,7 @@ export default function Expense() {
       setExpenses(data);
     } catch (error) {
       console.error("Error fetching expenses:", error);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -215,7 +211,7 @@ export default function Expense() {
       if (!response.ok) {
         throw new Error("Failed to add expense");
       }
-      const data = await response.json();
+
       setExpense({
         user: {
           id: user.id,
@@ -463,7 +459,6 @@ function ExpenseList({
         throw new Error("Failed to delete expenses");
       }
 
-      const result = await response.json();
 
       // Optionally, refresh the expense list after deletion
       setExpenses(
@@ -519,8 +514,6 @@ function ExpenseList({
       if (!response.ok) {
         throw new Error("Failed to update expense");
       }
-
-      const result = await response.json();
 
       fetchExpenses({
         fromDate: "",
