@@ -5,6 +5,7 @@ const sidebarSlice = createSlice({
   name: "sidebar",
   initialState: {
     enabled: true,
+    popUpEnabled: false,
   },
   reducers: {
     toggleSidebar: (state) => {
@@ -13,8 +14,14 @@ const sidebarSlice = createSlice({
     setSidebar: (state, action) => {
       state.enabled = action.payload;
     },
+    togglePopUp: (state) => {
+      state.popUpEnabled = !state.popUpEnabled;
+    },
+    setPopUp: (state, action) => {
+      state.popUpEnabled = action.payload;
+    },
   },
 });
 
-export const { toggleSidebar, setSidebar } = sidebarSlice.actions;
+export const { toggleSidebar, setSidebar, togglePopUp, setPopUp } = sidebarSlice.actions;
 export default sidebarSlice.reducer;

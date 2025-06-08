@@ -10,6 +10,17 @@ export const currencyMapper = (currency: string): string => {
     CNY: "¥",
     SEK: "kr",
     NZD: "NZ$",
+    INR: "₹",
+    RUB: "₽",
+    ZAR: "R",
+    BRL: "R$",
+    MXN: "$",
+    KRW: "₩",
+    SGD: "S$",
+    HKD: "HK$",
+    NOK: "kr",
+    DKK: "kr",
+    PLN: "zł",
   };
 
   return currencyMap[currency] || currency; // Return the mapped symbol or the original currency if not found

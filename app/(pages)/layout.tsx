@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { usePathname } from "next/navigation";
+
 
 export default function DashboardPage({
   children,
@@ -15,6 +16,7 @@ export default function DashboardPage({
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
   const user = useSelector((state: RootState) => state.user);
   const pathname = usePathname();
+  const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
 
   if (!user.isAuthenticated) {
     return (
@@ -23,6 +25,12 @@ export default function DashboardPage({
       </div>
     );
   }
+  useEffect(() => {
+    document.body.style.overflow = popUp ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [popUp]);
 
   return (
     <div className="w-full flex h-screen bg-gray-200 min-sm:relative">

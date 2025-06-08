@@ -9,6 +9,7 @@ import ExpensesChartCard, {
   ExpensesMonthlyBarChartCard,
   ExpensesMonthlyLineChartCard,
 } from "@/components/ExpenseChartCard";
+import { currencyMapper } from "@/utils/currencyMapper";
 
 interface ExpenseOverview {
   userId: string;
@@ -65,7 +66,7 @@ export default function DashboardPage() {
               className=""
             >
               <p className="text-gray-600">
-                Total Money Spent: ${overview.totalAmount}
+                Total Money Spent: {`${currencyMapper(user?.currency || "USD")} ${overview.totalAmount.toFixed(2)}`}
               </p>
               <p className="text-gray-600">
                 Total Transactions: {overview.totalCount}
