@@ -23,7 +23,6 @@ interface Category {
 export default function Expense() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
-  const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
   const token = FetchToken();
   const isExpenseMounted = useRef(false);

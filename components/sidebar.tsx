@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setSidebar } from "@/redux/slices/sidebarSlice";
 import Link from "next/link";
-import { link } from "fs";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },

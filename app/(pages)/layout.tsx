@@ -18,19 +18,20 @@ export default function DashboardPage({
   const pathname = usePathname();
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
 
-  if (!user.isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <h1 className="text-2xl text-gray-700">Please log in to continue.</h1>
-      </div>
-    );
-  }
   useEffect(() => {
     document.body.style.overflow = popUp ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
   }, [popUp]);
+
+    if (!user.isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <h1 className="text-2xl text-gray-700">Please log in to continue.</h1>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex h-screen bg-gray-200 min-sm:relative">
