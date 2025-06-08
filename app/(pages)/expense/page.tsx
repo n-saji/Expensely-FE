@@ -65,6 +65,10 @@ export default function Expense() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
 
+  const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
+  const [filter, setFilter] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("");
+
   const fetchExpenses = async ({
     fromDate,
     toDate,
@@ -340,6 +344,14 @@ export default function Expense() {
           showTable={expenses.length > 0}
           setPageNumber={setPageNumber}
           pageNumber={pageNumber}
+          user={user}
+          token={token}
+          setSelectedExpenses={setSelectedExpenses}
+          selectedExpenses={selectedExpenses}
+          setFilter={setFilter}
+          filter={filter}
+          setCategoryFilter={setCategoryFilter}
+          categoryFilter={categoryFilter}
         />
       )}
     </div>
@@ -354,6 +366,18 @@ function ExpenseList({
   showTable = true,
   setPageNumber,
   pageNumber,
+  user = {
+    id: "",
+    email: "",
+    name: "",
+  },
+  token = "",
+  setSelectedExpenses,
+  selectedExpenses = [],
+  setFilter,
+  filter = false,
+  setCategoryFilter,
+  categoryFilter = "",
 }: {
   expenses: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
@@ -378,14 +402,22 @@ function ExpenseList({
   showTable: boolean;
   setPageNumber: React.Dispatch<React.SetStateAction<number>>;
   pageNumber: number;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  token: string | null;
+  setSelectedExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
+  selectedExpenses: Expense[];
+  setFilter: React.Dispatch<React.SetStateAction<boolean>>;
+  filter: boolean;
+  setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
+  categoryFilter: string;
 }) {
-  const user = useSelector((state: RootState) => state.user);
-  const token = FetchToken();
-  const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -538,9 +570,11 @@ function ExpenseList({
         <div className="mb-4">
           <select
             className="p-2 border border-gray-400 rounded cursor-pointer"
+            value={categoryFilter} // Reset value to show "All Categories" initially
             onChange={(e) => {
               const categoryId = e.target.value;
               if (categoryId) {
+                setCategoryFilter(categoryId);
                 fetchExpenses({
                   fromDate: "",
                   toDate: "",
@@ -548,6 +582,7 @@ function ExpenseList({
                   order: "desc",
                 });
               } else {
+                setCategoryFilter("");
                 fetchExpenses({
                   fromDate: "",
                   toDate: "",
