@@ -82,17 +82,25 @@ export default function Expense() {
     limit?: number;
   }) => {
     setLoading(true);
+
+    const urlBuilder = new URL(
+      `${API_URL}/expenses/user/${user.id}/fetch-with-conditions`
+    );
+    urlBuilder.searchParams.append("order", order);
+    if (fromDate) urlBuilder.searchParams.append("start_date", fromDate);
+    if (toDate) urlBuilder.searchParams.append("end_date", toDate);
+    if (category) urlBuilder.searchParams.append("category_id", category);
+    urlBuilder.searchParams.append("page", String(page));
+    urlBuilder.searchParams.append("limit", String(limit));
+
     try {
-      const response = await fetch(
-        `${API_URL}/expenses/user/${user.id}/fetch-with-conditions?order=${order}&start_date=${fromDate}&end_date=${toDate}&category_id=${category}&page=${page}&limit=${limit}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(urlBuilder.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch expenses");
       const data = await response.json();
       setExpenses(data);
@@ -307,7 +315,7 @@ export default function Expense() {
                 onChange={(e) =>
                   setExpense({
                     ...expense,
-                    expenseDate: new Date(e.target.value).toISOString(),
+                    expenseDate: e.target.value,
                   })
                 }
               />
@@ -749,7 +757,7 @@ function ExpenseList({
                     setSelectedExpenses([
                       {
                         ...selectedExpenses[0],
-                        expenseDate: new Date(e.target.value).toISOString(),
+                        expenseDate: e.target.value,
                       },
                     ])
                   }
