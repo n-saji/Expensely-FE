@@ -20,6 +20,26 @@ interface Category {
   name: string;
 }
 
+interface Expense {
+  id: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  category: {
+    id: string;
+    name: string;
+  };
+  amount: number;
+  description: string;
+  expenseDate: string;
+  categoryId: string;
+  categoryName: string;
+  userId: string;
+  currency: string;
+}
+
 export default function Expense() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
@@ -46,13 +66,16 @@ export default function Expense() {
   const fetchExpenses = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/expenses/user/${user.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/expenses/user/${user.id}/timeframe?order=desc`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch expenses");
       const data = await response.json();
       setExpenses(data);
@@ -280,22 +303,6 @@ export default function Expense() {
   );
 }
 
-interface Expense {
-  id: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  category: {
-    id: string;
-    name: string;
-  };
-  amount: number;
-  description: string;
-  expenseDate: string;
-}
-
 function ExpenseList({
   expenses,
   setExpenses,
@@ -493,10 +500,10 @@ function ExpenseList({
                     }}
                   />
                 </td>
-                <td className="px-4 py-3">{expense.category.name}</td>
+                <td className="px-4 py-3">{expense.categoryName}</td>
                 <td className="px-4 py-3 font-medium text-green-600">
                   {`${currencyMapper(
-                    user?.currency || "USD"
+                    expense?.currency || "USD"
                   )}${expense.amount.toFixed(2)}`}
                 </td>
                 <td className="px-4 py-3">{expense.description}</td>
@@ -554,19 +561,20 @@ function ExpenseList({
                   className="p-2 border border-gray-400 rounded cursor-pointer"
                   value={
                     categories.find(
-                      (cat) => cat.id === selectedExpenses[0]?.category.id
+                      (cat) => cat.id === selectedExpenses[0]?.categoryId
                     )?.id || ""
                   }
                   onChange={(e) =>
                     setSelectedExpenses([
                       {
                         ...selectedExpenses[0],
-                        category: {
-                          id: e.target.value,
-                          name:
-                            categories.find((cat) => cat.id === e.target.value)
-                              ?.name || "",
-                        },
+                        categoryId: e.target.value,
+                        // category: {
+                        //   id: e.target.value,
+                        //   name:
+                        //     categories.find((cat) => cat.id === e.target.value)
+                        //       ?.name || "",
+                        // },
                       },
                     ])
                   }
