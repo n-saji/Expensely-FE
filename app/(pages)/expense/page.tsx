@@ -1,6 +1,6 @@
 "use client";
 import { API_URL } from "@/config/config";
-import { addCategory } from "@/redux/slices/category";
+import { addCategory, removeCategory } from "@/redux/slices/category";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +12,7 @@ import editIcon from "@/app/assets/icon/edit.png";
 import Image from "next/image";
 import PopUp from "@/components/pop-up";
 import { togglePopUp } from "@/redux/slices/sidebarSlice";
+import filteraIcon from "@/app/assets/icon/filter.png";
 
 const CategoryTypeExpense = "expense";
 interface Category {
@@ -119,6 +120,7 @@ export default function Expense() {
         if (!data || !Array.isArray(data)) {
           throw new Error("Invalid categories data");
         }
+        console.log("Fetched categories:", data);
         data.forEach((category: Category) => {
           const alreadyExists = categories.categories.some(
             (c) => c.id === category.id
@@ -138,6 +140,14 @@ export default function Expense() {
       }
     };
     fetchData();
+
+    dispatch(
+      removeCategory({
+        id: "",
+        type: CategoryTypeExpense,
+        name: "",
+      })
+    );
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -207,10 +217,10 @@ export default function Expense() {
    `}
     >
       <div
-        className="bg-gray-300 shadow-md rounded-lg p-8 w-full
+        className="bg-gray-300 shadow-md rounded-lg p-4 sm:p-8  w-full
          flex flex-col items-center justify-center"
       >
-        <div className="w-1/2 text-center">
+        <div className="w-80 sm:w-1/2 text-center">
           <h1 className="text-2xl font-semibold">Add New Expense</h1>
           <div className="p-4">
             <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
@@ -271,7 +281,7 @@ export default function Expense() {
                 onChange={(e) =>
                   setExpense({
                     ...expense,
-                    expenseDate: e.target.value,
+                    expenseDate: new Date(e.target.value).toISOString(),
                   })
                 }
               />
@@ -324,10 +334,11 @@ function ExpenseList({
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && popUp) {
         dispatch(togglePopUp());
       }
     };
@@ -337,7 +348,7 @@ function ExpenseList({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [dispatch]);
+  }, [dispatch, popUp]);
 
   const handleBulkDelete = async () => {
     if (selectedExpenses.length === 0) {
@@ -393,6 +404,8 @@ function ExpenseList({
       console.warn("Please select exactly one expense to update");
       return;
     }
+    if (!selectedExpenses.length) return alert("Select one expense to edit.");
+
     const expenseToUpdate = selectedExpenses[0];
 
     if (!token) {
@@ -432,38 +445,52 @@ function ExpenseList({
   return (
     <div className="block w-full mt-8">
       <div className="flex justify-between items-center mb-6 ">
-        <h1 className="text-2xl font-bold text-gray-500">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-500">
           Recent Transactions
         </h1>
         <div>
-          <button
-            className={`${
-              selectedExpenses.length === 0 || selectedExpenses.length > 1
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            } button-blue px-4 py-2`}
-            disabled={
-              selectedExpenses.length === 0 || selectedExpenses.length > 1
-            }
-            onClick={() => dispatch(togglePopUp())}
-          >
-            <Image src={editIcon} alt="Edit" className="inline-block w-4 h-4" />
-          </button>
-          <button
-            className={`ml-4 button-delete px-4 py-2 ${
-              selectedExpenses.length === 0
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }`}
-            disabled={selectedExpenses.length === 0}
-            onClick={handleBulkDelete}
-          >
-            <Image
-              src={deleteIcon}
-              alt="Delete"
-              className="inline-block w-4 h-4"
-            />
-          </button>
+          {selectedExpenses.length > 0 && (
+            <button
+              className={`${
+                selectedExpenses.length === 0 || selectedExpenses.length > 1
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer"
+              }  `}
+              disabled={
+                selectedExpenses.length === 0 || selectedExpenses.length > 1
+              }
+              onClick={() => dispatch(togglePopUp())}
+            >
+              <Image
+                src={editIcon}
+                alt="Edit"
+                className="inline-block w-5 h-5"
+              />
+            </button>
+          )}
+          {selectedExpenses.length > 0 && (
+            <button
+              className={`ml-4 ${
+                selectedExpenses.length === 0
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
+              disabled={selectedExpenses.length === 0}
+              onClick={handleBulkDelete}
+            >
+              <Image
+                src={deleteIcon}
+                alt="Delete"
+                className="inline-block w-6 h-6"
+              />
+            </button>
+          )}
+          <Image
+            src={filteraIcon}
+            alt="Filter"
+            className="inline-block w-6 h-6 cursor-pointer ml-4"
+            onClick={() => setFilter(!filter)}
+          />
         </div>
       </div>
 
@@ -513,6 +540,7 @@ function ExpenseList({
                     month: "short",
                     day: "numeric",
                   })}
+
                 </td>
               </tr>
             ))}
@@ -569,12 +597,6 @@ function ExpenseList({
                       {
                         ...selectedExpenses[0],
                         categoryId: e.target.value,
-                        // category: {
-                        //   id: e.target.value,
-                        //   name:
-                        //     categories.find((cat) => cat.id === e.target.value)
-                        //       ?.name || "",
-                        // },
                       },
                     ])
                   }
@@ -596,7 +618,7 @@ function ExpenseList({
                     setSelectedExpenses([
                       {
                         ...selectedExpenses[0],
-                        expenseDate: e.target.value,
+                        expenseDate: new Date(e.target.value).toISOString(),
                       },
                     ])
                   }
@@ -604,9 +626,9 @@ function ExpenseList({
                 <button
                   type="submit"
                   className="button-green"
-                  onClick={(event) => {
+                  onClick={async (event) => {
+                    await handleUpdateExpense(event);
                     dispatch(togglePopUp());
-                    handleUpdateExpense(event);
                     fetchExpenses();
                   }}
                 >
