@@ -13,6 +13,7 @@ import Image from "next/image";
 import PopUp from "@/components/pop-up";
 import { togglePopUp } from "@/redux/slices/sidebarSlice";
 import filteraIcon from "@/app/assets/icon/filter.png";
+import DropDown from "@/components/drop-down";
 
 const CategoryTypeExpense = "expense";
 interface Category {
@@ -44,6 +45,7 @@ interface Expense {
 export default function Expense() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
+
   const dispatch = useDispatch();
   const token = FetchToken();
   const isExpenseMounted = useRef(false);
@@ -84,7 +86,6 @@ export default function Expense() {
     page?: number;
     limit?: number;
   }) => {
-
     const urlBuilder = new URL(
       `${API_URL}/expenses/user/${user.id}/fetch-with-conditions`
     );
@@ -108,7 +109,7 @@ export default function Expense() {
       setExpenses(data);
     } catch (error) {
       console.error("Error fetching expenses:", error);
-    } 
+    }
   };
 
   useEffect(() => {
@@ -239,12 +240,10 @@ export default function Expense() {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-screen
-   w-full relative 
-   `}
+      className={`flex flex-col items-center justify-center min-h-screen w-full`}
     >
       <div
-        className="bg-gray-300 shadow-md rounded-lg p-4 sm:p-8  w-full
+        className="bg-gray-300 shadow-md rounded-lg p-4 md:p-8 w-full
          flex flex-col items-center justify-center"
       >
         <div className="w-80 sm:w-1/2 text-center">
@@ -459,7 +458,6 @@ function ExpenseList({
         throw new Error("Failed to delete expenses");
       }
 
-
       // Optionally, refresh the expense list after deletion
       setExpenses(
         expenses.filter((expense) => !selectedExpenses.includes(expense))
@@ -530,7 +528,7 @@ function ExpenseList({
   };
 
   return (
-    <div className="block w-full mt-8">
+    <div className="block w-full mt-8 ">
       <div className="flex justify-between items-center mb-6 ">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-500">
           Recent Transactions
@@ -562,7 +560,26 @@ function ExpenseList({
         </div>
       </div>
       {filter && (
-        <div className="mb-4">
+        <div className="mb-4 flex items-center space-x-4">
+          <DropDown
+            options={categories.map((category) => ({
+              label: category.name,
+              value: category.id,
+            }))}
+            selectedOption={categoryFilter}
+            onSelect={(option) => {
+              const selectedCategory = categories.find(
+                (category) => category.id === option
+              );
+              setCategoryFilter(selectedCategory ? selectedCategory.id : "");
+              fetchExpenses({
+                fromDate: "",
+                toDate: "",
+                category: selectedCategory ? selectedCategory.id : "",
+                order: "desc",
+              });
+            }}
+          />
           <select
             className="p-2 border border-gray-400 rounded cursor-pointer"
             value={categoryFilter} // Reset value to show "All Categories" initially
@@ -598,7 +615,7 @@ function ExpenseList({
       )}
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-300 shadow-lg rounded-lg overflow-hidden">
+        <table className="w-full divide-y divide-gray-300 shadow-lg rounded-lg overflow-hidden">
           <thead className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider">
             <tr className="text-left">
               <th className="px-4 py-3 font-semibold ">#</th>
