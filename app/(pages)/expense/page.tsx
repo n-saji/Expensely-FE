@@ -566,6 +566,7 @@ function ExpenseList({
               label: category.name,
               value: category.id,
             }))}
+            defaultValue="All Categories"
             selectedOption={categoryFilter}
             onSelect={(option) => {
               const selectedCategory = categories.find(
@@ -580,7 +581,7 @@ function ExpenseList({
               });
             }}
           />
-          <select
+          {/* <select
             className="p-2 border border-gray-400 rounded cursor-pointer"
             value={categoryFilter} // Reset value to show "All Categories" initially
             onChange={(e) => {
@@ -610,7 +611,7 @@ function ExpenseList({
                 {category.name}
               </option>
             ))}
-          </select>
+          </select> */}
         </div>
       )}
 

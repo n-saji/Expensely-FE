@@ -1,16 +1,18 @@
 "use client";
 import Image from "next/image";
 import DropDownIcon from "@/app/assets/icon/drop_down.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function DropDown({
   options,
   selectedOption = "Select an option",
   onSelect,
+  defaultValue,
 }: {
   options: Array<{ label: string; value: string }>;
   selectedOption: string;
   onSelect: (option: string) => void;
+  defaultValue: string;
 }) {
   if (!options || options.length === 0) {
     return (
@@ -19,6 +21,15 @@ export default function DropDown({
       </div>
     );
   }
+  useEffect(() => {
+    if (!options.some((option) => option.value === "")) {
+      options.unshift({
+        label: defaultValue,
+        value: "",
+      });
+    }
+    console.log("Options updated:", options);
+  }, [options]);
   const [clicked, setClicked] = useState(false);
 
   return (
@@ -29,7 +40,7 @@ export default function DropDown({
     >
       <p className="text-l text-gray-500">
         {selectedOption === ""
-          ? "All Categories"
+          ? defaultValue
           : options.find((option) => option.value === selectedOption)?.label ||
             selectedOption}
       </p>
