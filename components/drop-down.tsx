@@ -14,13 +14,6 @@ export default function DropDown({
   onSelect: (option: string) => void;
   defaultValue: string;
 }) {
-  if (!options || options.length === 0) {
-    return (
-      <div className="w-40 border border-gray-300 rounded-sm p-4 bg-white shadow-md">
-        <p className="text-xl text-gray-500">No options available</p>
-      </div>
-    );
-  }
   useEffect(() => {
     if (!options.some((option) => option.value === "")) {
       options.unshift({
@@ -31,6 +24,13 @@ export default function DropDown({
     console.log("Options updated:", options);
   }, [options]);
   const [clicked, setClicked] = useState(false);
+  if (!options || options.length === 0) {
+    return (
+      <div className="w-40 border border-gray-300 rounded-sm p-4 bg-white shadow-md">
+        <p className="text-xl text-gray-500">No options available</p>
+      </div>
+    );
+  }
 
   return (
     <div
