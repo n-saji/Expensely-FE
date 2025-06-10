@@ -39,9 +39,7 @@ export default function LoginForm() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
-    }).finally(() => {
-      setLoading(false);
-    });
+    })
     if (res.ok) {
       const data = await res.json();
 
@@ -86,15 +84,19 @@ export default function LoginForm() {
           setError(error.error || "Failed to fetch user data");
           return;
         }
+        setLoading(false);
 
         router.push("/dashboard");
       } else {
+        setLoading(false);
         setError(data.message || "Login failed");
       }
     } else {
       const errorData = await res.json();
+      setLoading(false);
       setError(errorData.message || "Login failed");
     }
+
   };
 
   return (

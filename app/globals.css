@@ -12,6 +12,9 @@
   .bg-primary-color {
     @apply bg-green-600;
   }
+  .bg-primary-color-light {
+    @apply bg-green-500;
+  }
   .button-blue {
     @apply bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 cursor-pointer transition duration-200 font-medium;
   }

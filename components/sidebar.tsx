@@ -49,7 +49,7 @@ export default function Sidebar() {
               <Link
                 href={link.href}
                 className={`${
-                  param === link.href ? "text-gray-200" : ""
+                  param.includes(link.href) ? "text-gray-200" : ""
                 }  hover:underline`}
               >
                 {link.label}
@@ -57,7 +57,6 @@ export default function Sidebar() {
             </li>
           );
         })}
-
       </ul>
     </aside>
   );

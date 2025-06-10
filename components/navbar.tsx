@@ -14,9 +14,13 @@ import { RootState } from "@/redux/store";
 export default function Navbar({
   title,
   addButton,
+  isLink = false,
+  ReactLink,
 }: {
   title?: string;
   addButton?: React.ReactNode;
+  isLink?: boolean;
+  ReactLink?: React.ReactNode;
 }) {
   const router = useRouter();
   const [profileDropDown, setProfileDropdown] = useState(false);
@@ -52,7 +56,7 @@ export default function Navbar({
           onClick={() => dispatch(toggleSidebar())}
         />
         <div className="flex justify-between w-full text-lg">
-          <p>{title || "Dashboard"}</p>
+          {isLink ? ReactLink : title || "Dashboard"}
 
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}

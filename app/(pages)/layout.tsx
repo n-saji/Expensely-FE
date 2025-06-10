@@ -31,11 +31,21 @@ export default function DashboardPage({
   }, []);
 
   let pathname = usePathname();
-  if (pathname === "/expense/add") {
-    pathname = "/Add Expense";
-  }
-  pathname = pathname.charAt(1).toUpperCase() + pathname.slice(2);
+  let reactLink = null;
+  let isLink = false;
   // conditional pathnames
+  if (pathname === "/expense/add") {
+    isLink = true;
+    reactLink = (
+      <div className="flex items-center space-x-2">
+        <Link href="/expense">{`Expense`}</Link>
+        <span className="text-gray-500">{" > "}</span>
+        <Link href="/expense/add">Add Expense</Link>
+      </div>
+    );
+  } else {
+    pathname = pathname.charAt(1).toUpperCase() + pathname.slice(2);
+  }
 
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
 
@@ -65,6 +75,8 @@ export default function DashboardPage({
       >
         <Navbar
           title={pathname}
+          isLink={isLink}
+          ReactLink={reactLink}
           addButton={
             pathname === "Expense" ? (
               <Link href="/expense/add">
