@@ -4,12 +4,14 @@ import { API_URL } from "@/config/config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
+import DropDown from "@/components/drop-down";
 
 export default function AddExpensePage() {
   const user = useSelector((state: RootState) => state.user);
   const [error, setError] = useState("");
   const token = FetchToken();
   const categories = useSelector((state: RootState) => state.categoryExpense);
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [expense, setExpense] = useState({
     user: {
       id: user.id,
@@ -113,6 +115,32 @@ export default function AddExpensePage() {
                   ...expense,
                   amount: Number(e.target.value),
                 })
+              }
+            />
+
+            <DropDown
+              options={categories.categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              }))}
+              defaultValue="All Categories"
+              selectedOption={categoryFilter}
+              onSelect={(option) => {
+                const selectedCategory = categories.categories.find(
+                  (category) => category.id === option
+                );
+                setCategoryFilter(selectedCategory ? selectedCategory.id : "");
+              }}
+              classname="border border-gray-400 rounded p-2 cursor-pointer w-full"
+              customButton={
+                <button
+                  className="button-green-outline px-1.5 py-0"
+                  onClick={() => {
+                    setCategoryFilter("");
+                  }}
+                >
+                  +
+                </button>
               }
             />
 

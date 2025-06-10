@@ -414,6 +414,7 @@ function ExpenseList({
                 order: "desc",
               });
             }}
+            classname="bg-white"
           />
         </div>
       )}
