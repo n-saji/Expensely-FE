@@ -4,12 +4,12 @@ import EditIcon from "@/app/assets/icon/edit.png";
 import ConfirmIcon from "@/app/assets/icon/accept.png";
 import CancelIcon from "@/app/assets/icon/cancel.png";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/userSlice";
 import { API_URL } from "@/config/config";
-import FetchToken from "@/utils/fetch_token";
+import FetchToken, { FetchUserId } from "@/utils/fetch_token";
 import UserPreferences from "@/utils/userPreferences";
 
 export default function DashboardPage() {
@@ -21,6 +21,9 @@ export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const token = FetchToken();
+  const userId = FetchUserId();
+  const hasFetchedRef = useRef(false);
+
   if (!token) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -30,6 +33,68 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  async function fetchUser(userId: string): Promise<any> {
+    const token = FetchToken();
+    const fetchData = async () => {
+      const response = await fetch(`${API_URL}/users/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        dispatch(
+          setUser({
+            email: data.user.email,
+            id: data.user.id,
+            name: data.user.name,
+            country_code: data.user.country_code,
+            phone: data.user.phone,
+            currency: data.user.currency,
+            theme: data.user.theme,
+            language: data.user.language,
+            isActive: data.user.isActive,
+            isAdmin: data.user.isAdmin,
+            notificationsEnabled: data.user.notificationsEnabled,
+          })
+        );
+        return data;
+      }
+    };
+    fetchData();
+  }
+
+  useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+
+    const fetchData = async () => {
+      await fetchUser(user.id).then((data) => {
+        if (data) {
+          dispatch(
+            setUser({
+              email: data.user.email,
+              id: data.user.id,
+              name: data.user.name,
+              country_code: data.user.country_code,
+              phone: data.user.phone,
+              currency: data.user.currency,
+              theme: data.user.theme,
+              notificationsEnabled: data.user.notificationsEnabled,
+              language: data.user.language,
+              isActive: data.user.isActive,
+              isAdmin: data.user.isAdmin,
+              isAuthenticated: data.user.isAuthenticated,
+            })
+          );
+        }
+      });
+    };
+    fetchData();
+  }, []);
 
   const handlePasswordChange = async () => {
     if (!password) {
