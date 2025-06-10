@@ -37,3 +37,38 @@ export default function Card({
     </div>
   );
 }
+
+export function SettingsCard({
+  title,
+  description,
+  icon: Icon,
+  className = "",
+  children,
+}: {
+  title: string;
+  description: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`bg-gray-100/20 dark:bg-gray-700/20 py-4 px-6 rounded-lg shadow-md 
+        w-[90%] sm:w-4/5 flex space-x-4 justify-between items-center
+        ${className}`}
+    >
+      <div className="flex items-start space-x-4">
+        {Icon && <Icon className="text-green-600 w-8 h-8" />}
+        <div>
+          <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200">
+            {title}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 text-xs">
+            {description}
+          </p>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
