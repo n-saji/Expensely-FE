@@ -5,33 +5,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
+import { categoryTypes } from "@/global/category";
 
-const categoryTypes = [
-  {
-    label: "Expense",
-    value: "expense",
-  },
-  {
-    label: "Income",
-    value: "income",
-  },
-  {
-    label: "Investment",
-    value: "investment",
-  },
-  {
-    label: "Savings",
-    value: "savings",
-  },
-  {
-    label: "Debt",
-    value: "debt",
-  },
-  {
-    label: "Other",
-    value: "other",
-  },
-];
+
 
 export default function AddExpensePage() {
   const user = useSelector((state: RootState) => state.user);
