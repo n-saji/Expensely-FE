@@ -18,10 +18,7 @@ export default function Logo({
       href={redirect ? "/" : ""}
       className={`flex justify-evenly items-center cursor-pointer text-gray-500 ${className}`}
     >
-      <div
-        className="flex justify-evenly items-center cursor-pointer"
-        onClick={() => {}}
-      >
+      <div className="flex justify-evenly items-center">
         {!disableIcon && (
           <Image
             src={logo}

@@ -26,15 +26,15 @@ export default function DropDown({
   const [clicked, setClicked] = useState(false);
   if (!options || options.length === 0) {
     return (
-      <div className="w-40 border border-gray-300 rounded-sm p-4 bg-white shadow-md">
-        <p className="text-xl text-gray-500">No options available</p>
+      <div className=" border border-gray-300 rounded-sm p-2.5 bg-white shadow-md cursor-not-allowed">
+        <p className="text-sm text-gray-500">No options available</p>
       </div>
     );
   }
 
   return (
     <div
-      className="w-40 border border-gray-300 rounded-sm p-2 bg-white shadow-md flex items-center relative
+      className="w-40 border border-gray-300 rounded-sm p-2.5 bg-white shadow-md flex items-center relative
     cursor-pointer"
       onClick={() => setClicked(!clicked)}
     >

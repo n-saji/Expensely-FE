@@ -11,6 +11,7 @@ import ExpensesChartCard, {
   ExpensesTop10Monthly,
 } from "@/components/ExpenseChartCard";
 import { currencyMapper } from "@/utils/currencyMapper";
+import Link from "next/link";
 
 interface ExpenseOverview {
   userId: string;
@@ -28,11 +29,11 @@ interface ExpenseOverview {
   topTenMostExpenseiveItemThisMonth: Record<string, number>;
 }
 
-
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
   const token = FetchToken();
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
+  const [newUser, setNewUser] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchOverview = async () => {
@@ -53,6 +54,9 @@ export default function DashboardPage() {
         }
 
         const data = (await res.json()) as ExpenseOverview;
+        if (data.totalCount === 0) {
+          setNewUser(true);
+        }
         console.log("Expense overview data:", data);
         setOverview(data);
       } catch (error) {
@@ -64,6 +68,29 @@ export default function DashboardPage() {
       fetchOverview();
     }
   }, []);
+
+  if (!user.isAuthenticated) {
+    return (
+      <div className="flex  items-center justify-center h-screen">
+        <h1 className="text-2xl text-gray-700">Please log in to continue.</h1>
+      </div>
+    );
+  }
+
+  if (newUser) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <h1 className="text-2xl text-gray-700 p-4">Welcome to Expensely!</h1>
+        <p className="text-gray-600 p-2">
+          It looks like you haven't added any expenses yet.
+        </p>
+        <p className="text-gray-600 p-2 text-center">
+          Start tracking your expenses by adding your first expense.
+        </p>
+
+      </div>
+    );
+  }
 
   return (
     <>
@@ -183,7 +210,6 @@ export default function DashboardPage() {
                 {Math.abs(overview.comparedToLastMonthExpense).toFixed(2)}
               </span>
             </div>
-
           </Card>
         ) : (
           <Card

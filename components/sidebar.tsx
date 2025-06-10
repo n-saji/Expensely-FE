@@ -40,7 +40,7 @@ export default function Sidebar() {
         disableIcon={true}
         className="text-2xl border-b border-gray-200 py-4 px-4 w-full justify-start text-white"
         dimension={{ width: 30, height: 30 }}
-        redirect={false}
+        redirect={true}
       />
       <ul className="space-y-4 w-full px-8 py-4 text-lg text-gray-600 font-semibold">
         {navLinks.map((link) => {

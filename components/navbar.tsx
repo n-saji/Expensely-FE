@@ -11,13 +11,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "@/redux/slices/userSlice";
 import { RootState } from "@/redux/store";
 
-export default function Navbar({ title }: { title?: string }) {
+export default function Navbar({
+  title,
+  addButton,
+}: {
+  title?: string;
+  addButton?: React.ReactNode;
+}) {
   const router = useRouter();
   const [profileDropDown, setProfileDropdown] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
-
 
   const handleLogout = async () => {
     try {
@@ -48,7 +53,8 @@ export default function Navbar({ title }: { title?: string }) {
         <div className="flex justify-between w-full text-lg">
           <p>{title || "Dashboard"}</p>
 
-          <div className="relative">
+          <div className="relative flex items-center space-x-4">
+            {addButton && <div className="flex items-center">{addButton}</div>}
             <p
               className="hover:underline active:underline cursor-pointer text-gray-700"
               onClick={() => {
