@@ -20,7 +20,6 @@ export default function CategoryPage() {
   const dispatch = useDispatch();
   const token = FetchToken();
   const isCategoryMounted = useRef(false);
-  const [pageNumber, setPageNumber] = useState(1);
   const [filter, setFilter] = useState(false);
   const [categoriesList, setCategories] = useState<categorySkeleton[]>([]);
   const [loading, setLoading] = useState(false);

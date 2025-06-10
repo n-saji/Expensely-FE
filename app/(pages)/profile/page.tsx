@@ -34,8 +34,11 @@ export default function ProfilePage() {
   const userId = FetchUserId();
   const token = FetchToken();
 
-  async function fetchUser(userId: string): Promise<any> {
-    const token = FetchToken();
+  useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    console.log("Fetching user profile data...");
+
     const fetchData = async () => {
       const response = await fetch(`${API_URL}/users/${userId}`, {
         method: "GET",
@@ -61,26 +64,15 @@ export default function ProfilePage() {
             notificationsEnabled: data.user.notificationsEnabled,
           })
         );
-        return data;
+        setName(data.user.name);
+        setEmail(data.user.email);
+        setCountryCode(data.user.country_code);
+        setPhone(data.user.phone);
+        setCurrency(data.user.currency);
+        setError("");
+      } else {
+        setError("Failed to fetch user profile data.");
       }
-    };
-    fetchData();
-  }
-
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-
-    const fetchData = async () => {
-      await fetchUser(user.id).then((data) => {
-        if (data) {
-          setName(data.user.name);
-          setEmail(data.user.email);
-          setCountryCode(data.user.country_code);
-          setPhone(data.user.phone);
-          setCurrency(data.user.currency);
-        }
-      });
     };
     fetchData();
   }, []);

@@ -9,7 +9,6 @@ import { usePathname } from "next/navigation";
 
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
-import path from "path";
 
 export default function DashboardPage({
   children,

@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/userSlice";
 import { API_URL } from "@/config/config";
-import FetchToken, { FetchUserId } from "@/utils/fetch_token";
+import FetchToken from "@/utils/fetch_token";
 import UserPreferences from "@/utils/userPreferences";
 
 export default function DashboardPage() {
@@ -21,23 +21,15 @@ export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const token = FetchToken();
-  const userId = FetchUserId();
   const hasFetchedRef = useRef(false);
 
-  if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold">
-          Please log in to access settings.
-        </h1>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    console.log("Fetching user profile data...");
 
-  async function fetchUser(userId: string): Promise<any> {
-    const token = FetchToken();
     const fetchData = async () => {
-      const response = await fetch(`${API_URL}/users/${userId}`, {
+      const response = await fetch(`${API_URL}/users/${user.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -61,40 +53,24 @@ export default function DashboardPage() {
             notificationsEnabled: data.user.notificationsEnabled,
           })
         );
-        return data;
+
+        setError("");
+      } else {
+        setError("Failed to fetch user profile data.");
       }
     };
     fetchData();
-  }
-
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-
-    const fetchData = async () => {
-      await fetchUser(user.id).then((data) => {
-        if (data) {
-          dispatch(
-            setUser({
-              email: data.user.email,
-              id: data.user.id,
-              name: data.user.name,
-              country_code: data.user.country_code,
-              phone: data.user.phone,
-              currency: data.user.currency,
-              theme: data.user.theme,
-              notificationsEnabled: data.user.notificationsEnabled,
-              language: data.user.language,
-              isActive: data.user.isActive,
-              isAdmin: data.user.isAdmin,
-              isAuthenticated: data.user.isAuthenticated,
-            })
-          );
-        }
-      });
-    };
-    fetchData();
   }, []);
+
+  if (!token) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-2xl font-bold">
+          Please log in to access settings.
+        </h1>
+      </div>
+    );
+  }
 
   const handlePasswordChange = async () => {
     if (!password) {
