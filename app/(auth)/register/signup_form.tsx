@@ -105,7 +105,7 @@ export default function SignUpForm() {
       <div>
         <label
           htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Name
         </label>
@@ -128,7 +128,7 @@ export default function SignUpForm() {
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Email
         </label>
@@ -152,7 +152,7 @@ export default function SignUpForm() {
       <div>
         <label
           htmlFor="phone"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Phone
         </label>
@@ -192,7 +192,7 @@ export default function SignUpForm() {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Password
         </label>
@@ -215,7 +215,7 @@ export default function SignUpForm() {
       <div>
         <label
           htmlFor="confirm-password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Confirm Password
         </label>
@@ -246,7 +246,7 @@ export default function SignUpForm() {
         {loading ? "Signing Up..." : "Sign Up"}
       </button>
 
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
         Already have an account?{" "}
         <a href="/login" className="text-blue-500 hover:underline">
           Log in
