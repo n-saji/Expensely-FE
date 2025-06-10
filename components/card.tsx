@@ -53,7 +53,7 @@ export function SettingsCard({
 }) {
   return (
     <div
-      className={`bg-gray-100/20 dark:bg-gray-700/20 py-4 px-6 rounded-lg shadow-md 
+      className={`bg-gray-100 dark:bg-gray-700/20 py-4 px-6 rounded-lg shadow-md 
         w-[90%] sm:w-4/5 flex space-x-4 justify-between items-center
         ${className}`}
     >

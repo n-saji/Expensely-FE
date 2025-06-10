@@ -34,11 +34,13 @@ export default function DashboardPage() {
   const handlePasswordChange = async () => {
     if (!password) {
       setError("Password cannot be empty.");
+      setSuccess(null);
       return;
     }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
+      setSuccess(null);
       return;
     }
     await fetch(`${API_URL}/users/update-password`, {
@@ -59,13 +61,16 @@ export default function DashboardPage() {
           setPassword("");
           setEnablePasswordUpdate(false);
           setSuccess("Password updated successfully!");
+          setError(null);
         } else {
           setError(data.message || "Failed to update password.");
+          setSuccess(null);
         }
       })
       .catch((err) => {
         console.error("Error updating password:", err);
         setError("An error occurred while updating the password.");
+        setSuccess(null);
       });
   };
 
@@ -93,19 +98,23 @@ export default function DashboardPage() {
       .then((data) => {
         if (data.error === null) {
           setSuccess("User settings updated successfully!");
+          setError(null);
         } else {
           setError(data.message || "Failed to update user settings.");
+          setSuccess(null);
         }
       })
       .catch((err) => {
         console.error("Error updating user settings:", err);
         setError("An error occurred while updating user settings.");
+        setSuccess(null);
       });
   };
 
   const handleUserDeletion = async () => {
     if (!user.id) {
       setError("User ID is required for deletion.");
+      setSuccess(null);
       return;
     }
     await fetch(`${API_URL}/users/delete-account/${user.id}`, {
@@ -121,6 +130,7 @@ export default function DashboardPage() {
         if (data.error === null) {
           dispatch(setUser({ ...user, isActive: false }));
           setSuccess("Account deleted successfully!");
+          setError(null);
 
           localStorage.removeItem("token");
           sessionStorage.removeItem("token");
@@ -128,11 +138,13 @@ export default function DashboardPage() {
           localStorage.removeItem("theme");
         } else {
           setError(data.message || "Failed to delete account.");
+          setSuccess(null);
         }
       })
       .catch((err) => {
         console.error("Error deleting account:", err);
         setError("An error occurred while deleting the account.");
+        setSuccess(null);
       });
   };
 
@@ -147,7 +159,7 @@ export default function DashboardPage() {
           <input
             type={enablePasswordUpdate ? "text" : "password"}
             placeholder="Enter new password"
-            className={`p-2 border border-gray-300 rounded dark:bg-gray-800 dark:text-gray-200 
+            className={`p-2 border border-gray-300 rounded placeholder:text-gray-500 text-gray-900 dark:bg-gray-800 dark:text-gray-200 
             ${
               enablePasswordUpdate
                 ? "cursor-pointer"
@@ -173,6 +185,7 @@ export default function DashboardPage() {
                 onClick={async () => {
                   if (!changesMade) {
                     setError("No changes made to update.");
+                    setSuccess(null);
                     return;
                   }
                   await handlePasswordChange();
@@ -272,6 +285,7 @@ export default function DashboardPage() {
               }
               handleUserDeletion();
               setSuccess("Account deleted successfully!");
+              setError(null);
               setTimeout(() => {
                 // Redirect to home or login page after deletion
                 window.location.href = "/";

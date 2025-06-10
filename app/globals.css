@@ -7,7 +7,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
 @layer components {
   .bg-primary-color {
     @apply bg-green-600;
@@ -32,5 +31,12 @@
   }
   .button-gray {
     @apply bg-gray-300 text-gray-800 px-6 py-3 rounded-md font-medium hover:bg-gray-400 cursor-pointer transition duration-200;
+  }
+
+  .grid_input {
+    @apply grid max-sm:grid-cols-1 min-md:grid-cols-2 max-sm:gap-2 w-full py-1;
+  }
+  .edit_input {
+    @apply w-full bg-transparent border-b-2 border-gray-400 dark:border-gray-600 focus:border-green-600 focus:outline-none;
   }
 }

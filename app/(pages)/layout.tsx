@@ -43,6 +43,15 @@ export default function DashboardPage({
         <Link href="/expense/add">Add Expense</Link>
       </div>
     );
+  } else if (pathname === "/category/add") {
+    isLink = true;
+    reactLink = (
+      <div className="flex items-center space-x-2">
+        <Link href="/category">{`Category`}</Link>
+        <span className="text-gray-500">{" > "}</span>
+        <Link href="/category/add">Add Category</Link>
+      </div>
+    );
   } else {
     pathname = pathname.charAt(1).toUpperCase() + pathname.slice(2);
   }

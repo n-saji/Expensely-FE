@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
+import Link from "next/link";
 
 export default function AddExpensePage() {
   const user = useSelector((state: RootState) => state.user);
@@ -110,7 +111,6 @@ export default function AddExpensePage() {
               placeholder="Amount"
               className="p-2 border border-gray-400 rounded"
               value={expense.amount}
-
               onChange={(e) =>
                 setExpense({
                   ...expense,
@@ -134,42 +134,14 @@ export default function AddExpensePage() {
               }}
               classname="border border-gray-400 rounded p-2 cursor-pointer w-full"
               customButton={
-                <button
-                  className="button-green-outline px-1.5 py-0"
-                  onClick={() => {
-                    setCategoryFilter("");
-                  }}
-                >
-                  +
-                </button>
+                <Link href="/category/add" className="z-10">
+                  <button className="button-green-outline px-1.5 py-0">
+                    +
+                  </button>
+                </Link>
               }
             />
 
-            <select
-              className="p-2 border border-gray-400 rounded cursor-pointer"
-              value={
-                categories.categories.find(
-                  (cat) => cat.id === expense.category.id
-                )?.id || ""
-              }
-              onChange={(e) =>
-                setExpense({
-                  ...expense,
-                  category: {
-                    id: e.target.value,
-                  },
-                })
-              }
-            >
-              <option value="" disabled className="text-gray-400">
-                Select Category
-              </option>
-              {categories.categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
             <input
               type="datetime-local"
               className="p-2 border border-gray-400 rounded"

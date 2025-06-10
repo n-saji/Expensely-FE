@@ -29,7 +29,6 @@ export default function DropDown({
   }, [options]);
   const [clicked, setClicked] = useState(false);
 
-
   return (
     <div
       className={`w-40 border border-gray-300 rounded-sm p-2.5  shadow-md flex items-center relative justify-between
@@ -43,7 +42,7 @@ export default function DropDown({
             selectedOption}
       </p>
       <div className="flex space-x-4 items-center">
-        {customButton ? <div className="">{customButton}</div> : null}
+        {customButton ? customButton : null}
         <Image
           src={DropDownIcon}
           alt="Dropdown Icon"

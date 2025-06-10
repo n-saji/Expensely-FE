@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import "./styles.css";
 import FetchToken, { FetchUserId } from "@/utils/fetch_token";
 import { API_URL } from "@/config/config";
 import { setUser } from "@/redux/slices/userSlice";
@@ -132,9 +131,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <>
-
-      <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center relative">
+      <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
         <Image
           alt="Profile Picture"
           src="/path/to/profile-picture.jpg"
@@ -249,6 +246,5 @@ export default function ProfilePage() {
         </div>
         {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
       </div>
-    </>
   );
 }
