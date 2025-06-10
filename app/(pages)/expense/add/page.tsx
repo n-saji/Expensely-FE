@@ -12,7 +12,6 @@ export default function AddExpensePage() {
   const [error, setError] = useState("");
   const token = FetchToken();
   const categories = useSelector((state: RootState) => state.categoryExpense);
-  const [categoryFilter, setCategoryFilter] = useState("");
   const [expense, setExpense] = useState({
     user: {
       id: user.id,
@@ -125,12 +124,17 @@ export default function AddExpensePage() {
                 value: category.id,
               }))}
               defaultValue="All Categories"
-              selectedOption={categoryFilter}
+              selectedOption={expense.category.id}
               onSelect={(option) => {
                 const selectedCategory = categories.categories.find(
-                  (category) => category.name === option
+                  (category) => category.id === option
                 );
-                setCategoryFilter(selectedCategory ? selectedCategory.id : "");
+                setExpense({
+                  ...expense,
+                  category: {
+                    id: selectedCategory ? selectedCategory.id : "",
+                  },
+                });
               }}
               classname="border border-gray-400 rounded p-2 cursor-pointer w-full"
               customButton={

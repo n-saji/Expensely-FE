@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
+import path from "path";
 
 export default function DashboardPage({
   children,
@@ -93,11 +94,17 @@ export default function DashboardPage({
                   {deviceWidth < 640 ? "+" : "+ Add Expense"}
                 </button>
               </Link>
+            ) : pathname === "Category" ? (
+              <Link href="/category/add">
+                <button className="button-green-outline p-0 px-1.5 text-md sm:py-0 sm:px-3 sm:text-md">
+                  {deviceWidth < 640 ? "+" : "+ Add Category"}
+                </button>
+              </Link>
             ) : null
           }
         />
 
-        <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto">
+        <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full">
           {children}
         </div>
       </div>
