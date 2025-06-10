@@ -9,6 +9,11 @@ const userSlice = createSlice({
     country_code: "",
     phone: "",
     currency: "",
+    theme: "",
+    language: "en",
+    isActive: true,
+    isAdmin: false, // Default to false if not provided
+    notificationsEnabled: true, // Default to true if not provided
   },
   reducers: {
     setUser: (state, action) => {
@@ -19,6 +24,16 @@ const userSlice = createSlice({
       state.country_code = action.payload.country_code;
       state.phone = action.payload.phone;
       state.currency = action.payload.currency;
+      state.theme = action.payload.theme;
+      state.language = action.payload.language || "en";
+      state.isActive =
+        action.payload.isActive !== undefined ? action.payload.isActive : true;
+      state.isAdmin =
+        action.payload.isAdmin !== undefined ? action.payload.isAdmin : false;
+      state.notificationsEnabled =
+        action.payload.notificationsEnabled !== undefined
+          ? action.payload.notificationsEnabled
+          : true;
     },
     clearUser: (state) => {
       state.email = "";
@@ -28,6 +43,11 @@ const userSlice = createSlice({
       state.country_code = "";
       state.phone = "";
       state.currency = "";
+      state.theme = "";
+      state.language = "en";
+      state.isActive = true;
+      state.isAdmin = false;
+      state.notificationsEnabled = true;
     },
   },
 });

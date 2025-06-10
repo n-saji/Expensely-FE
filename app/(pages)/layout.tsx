@@ -8,6 +8,7 @@ import { RootState } from "@/redux/store";
 import { usePathname } from "next/navigation";
 
 import Link from "next/link";
+import UserPreferences from "@/utils/userPreferences";
 
 export default function DashboardPage({
   children,
@@ -54,7 +55,7 @@ export default function DashboardPage({
   }
 
   return (
-    <div className="w-full flex h-screen bg-gray-200 min-sm:relative">
+    <div className="w-full flex min-h-screen bg-gray-200 min-sm:relative dark:bg-gray-900 dark:text-gray-200">
       <Sidebar />
 
       <div
@@ -79,6 +80,7 @@ export default function DashboardPage({
           {children}
         </div>
       </div>
+      <UserPreferences />
     </div>
   );
 }

@@ -58,6 +58,11 @@ export default function ProfilePage() {
             country_code: data.user.country_code,
             phone: data.user.phone,
             currency: data.user.currency,
+            theme: data.user.theme,
+            language: data.user.language,
+            isActive: data.user.isActive,
+            isAdmin: data.user.isAdmin,
+            notificationsEnabled: data.user.notificationsEnabled,
           })
         );
         setName(data.user.name);
@@ -109,6 +114,11 @@ export default function ProfilePage() {
             phone: phone,
             currency: currency,
             id: userId,
+            theme: user.theme,
+            language: user.language,
+            isActive: user.isActive,
+            isAdmin: user.isAdmin,
+            notificationsEnabled: user.notificationsEnabled,
           })
         );
       })
@@ -123,22 +133,22 @@ export default function ProfilePage() {
 
   return (
     <>
-      {/* <h1 className="text-gray-700 text-4xl">Welcome to your Profile!</h1> */}
-      <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center relative">
+
+      <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6  flex flex-col items-center relative">
         <Image
           alt="Profile Picture"
           src="/path/to/profile-picture.jpg"
           width={150}
           height={150}
-          className="rounded-full mb-4 bg-gray-300 text-center"
+          className="rounded-full mb-4 bg-gray-300 text-center dark:bg-gray-700 dark:text-gray-200"
         />
         <div className="flex flex-col items-center space-y-2">
-          <h2 className="text-2xl font-semibold text-gray-800 ">{user.name}</h2>
-          <p className="text-gray-600">{user.email}</p>
+          <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">{user.name}</h2>
+          <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
         </div>
-        <div className="bg-gray-200 w-full mt-4 flex justify-center flex-col items-center space-y-2 p-4 rounded-lg">
+        <div className="bg-gray-200 dark:bg-gray-700 w-full mt-4 flex justify-center flex-col items-center space-y-2 p-4 rounded-lg">
           <div className="w-full flex items-start">
-            <h1 className="text-2xl font-semibold text-gray-800 block text-left">
+            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 block text-left">
               Profile
             </h1>
           </div>
@@ -148,11 +158,11 @@ export default function ProfilePage() {
           >
             <div className="grid_input">
               <p className="font-semibold">Full Name</p>
-              <p>
+              <p className="text-gray-600 dark:text-gray-300">
                 {edit ? (
                   <input
                     type="text"
-                    className="edit_input"
+                    className="edit_input "
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />

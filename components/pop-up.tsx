@@ -18,8 +18,8 @@ export default function PopUp({
   const dispatch = useDispatch();
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 w-full h-full bg-black/40">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+    <div className="fixed inset-0 flex items-center justify-center z-50 w-full h-full bg-black/40 ">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full dark:bg-gray-800 dark:text-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">{title}</h2>
           <button

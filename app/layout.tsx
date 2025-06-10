@@ -11,7 +11,8 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Expensely - Track and Manage Your Expenses",
-  description: "Expensely helps you manage budgets, track spending, and visualize your finances securely.",
+  description:
+    "Expensely helps you manage budgets, track spending, and visualize your finances securely.",
 };
 
 export default function RootLayout({
@@ -20,9 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="">
+    <html lang="en">
       <body
-        className={`antialiased ${poppins.className} bg-gray-200`}
+        className={`antialiased ${poppins.className} bg-gray-200 dark:bg-gray-900  dark:text-gray-200`}
       >
         <ReduxProvider>{children}</ReduxProvider>
       </body>

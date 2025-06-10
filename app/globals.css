@@ -5,6 +5,9 @@
   --foreground: #171717;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+
 @layer components {
   .bg-primary-color {
     @apply bg-green-600;

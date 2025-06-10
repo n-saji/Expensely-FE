@@ -18,4 +18,6 @@ export default async function Logout() {
   localStorage.removeItem("token");
   sessionStorage.removeItem("token");
   localStorage.removeItem("user_id");
+  localStorage.removeItem("theme");
+
 }

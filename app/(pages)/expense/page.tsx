@@ -364,7 +364,7 @@ function ExpenseList({
   return (
     <div className="block w-full">
       <div className="flex justify-between items-center mb-6 ">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-500">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
           Recent Transactions
         </h1>
         <div>
@@ -414,14 +414,18 @@ function ExpenseList({
                 order: "desc",
               });
             }}
-            classname="bg-white"
+            classname="bg-white dark:bg-gray-800"
           />
         </div>
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full divide-y divide-gray-300 shadow-lg rounded-lg overflow-hidden">
-          <thead className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider">
+        <table className="w-full divide-y  shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 ">
+          {/* divide-gray-300 */}
+          <thead
+            className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider
+            dark:bg-gray-800 dark:text-gray-200"
+          >
             <tr className="text-left">
               <th className="px-4 py-3 font-semibold ">#</th>
               <th className="px-4 py-3 font-semibold ">Category</th>
@@ -431,7 +435,12 @@ function ExpenseList({
             </tr>
           </thead>
           {!showTable && (
-            <tbody className="bg-white divide-y divide-gray-200 text-sm">
+            <tbody
+              className="bg-white divide-y  text-sm
+              dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
+            >
+
+              {/* divide-gray-200 */}
               <tr>
                 <td colSpan={6} className="text-center py-4">
                   <p className="text-gray-500">No expenses found</p>
@@ -440,11 +449,15 @@ function ExpenseList({
             </tbody>
           )}
           {showTable && (
-            <tbody className="bg-white divide-y divide-gray-200 text-sm">
+            <tbody
+              className="bg-white divide-y divide-gray-200 text-sm
+              dark:bg-gray-900 dark:text-gray-200
+              dark:divide-gray-700"
+            >
               {expenses.map((expense) => (
                 <tr
                   key={expense.id}
-                  className="hover:bg-gray-100 py-3 group relative "
+                  className="hover:bg-gray-100 py-3 group relative dark:hover:bg-gray-800 transition-colors cursor-pointer"
                   onClick={() => {
                     if (window.innerWidth < 640) {
                       setSelectedExpenses([expense]);
@@ -601,7 +614,7 @@ function ExpenseList({
       <div className="flex justify-between items-center py-4 w-full">
         <div className="flex items-center space-x-2 w-full justify-center">
           <button
-            className={`px-4 py-2 bg-gray-200 rounded-l ${
+            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-l dark:text-gray-200 ${
               pageNumber <= 1
                 ? "cursor-not-allowed opacity-50"
                 : "cursor-pointer"
@@ -623,7 +636,7 @@ function ExpenseList({
           </button>
           <span className="px-4">Page {pageNumber}</span>
           <button
-            className={`px-4 py-2 bg-gray-200 rounded-r ${
+            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-r dark:text-gray-200 ${
               expenses.length < 10
                 ? "cursor-not-allowed opacity-50"
                 : "cursor-pointer"

@@ -81,7 +81,7 @@ export default function AddExpensePage() {
   return (
     <div
       className="bg-gray-300 shadow-md rounded-lg p-4 md:p-8 w-full
-         flex flex-col items-center justify-center"
+         flex flex-col items-center justify-center dark:bg-gray-800 dark:text-gray-200"
     >
       <div className="w-80 sm:w-1/2 text-center">
         <h1 className="text-2xl font-semibold">Add New Expense</h1>
@@ -96,7 +96,7 @@ export default function AddExpensePage() {
             <input
               type="text"
               placeholder="Expense Name"
-              className="p-2 border border-gray-400 rounded"
+              className="p-2 border border-gray-400 rounded "
               value={expense.description}
               onChange={(e) =>
                 setExpense({
@@ -110,6 +110,7 @@ export default function AddExpensePage() {
               placeholder="Amount"
               className="p-2 border border-gray-400 rounded"
               value={expense.amount}
+
               onChange={(e) =>
                 setExpense({
                   ...expense,
@@ -127,7 +128,7 @@ export default function AddExpensePage() {
               selectedOption={categoryFilter}
               onSelect={(option) => {
                 const selectedCategory = categories.categories.find(
-                  (category) => category.id === option
+                  (category) => category.name === option
                 );
                 setCategoryFilter(selectedCategory ? selectedCategory.id : "");
               }}

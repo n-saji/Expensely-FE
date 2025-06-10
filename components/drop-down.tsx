@@ -28,16 +28,7 @@ export default function DropDown({
     console.log("Options updated:", options);
   }, [options]);
   const [clicked, setClicked] = useState(false);
-  // if (!options || options.length === 0) {
-  //   return (
-  //     <div
-  //       className={`flex border border-gray-300 rounded-sm p-2.5  shadow-md cursor-not-allowed ${classname}`}
-  //     >
-  //       <p className="text-sm text-gray-500">No options available</p>
-  //       {customButton ? <div className="ml-auto">{customButton}</div> : null}
-  //     </div>
-  //   );
-  // }
+
 
   return (
     <div
@@ -45,7 +36,7 @@ export default function DropDown({
     cursor-pointer ${classname}`}
       onClick={() => setClicked(!clicked)}
     >
-      <p className="text-l text-gray-500">
+      <p className="text-l text-gray-500 dark:text-gray-300">
         {selectedOption === ""
           ? defaultValue
           : options.find((option) => option.value === selectedOption)?.label ||
@@ -63,7 +54,7 @@ export default function DropDown({
         />
       </div>
       <div
-        className={`absolute top-full left-0 mt-2 w-full bg-white border border-gray-300 rounded-sm shadow-lg z-10 ${
+        className={`absolute top-full left-0 mt-2 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 border-gray-300 rounded-sm shadow-lg z-10 ${
           clicked ? "block" : "hidden"
         }`}
       >
@@ -71,7 +62,7 @@ export default function DropDown({
           {options.map((option, index) => (
             <li
               key={index}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-700 dark:text-gray-300"
               onClick={() => {
                 onSelect(option.value);
                 setClicked(false);

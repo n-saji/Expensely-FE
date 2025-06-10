@@ -72,8 +72,14 @@ export default function LoginForm() {
               country_code: data.user.country_code,
               phone: data.user.phone,
               currency: data.user.currency,
+              theme: data.user.theme,
+              language: data.user.language,
+              isActive: data.user.isActive,
+              isAdmin: data.user.isAdmin,
+              notificationsEnabled: data.user.notificationsEnabled,
             })
           );
+          localStorage.setItem("theme", data.user.theme);
         } else {
           const error = await response.json();
           console.error("Error fetching user data:", error);

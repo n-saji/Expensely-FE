@@ -15,13 +15,16 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-white shadow-md rounded-lg p-6 flex flex-col items-start space-x-4 ${className}`}
+      className={`bg-white shadow-md rounded-lg p-6 flex flex-col items-start space-x-4 ${className}
+        dark:bg-gray-800 dark:text-gray-200`}
     >
       {Icon && <Icon className="text-green-600 w-8 h-8" />}
 
       <div>
-        <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
-        <p className="text-gray-600 mt-2">{description}</p>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+          {title}
+        </h3>
+        <p className="text-gray-600 mt-2 dark:text-gray-400">{description}</p>
       </div>
       {children && <>{children}</>}
       {loading ? (

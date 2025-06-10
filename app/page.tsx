@@ -1,14 +1,14 @@
 import LandingPageNavBar from "@/components/landing-page-navbar";
+import UserPreferences from "@/utils/userPreferences";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white text-gray-800">
-
+    <div className="min-h-screen bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-200">
       <LandingPageNavBar />
 
       {/* Hero Section */}
-      <section className="text-center px-6 py-20 bg-gray-50">
+      <section className="text-center px-6 py-20 bg-gray-50 dark:bg-gray-800 dark:text-gray-200">
         <h1 className="text-4xl sm:text-5xl font-bold mb-4">
           Track your expenses effortlessly 💰
         </h1>
@@ -27,7 +27,7 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 bg-white dark:bg-gray-900 dark:text-gray-200">
         <div className="grid sm:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
           <div>
             <h3 className="text-xl font-semibold mb-2">💼 Budgeting</h3>
@@ -61,9 +61,10 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="text-center text-sm py-6 text-gray-500 bg-gray-50">
+      <footer className="text-center text-sm py-6 text-gray-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
         © 2025 Expensely · Privacy Policy · Contact
       </footer>
+      <UserPreferences />
     </div>
   );
 }

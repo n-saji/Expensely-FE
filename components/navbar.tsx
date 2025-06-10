@@ -39,6 +39,7 @@ export default function Navbar({
       className={`px-6 py-5 bg-white shadow-md flex justify-between items-center 
         fixed top-0 right-0  duration-300 ease-in-out z-50
     ${isOpen ? "min-sm: w-[calc(100%-16rem)] max-sm:w-full" : "w-full"}
+    dark:bg-gray-800 dark:text-gray-200
     `}
     >
       <div className="space-x-4 flex items-center w-full">
@@ -56,7 +57,7 @@ export default function Navbar({
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}
             <p
-              className="hover:underline active:underline cursor-pointer text-gray-700"
+              className="hover:underline active:underline cursor-pointer text-gray-700 dark:text-gray-300"
               onClick={() => {
                 setProfileDropdown((prev) => !prev);
               }}

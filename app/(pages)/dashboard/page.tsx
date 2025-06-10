@@ -79,11 +79,11 @@ export default function DashboardPage() {
   if (newUser) {
     return (
       <div className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl text-gray-700 p-4 font-bold">Welcome to Expensely!</h1>
-        <p className="text-gray-600 p-2 text-center">
+        <h1 className="text-2xl text-gray-700 p-4 font-bold dark:text-gray-200">Welcome to Expensely!</h1>
+        <p className="text-gray-600 p-2 text-center dark:text-gray-400">
           {`It looks like you haven't added any expenses yet.`}
         </p>
-        <p className="text-gray-600 p-2 text-center">
+        <p className="text-gray-600 p-2 text-center dark:text-gray-400">
           Start tracking your expenses by adding your first expense.
         </p>
 
@@ -98,10 +98,10 @@ export default function DashboardPage() {
         {overview ? (
           <Card
             title="Expenses Summary For this Year"
-            description="Overview of your expenses"
+            description=""
             className="space-y-4"
           >
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Total Spent This Year &nbsp;</span>
               <span className="font-semibold">
                 {currencyMapper(user?.currency || "USD")}{" "}
@@ -109,31 +109,30 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Total Transactions &nbsp;</span>
               <span className="font-semibold">{overview.totalCount}</span>
             </div>
 
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Most Frequent Category &nbsp;</span>
               <span className="font-semibold">
                 {overview.mostFrequentCategory || "N/A"}
               </span>
             </div>
-
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Most Frequent Category Count &nbsp;</span>
               <span className="font-semibold">
                 {overview.mostFrequentCategoryCount}
               </span>
             </div>
 
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Total Categories &nbsp;</span>
               <span className="font-semibold">{overview.totalCategories}</span>
             </div>
 
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Avg Monthly Expense &nbsp;</span>
               <span className="font-semibold">
                 {currencyMapper(user?.currency || "USD")}
@@ -184,18 +183,18 @@ export default function DashboardPage() {
         {overview ? (
           <Card
             title="Expenses Summary For this Month"
-            description="Overview of your expenses"
+            description=""
             className="space-y-4"
           >
-            <div className="flex justify-between text-gray-700">
-              <span>{`This Month's Expense &nbsp;`}</span>
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
+              <span>{`This Month's Expense${'\u00A0'}`}</span>
               <span className="font-semibold">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.thisMonthTotalExpense.toFixed(2)}
               </span>
             </div>
 
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-gray-700 dark:text-gray-300">
               <span>Change from Last Month &nbsp;</span>
               <span
                 className={`font-semibold ${
