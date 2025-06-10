@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { usePathname } from "next/navigation";
 
-import { lazy } from "react";
 import Link from "next/link";
 
 export default function DashboardPage({

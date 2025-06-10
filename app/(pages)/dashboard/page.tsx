@@ -11,7 +11,6 @@ import ExpensesChartCard, {
   ExpensesTop10Monthly,
 } from "@/components/ExpenseChartCard";
 import { currencyMapper } from "@/utils/currencyMapper";
-import Link from "next/link";
 
 interface ExpenseOverview {
   userId: string;
@@ -82,7 +81,7 @@ export default function DashboardPage() {
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-2xl text-gray-700 p-4">Welcome to Expensely!</h1>
         <p className="text-gray-600 p-2">
-          It looks like you haven't added any expenses yet.
+          {`It looks like you haven't added any expenses yet.`}
         </p>
         <p className="text-gray-600 p-2 text-center">
           Start tracking your expenses by adding your first expense.
