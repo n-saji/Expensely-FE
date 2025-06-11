@@ -131,7 +131,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-w-1/2 max-md:w-2/3 max-sm:w-80 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
+    <div className="min-w-1/2 max-md:w-2/3 max-sm:w-96 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
       <Image
         alt="Profile Picture"
         src="/path/to/profile-picture.jpg"
@@ -146,7 +146,7 @@ export default function ProfilePage() {
         <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
       </div>
       <div className="bg-gray-200 dark:bg-gray-700 w-full mt-4 flex justify-center flex-col items-center space-y-2 p-4 rounded-lg">
-        <div className="w-full flex items-start">
+        <div className="w-full flex items-start border-b border-gray-300 dark:border-gray-600 pb-2 mb-4">
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 block text-left">
             Profile
           </h1>
@@ -156,8 +156,8 @@ export default function ProfilePage() {
                 "
         >
           <div className="grid_input">
-            <p className="font-semibold">Full Name</p>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="font-semibold text-gray-600 dark:text-gray-300">Full Name</p>
+            <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
                   type="text"
@@ -170,9 +170,9 @@ export default function ProfilePage() {
               )}
             </p>
           </div>
-          <div className="grid_input">
-            <p className="font-semibold">Email</p>
-            <p>
+            <div className="grid_input">
+              <p className="font-semibold text-gray-600 dark:text-gray-300">Email</p>
+            <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
                   type="email"
@@ -186,8 +186,8 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold">Country Code</p>
-            <p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">Country Code</p>
+            <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
                   type="text"
@@ -201,8 +201,8 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold">Phone</p>
-            <p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">Phone</p>
+            <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
                   type="text"
@@ -216,8 +216,8 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold">Currency</p>
-            <p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">Currency</p>
+            <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
                   type="text"

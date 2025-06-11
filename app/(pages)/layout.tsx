@@ -74,7 +74,11 @@ export default function DashboardPage({
   }
 
   return (
-    <div className="w-full flex min-h-screen bg-gray-200 min-sm:relative dark:bg-gray-900 dark:text-gray-200">
+    <div
+      className={`w-full flex min-h-screen bg-gray-200 min-sm:relative
+         dark:bg-gray-900 dark:text-gray-200
+        `}
+    >
       <Sidebar />
 
       <div

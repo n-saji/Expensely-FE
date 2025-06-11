@@ -196,7 +196,7 @@ export default function DashboardPage() {
         description="Change your password to keep your account secure."
         className=""
       >
-        <div className="flex items-center space-x-2 max-w-1/2">
+        <div className="flex items-center space-x-2 max-w-3/4">
           <input
             type={enablePasswordUpdate ? "text" : "password"}
             placeholder="Enter new password"
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 ? "cursor-pointer"
                 : "cursor-not-allowed opacity-50"
             }
-              `}
+              w-full sm:w-3/4`}
             disabled={!enablePasswordUpdate}
             autoComplete="new-password"
             value={password}
@@ -218,7 +218,7 @@ export default function DashboardPage() {
             }}
           />
           {enablePasswordUpdate ? (
-            <div>
+            <div className="flex items-center space-x-2">
               <Image
                 src={ConfirmIcon}
                 alt="Confirm Icon"
@@ -256,7 +256,7 @@ export default function DashboardPage() {
         title="Dark Mode"
         description="Toggle dark mode for a better viewing experience."
       >
-        <div className="flex justify-center items-center space-x-4">
+        <div className="flex justify-left sm:justify-center items-center space-x-4">
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -284,7 +284,7 @@ export default function DashboardPage() {
         title="Notifications"
         description="Manage your notification preferences."
       >
-        <div className="flex justify-center items-center space-x-4">
+        <div className="flex justify-left sm:justify-center items-center space-x-4">
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -312,7 +312,7 @@ export default function DashboardPage() {
         title="Delete Account"
         description="Permanently delete your account. This action cannot be undone."
       >
-        <div className="flex justify-center items-center space-x-4">
+        <div className="flex justify-left sm:justify-center items-center space-x-4">
           <button
             className="button-delete py-2 dark:bg-red-600 dark:hover:bg-red-700"
             onClick={async () => {

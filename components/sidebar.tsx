@@ -32,9 +32,9 @@ export default function Sidebar() {
       <Image
         src={closeIcone}
         alt="Close Sidebar"
-        width={35}
-        height={35}
-        className="absolute top-4 right-1 min-sm:hidden"
+        width={30}
+        height={30}
+        className="absolute top-4 right-3 min-sm:hidden"
         onClick={() => dispatch(setSidebar(false))}
       />
       <Logo
