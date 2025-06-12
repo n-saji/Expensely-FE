@@ -12,8 +12,9 @@ const userSlice = createSlice({
     theme: "",
     language: "en",
     isActive: true,
-    isAdmin: false, // Default to false if not provided
-    notificationsEnabled: true, // Default to true if not provided
+    isAdmin: false, 
+    notificationsEnabled: true,
+    profilePictureUrl : "", 
   },
   reducers: {
     setUser: (state, action) => {
@@ -34,6 +35,8 @@ const userSlice = createSlice({
         action.payload.notificationsEnabled !== undefined
           ? action.payload.notificationsEnabled
           : true;
+      state.profilePictureUrl =
+        action.payload.profilePictureUrl || ""; 
     },
     clearUser: (state) => {
       state.email = "";
@@ -48,6 +51,7 @@ const userSlice = createSlice({
       state.isActive = true;
       state.isAdmin = false;
       state.notificationsEnabled = true;
+      state.profilePictureUrl = ""; 
     },
   },
 });

@@ -7,6 +7,9 @@ import { RootState } from "@/redux/store";
 import FetchToken, { FetchUserId } from "@/utils/fetch_token";
 import { API_URL } from "@/config/config";
 import { setUser } from "@/redux/slices/userSlice";
+import editIcon from "@/app/assets/icon/edit.png";
+import { supabase } from "@/utils/supabase";
+import defaultPNG from "@/app/assets/icon/user.png";
 
 export default function ProfilePage() {
   const [error, setError] = useState("");
@@ -19,6 +22,7 @@ export default function ProfilePage() {
   const [countryCode, setCountryCode] = useState("");
   const [phone, setPhone] = useState("");
   const [currency, setCurrency] = useState("");
+  const [editImage, setEditImage] = useState(false);
 
   const hasFetchedRef = useRef(false);
 
@@ -130,15 +134,110 @@ export default function ProfilePage() {
       });
   };
 
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    try {
+      // 1. Upload to Supabase
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Upload Error:", uploadError.message);
+        return;
+      }
+
+      // 2. Get public URL
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const publicUrl = data?.publicUrl;
+
+      console.log("Uploaded image URL:", publicUrl);
+
+      // 3. Send image URL to your backend
+      const response = await fetch("/api/user/profile-picture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: publicUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile picture in backend.");
+      }
+
+      console.log("Profile picture URL saved to backend.");
+    } catch (err) {
+      console.error("Error during upload:", err);
+    }
+
+    dispatch(
+      setUser({
+        ...user,
+        profilePictureUrl: `/storage/v1/object/public/avatars/${fileName}`, // Update with the new URL
+      })
+    );
+  };
+
   return (
     <div className="min-w-1/2 max-md:w-2/3 max-sm:w-96 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
-      <Image
-        alt="Profile Picture"
-        src="/path/to/profile-picture.jpg"
-        width={150}
-        height={150}
-        className="rounded-full mb-4 bg-gray-300 text-center dark:bg-gray-700 dark:text-gray-200"
-      />
+      <div
+        className="relative w-[150px] h-[150px] rounded-full mb-4 bg-gray-300 text-center 
+      dark:bg-gray-700 dark:text-gray-200"
+      >
+        <Image
+          alt="Profile Picture"
+          src={
+            user.profilePictureUrl
+              ? user.profilePictureUrl
+              : defaultPNG
+          }
+          fill
+          className="object-cover rounded-full"
+        />
+        <Image
+          alt="Edit Icon"
+          src={editIcon}
+          width={25}
+          height={25}
+          className="absolute bottom-0 right-2  p-1 rounded-md 
+          cursor-pointer hover:bg-white/40 dark:hover:bg-gray-800/40 transition-all duration-200"
+          onClick={() => setEditImage(!editImage)}
+        />
+        {editImage && (
+          <div
+            className="absolute top-full left-full w-25 h-10 bg-gray-800/50 dark:bg-gray-700/50
+            flex items-center justify-center rounded-md"
+          >
+            <label className="text-gray-200 cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+
+                    console.log("Selected file:", file);
+                    handleImageUpload(file);
+                    setEditImage(false);
+                  }
+                }}
+              />
+              <span className="text-xs">Change Profile Picture</span>
+            </label>
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-col items-center space-y-2">
         <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
           {user.name}
@@ -156,7 +255,9 @@ export default function ProfilePage() {
                 "
         >
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">Full Name</p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">
+              Full Name
+            </p>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -170,8 +271,10 @@ export default function ProfilePage() {
               )}
             </p>
           </div>
-            <div className="grid_input">
-              <p className="font-semibold text-gray-600 dark:text-gray-300">Email</p>
+          <div className="grid_input">
+            <p className="font-semibold text-gray-600 dark:text-gray-300">
+              Email
+            </p>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -186,7 +289,9 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">Country Code</p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">
+              Country Code
+            </p>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -201,7 +306,9 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">Phone</p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">
+              Phone
+            </p>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -216,7 +323,9 @@ export default function ProfilePage() {
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">Currency</p>
+            <p className="font-semibold text-gray-600 dark:text-gray-300">
+              Currency
+            </p>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
