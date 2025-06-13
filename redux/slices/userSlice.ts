@@ -14,7 +14,8 @@ const userSlice = createSlice({
     isActive: true,
     isAdmin: false, 
     notificationsEnabled: true,
-    profilePictureUrl : "", 
+    profilePicFilePath: "",
+    profilePictureUrl: "",
   },
   reducers: {
     setUser: (state, action) => {
@@ -37,6 +38,7 @@ const userSlice = createSlice({
           : true;
       state.profilePictureUrl =
         action.payload.profilePictureUrl || ""; 
+      state.profilePicFilePath = action.payload.profilePicFilePath || ""; 
     },
     clearUser: (state) => {
       state.email = "";
@@ -52,6 +54,7 @@ const userSlice = createSlice({
       state.isAdmin = false;
       state.notificationsEnabled = true;
       state.profilePictureUrl = ""; 
+      state.profilePicFilePath = "";
     },
   },
 });

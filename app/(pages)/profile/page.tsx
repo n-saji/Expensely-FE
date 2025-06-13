@@ -10,6 +10,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import editIcon from "@/app/assets/icon/edit.png";
 import { supabase } from "@/utils/supabase";
 import defaultPNG from "@/app/assets/icon/user.png";
+import fetchProfileUrl from "@/utils/fetchProfileURl";
 
 export default function ProfilePage() {
   const [error, setError] = useState("");
@@ -55,8 +56,8 @@ export default function ProfilePage() {
         const data = await response.json();
         dispatch(
           setUser({
+            ...user,
             email: data.user.email,
-            id: data.user.id,
             name: data.user.name,
             country_code: data.user.country_code,
             phone: data.user.phone,
@@ -111,6 +112,7 @@ export default function ProfilePage() {
         }
         dispatch(
           setUser({
+            ...user,
             email: email,
             name: name,
             country_code: countryCode,
@@ -139,12 +141,25 @@ export default function ProfilePage() {
 
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const filePath = `${fileName}`;
+    let signedUrl = "";
 
     try {
-      // 1. Upload to Supabase
+
+      if (user.profilePicFilePath) {
+        console.log("Deleting old image from Supabase Storage...");
+        const { error: deleteError } = await supabase.storage
+          .from("profiles-expensely")
+          .remove([user.profilePicFilePath]);
+        if (deleteError) {
+          console.error("Delete Error:", deleteError.message);
+          return;
+        }
+      }
+
+      console.log("Uploading image to Supabase Storage...");
       const { error: uploadError } = await supabase.storage
-        .from("avatars")
+        .from("profiles-expensely")
         .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
@@ -155,20 +170,27 @@ export default function ProfilePage() {
         return;
       }
 
-      // 2. Get public URL
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      const publicUrl = data?.publicUrl;
+      await fetchProfileUrl(filePath)
+        .then((url) => {
+          signedUrl = url;
+          console.log("Uploaded image Signed URL:", signedUrl);
+        })
+        .catch((err) => {
+          console.error("Error fetching signed URL:", err);
+          throw new Error("Failed to fetch signed URL for profile picture");
+        });
 
-      console.log("Uploaded image URL:", publicUrl);
-
-      // 3. Send image URL to your backend
-      const response = await fetch("/api/user/profile-picture", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ imageUrl: publicUrl }),
-      });
+      const response = await fetch(
+        `${API_URL}/users/${userId}/update-profile-picture?filepath=${filePath}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ imageUrl: signedUrl }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update profile picture in backend.");
@@ -182,7 +204,8 @@ export default function ProfilePage() {
     dispatch(
       setUser({
         ...user,
-        profilePictureUrl: `/storage/v1/object/public/avatars/${fileName}`, // Update with the new URL
+        profilePictureUrl: `${signedUrl}`,
+        profilePicFilePath: filePath,
       })
     );
   };
@@ -195,11 +218,7 @@ export default function ProfilePage() {
       >
         <Image
           alt="Profile Picture"
-          src={
-            user.profilePictureUrl
-              ? user.profilePictureUrl
-              : defaultPNG
-          }
+          src={user.profilePictureUrl ? user.profilePictureUrl : defaultPNG}
           fill
           className="object-cover rounded-full"
         />

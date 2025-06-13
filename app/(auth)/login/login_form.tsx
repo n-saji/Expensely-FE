@@ -7,6 +7,7 @@ import validateToken from "@/utils/validate_token";
 
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
+import fetchProfileUrl from "@/utils/fetchProfileURl";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -61,6 +62,18 @@ export default function LoginForm() {
         });
         if (response.ok) {
           const data = await response.json();
+          if (data.user.profilePicFilePath) {
+            const profilePictureUrl = await fetchProfileUrl(
+              data.user.profilePicFilePath
+            ).catch((error) => {
+              console.error("Error fetching profile picture URL:", error);
+              return "";
+            });
+            data.user.profilePictureUrl = profilePictureUrl;
+          } else {
+            data.user.profilePictureUrl = "";
+          }
+
           dispatch(
             setUser({
               email: data.user.email,
@@ -75,6 +88,8 @@ export default function LoginForm() {
               isActive: data.user.isActive,
               isAdmin: data.user.isAdmin,
               notificationsEnabled: data.user.notificationsEnabled,
+              profilePictureUrl: data.user.profilePictureUrl,
+              profilePicFilePath: data.user.profilePicFilePath,
             })
           );
           localStorage.setItem("theme", data.user.theme);

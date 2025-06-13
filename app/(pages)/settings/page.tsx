@@ -40,6 +40,7 @@ export default function DashboardPage() {
         const data = await response.json();
         dispatch(
           setUser({
+            ...user,
             email: data.user.email,
             id: data.user.id,
             name: data.user.name,
