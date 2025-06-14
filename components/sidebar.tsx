@@ -9,6 +9,8 @@ import { RootState } from "@/redux/store";
 import { setSidebar } from "@/redux/slices/sidebarSlice";
 import Link from "next/link";
 
+import { useSwipeable } from 'react-swipeable';
+
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/expense", label: "Expense" },
@@ -23,11 +25,18 @@ export default function Sidebar() {
   const dispatch = useDispatch();
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
 
+  const handlers = useSwipeable({
+    onSwipedLeft: () => dispatch(setSidebar(false)),
+    preventScrollOnSwipe: true,
+    trackTouch: true,
+  });
+
   return (
     <aside
       className={`w-64 bg-primary-color shadow-md max-sm:z-60 fixed z-40
         transform transition-transform duration-300 ease-in-out top-0 left-0 h-screen 
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+      {...handlers}
     >
       <Image
         src={closeIcone}
@@ -38,7 +47,7 @@ export default function Sidebar() {
         onClick={() => dispatch(setSidebar(false))}
       />
       <Logo
-        disableIcon={true}
+        disableIcon={false}
         className="text-2xl border-b border-gray-200 py-4 px-4 w-full justify-start text-white"
         dimension={{ width: 30, height: 30 }}
         redirect={true}
