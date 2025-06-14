@@ -21,7 +21,7 @@ export default function AddExpensePage() {
     },
     amount: 0,
     description: "",
-    expenseDate: new Date().toISOString().slice(0, 16),
+    expenseDate: new Date().toISOString().slice(0, 10), // Default to current date
   });
   const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
 
@@ -31,7 +31,7 @@ export default function AddExpensePage() {
       setError("Please select a category");
       return;
     }
-    if (expense.amount <= 0) {
+    if (expense.amount === null || expense.amount <= 0) {
       setError("Please enter a valid amount");
       return;
     }
@@ -46,6 +46,10 @@ export default function AddExpensePage() {
 
     setAddingExpenseLoading(true);
     try {
+      // convert date to datetime
+      const expenseDate = new Date(expense.expenseDate);
+      expense.expenseDate = expenseDate.toISOString();
+
       const response = await fetch(`${API_URL}/expenses/create`, {
         method: "POST",
         headers: {
@@ -68,7 +72,9 @@ export default function AddExpensePage() {
         },
         amount: 0,
         description: "",
-        expenseDate: new Date().toISOString().slice(0, 16),
+        expenseDate: expense.expenseDate
+          ? expense.expenseDate.slice(0, 10)
+          : new Date().toISOString().slice(0, 10),
       });
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -109,7 +115,7 @@ export default function AddExpensePage() {
               type="number"
               placeholder="Amount"
               className="p-2 border border-gray-400 rounded"
-              value={expense.amount}
+              value={expense.amount === 0 ? "" : expense.amount}
               onChange={(e) =>
                 setExpense({
                   ...expense,
@@ -147,7 +153,7 @@ export default function AddExpensePage() {
             />
 
             <input
-              type="datetime-local"
+              type="date"
               className="p-2 border border-gray-400 rounded"
               value={expense.expenseDate}
               onChange={(e) =>

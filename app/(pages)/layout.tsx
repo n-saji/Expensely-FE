@@ -38,18 +38,18 @@ export default function DashboardPage({
     isLink = true;
     reactLink = (
       <div className="flex items-center space-x-2">
-        <Link href="/expense">{`Expense`}</Link>
+        <Link href="/expense" className="hover:underline">{`Expense`}</Link>
         <span className="text-gray-500">{" > "}</span>
-        <Link href="/expense/add">Add Expense</Link>
+        <Link href="/expense/add" className="hover:underline">Add</Link>
       </div>
     );
   } else if (pathname === "/category/add") {
     isLink = true;
     reactLink = (
       <div className="flex items-center space-x-2">
-        <Link href="/category">{`Category`}</Link>
+        <Link href="/category" className="hover:underline">{`Category`}</Link>
         <span className="text-gray-500">{" > "}</span>
-        <Link href="/category/add">Add Category</Link>
+        <Link href="/category/add" className="hover:underline">Add</Link>
       </div>
     );
   } else {
