@@ -47,8 +47,8 @@ export default function Sidebar() {
         <div
           className="absolute top-1/2 -right-5 min-sm:hidden 
         w-5 h-20 bg-primary-color flex text-center
-        justify-center items-center border-l-2
-         border-black"
+        justify-center items-center border-l
+         border-white"
           onClick={() => dispatch(setSidebar(false))}
         >{`<`}</div>
         <Logo
