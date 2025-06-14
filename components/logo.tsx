@@ -14,22 +14,22 @@ export default function Logo({
   redirect?: boolean;
 }) {
   return (
-    <Link
-      href={redirect ? "/" : ""}
-      className={`flex justify-evenly items-center cursor-pointer text-gray-500 ${className}`}
-    >
-      <div className="flex justify-evenly items-center">
-        {!disableIcon && (
-          <Image
-            src={logo}
-            alt="Logo"
-            width={dimension?.width || 50}
-            height={dimension?.height || 50}
-            className="rounded-lg"
-          />
-        )}
-        <h1 className=" font-bold  mx-4">Expensely</h1>
-      </div>
-    </Link>
+    <div className="flex justify-around items-center">
+      {!disableIcon && (
+        <Image
+          src={logo}
+          alt="Logo"
+          width={dimension?.width || 50}
+          height={dimension?.height || 50}
+          className="rounded-lg mr-4"
+        />
+      )}
+      <Link
+        href={redirect ? "/" : ""}
+        className={` cursor-pointer text-gray-500 ${className}`}
+      >
+        <h1 className="font-bold">Expensely</h1>
+      </Link>
+    </div>
   );
 }
