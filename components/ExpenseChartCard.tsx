@@ -65,6 +65,7 @@ export default function ExpensesChartCard({
             cx="50%"
             cy="50%"
             outerRadius={100}
+            innerRadius={50}
             label
           >
             {chartData.map((_, index) => (
@@ -74,7 +75,13 @@ export default function ExpensesChartCard({
               />
             ))}
           </Pie>
-          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+            // labelStyle={{ color: "#fff" }}
+            itemStyle={{ color: "#fff" }}
+            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+            formatter={(value: number) => `$${value.toFixed(2)}`}
+          />
         </PieChart>
       </ResponsiveContainer>
     </Card>
@@ -101,14 +108,21 @@ export function ExpensesMonthlyBarChartCard({
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name"  />
-          <YAxis  />
-          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+            labelStyle={{ color: "#fff" }}
+            // itemStyle={{ color: "#fff" }}
+            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+            formatter={(value: number) => `$${value.toFixed(2)}`}
+          />
           <Bar
             dataKey="amount"
             fill="#4ade80"
             radius={[4, 4, 0, 0]}
             barSize={50}
+            viewBox="20"
           />
         </BarChart>
       </ResponsiveContainer>
@@ -136,9 +150,15 @@ export function ExpensesMonthlyLineChartCard({
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name"  />
-          <YAxis  />
-          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+            labelStyle={{ color: "#fff" }}
+            // itemStyle={{ color: "#fff" }}
+            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+            formatter={(value: number) => `$${value.toFixed(2)}`}
+          />
           <Line
             type="monotone"
             dataKey="value"
@@ -172,9 +192,15 @@ export function ExpensesTop10Monthly({
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name"  />
-          <YAxis  />
-          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+            labelStyle={{ color: "#fff" }}
+            // itemStyle={{ color: "#fff" }}
+            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+            formatter={(value: number) => `$${value.toFixed(2)}`}
+          />
           <Bar
             dataKey="value"
             fill="#4ade80"
