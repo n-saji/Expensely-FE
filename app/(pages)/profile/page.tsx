@@ -7,9 +7,10 @@ import { RootState } from "@/redux/store";
 import FetchToken, { FetchUserId } from "@/utils/fetch_token";
 import { API_URL } from "@/config/config";
 import { setUser } from "@/redux/slices/userSlice";
-import editIcon from "@/app/assets/icon/edit.png";
+import editIcon from "@/assets/icon/edit.png";
+import editIconWhite from "@/assets/icon/edit-white.png";
 import { supabase } from "@/utils/supabase";
-import defaultPNG from "@/app/assets/icon/user.png";
+import defaultPNG from "@/assets/icon/user.png";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 
 export default function ProfilePage() {
@@ -145,7 +146,6 @@ export default function ProfilePage() {
     let signedUrl = "";
 
     try {
-
       if (user.profilePicFilePath) {
         console.log("Deleting old image from Supabase Storage...");
         const { error: deleteError } = await supabase.storage
@@ -224,11 +224,13 @@ export default function ProfilePage() {
         />
         <Image
           alt="Edit Icon"
-          src={editIcon}
-          width={25}
-          height={25}
-          className="absolute bottom-0 right-2  p-1 rounded-md 
-          cursor-pointer hover:bg-white/40 dark:hover:bg-gray-800/40 transition-all duration-200"
+          src={user.theme === "light" ? editIcon : editIconWhite}
+          width={30}
+          height={30}
+          className="absolute bottom-0 right-2  p-1 rounded-full 
+          bg-white dark:bg-gray-800
+          cursor-pointer hover:bg-white/40 dark:hover:bg-gray-800/40 transition-all duration-200
+          "
           onClick={() => setEditImage(!editImage)}
         />
         {editImage && (

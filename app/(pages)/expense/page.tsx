@@ -7,12 +7,14 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { currencyMapper } from "@/utils/currencyMapper";
-import deleteIcon from "@/app/assets/icon/delete.png";
-import editIcon from "@/app/assets/icon/edit.png";
+import deleteIcon from "@/assets/icon/delete.png";
+import editIcon from "@/assets/icon/edit.png";
+import editIconWhite from "@/assets/icon/edit-white.png";
 import Image from "next/image";
 import PopUp from "@/components/pop-up";
 import { togglePopUp } from "@/redux/slices/sidebarSlice";
-import filteraIcon from "@/app/assets/icon/filter.png";
+import filterIcon from "@/assets/icon/filter.png";
+import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 
 const CategoryTypeExpense = "expense";
@@ -207,6 +209,7 @@ function ExpenseList({
     id: "",
     email: "",
     name: "",
+    theme: "light",
   },
   token = "",
   setSelectedExpenses,
@@ -247,6 +250,7 @@ function ExpenseList({
     id: string;
     email: string;
     name: string;
+    theme: string;
   };
   token: string | null;
   setSelectedExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
@@ -399,7 +403,7 @@ function ExpenseList({
             </button>
           )}
           <Image
-            src={filteraIcon}
+            src={user.theme === "light" ? filterIcon : filterIconWhite}
             alt="Filter"
             className="inline-block w-6 h-6 cursor-pointer ml-4"
             onClick={() => setFilter(!filter)}
@@ -506,9 +510,15 @@ function ExpenseList({
           >
             <tr className="text-left">
               <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">#</th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Category</th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Amount</th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Description</th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">
+                Category
+              </th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">
+                Amount
+              </th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">
+                Description
+              </th>
               <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Date</th>
             </tr>
           </thead>
@@ -564,13 +574,17 @@ function ExpenseList({
                       }}
                     />
                   </td>
-                  <td className="px-1 py-3 sm:px-4 sm:py-3">{expense.categoryName}</td>
+                  <td className="px-1 py-3 sm:px-4 sm:py-3">
+                    {expense.categoryName}
+                  </td>
                   <td className="px-1 py-3 sm:px-4 sm:py-3 font-medium text-green-600">
                     {`${currencyMapper(
                       expense?.currency || "USD"
                     )}${expense.amount.toFixed(2)}`}
                   </td>
-                  <td className="px-1 py-3 sm:px-4 sm:py-3">{expense.description}</td>
+                  <td className="px-1 py-3 sm:px-4 sm:py-3">
+                    {expense.description}
+                  </td>
                   <td className="px-1 py-3 sm:px-4 sm:py-3 text-gray-500">
                     {new Date(expense.expenseDate).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -581,7 +595,7 @@ function ExpenseList({
 
                   <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <Image
-                      src={editIcon}
+                      src={user.theme === "light" ? editIcon : editIconWhite}
                       alt="Edit"
                       className="w-4 h-4"
                       onClick={() => {

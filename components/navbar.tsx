@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import menubar from "@/app/assets/icon/menu.png";
+import menubar from "@/assets/icon/menu.png";
+import menubarwhite from "@/assets/icon/menu-white.png";
 import Image from "next/image";
 import Logout from "@/app/(auth)/logout/logout";
 import { useState } from "react";
@@ -48,7 +49,7 @@ export default function Navbar({
     >
       <div className="space-x-4 flex items-center w-full">
         <Image
-          src={menubar}
+          src={user.theme === "light" ? menubar : menubarwhite}
           alt="hamburger menu"
           width={30}
           height={30}

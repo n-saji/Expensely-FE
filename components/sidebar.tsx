@@ -2,7 +2,7 @@
 import Logo from "@/components/logo";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import closeIcone from "@/app/assets/icon/close.png";
+import closeIcone from "@/assets/icon/close.png";
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -44,14 +44,6 @@ export default function Sidebar() {
       {...handlers}
     >
       <div className="w-55 sm:w-full h-screen bg-primary-color relative">
-        {/* <Image
-          src={closeIcone}
-          alt="Close Sidebar"
-          width={30}
-          height={30}
-          className="absolute top-1/2 -right-1 min-sm:hidden"
-          
-        /> */}
         <div
           className="absolute top-1/2 -right-5 min-sm:hidden 
         w-5 h-20 bg-primary-color flex text-center

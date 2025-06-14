@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import logo from "@/app/assets/icon/logo.png";
+import logo from "@/assets/icon/logo.png";
 import Link from "next/link";
 export default function Logo({
   className,

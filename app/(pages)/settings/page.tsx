@@ -1,8 +1,9 @@
 "use client";
 import { SettingsCard } from "@/components/card";
-import EditIcon from "@/app/assets/icon/edit.png";
-import ConfirmIcon from "@/app/assets/icon/accept.png";
-import CancelIcon from "@/app/assets/icon/cancel.png";
+import EditIcon from "@/assets/icon/edit.png";
+import EditIconWhite from "@/assets/icon/edit-white.png";
+import ConfirmIcon from "@/assets/icon/accept.png";
+import CancelIcon from "@/assets/icon/cancel.png";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -245,7 +246,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <Image
-              src={EditIcon}
+              src={user.theme === "light" ? EditIcon : EditIconWhite}
               alt="Edit Icon"
               className="w-4 h-4 ml-2 inline-block cursor-pointer"
               onClick={() => setEnablePasswordUpdate(!enablePasswordUpdate)}

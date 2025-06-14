@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import DropDownIcon from "@/app/assets/icon/drop_down.png";
+import DropDownIcon from "@/assets/icon/drop_down.png";
 import { useEffect, useState } from "react";
 
 export default function DropDown({
@@ -54,9 +54,7 @@ export default function DropDown({
       </div>
       <div
         className={`absolute top-full left-0 mt-2 w-full bg-white dark:bg-gray-800 border dark:border-gray-700 border-gray-300 
-          rounded-sm shadow-lg z-10 ${
-          clicked ? "block" : "hidden"
-        }
+          rounded-sm shadow-lg z-10 ${clicked ? "block" : "hidden"}
           max-h-80 overflow-y-auto`}
       >
         <ul className="max-h-60 overflow-y-auto">

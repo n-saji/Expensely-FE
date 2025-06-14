@@ -5,11 +5,13 @@ import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import editIcon from "@/app/assets/icon/edit.png";
+import editIcon from "@/assets/icon/edit.png";
+import editIconWhite from "@/assets/icon/edit-white.png";
 import Image from "next/image";
 import PopUp from "@/components/pop-up";
 import { togglePopUp } from "@/redux/slices/sidebarSlice";
-import filteraIcon from "@/app/assets/icon/filter.png";
+import filterIcon from "@/assets/icon/filter.png";
+import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 import { categoryTypes, categorySkeleton } from "@/global/category";
 
@@ -111,7 +113,7 @@ export default function CategoryPage() {
         </h1>
         <div>
           <Image
-            src={filteraIcon}
+            src={user.theme === "light" ? filterIcon : filterIconWhite}
             alt="Filter"
             className="inline-block w-6 h-6 cursor-pointer ml-4"
             onClick={() => setFilter(!filter)}
@@ -193,7 +195,7 @@ export default function CategoryPage() {
 
                   <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <Image
-                      src={editIcon}
+                      src={user.theme === "light" ? editIcon : editIconWhite}
                       alt="Edit"
                       className="w-4 h-4"
                       onClick={() => {
