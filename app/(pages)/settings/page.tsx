@@ -194,67 +194,6 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col w-full items-center space-y-6 ">
       <SettingsCard
-        title="Update Password"
-        description="Change your password to keep your account secure."
-        className=""
-      >
-        <div className="flex items-center space-x-2 max-w-3/4">
-          <input
-            type={enablePasswordUpdate ? "text" : "password"}
-            placeholder="Enter new password"
-            className={`p-2 border border-gray-300 rounded placeholder:text-gray-500 text-gray-900 dark:bg-gray-800 dark:text-gray-200 
-            ${
-              enablePasswordUpdate
-                ? "cursor-pointer"
-                : "cursor-not-allowed opacity-50"
-            }
-              w-full sm:w-3/4`}
-            disabled={!enablePasswordUpdate}
-            autoComplete="new-password"
-            value={password}
-            onChange={async (e) => {
-              setPassword(e.target.value);
-              if (!enablePasswordUpdate) return;
-
-              setChangesMade(true);
-            }}
-          />
-          {enablePasswordUpdate ? (
-            <div className="flex items-center space-x-2">
-              <Image
-                src={ConfirmIcon}
-                alt="Confirm Icon"
-                className="w-6 h-6 ml-2 inline-block cursor-pointer"
-                onClick={async () => {
-                  if (!changesMade) {
-                    setError("No changes made to update.");
-                    setSuccess(null);
-                    return;
-                  }
-                  await handlePasswordChange();
-                  setEnablePasswordUpdate(false);
-                }}
-              />
-              <Image
-                src={CancelIcon}
-                alt="Cancel Icon"
-                className="w-6 h-6 ml-2 inline-block cursor-pointer"
-                onClick={() => {
-                  setEnablePasswordUpdate(false);
-                }}
-              />
-            </div>
-          ) : (
-            <Image
-              src={user.theme === "light" ? EditIcon : EditIconWhite}
-              alt="Edit Icon"
-              className="w-4 h-4 ml-2 inline-block cursor-pointer"
-              onClick={() => setEnablePasswordUpdate(!enablePasswordUpdate)}
-            />
-          )}
-        </div>
-      </SettingsCard>
-      <SettingsCard
         title="Dark Mode"
         description="Toggle dark mode for a better viewing experience."
       >
@@ -310,6 +249,70 @@ export default function DashboardPage() {
           </label>
         </div>
       </SettingsCard>
+
+      <SettingsCard
+        title="Update Password"
+        description="Change your password to keep your account secure."
+        className=""
+      >
+        <div className="flex items-center justify-between space-x-2 max-w-3/4">
+          <input
+            type={enablePasswordUpdate ? "text" : "password"}
+            placeholder="Enter new password"
+            className={`p-2 border border-gray-300 rounded
+               placeholder:text-gray-500 text-gray-900 dark:bg-gray-800 dark:text-gray-200 
+            ${
+              enablePasswordUpdate
+                ? "cursor-pointer"
+                : "cursor-not-allowed opacity-50"
+            }
+              w-full`}
+            disabled={!enablePasswordUpdate}
+            autoComplete="new-password"
+            value={password}
+            onChange={async (e) => {
+              setPassword(e.target.value);
+              if (!enablePasswordUpdate) return;
+
+              setChangesMade(true);
+            }}
+          />
+          {enablePasswordUpdate ? (
+            <div className="flex items-center space-x-2">
+              <Image
+                src={ConfirmIcon}
+                alt="Confirm Icon"
+                className="w-6 h-6 ml-2 inline-block cursor-pointer"
+                onClick={async () => {
+                  if (!changesMade) {
+                    setError("No changes made to update.");
+                    setSuccess(null);
+                    return;
+                  }
+                  await handlePasswordChange();
+                  setEnablePasswordUpdate(false);
+                }}
+              />
+              <Image
+                src={CancelIcon}
+                alt="Cancel Icon"
+                className="w-6 h-6 ml-2 inline-block cursor-pointer"
+                onClick={() => {
+                  setEnablePasswordUpdate(false);
+                }}
+              />
+            </div>
+          ) : (
+            <Image
+              src={user.theme === "light" ? EditIcon : EditIconWhite}
+              alt="Edit Icon"
+              className="w-4 h-4 ml-2 inline-block cursor-pointer"
+              onClick={() => setEnablePasswordUpdate(!enablePasswordUpdate)}
+            />
+          )}
+        </div>
+      </SettingsCard>
+
       <SettingsCard
         title="Delete Account"
         description="Permanently delete your account. This action cannot be undone."
