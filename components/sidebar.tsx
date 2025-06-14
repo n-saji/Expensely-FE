@@ -1,8 +1,6 @@
 "use client";
 import Logo from "@/components/logo";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
-import closeIcone from "@/assets/icon/close.png";
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
