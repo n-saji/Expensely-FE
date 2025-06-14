@@ -57,6 +57,8 @@ export default function Expense() {
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const [filter, setFilter] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const fetchExpenses = async ({
     fromDate,
@@ -184,6 +186,10 @@ export default function Expense() {
         filter={filter}
         setCategoryFilter={setCategoryFilter}
         categoryFilter={categoryFilter}
+        fromDateFilter={fromDate}
+        toDateFilter={toDate}
+        setFromDate={setFromDate}
+        setToDate={setToDate}
       />
     </div>
   );
@@ -209,6 +215,10 @@ function ExpenseList({
   filter = false,
   setCategoryFilter,
   categoryFilter = "",
+  fromDateFilter = "",
+  toDateFilter = "",
+  setFromDate,
+  setToDate,
 }: {
   expenses: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
@@ -245,6 +255,10 @@ function ExpenseList({
   filter: boolean;
   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
   categoryFilter: string;
+  fromDateFilter: string;
+  toDateFilter: string;
+  setFromDate: React.Dispatch<React.SetStateAction<string>>;
+  setToDate: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
@@ -292,7 +306,6 @@ function ExpenseList({
         throw new Error("Failed to delete expenses");
       }
 
-      // Optionally, refresh the expense list after deletion
       setExpenses(
         expenses.filter((expense) => !selectedExpenses.includes(expense))
       );
@@ -394,7 +407,12 @@ function ExpenseList({
         </div>
       </div>
       {filter && (
-        <div className="mb-4 flex items-center space-x-4">
+        <div
+          className="mb-4 sm:flex sm:flex-row sm:items-center gap-2
+          max-sm:grid
+          max-sm:grid-cols-2 
+        "
+        >
           <DropDown
             options={categories.map((category) => ({
               label: category.name,
@@ -408,30 +426,90 @@ function ExpenseList({
               );
               setCategoryFilter(selectedCategory ? selectedCategory.id : "");
               fetchExpenses({
-                fromDate: "",
-                toDate: "",
+                fromDate: fromDateFilter
+                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                  : "",
+                toDate: toDateFilter
+                  ? new Date(toDateFilter).toISOString().slice(0, 16)
+                  : "",
                 category: selectedCategory ? selectedCategory.id : "",
                 order: "desc",
               });
             }}
-            classname="bg-white dark:bg-gray-800"
+            classname="bg-white dark:bg-gray-800 max-sm:w-full"
           />
+          <div className="max-sm:w-full">
+            <input
+              type="date"
+              className="p-2 border border-gray-400 rounded cursor-pointer w-full"
+              onChange={(e) => {
+                setFromDate(e.target.value);
+                fetchExpenses({
+                  fromDate: new Date(e.target.value).toISOString().slice(0, 16),
+                  toDate:
+                    toDateFilter !== ""
+                      ? new Date(toDateFilter).toISOString().slice(0, 16)
+                      : "",
+                  category: categoryFilter || "",
+                  order: "desc",
+                });
+              }}
+            />
+          </div>
+          <div className="max-sm:w-full">
+            <input
+              type="date"
+              className="p-2 border border-gray-400 rounded cursor-pointer w-full"
+              onChange={(e) => {
+                fetchExpenses({
+                  fromDate:
+                    fromDateFilter !== ""
+                      ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                      : "",
+                  toDate: new Date(e.target.value).toISOString().slice(0, 16),
+                  category: categoryFilter || "",
+                  order: "desc",
+                });
+                setToDate(e.target.value);
+              }}
+            />
+          </div>
+
+          <div className="max-sm:w-full">
+            <button
+              className="button-blue px-1 py-2 w-full"
+              onClick={() => {
+                setFilter(false);
+                setFromDate("");
+                setToDate("");
+                setCategoryFilter("");
+                fetchExpenses({
+                  fromDate: "",
+                  toDate: "",
+                  category: "",
+                  order: "desc",
+                });
+              }}
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full divide-y  shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 ">
+        <table className="w-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 ">
           {/* divide-gray-300 */}
           <thead
             className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider
             dark:bg-gray-800 dark:text-gray-200"
           >
             <tr className="text-left">
-              <th className="px-4 py-3 font-semibold ">#</th>
-              <th className="px-4 py-3 font-semibold ">Category</th>
-              <th className="px-4 py-3 font-semibold ">Amount</th>
-              <th className="px-4 py-3 font-semibold ">Description</th>
-              <th className="px-4 py-3 font-semibold ">Date</th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">#</th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Category</th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Amount</th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Description</th>
+              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Date</th>
             </tr>
           </thead>
           {!showTable && (
@@ -439,7 +517,6 @@ function ExpenseList({
               className="bg-white divide-y  text-sm
               dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
             >
-
               {/* divide-gray-200 */}
               <tr>
                 <td colSpan={6} className="text-center py-4">
@@ -466,7 +543,7 @@ function ExpenseList({
                     }
                   }}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-1 py-3 sm:px-4 sm:py-3">
                     <input
                       type="checkbox"
                       className="cursor-pointer"
@@ -487,14 +564,14 @@ function ExpenseList({
                       }}
                     />
                   </td>
-                  <td className="px-4 py-3">{expense.categoryName}</td>
-                  <td className="px-4 py-3 font-medium text-green-600">
+                  <td className="px-1 py-3 sm:px-4 sm:py-3">{expense.categoryName}</td>
+                  <td className="px-1 py-3 sm:px-4 sm:py-3 font-medium text-green-600">
                     {`${currencyMapper(
                       expense?.currency || "USD"
                     )}${expense.amount.toFixed(2)}`}
                   </td>
-                  <td className="px-4 py-3">{expense.description}</td>
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="px-1 py-3 sm:px-4 sm:py-3">{expense.description}</td>
+                  <td className="px-1 py-3 sm:px-4 sm:py-3 text-gray-500">
                     {new Date(expense.expenseDate).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -624,8 +701,12 @@ function ExpenseList({
             onClick={() => {
               setPageNumber((prev) => Math.max(prev - 1, 1));
               fetchExpenses({
-                fromDate: "",
-                toDate: "",
+                fromDate: fromDateFilter
+                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                  : "",
+                toDate: toDateFilter
+                  ? new Date(toDateFilter).toISOString().slice(0, 16)
+                  : "",
                 category: "",
                 order: "desc",
                 page: Math.max(pageNumber - 1, 1),
@@ -646,8 +727,12 @@ function ExpenseList({
             onClick={() => {
               setPageNumber((prev) => prev + 1);
               fetchExpenses({
-                fromDate: "",
-                toDate: "",
+                fromDate: fromDateFilter
+                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                  : "",
+                toDate: toDateFilter
+                  ? new Date(toDateFilter).toISOString().slice(0, 16)
+                  : "",
                 category: "",
                 order: "desc",
                 page: pageNumber + 1,
