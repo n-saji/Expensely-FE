@@ -74,7 +74,7 @@ export default function ExpensesChartCard({
               />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
         </PieChart>
       </ResponsiveContainer>
     </Card>
@@ -88,7 +88,7 @@ export function ExpensesMonthlyBarChartCard({
   const chartData = Object.entries(amountByMonth || {}).map(
     ([month, amount]) => ({
       name: month,
-      value: amount,
+      amount: amount,
     })
   );
 
@@ -101,10 +101,15 @@ export function ExpensesMonthlyBarChartCard({
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="value" fill="#4ade80" radius={[4, 4, 0, 0]} />
+          <XAxis dataKey="name"  />
+          <YAxis  />
+          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
+          <Bar
+            dataKey="amount"
+            fill="#4ade80"
+            radius={[4, 4, 0, 0]}
+            barSize={50}
+          />
         </BarChart>
       </ResponsiveContainer>
     </Card>
@@ -131,13 +136,13 @@ export function ExpensesMonthlyLineChartCard({
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
+          <XAxis dataKey="name"  />
+          <YAxis  />
+          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#3b82f6"
+            stroke="#4ade80"
             strokeWidth={2}
             dot
           />
@@ -167,10 +172,15 @@ export function ExpensesTop10Monthly({
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="value" fill="#4ade80" radius={[4, 4, 0, 0]} />
+          <XAxis dataKey="name"  />
+          <YAxis  />
+          <Tooltip contentStyle={{ backgroundColor: "#333" }} />
+          <Bar
+            dataKey="value"
+            fill="#4ade80"
+            radius={[4, 4, 0, 0]}
+            barSize={50}
+          />
         </BarChart>
       </ResponsiveContainer>
     </Card>

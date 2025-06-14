@@ -15,7 +15,7 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-white shadow-md rounded-lg p-6 flex flex-col items-start space-x-4 ${className}
+      className={`bg-white shadow-md rounded-lg p-6 flex flex-col items-start space-y-4 ${className}
         dark:bg-gray-800 dark:text-gray-200`}
     >
       {Icon && <Icon className="text-green-600 w-8 h-8" />}
