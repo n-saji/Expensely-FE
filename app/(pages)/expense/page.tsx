@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { currencyMapper } from "@/utils/currencyMapper";
 import deleteIcon from "@/assets/icon/delete.png";
+import deleteIconWhite from "@/assets/icon/delete-white.png";
 import editIcon from "@/assets/icon/edit.png";
 import editIconWhite from "@/assets/icon/edit-white.png";
 import Image from "next/image";
@@ -401,7 +402,7 @@ function ExpenseList({
               onClick={handleBulkDelete}
             >
               <Image
-                src={deleteIcon}
+                src={user.theme === "light" ? deleteIcon : deleteIconWhite}
                 alt="Delete"
                 className="inline-block w-6 h-6"
               />
@@ -452,6 +453,7 @@ function ExpenseList({
             <input
               type="date"
               className="p-2 border border-gray-400 rounded cursor-pointer w-full h-full"
+
               onChange={(e) => {
                 setFromDate(e.target.value);
                 fetchExpenses({
