@@ -103,6 +103,7 @@ export default function Expense() {
     }
   };
 
+  // initial fetch for expenses
   useEffect(() => {
     if (!isExpenseMounted.current) {
       isExpenseMounted.current = true;
@@ -365,9 +366,13 @@ function ExpenseList({
       }
 
       fetchExpenses({
-        fromDate: "",
-        toDate: "",
-        category: "",
+        fromDate: fromDateFilter
+          ? new Date(fromDateFilter).toISOString().slice(0, 16)
+          : "",
+        toDate: toDateFilter
+          ? new Date(toDateFilter).toISOString().slice(0, 16)
+          : "",
+        category: categoryFilter || "",
         order: "desc",
       });
     } catch (error) {
@@ -619,12 +624,6 @@ function ExpenseList({
                   event.preventDefault();
                   await handleUpdateExpense(event);
                   dispatch(togglePopUp());
-                  fetchExpenses({
-                    fromDate: "",
-                    toDate: "",
-                    category: "",
-                    order: "desc",
-                  });
                 }}
               >
                 <input
@@ -721,7 +720,7 @@ function ExpenseList({
                 toDate: toDateFilter
                   ? new Date(toDateFilter).toISOString().slice(0, 16)
                   : "",
-                category: "",
+                category: categoryFilter || "",
                 order: "desc",
                 page: Math.max(pageNumber - 1, 1),
               });
@@ -747,7 +746,7 @@ function ExpenseList({
                 toDate: toDateFilter
                   ? new Date(toDateFilter).toISOString().slice(0, 16)
                   : "",
-                category: "",
+                category: categoryFilter || "",
                 order: "desc",
                 page: pageNumber + 1,
               });
