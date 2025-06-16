@@ -417,9 +417,10 @@ function ExpenseList({
       </div>
       {filter && (
         <div
-          className="mb-4 sm:flex sm:flex-row sm:items-center gap-2
-          max-sm:grid
-          max-sm:grid-cols-2 
+          className="mb-4 gap-2
+          grid grid-cols-2 sm:grid-cols-4
+          md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4
+          2xl:grid-cols-4
         "
         >
           <DropDown
@@ -445,12 +446,12 @@ function ExpenseList({
                 order: "desc",
               });
             }}
-            classname="bg-white dark:bg-gray-800 max-sm:w-full"
+            classname="bg-white dark:bg-gray-900 w-full"
           />
           <div className="max-sm:w-full">
             <input
               type="date"
-              className="p-2 border border-gray-400 rounded cursor-pointer w-full"
+              className="p-2 border border-gray-400 rounded cursor-pointer w-full h-full"
               onChange={(e) => {
                 setFromDate(e.target.value);
                 fetchExpenses({
@@ -468,7 +469,7 @@ function ExpenseList({
           <div className="max-sm:w-full">
             <input
               type="date"
-              className="p-2 border border-gray-400 rounded cursor-pointer w-full"
+              className="p-2 border border-gray-400 rounded cursor-pointer w-full h-full"
               onChange={(e) => {
                 fetchExpenses({
                   fromDate:
@@ -486,7 +487,7 @@ function ExpenseList({
 
           <div className="max-sm:w-full">
             <button
-              className="button-blue px-1 py-2 w-full"
+              className="button-blue px-2 py-2 w-full h-full"
               onClick={() => {
                 setFilter(false);
                 setFromDate("");
@@ -729,7 +730,7 @@ function ExpenseList({
               });
             }}
           >
-            {`< Prev`}
+            {`<`}
           </button>
           <span className="px-4">Page {pageNumber}</span>
           <button
@@ -755,7 +756,7 @@ function ExpenseList({
               });
             }}
           >
-            {`Next >`}
+            {`>`}
           </button>
         </div>
       </div>
