@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function ProfilePageWrapper({}: {}) {
+export default function ProfilePageWrapper() {
   return <ProfilePage />;
 }

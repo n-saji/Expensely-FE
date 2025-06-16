@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function AddCategoryPageWrapper({}: {}) {
+export default function AddCategoryPageWrapper() {
   return <AddCategoryPage />;
 }

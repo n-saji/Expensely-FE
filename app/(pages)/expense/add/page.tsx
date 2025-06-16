@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function AddExpensePageWrapper({}: {}) {
+export default function AddExpensePageWrapper() {
   return <AddExpensePage />;
 }

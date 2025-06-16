@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function DashboardPageWrapper({}: {}) {
+export default function DashboardPageWrapper() {
   return <DashboardPage />;
 }

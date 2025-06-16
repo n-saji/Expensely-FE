@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function CategoryPageWrapper({}: {}) {
+export default function CategoryPageWrapper() {
   return <CategoryPage />;
 }

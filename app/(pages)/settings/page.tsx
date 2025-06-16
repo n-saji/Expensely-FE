@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function SettingsPageWrapper({}: {}) {
+export default function SettingsPageWrapper() {
   return <SettingsPage />;
 }

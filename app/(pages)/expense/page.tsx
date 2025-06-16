@@ -6,6 +6,6 @@ export async function generateMetadata() {
   };
 }
 
-export default function ExpensePageWrapper({}: {}) {
+export default function ExpensePageWrapper() {
   return <Expense />;
 }
