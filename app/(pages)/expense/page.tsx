@@ -506,7 +506,7 @@ function ExpenseList({
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="">
         <table className="w-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 ">
           {/* divide-gray-300 */}
           <thead
@@ -535,21 +535,24 @@ function ExpenseList({
               {/* divide-gray-200 */}
               <tr>
                 <td colSpan={6} className="text-center py-4">
-                  <p className="text-gray-500">No expenses found</p>
+                  <p className="text-gray-500">
+                    {loading ? "Loading..." : "No expenses found"}
+                  </p>
                 </td>
               </tr>
             </tbody>
           )}
           {showTable && (
             <tbody
-              className="bg-white divide-y divide-gray-200 text-sm
+              className="bg-white text-sm
               dark:bg-gray-900 dark:text-gray-200
               dark:divide-gray-700"
             >
               {expenses.map((expense) => (
                 <tr
                   key={expense.id}
-                  className="hover:bg-gray-100 py-3 group relative dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="hover:bg-gray-100 py-3 group relative dark:hover:bg-gray-950 
+                  transition-colors cursor-pointer divide-y divide-gray-200 dark:divide-gray-700"
                   onClick={() => {
                     if (window.innerWidth < 640) {
                       setSelectedExpenses([expense]);
