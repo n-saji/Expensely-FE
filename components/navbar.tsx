@@ -41,7 +41,7 @@ export default function Navbar({
 
   return (
     <nav
-      className={`px-6 py-5 bg-white shadow-md flex justify-between items-center 
+      className={`h-16 px-6 py-4 bg-white shadow-md flex justify-between items-center 
         fixed top-0 right-0  duration-300 ease-in-out z-50
     ${isOpen ? "min-sm: w-[calc(100%-16rem)] max-sm:w-full" : "w-full"}
     dark:bg-gray-800 dark:text-gray-200

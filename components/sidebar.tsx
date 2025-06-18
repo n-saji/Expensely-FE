@@ -49,13 +49,15 @@ export default function Sidebar() {
          border-white"
           onClick={() => dispatch(setSidebar(false))}
         >{`<`}</div>
-        <Logo
-          disableIcon={true}
-          className="text-2xl border-b border-gray-200 py-4 px-4 w-full justify-start text-white"
-          dimension={{ width: 30, height: 30 }}
-          redirect={true}
-        />
-        <ul className="space-y-4 w-full px-4 py-4 text-lg text-gray-600 font-semibold">
+        <div className="h-16 border-b border-gray-200 flex items-center justify-start px-5 sm:px-6">
+          <Logo
+            disableIcon={false}
+            className="text-2xl py-4 w-full justify-start text-white "
+            dimension={{ width: 30, height: 30 }}
+            redirect={true}
+          />
+        </div>
+        <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-600 font-semibold">
           {navLinks.map((link) => {
             return (
               <li key={link.href}>

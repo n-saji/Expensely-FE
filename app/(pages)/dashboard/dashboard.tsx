@@ -79,14 +79,15 @@ export default function DashboardPage() {
   if (newUser) {
     return (
       <div className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl text-gray-700 p-4 font-bold dark:text-gray-200">Welcome to Expensely!</h1>
+        <h1 className="text-2xl text-gray-700 p-4 font-bold dark:text-gray-200">
+          Welcome to Expensely!
+        </h1>
         <p className="text-gray-600 p-2 text-center dark:text-gray-400">
           {`It looks like you haven't added any expenses yet.`}
         </p>
         <p className="text-gray-600 p-2 text-center dark:text-gray-400">
           Start tracking your expenses by adding your first expense.
         </p>
-
       </div>
     );
   }
@@ -111,7 +112,9 @@ export default function DashboardPage() {
 
             <div className="flex justify-between text-gray-700 dark:text-gray-500">
               <span>Total Transactions: &nbsp;</span>
-              <span className="font-semibold text-gray-700 dark:text-gray-300">{overview.totalCount}</span>
+              <span className="font-semibold text-gray-700 dark:text-gray-300">
+                {overview.totalCount}
+              </span>
             </div>
 
             <div className="flex justify-between text-gray-700 dark:text-gray-500">
@@ -129,7 +132,9 @@ export default function DashboardPage() {
 
             <div className="flex justify-between text-gray-700 dark:text-gray-500">
               <span>Total Categories: &nbsp;</span>
-              <span className="font-semibold text-gray-700 dark:text-gray-300">{overview.totalCategories}</span>
+              <span className="font-semibold text-gray-700 dark:text-gray-300">
+                {overview.totalCategories}
+              </span>
             </div>
 
             <div className="flex justify-between text-gray-700 dark:text-gray-500">
@@ -149,36 +154,6 @@ export default function DashboardPage() {
           />
         )}
 
-        {overview ? (
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <ExpensesMonthlyBarChartCard
-              amountByMonth={overview.amountByMonth}
-            />
-          </div>
-        ) : (
-          <Card
-            title="Monthly Expenses (Bar)"
-            description="Loading your monthly expenses..."
-            className=""
-            loading={true}
-          />
-        )}
-
-        {overview ? (
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
-            <ExpensesTop10Monthly
-              amountByItem={overview.topTenMostExpenseiveItemThisMonth}
-            />
-          </div>
-        ) : (
-          <Card
-            title="Monthly Expenses (Bar)"
-            description="Loading your monthly expenses..."
-            className=""
-            loading={true}
-          />
-        )}
-
         {/* Monthly Overview */}
         {overview ? (
           <Card
@@ -187,7 +162,7 @@ export default function DashboardPage() {
             className="space-y-4"
           >
             <div className="flex justify-between text-gray-700 dark:text-gray-500">
-              <span>{`This Month's Expense: ${'\u00A0'}`}</span>
+              <span>{`This Month's Expense: ${"\u00A0"}`}</span>
               <span className="font-semibold text-gray-700 dark:text-gray-300">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.thisMonthTotalExpense.toFixed(2)}
@@ -203,7 +178,6 @@ export default function DashboardPage() {
                     : "text-green-600"
                 }`}
               >
-                
                 {currencyMapper(user?.currency || "USD")}
                 {Math.abs(overview.comparedToLastMonthExpense).toFixed(2)}
               </span>
@@ -218,8 +192,50 @@ export default function DashboardPage() {
           />
         )}
 
+        {/* Expenses by Category */}
         {overview ? (
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
+          <ExpensesChartCard amountByCategory={overview.amountByCategory} />
+        ) : (
+          <Card
+            title="Expenses by Category"
+            description="Loading your expenses by category..."
+            className=""
+            loading={true}
+          />
+        )}
+
+        {overview ? (
+          <div className="col-span-1 md:col-span-3 lg:col-span-3">
+            <ExpensesMonthlyBarChartCard
+              amountByMonth={overview.amountByMonth}
+            />
+          </div>
+        ) : (
+          <Card
+            title="Monthly Expenses (Bar)"
+            description="Loading your monthly expenses..."
+            className=""
+            loading={true}
+          />
+        )}
+
+        {overview ? (
+          <div className="col-span-1 md:col-span-3 lg:col-span-3">
+            <ExpensesTop10Monthly
+              amountByItem={overview.topTenMostExpenseiveItemThisMonth}
+            />
+          </div>
+        ) : (
+          <Card
+            title="Monthly Expenses (Bar)"
+            description="Loading your monthly expenses..."
+            className=""
+            loading={true}
+          />
+        )}
+
+        {overview ? (
+          <div className="col-span-1 md:col-span-3 lg:col-span-3">
             <ExpensesMonthlyLineChartCard
               amountByMonth={overview.amountByMonth}
             />
@@ -228,16 +244,6 @@ export default function DashboardPage() {
           <Card
             title="Monthly Expenses (Line)"
             description="Loading your monthly expenses..."
-            className=""
-            loading={true}
-          />
-        )}
-        {overview ? (
-          <ExpensesChartCard amountByCategory={overview.amountByCategory} />
-        ) : (
-          <Card
-            title="Expenses by Category"
-            description="Loading your expenses by category..."
             className=""
             loading={true}
           />
