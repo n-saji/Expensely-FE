@@ -15,6 +15,7 @@ import {
   LineChart,
   Line,
   ComposedChart,
+  Legend,
 } from "recharts";
 import Card from "@/components/card";
 
@@ -67,7 +68,12 @@ export default function ExpensesChartCard({
             cy="50%"
             outerRadius={100}
             innerRadius={50}
-            label
+            label ={({ name, percent }) =>
+              `${name} ${(percent * 100).toFixed(0)}%`
+            }
+            labelLine={false}
+            animationDuration={800}
+            animationEasing="ease-in-out"
           >
             {chartData.map((_, index) => (
               <Cell
@@ -81,7 +87,7 @@ export default function ExpensesChartCard({
             // labelStyle={{ color: "#fff" }}
             itemStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) => `$${value.toFixed(2)}`}
+            formatter={(value: number , name: string) => [`$${value.toFixed(2)}`, null]}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -97,6 +103,7 @@ export function ExpensesMonthlyBarChartCard({
     ([month, amount]) => ({
       name: month,
       amount: amount,
+      trend: amount,
     })
   );
 
@@ -115,7 +122,10 @@ export function ExpensesMonthlyBarChartCard({
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             labelStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) => `$${value.toFixed(2)}`}
+            formatter={(value: number, name: string) => {
+              if (name === "amount") return [`$${value.toFixed(2)}`, "Amount"];
+              if (name === "trend") return [];
+            }}
           />
           <Bar
             dataKey="amount"
@@ -125,7 +135,7 @@ export function ExpensesMonthlyBarChartCard({
           />
           <Line
             type="monotone"
-            dataKey="amount"
+            dataKey="trend"
             stroke="#4ade80"
             strokeWidth={2}
             dot
