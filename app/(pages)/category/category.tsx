@@ -160,7 +160,7 @@ export default function CategoryPage() {
             >
               <tr>
                 <td colSpan={6} className="text-center py-4">
-                  <p className="text-gray-500">No expenses found</p>
+                  <p className="text-gray-500">No category found</p>
                 </td>
               </tr>
             </tbody>
