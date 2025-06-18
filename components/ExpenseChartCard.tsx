@@ -14,6 +14,7 @@ import {
   CartesianGrid,
   LineChart,
   Line,
+  ComposedChart,
 } from "recharts";
 import Card from "@/components/card";
 
@@ -35,7 +36,7 @@ interface ExpensesMonthlyChartProps {
   amountByMonth: Record<string, number>;
 }
 
-interface ExpensesTop10MonthlyProps {
+interface ExpensesTop5MonthlyProps {
   amountByItem: Record<string, number>;
 }
 
@@ -106,14 +107,13 @@ export function ExpensesMonthlyBarChartCard({
       className="w-full"
     >
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
+        <ComposedChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="name" fontSize={12} />
           <YAxis />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             labelStyle={{ color: "#fff" }}
-            // itemStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
             formatter={(value: number) => `$${value.toFixed(2)}`}
           />
@@ -122,9 +122,17 @@ export function ExpensesMonthlyBarChartCard({
             fill="#4ade80"
             radius={[4, 4, 0, 0]}
             barSize={50}
-            viewBox="20"
           />
-        </BarChart>
+          <Line
+            type="monotone"
+            dataKey="amount"
+            stroke="#4ade80"
+            strokeWidth={2}
+            dot
+            activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+            strokeDasharray="5 5"
+          />
+        </ComposedChart>
       </ResponsiveContainer>
     </Card>
   );
@@ -150,7 +158,7 @@ export function ExpensesMonthlyLineChartCard({
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="name" fontSize={12} />
           <YAxis />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
@@ -172,10 +180,10 @@ export function ExpensesMonthlyLineChartCard({
   );
 }
 
-// ========== Bar Chart: Top 10 Items This Month ==========
-export function ExpensesTop10Monthly({
+// ========== Bar Chart: Top 5 Items This Month ==========
+export function ExpensesTop5Monthly({
   amountByItem,
-}: ExpensesTop10MonthlyProps) {
+}: ExpensesTop5MonthlyProps) {
   const chartData = Object.entries(amountByItem || {}).map(
     ([item, amount]) => ({
       name: item,
@@ -185,14 +193,21 @@ export function ExpensesTop10Monthly({
 
   return (
     <Card
-      title="Top 10 Most Expensive Items This Month"
+      title="Top 5 Most Expensive Items This Month"
       description="Your highest spending items this month"
       className="w-full"
     >
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis
+            dataKey="name"
+            fontSize={12}
+            tickFormatter={(value: string) =>
+              value.length > 10 ? `${value.slice(0, 10)}...` : value
+            }
+            interval={0}
+          />
           <YAxis />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
@@ -205,7 +220,7 @@ export function ExpensesTop10Monthly({
             dataKey="value"
             fill="#4ade80"
             radius={[4, 4, 0, 0]}
-            barSize={50}
+            barSize={30}
           />
         </BarChart>
       </ResponsiveContainer>

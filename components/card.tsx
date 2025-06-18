@@ -57,7 +57,7 @@ export function SettingsCard({
         w-[90%] sm:w-4/5 flex flex-col sm:flex-row space-y-4 sm:space-x-4 justify-between items-left sm:items-center 
         ${className}`}
     >
-      <div className="flex items-start space-x-4">
+      <div className="flex items-start">
         {Icon && <Icon className="text-green-600 w-8 h-8" />}
         <div>
           <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200">

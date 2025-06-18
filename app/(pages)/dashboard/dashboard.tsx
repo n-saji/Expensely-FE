@@ -8,7 +8,7 @@ import FetchToken from "@/utils/fetch_token";
 import ExpensesChartCard, {
   ExpensesMonthlyBarChartCard,
   ExpensesMonthlyLineChartCard,
-  ExpensesTop10Monthly,
+  ExpensesTop5Monthly,
 } from "@/components/ExpenseChartCard";
 import { currencyMapper } from "@/utils/currencyMapper";
 
@@ -25,7 +25,7 @@ interface ExpenseOverview {
   comparedToLastMonthExpense: number;
   categoryCount: Record<string, number>;
   averageMonthlyExpense: number;
-  topTenMostExpenseiveItemThisMonth: Record<string, number>;
+  topFiveMostExpensiveItemThisMonth: Record<string, number>;
 }
 
 export default function DashboardPage() {
@@ -220,9 +220,9 @@ export default function DashboardPage() {
         )}
 
         {overview ? (
-          <div className="col-span-1 md:col-span-3 lg:col-span-3">
-            <ExpensesTop10Monthly
-              amountByItem={overview.topTenMostExpenseiveItemThisMonth}
+          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+            <ExpensesTop5Monthly
+              amountByItem={overview.topFiveMostExpensiveItemThisMonth}
             />
           </div>
         ) : (
@@ -235,7 +235,7 @@ export default function DashboardPage() {
         )}
 
         {overview ? (
-          <div className="col-span-1 md:col-span-3 lg:col-span-3">
+          <div className="col-span-1 md:col-span-2 lg:col-span-2">
             <ExpensesMonthlyLineChartCard
               amountByMonth={overview.amountByMonth}
             />

@@ -77,7 +77,13 @@ export default function SignUpForm() {
     })
       .then((response) => {
         if (!response.ok) {
-          setError("Failed to sign up");
+          response.json().then((data) => {
+            if (data.error) {
+              setError(data.error);
+            } else {
+              setError("An unexpected error occurred. Please try again.");
+            }
+          });
           return;
         }
         setLoading(false);
