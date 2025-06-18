@@ -67,7 +67,7 @@ export default function ExpensesChartCard({
             cy="50%"
             outerRadius={100}
             innerRadius={50}
-            label ={({ name, percent }) =>
+            label={({ name, percent }) =>
               `${name} ${(percent * 100).toFixed(0)}%`
             }
             labelLine={false}
@@ -167,7 +167,11 @@ export function ExpensesMonthlyLineChartCard({
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" fontSize={12} />
+          <XAxis
+            dataKey="name"
+            fontSize={12}
+            tickFormatter={(value: string) => `${value.slice(0, 3)}`}
+          />
           <YAxis />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
