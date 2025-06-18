@@ -15,7 +15,6 @@ import {
   LineChart,
   Line,
   ComposedChart,
-  Legend,
 } from "recharts";
 import Card from "@/components/card";
 
@@ -87,7 +86,7 @@ export default function ExpensesChartCard({
             // labelStyle={{ color: "#fff" }}
             itemStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number , name: string) => [`$${value.toFixed(2)}`, null]}
+            formatter={(value: number) => [`$${value.toFixed(2)}`, null]}
           />
         </PieChart>
       </ResponsiveContainer>
