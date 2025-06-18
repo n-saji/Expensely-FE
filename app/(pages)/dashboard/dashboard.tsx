@@ -220,22 +220,22 @@ export default function DashboardPage() {
         )}
 
         {overview ? (
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+          <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
             <ExpensesTop5Monthly
               amountByItem={overview.topFiveMostExpensiveItemThisMonth}
             />
           </div>
         ) : (
           <Card
-            title="Monthly Expenses (Bar)"
-            description="Loading your monthly expenses..."
+            title="Top 5 Most Expensive Items This Month"
+            description="Loading your top 5 most expensive items..."
             className=""
             loading={true}
           />
         )}
 
         {overview ? (
-          <div className="col-span-1 md:col-span-2 lg:col-span-2">
+          <div className="col-span-1 md:col-span-2 lg:col-span-2 h-full">
             <ExpensesMonthlyLineChartCard
               amountByMonth={overview.amountByMonth}
             />

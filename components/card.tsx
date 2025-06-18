@@ -2,7 +2,7 @@ export default function Card({
   title,
   description,
   icon: Icon,
-  className = "",
+  className,
   children,
   loading,
 }: {
@@ -15,7 +15,7 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-white shadow-md rounded-lg p-6 flex flex-col items-start space-y-4 ${className}
+      className={`bg-white shadow-md rounded-lg p-6 flex flex-col h-full items-start space-y-4 ${className}
         dark:bg-gray-800 dark:text-gray-200`}
     >
       {Icon && <Icon className="text-green-600 w-8 h-8" />}
@@ -54,7 +54,8 @@ export function SettingsCard({
   return (
     <div
       className={`bg-gray-100 dark:bg-gray-700/20 py-4 px-6 rounded-lg shadow-md 
-        w-[90%] sm:w-4/5 flex flex-col sm:flex-row space-y-4 sm:space-x-4 justify-between items-left sm:items-center 
+        w-[90%] sm:w-4/5 flex flex-col sm:flex-row space-y-4 sm:space-x-4 
+        justify-between items-left sm:items-center 
         ${className}`}
     >
       <div className="flex items-start">
