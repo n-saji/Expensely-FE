@@ -12,7 +12,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  LineChart,
   Line,
   ComposedChart,
 } from "recharts";
