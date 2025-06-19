@@ -32,6 +32,10 @@ interface ExpensesChartCardProps {
   amountByCategory: Record<string, number>;
 }
 
+interface ExpensesMonthlyCategoryChartProps {
+  amountByMonth: Record<string, Record<string, number>>;
+}
+
 interface ExpensesMonthlyChartProps {
   amountByMonth: Record<string, number>;
 }
@@ -150,44 +154,50 @@ export function ExpensesMonthlyBarChartCard({
 // ========== Line Chart: Monthly Expense Trend ==========
 export function ExpensesMonthlyLineChartCard({
   amountByMonth,
-}: ExpensesMonthlyChartProps) {
-  const chartData = Object.entries(amountByMonth || {}).map(
-    ([month, amount]) => ({
+}: ExpensesMonthlyCategoryChartProps) {
+  const chartData = Object.entries(amountByMonth).map(
+    ([month, categories]) => ({
       name: month,
-      value: amount,
+      ...categories,
     })
   );
 
   return (
     <Card
-      title="Monthly Expenses (Line)"
-      description="Track your expenses over time"
+      title="Monthly Spending Trends"
+      description="Visual breakdown of expenses by category over the year"
       className="w-full"
     >
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="name"
-            fontSize={12}
-            tickFormatter={(value: string) => `${value.slice(0, 3)}`}
-          />
-          <YAxis />
-          <Tooltip
-            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
-            labelStyle={{ color: "#fff" }}
-            // itemStyle={{ color: "#fff" }}
-            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) => `$${value.toFixed(2)}`}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#4ade80"
-            strokeWidth={2}
-            dot
-          />
-        </LineChart>
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">No data available</p>
+          </div>
+        ) : (
+          <ComposedChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" fontSize={12} />
+            <YAxis />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+              labelStyle={{ color: "#fff" }}
+              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+              formatter={(value: number) => `$${value.toFixed(2)}`}
+            />
+            {Object.keys(chartData[0])
+              .filter((key) => key !== "name")
+              .map((category, index) => (
+                <Line
+                  key={category}
+                  type="monotone"
+                  dataKey={category}
+                  stroke={COLORS[index % COLORS.length]}
+                  strokeWidth={2}
+                  dot
+                />
+              ))}
+          </ComposedChart>
+        )}
       </ResponsiveContainer>
     </Card>
   );

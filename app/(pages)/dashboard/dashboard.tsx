@@ -26,6 +26,7 @@ interface ExpenseOverview {
   categoryCount: Record<string, number>;
   averageMonthlyExpense: number;
   topFiveMostExpensiveItemThisMonth: Record<string, number>;
+  monthlyCategoryExpense: Record<string, Record<string, number>>;
 }
 
 export default function DashboardPage() {
@@ -288,7 +289,7 @@ export default function DashboardPage() {
             {overview ? (
               <div className="col-span-1 md:col-span-1 lg:col-span-1">
                 <ExpensesMonthlyLineChartCard
-                  amountByMonth={overview.amountByMonth}
+                  amountByMonth={overview.monthlyCategoryExpense}
                 />
               </div>
             ) : (

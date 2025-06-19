@@ -25,6 +25,50 @@ interface Category {
   name: string;
 }
 
+interface ExpenseListProps {
+  expenses: Expense[];
+  totalPages: number;
+  totalElements: number;
+  pageNumber: number;
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>;
+  fetchExpenses: ({
+    fromDate,
+    toDate,
+    category,
+    order,
+    page,
+  }: {
+    fromDate: string;
+    toDate: string;
+    category: string;
+    order: "asc" | "desc";
+    page?: number;
+  }) => void;
+  categories: {
+    id: string;
+    type: string;
+    name: string;
+  }[];
+  showTable?: boolean;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    theme: string;
+  };
+  token: string | null;
+  setSelectedExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
+  selectedExpenses: Expense[];
+  setFilter: React.Dispatch<React.SetStateAction<boolean>>;
+  filter: boolean;
+  setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
+  categoryFilter: string;
+  fromDateFilter: string;
+  toDateFilter: string;
+  setFromDate: React.Dispatch<React.SetStateAction<string>>;
+  setToDate: React.Dispatch<React.SetStateAction<string>>;
+}
+
 interface Expense {
   id: string;
   user: {
@@ -48,20 +92,45 @@ interface Expense {
 export default function Expense() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
-
   const dispatch = useDispatch();
   const token = FetchToken();
   const isExpenseMounted = useRef(false);
   const isCategoryMounted = useRef(false);
-
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
-
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const [filter, setFilter] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+
+  const [expenseList, setExpenseList] = useState<ExpenseListProps>({
+    expenses: [],
+    totalPages: 0,
+    totalElements: 0,
+    pageNumber: 1,
+    setPageNumber: setPageNumber,
+    fetchExpenses: async () => {},
+    categories: categories.categories,
+    showTable: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      theme: user.theme,
+    },
+    token: token,
+    setSelectedExpenses: setSelectedExpenses,
+    selectedExpenses: selectedExpenses,
+    setFilter: setFilter,
+    filter: filter,
+    setCategoryFilter: setCategoryFilter,
+    categoryFilter: categoryFilter,
+    fromDateFilter: fromDate,
+    toDateFilter: toDate,
+    setFromDate: setFromDate,
+    setToDate: setToDate,
+  });
 
   const fetchExpenses = async ({
     fromDate,
@@ -453,7 +522,6 @@ function ExpenseList({
             <input
               type="date"
               className="p-2 border border-gray-400 rounded cursor-pointer w-full h-full"
-
               onChange={(e) => {
                 setFromDate(e.target.value);
                 fetchExpenses({
