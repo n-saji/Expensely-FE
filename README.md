@@ -5,7 +5,7 @@
 
 
 Expensely is a personal expense tracking web application designed to help users manage, categorize, and visualize their daily spending. This is the frontend built with **Next.js** and **Tailwind CSS**.
-Link to back end repo [[Backend Repo](https://github.com/n-saji/Expensely)]
+Link to back end repository [[Link](https://github.com/n-saji/Expensely)]
 
 ## 🚀 Features
 
