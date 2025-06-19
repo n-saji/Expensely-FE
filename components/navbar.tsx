@@ -5,7 +5,7 @@ import menubar from "@/assets/icon/menu.png";
 import menubarwhite from "@/assets/icon/menu-white.png";
 import Image from "next/image";
 import Logout from "@/app/(auth)/logout/logout";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { toggleSidebar } from "@/redux/slices/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +28,27 @@ export default function Navbar({
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
+  const profileDropDownRef = useRef<HTMLDivElement>(null);
+  const profileToggleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileDropDown &&
+        profileDropDownRef.current &&
+        profileToggleRef.current &&
+        !profileDropDownRef.current.contains(event.target as Node) &&
+        !profileToggleRef.current?.contains(event.target as Node)
+      ) {
+        setProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileDropDown]);
 
   const handleLogout = async () => {
     try {
@@ -61,25 +82,69 @@ export default function Navbar({
 
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}
-            <p
-              className="hover:underline active:underline cursor-pointer text-gray-700 dark:text-gray-300"
-              onClick={() => {
-                setProfileDropdown((prev) => !prev);
-              }}
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              ref={profileToggleRef}
             >
-              Hi, {user.name || "User"}
-            </p>
+              <Image
+                src={user.profilePictureUrl || "/default-profile.png"}
+                alt="Profile"
+                width={30}
+                height={30}
+                className="w-[30px] h-[30px] object-cover rounded-full cursor-pointer"
+                onClick={() => {
+                  setProfileDropdown((prev) => !prev);
+                }}
+              />
+              <p
+                className="hover:underline active:underline cursor-pointer text-gray-700 dark:text-gray-300"
+                onClick={() => {
+                  setProfileDropdown((prev) => !prev);
+                }}
+              >
+                {user.name || "User"}
+              </p>
+            </div>
           </div>
           <div
-            className={`absolute right-0.5 top-full w-40 bg-primary-color shadow-lg rounded-md p-4 transition-all duration-300 z-50
-            ${
-              profileDropDown
-                ? "translate-y-0 opacity-100"
-                : "-translate-y-4 opacity-0 pointer-events-none"
-            }`}
+            ref={profileDropDownRef}
+            className={`absolute right-0.5 top-full w-50 dark:bg-gray-950 
+              bg-gray-300 text-gray-700 dark:text-gray-200
+              shadow-lg rounded-sm transition-all duration-300 z-50
+              p-1
+  ${
+    profileDropDown
+      ? "translate-y-0 opacity-100"
+      : "-translate-y-4 opacity-0 pointer-events-none"
+  }`}
           >
             <button
-              className="text-md hover:underline w-full text-left text-white cursor-pointer"
+              className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
+              dark:hover:bg-gray-700
+              transition-colors duration-300 ease-in-out"
+              onClick={() => {
+                setProfileDropdown(false);
+                router.push("/profile");
+              }}
+            >
+              Profile
+            </button>
+            <button
+              className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
+              dark:hover:bg-gray-700
+              transition-colors duration-300 ease-in-out"
+              onClick={() => {
+                setProfileDropdown(false);
+                router.push("/settings");
+              }}
+            >
+              Settings
+            </button>
+            <hr className="my-1 border-gray-400 dark:border-gray-600" />
+            <button
+              className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
+              dark:hover:bg-gray-700
+              transition-colors duration-300 ease-in-out"
               onClick={handleLogout}
             >
               Logout

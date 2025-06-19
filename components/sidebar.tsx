@@ -13,8 +13,8 @@ const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/expense", label: "Expense" },
   { href: "/category", label: "Category" },
-  { href: "/profile", label: "Profile" },
-  { href: "/settings", label: "Settings" },
+  // { href: "/profile", label: "Profile" }, // handled in navbar
+  // { href: "/settings", label: "Settings" }, handled in navbar
 ];
 
 export default function Sidebar() {
@@ -41,7 +41,7 @@ export default function Sidebar() {
         `}
       {...handlers}
     >
-      <div className="w-55 sm:w-full h-screen bg-primary-color relative">
+      <div className="w-55 sm:w-full h-screen bg-primary-color relative flex flex-col">
         <div
           className="absolute top-1/2 -right-5 min-sm:hidden 
         w-5 h-20 bg-primary-color flex text-center
@@ -57,22 +57,27 @@ export default function Sidebar() {
             redirect={true}
           />
         </div>
-        <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-600 font-semibold">
-          {navLinks.map((link) => {
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={`${
-                    param.includes(link.href) ? "text-gray-200" : ""
-                  }  hover:underline`}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex-grow justify-between">
+          <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-600 font-semibold">
+            {navLinks.map((link) => {
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`${
+                      param.includes(link.href) ? "text-gray-200" : ""
+                    }  hover:underline`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <div>
+          <p className="text-gray-300 text-sm">Version 1.1.5</p>
+        </div>
       </div>
     </aside>
   );

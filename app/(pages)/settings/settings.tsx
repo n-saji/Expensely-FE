@@ -25,6 +25,18 @@ export default function SettingsPage() {
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => setError(null), 5000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => setSuccess(null), 5000);
+    return () => clearTimeout(timer);
+  }, [success]);
+
+  useEffect(() => {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
     console.log("Fetching user profile data...");
@@ -344,7 +356,7 @@ export default function SettingsPage() {
       </SettingsCard>
 
       <div
-        className={`fixed w-80 bottom-10 -right-80  text-white 
+        className={`fixed w-80 bottom-10 -right-80  text-white  text-xs
           p-4 text-left rounded-md flex justify-between items-center shadow-lg
           ${error ? "bg-red-500" : success ? "bg-green-500" : "bg-gray-500"}
           ${
@@ -354,7 +366,7 @@ export default function SettingsPage() {
         {error && <div>{error}</div>}
         {success && <div>{success}</div>}
         <button
-          className=" text-white underline text-sm cursor-pointer"
+          className=" text-white underline cursor-pointer"
           onClick={() => {
             setError(null);
             setSuccess(null);
