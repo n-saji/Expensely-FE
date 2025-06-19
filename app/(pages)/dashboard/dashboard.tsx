@@ -240,6 +240,8 @@ export default function DashboardPage() {
               <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
                 <ExpensesTop5Monthly
                   amountByItem={overview.topFiveMostExpensiveItemThisMonth}
+                  darkMode={user.theme === "dark"}
+                  currency={user.currency}
                 />
               </div>
             ) : (
@@ -259,6 +261,8 @@ export default function DashboardPage() {
               <div className="col-span-1 md:col-span-2 lg:col-span-2">
                 <ExpensesMonthlyBarChartCard
                   amountByMonth={overview.amountByMonth}
+                  darkMode={user.theme === "dark"}
+                  currency={user.currency}
                 />
               </div>
             ) : (
@@ -290,6 +294,8 @@ export default function DashboardPage() {
               <div className="col-span-1 md:col-span-1 lg:col-span-1">
                 <ExpensesMonthlyLineChartCard
                   amountByMonth={overview.monthlyCategoryExpense}
+                  darkMode={user.theme === "dark"}
+                  currency={user.currency}
                 />
               </div>
             ) : (

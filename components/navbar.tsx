@@ -74,7 +74,7 @@ export default function Navbar({
             className={`absolute right-0.5 top-full w-40 bg-primary-color shadow-lg rounded-md p-4 transition-all duration-300 z-50
             ${
               profileDropDown
-                ? "translate-y-0 opacity-90"
+                ? "translate-y-0 opacity-100"
                 : "-translate-y-4 opacity-0 pointer-events-none"
             }`}
           >

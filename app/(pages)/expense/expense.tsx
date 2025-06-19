@@ -573,10 +573,13 @@ function ExpenseList({
       )}
 
       <div className="">
-        <table className="w-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 ">
+        <table
+          className="w-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 
+        text-xs sm:text-sm"
+        >
           {/* divide-gray-300 */}
           <thead
-            className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider
+            className="bg-gray-100 text-gray-700  uppercase tracking-wider
             dark:bg-gray-800 dark:text-gray-200"
           >
             <tr className="text-left">
@@ -595,7 +598,7 @@ function ExpenseList({
           </thead>
           {!showTable && (
             <tbody
-              className="bg-white divide-y  text-sm
+              className="bg-white divide-y 
               dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
             >
               {/* divide-gray-200 */}
@@ -610,7 +613,7 @@ function ExpenseList({
           )}
           {showTable && (
             <tbody
-              className="bg-white text-sm
+              className="bg-white
               dark:bg-gray-900 dark:text-gray-200
               dark:divide-gray-700"
             >
@@ -618,14 +621,8 @@ function ExpenseList({
                 <tr
                   key={expense.id}
                   className="hover:bg-gray-100 py-3 group relative dark:hover:bg-gray-950 
-                  transition-colors cursor-pointer divide-y divide-gray-200 dark:divide-gray-700"
-                  onClick={() => {
-                    if (window.innerWidth < 640) {
-                      setSelectedExpenses([expense]);
-                      dispatch(togglePopUp());
-                      return;
-                    }
-                  }}
+                  transition-colors cursor-pointer divide-y divide-gray-200 dark:divide-gray-700
+                  "
                 >
                   <td className="px-1 py-3 sm:px-4 sm:py-3">
                     <input
@@ -648,15 +645,42 @@ function ExpenseList({
                       }}
                     />
                   </td>
-                  <td className="px-1 py-3 sm:px-4 sm:py-3">
+                  <td
+                    className="px-1 py-3 sm:px-4 sm:py-3"
+                    onClick={() => {
+                      if (window.innerWidth < 640) {
+                        setSelectedExpenses([expense]);
+                        dispatch(togglePopUp());
+                        return;
+                      }
+                    }}
+                  >
                     {expense.categoryName}
                   </td>
-                  <td className="px-1 py-3 sm:px-4 sm:py-3 font-medium text-green-600">
+                  <td
+                    className="px-1 py-3 sm:px-4 sm:py-3 font-medium text-green-600"
+                    onClick={() => {
+                      if (window.innerWidth < 640) {
+                        setSelectedExpenses([expense]);
+                        dispatch(togglePopUp());
+                        return;
+                      }
+                    }}
+                  >
                     {`${currencyMapper(
                       expense?.currency || "USD"
                     )}${expense.amount.toFixed(2)}`}
                   </td>
-                  <td className="px-1 py-3 sm:px-4 sm:py-3">
+                  <td
+                    className="px-1 py-3 sm:px-4 sm:py-3"
+                    onClick={() => {
+                      if (window.innerWidth < 640) {
+                        setSelectedExpenses([expense]);
+                        dispatch(togglePopUp());
+                        return;
+                      }
+                    }}
+                  >
                     {expense.description}
                   </td>
                   <td className="px-1 py-3 sm:px-4 sm:py-3 text-gray-500">
@@ -821,7 +845,7 @@ function ExpenseList({
           >
             {`<`}
           </button>
-          <span className="px-4 text-sm text-gray-600 dark:text-gray-300">
+          <span className="px-4 text-gray-600 dark:text-gray-300">
             Page {pageNumber} of {expensesList.totalPages}
           </span>
           <button

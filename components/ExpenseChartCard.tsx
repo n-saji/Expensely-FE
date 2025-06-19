@@ -1,5 +1,5 @@
 "use client";
-
+import { currencyMapper } from "@/utils/currencyMapper";
 import React from "react";
 import {
   PieChart,
@@ -14,6 +14,7 @@ import {
   CartesianGrid,
   Line,
   ComposedChart,
+  Legend,
 } from "recharts";
 import Card from "@/components/card";
 
@@ -71,7 +72,7 @@ export default function ExpensesChartCard({
             outerRadius={100}
             innerRadius={50}
             label={({ name, percent }) =>
-              `${name} ${(percent * 100).toFixed(0)}%`
+              `${name} ${(percent * 100).toFixed(1)}%`
             }
             labelLine={false}
             animationDuration={800}
@@ -100,7 +101,9 @@ export default function ExpensesChartCard({
 // ========== Bar Chart: Monthly Spending ==========
 export function ExpensesMonthlyBarChartCard({
   amountByMonth,
-}: ExpensesMonthlyChartProps) {
+  darkMode,
+  currency = "USD",
+}: ExpensesMonthlyChartProps & { darkMode: boolean } & { currency?: string }) {
   const chartData = Object.entries(amountByMonth || {}).map(
     ([month, amount]) => ({
       name: month,
@@ -108,24 +111,39 @@ export function ExpensesMonthlyBarChartCard({
       trend: amount,
     })
   );
-
+  console.log(darkMode, currency);
   return (
     <Card
-      title="Monthly Expenses (Bar)"
-      description="Visualized monthly spending with bar chart"
+      title="Expense Summary"
+      description="Insights into your spending patterns"
       className="w-full"
     >
       <ResponsiveContainer width="100%" height={300}>
         <ComposedChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" fontSize={12} />
-          <YAxis />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={darkMode ? "#999999" : "#ccc"}
+          />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+          />
+          <YAxis
+            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+            tickFormatter={(value: number) =>
+              `${currencyMapper(currency)}${value.toFixed(0)}`
+            }
+          />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             labelStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
             formatter={(value: number, name: string) => {
-              if (name === "amount") return [`$${value.toFixed(2)}`, "Amount"];
+              if (name === "amount")
+                return [
+                  `${currencyMapper(currency)}${value.toFixed(2)}`,
+                  "Amount",
+                ];
               if (name === "trend") return [];
             }}
           />
@@ -153,7 +171,11 @@ export function ExpensesMonthlyBarChartCard({
 // ========== Line Chart: Monthly Expense Trend ==========
 export function ExpensesMonthlyLineChartCard({
   amountByMonth,
-}: ExpensesMonthlyCategoryChartProps) {
+  darkMode,
+  currency = "USD",
+
+}: ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & { currency?: string }) {
+
   const chartData = Object.entries(amountByMonth).map(
     ([month, categories]) => ({
       name: month,
@@ -174,9 +196,20 @@ export function ExpensesMonthlyLineChartCard({
           </div>
         ) : (
           <ComposedChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" fontSize={12} />
-            <YAxis />
+            <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#999999" : "#ccc"} />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+              tickFormatter={(name: string) =>
+                name.length > 3 ? `${name.slice(0, 3)}` : name
+              }
+            />
+            <YAxis
+              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+              tickFormatter={(value: number) =>
+                `${currencyMapper(currency)}${value.toFixed(0)}`
+              }
+            />
             <Tooltip
               contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
               labelStyle={{ color: "#fff" }}
@@ -195,6 +228,7 @@ export function ExpensesMonthlyLineChartCard({
                   dot
                 />
               ))}
+            <Legend />
           </ComposedChart>
         )}
       </ResponsiveContainer>
@@ -205,7 +239,9 @@ export function ExpensesMonthlyLineChartCard({
 // ========== Bar Chart: Top 5 Items This Month ==========
 export function ExpensesTop5Monthly({
   amountByItem,
-}: ExpensesTop5MonthlyProps) {
+  darkMode,
+  currency = "USD",
+}: ExpensesTop5MonthlyProps & { darkMode: boolean } & { currency?: string }) {
   const chartData = Object.entries(amountByItem || {}).map(
     ([item, amount]) => ({
       name: item,
@@ -215,22 +251,27 @@ export function ExpensesTop5Monthly({
 
   return (
     <Card
-      title="Top 5 Most Expensive Items This Month"
-      description="Your highest spending items this month"
+      title="Top 5 Costliest Items"
+      description="Highlights your biggest spending items for the current period"
       className="w-full"
     >
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#999999" : "#ccc"} />
           <XAxis
             dataKey="name"
-            fontSize={12}
+            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
             tickFormatter={(value: string) =>
               value.length > 10 ? `${value.slice(0, 10)}...` : value
             }
             interval={0}
           />
-          <YAxis />
+          <YAxis
+            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+            tickFormatter={(value: number) =>
+              `${currencyMapper(currency)}${value.toFixed(0)}`
+            }
+          />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             labelStyle={{ color: "#fff" }}
