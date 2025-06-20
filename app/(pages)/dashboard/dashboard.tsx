@@ -10,24 +10,8 @@ import ExpensesChartCard, {
   ExpensesMonthlyLineChartCard,
   ExpensesTop5Monthly,
 } from "@/components/ExpenseChartCard";
-import { currencyMapper } from "@/utils/currencyMapper";
-
-interface ExpenseOverview {
-  userId: string;
-  totalAmount: number;
-  totalCount: number;
-  amountByCategory: Record<string, number>;
-  amountByMonth: Record<string, number>;
-  mostFrequentCategory: string;
-  totalCategories: number;
-  mostFrequentCategoryCount: number;
-  thisMonthTotalExpense: number;
-  comparedToLastMonthExpense: number;
-  categoryCount: Record<string, number>;
-  averageMonthlyExpense: number;
-  topFiveMostExpensiveItemThisMonth: Record<string, number>;
-  monthlyCategoryExpense: Record<string, Record<string, number>>;
-}
+import { DashboardPageProps, ExpenseOverview } from "@/global/dto";
+import Overview from "./overview";
 
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
@@ -35,6 +19,12 @@ export default function DashboardPage() {
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [newUser, setNewUser] = useState<boolean>(false);
   const [clickedButton, setClickedButton] = useState<string>("overview");
+  const dashboardProps: DashboardPageProps = {
+    userId: user.id,
+    token: token,
+    user: user,
+    overview: overview,
+  };
 
   useEffect(() => {
     const fetchOverview = async () => {
@@ -133,105 +123,8 @@ export default function DashboardPage() {
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 w-full">
-        {/* Yearly Overview */}
         {clickedButton === "overview" && (
-          <>
-            {overview ? (
-              <Card
-                title="Yearly Expenses Overview"
-                description=""
-                className="space-y-4"
-              >
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>Total Spent This Year: &nbsp;</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    {currencyMapper(user?.currency || "USD")}
-                    {overview.totalAmount.toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>Total Transactions: &nbsp;</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    {overview.totalCount}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>Most Frequent Category: &nbsp;</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    {overview.mostFrequentCategory || "N/A"}
-                  </span>
-                </div>
-                {/* <div className="flex justify-between text-gray-700 dark:text-gray-500">
-              <span>Most Frequent Category Count &nbsp;</span>
-              <span className="font-semibold text-gray-700 dark:text-gray-300">
-                {overview.mostFrequentCategoryCount}
-              </span>
-            </div> */}
-
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>Total Categories: &nbsp;</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    {overview.totalCategories}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>Avg Monthly Expense: &nbsp;</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    {currencyMapper(user?.currency || "USD")}
-                    {overview.averageMonthlyExpense.toFixed(2)}
-                  </span>
-                </div>
-              </Card>
-            ) : (
-              <Card
-                title="Expenses Summary For this Year"
-                description="Loading your expenses overview..."
-                className=""
-                loading={true}
-              />
-            )}
-
-            {/* Monthly Overview */}
-            {overview ? (
-              <Card
-                title="This Month's Expenses Overview"
-                description=""
-                className="space-y-4"
-              >
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>{`This Month's Expense: ${"\u00A0"}`}</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">
-                    {currencyMapper(user?.currency || "USD")}
-                    {overview.thisMonthTotalExpense.toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-gray-700 dark:text-gray-500">
-                  <span>Change from Last Month: &nbsp;</span>
-                  <span
-                    className={`font-semibold ${
-                      overview.comparedToLastMonthExpense >= 0
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {currencyMapper(user?.currency || "USD")}
-                    {Math.abs(overview.comparedToLastMonthExpense).toFixed(2)}
-                  </span>
-                </div>
-              </Card>
-            ) : (
-              <Card
-                title="Expenses Summary For this Year"
-                description="Loading your expenses overview..."
-                className=""
-                loading={true}
-              />
-            )}
-          </>
+          <Overview dashboardProps={dashboardProps} />
         )}
 
         {clickedButton === "monthly" && (
