@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
-import { categoryTypes } from "@/global/category";
+import { categoryTypes } from "@/global/dto";
 
 export default function AddCategoryPage() {
   const user = useSelector((state: RootState) => state.user);

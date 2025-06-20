@@ -7,7 +7,7 @@ export default function Overview({
 }: {
   dashboardProps: DashboardPageProps;
 }) {
-  const { user, token } = dashboardProps;
+  const { user } = dashboardProps;
   const overview = dashboardProps.overview;
 
   return (
