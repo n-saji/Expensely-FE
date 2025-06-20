@@ -61,8 +61,8 @@ export default function ExpensesChartCard({
       description="Your expense distribution across categories"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
+      <ResponsiveContainer width="100%" height={300} >
+        <PieChart >
           <Pie
             data={chartData}
             dataKey="value"
@@ -71,10 +71,10 @@ export default function ExpensesChartCard({
             cy="50%"
             outerRadius={100}
             innerRadius={50}
-            label={({ name, percent }) =>
-              `${name} ${(percent * 100).toFixed(1)}%`
+            label={({ percent }) =>
+              `${(percent * 100).toFixed(1)}%`
             }
-            labelLine={false}
+
             animationDuration={800}
             animationEasing="ease-in-out"
           >
@@ -85,6 +85,7 @@ export default function ExpensesChartCard({
               />
             ))}
           </Pie>
+          <Legend />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             // labelStyle={{ color: "#fff" }}

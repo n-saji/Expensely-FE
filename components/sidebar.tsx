@@ -32,7 +32,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-full sm:w-64  shadow-md max-sm:z-60 fixed z-40
+      className={`w-full lg:w-64 shadow-md max-lg:z-60 fixed z-40
         top-0 left-0 h-screen 
         transition-transform
         transform duration-300 ease-in-out
@@ -41,9 +41,9 @@ export default function Sidebar() {
         `}
       {...handlers}
     >
-      <div className="w-55 sm:w-full h-screen bg-primary-color relative flex flex-col">
+      <div className="w-55 lg:w-full h-screen bg-primary-color relative flex flex-col">
         <div
-          className="absolute top-1/2 -right-5 min-sm:hidden 
+          className="absolute top-1/2 -right-5 min-lg:hidden 
         w-5 h-20 bg-primary-color flex text-center
         justify-center items-center border-l
          border-white"

@@ -64,7 +64,7 @@ export default function Navbar({
     <nav
       className={`h-16 px-6 py-4 bg-white shadow-md flex justify-between items-center 
         fixed top-0 right-0  duration-300 ease-in-out z-50
-    ${isOpen ? "min-sm: w-[calc(100%-16rem)] max-sm:w-full" : "w-full"}
+    ${isOpen ? "min-lg: w-[calc(100%-16rem)] max-lg:w-full" : "w-full"}
     dark:bg-gray-800 dark:text-gray-200
     `}
     >

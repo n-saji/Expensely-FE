@@ -88,7 +88,7 @@ export default function DashboardPage({
 
         <div
           className={`w-full ${
-            isOpen ? "min-sm:ml-64" : "min-sm:ml-0"
+            isOpen ? "min-lg:ml-64" : "min-lg:ml-0"
           } transition-all duration-300`}
         >
           <Navbar
