@@ -94,7 +94,7 @@ export default function ExpensesChartCard({
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             labelStyle={{ color: "#fff" }}
-            itemStyle={{ color: "#fff" }}
+            itemStyle={{ color: darkMode ? "#fff" : "#000" }}
             formatter={(value: number, name: string) => [
               `${currencyMapper(currency)}${value.toFixed(2)}`,
               name,
