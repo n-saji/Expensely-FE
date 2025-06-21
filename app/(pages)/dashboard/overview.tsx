@@ -13,7 +13,7 @@ export default function Overview({
   return (
     <>
       {overview ? (
-        <Card title="Yearly Expenses" description="" className="space-y-4">
+        <Card title="Yearly Expense" description="" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
             <div className="card-overview">
               <span>Total Spent This Year</span>
@@ -53,7 +53,7 @@ export default function Overview({
         <Card title="This Month's Expense" description="" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 w-full">
             <div className="card-overview">
-              <span>{`This Month's Expense`}</span>
+              <span>{`Total Spent`}</span>
               <span className="card-overview-quantity">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.thisMonthTotalExpense.toFixed(2)}

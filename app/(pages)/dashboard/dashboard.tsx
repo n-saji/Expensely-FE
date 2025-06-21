@@ -172,6 +172,8 @@ export default function DashboardPage() {
               <div className="col-span-1 md:col-span-1 lg:col-span-1">
                 <ExpensesChartCard
                   amountByCategory={overview.amountByCategory}
+                  darkMode={user.theme === "dark"}
+                  currency={user.currency}
                 />
               </div>
             ) : (

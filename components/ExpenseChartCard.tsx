@@ -25,6 +25,12 @@ const COLORS = [
   "#0088FE",
   "#FF4444",
   "#AA66CC",
+  "#FF6699",
+  "#FFBB33",
+  "#FF8042",
+  "#00C49F",
+  "#FFBB28",
+  "#0088FE",
 ];
 
 // ========== Props Interfaces ==========
@@ -47,7 +53,9 @@ interface ExpensesTop5MonthlyProps {
 // ========== Pie Chart: Category-wise Spending ==========
 export default function ExpensesChartCard({
   amountByCategory,
-}: ExpensesChartCardProps) {
+  darkMode = false,
+  currency = "USD",
+}: ExpensesChartCardProps & { darkMode?: boolean } & { currency?: string }) {
   const chartData = Object.entries(amountByCategory || {}).map(
     ([category, amount]) => ({
       name: category,
@@ -61,8 +69,8 @@ export default function ExpensesChartCard({
       description="Your expense distribution across categories"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300} >
-        <PieChart >
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
           <Pie
             data={chartData}
             dataKey="value"
@@ -71,10 +79,7 @@ export default function ExpensesChartCard({
             cy="50%"
             outerRadius={100}
             innerRadius={50}
-            label={({ percent }) =>
-              `${(percent * 100).toFixed(1)}%`
-            }
-
+            label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
             animationDuration={800}
             animationEasing="ease-in-out"
           >
@@ -88,10 +93,12 @@ export default function ExpensesChartCard({
           <Legend />
           <Tooltip
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
-            // labelStyle={{ color: "#fff" }}
+            labelStyle={{ color: "#fff" }}
             itemStyle={{ color: "#fff" }}
-            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) => [`$${value.toFixed(2)}`, null]}
+            formatter={(value: number, name: string) => [
+              `${currencyMapper(currency)}${value.toFixed(2)}`,
+              name,
+            ]}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -174,9 +181,9 @@ export function ExpensesMonthlyLineChartCard({
   amountByMonth,
   darkMode,
   currency = "USD",
-
-}: ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & { currency?: string }) {
-
+}: ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & {
+  currency?: string;
+}) {
   const chartData = Object.entries(amountByMonth).map(
     ([month, categories]) => ({
       name: month,
@@ -197,7 +204,10 @@ export function ExpensesMonthlyLineChartCard({
           </div>
         ) : (
           <ComposedChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#999999" : "#ccc"} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={darkMode ? "#999999" : "#ccc"}
+            />
             <XAxis
               dataKey="name"
               tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
@@ -215,7 +225,9 @@ export function ExpensesMonthlyLineChartCard({
               contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
               labelStyle={{ color: "#fff" }}
               cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-              formatter={(value: number) => `$${value.toFixed(2)}`}
+              formatter={(value: number) =>
+                `${currencyMapper(currency)}${value.toFixed(2)}`
+              }
             />
             {Object.keys(chartData[0])
               .filter((key) => key !== "name")
@@ -257,8 +269,11 @@ export function ExpensesTop5Monthly({
       className="w-full"
     >
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#999999" : "#ccc"} />
+        <BarChart data={chartData} layout="horizontal">
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={darkMode ? "#999999" : "#ccc"}
+          />
           <XAxis
             dataKey="name"
             tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
@@ -278,7 +293,7 @@ export function ExpensesTop5Monthly({
             labelStyle={{ color: "#fff" }}
             // itemStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) => `$${value.toFixed(2)}`}
+            formatter={(value: number) => `${currencyMapper(currency)}${value.toFixed(2)}`}
           />
           <Bar
             dataKey="value"

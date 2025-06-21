@@ -58,14 +58,14 @@ export default function Sidebar() {
           />
         </div>
         <div className="flex-grow justify-between">
-          <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-600 font-semibold">
+          <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-700 font-semibold">
             {navLinks.map((link) => {
               return (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     className={`${
-                      param.includes(link.href) ? "text-gray-200" : ""
+                      param.includes(link.href) ? "text-gray-300" : ""
                     }  hover:underline`}
                   >
                     {link.label}
@@ -76,7 +76,7 @@ export default function Sidebar() {
           </ul>
         </div>
         <div>
-          <p className="text-gray-300 text-sm">Version 1.1.6</p>
+          <p className="text-gray-300 text-sm">Version 1.1.7</p>
         </div>
       </div>
     </aside>

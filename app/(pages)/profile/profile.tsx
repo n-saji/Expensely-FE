@@ -363,7 +363,10 @@ export default function ProfilePage() {
         </div>
         <div className="w-full flex justify-end mt-4">
           <button
-            className={`${edit ? "button-green" : "button-green-outline"}`}
+            className={`${edit ? "button-green px-3 py-1" : "button-gray px-3 py-1"}
+              ${loading ? "opacity-50 cursor-not-allowed" : ""}
+              w-20
+              `}
             onClick={() => {
               setEdit(!edit);
               if (edit) {
