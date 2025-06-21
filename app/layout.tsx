@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Poppins } from "next/font/google";
+import { Poppins, DM_Mono } from "next/font/google";
 import ReduxProvider from "@/redux/provider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const dmMono = DM_Mono({
+  variable: "--font-dmmono",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`antialiased ${poppins.className} bg-gray-200 dark:bg-gray-900  dark:text-gray-200`}
+        className={`antialiased ${poppins.className} ${dmMono.variable} bg-gray-200 dark:bg-gray-900  dark:text-gray-200`}
       >
         <ReduxProvider>{children}</ReduxProvider>
       </body>

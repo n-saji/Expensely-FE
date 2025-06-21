@@ -44,4 +44,11 @@
     hover:border-green-700 hover:bg-green-600/40 dark:hover:bg-green-600/20
       cursor-pointer transition duration-300;
   }
+  .card-overview{
+    @apply flex flex-col justify-between text-gray-700 dark:text-gray-400
+  }
+  .card-overview-quantity {
+    @apply text-xl font-extrabold text-gray-700 dark:text-gray-300;
+    font-family: var(--font-dmmono), monospace;
+  }
 }
