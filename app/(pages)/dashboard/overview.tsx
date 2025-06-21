@@ -51,7 +51,7 @@ export default function Overview({
       {/* Monthly Overview */}
       {overview ? (
         <Card title="This Month's Expense" description="" className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
             <div className="card-overview">
               <span>{`Total Spent`}</span>
               <span className="card-overview-quantity">
