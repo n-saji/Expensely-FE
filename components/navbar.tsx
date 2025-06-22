@@ -53,8 +53,8 @@ export default function Navbar({
   const handleLogout = async () => {
     try {
       await Logout();
-      dispatch(clearUser());
       router.push("/");
+      dispatch(clearUser());
     } catch (error) {
       console.error("Logout failed:", error);
     }

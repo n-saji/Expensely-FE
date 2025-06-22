@@ -12,6 +12,7 @@ import ExpensesChartCard, {
 } from "@/components/ExpenseChartCard";
 import { DashboardPageProps, ExpenseOverview } from "@/global/dto";
 import Overview from "./overview";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
@@ -59,14 +60,6 @@ export default function DashboardPage() {
       fetchOverview();
     }
   }, []);
-
-  if (!user.isAuthenticated) {
-    return (
-      <div className="flex  items-center justify-center h-screen">
-        <h1 className="text-2xl text-gray-700">Please log in to continue.</h1>
-      </div>
-    );
-  }
 
   if (newUser) {
     return (

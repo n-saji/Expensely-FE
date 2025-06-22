@@ -1,11 +1,10 @@
-"use client";
+
 import { API_URL } from "@/config/config";
 
 export default async function Logout() {
-
   const token =
     localStorage.getItem("token") || sessionStorage.getItem("token");
-  console.log("Token found:", token);
+
   if (token) {
     await fetch(`${API_URL}/users/logout`, {
       method: "GET",
@@ -13,11 +12,10 @@ export default async function Logout() {
         Authorization: `Bearer ${token}`,
       },
     });
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
   }
 
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("token");
   localStorage.removeItem("user_id");
   localStorage.removeItem("theme");
-
 }

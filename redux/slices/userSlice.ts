@@ -20,7 +20,7 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.email = action.payload.email;
-      state.isAuthenticated = true;
+      state.isAuthenticated = action.payload.isAuthenticated !== undefined;
       state.id = action.payload.id;
       state.name = action.payload.name;
       state.country_code = action.payload.country_code;
@@ -50,9 +50,9 @@ const userSlice = createSlice({
       state.currency = "";
       state.theme = "";
       state.language = "en";
-      state.isActive = true;
+      state.isActive = false;
       state.isAdmin = false;
-      state.notificationsEnabled = true;
+      state.notificationsEnabled = false;
       state.profilePictureUrl = ""; 
       state.profilePicFilePath = "";
     },

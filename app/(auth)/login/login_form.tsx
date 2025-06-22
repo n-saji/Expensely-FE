@@ -6,12 +6,12 @@ import { API_URL } from "@/config/config";
 import validateToken from "@/utils/validate_token";
 
 import { useDispatch } from "react-redux";
-import { setUser } from "@/redux/slices/userSlice";
+import { setUser,clearUser } from "@/redux/slices/userSlice";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -29,7 +29,7 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!username || !password) {
       setError("Please fill in all fields.");
       return;
     }
@@ -39,9 +39,10 @@ export default function LoginForm() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
-    })
+      body: JSON.stringify({ email: username, phone: username, password }),
+    });
     if (res.ok) {
+      console.log("Login successful");
       const data = await res.json();
 
       if (data.error === "") {
@@ -99,19 +100,25 @@ export default function LoginForm() {
           setError(error.error || "Failed to fetch user data");
           return;
         }
-        // setLoading(false);
 
         router.push("/dashboard");
       } else {
         setLoading(false);
+        dispatch(setUser(null));
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        localStorage.removeItem("user_id");
         setError(data.message || "Login failed");
       }
     } else {
       const errorData = await res.json();
       setLoading(false);
-      setError(errorData.message || "Login failed");
+      dispatch(clearUser());
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      localStorage.removeItem("user_id");
+      setError(errorData.error || "Login failed");
     }
-
   };
 
   return (
@@ -119,31 +126,31 @@ export default function LoginForm() {
       <div className="">
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          Email
+          Username
         </label>
         <input
-          id="email"
-          type="email"
+          id="username"
+          type="text"
           className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md 
             focus:outline-none focus:ring-2 focus:ring-blue-500
             ${error ? "border-red-500" : ""}`}
-          placeholder="you@example.com"
+          placeholder="email or phone number"
           required
           onChange={(e) => {
-            setEmail(e.target.value);
+            setUsername(e.target.value);
             setError("");
           }}
-          value={email}
-          autoComplete="email"
+          value={username}
+          autoComplete="username"
         />
       </div>
 
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           Password
         </label>
@@ -162,7 +169,7 @@ export default function LoginForm() {
         />
       </div>
 
-      <div className="flex items-center justify-between text-sm text-gray-600">
+      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <label className="flex items-center">
           <input
             type="checkbox"
@@ -187,8 +194,8 @@ export default function LoginForm() {
       >
         {loading ? "Logging in..." : "Log In"}
       </button>
-      <p className="mt-4 text-sm text-gray-600">
-        {`Don't have an account?`}
+      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+        {`Don't have an account? `}
         <a href="/register" className="text-blue-500 hover:underline">
           Sign up
         </a>
