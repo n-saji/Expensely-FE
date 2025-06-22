@@ -5,7 +5,7 @@ import Sidebar from "@/components/sidebar";
 
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
@@ -33,6 +33,7 @@ export default function DashboardPage({
   let pathname = usePathname();
   let reactLink = null;
   let isLink = false;
+  const router = useRouter();
   // conditional pathnames
   if (pathname === "/expense/add") {
     isLink = true;
@@ -76,6 +77,24 @@ export default function DashboardPage({
         <Link href="/login" className="text-blue-600 hover:underline">
           Log In
         </Link>
+      </div>
+    );
+  }
+
+  if (user.profileComplete === false) {
+    return (
+      <div className="flex items-center justify-center h-screen text-2xl">
+        <h1 className="text-gray-700">
+          Please complete your profile to continue.
+        </h1>
+        <button
+          onClick={() => {
+            router.push("/complete-profile");
+          }}
+          className="text-blue-600 hover:underline"
+        >
+          Complete Profile
+        </button>
       </div>
     );
   }
