@@ -76,7 +76,7 @@ export default function AuthHandler() {
                     notificationsEnabled: data.user.notificationsEnabled,
                     profilePictureUrl: data.user.profilePictureUrl,
                       profilePicFilePath: data.user.profilePicFilePath,
-                    profileCompleted: data.user.profileComplete,
+                    profileComplete: data.user.profileComplete,
                   })
                 );
                 localStorage.setItem("theme", data.user.theme);
