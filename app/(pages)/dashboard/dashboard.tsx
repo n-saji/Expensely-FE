@@ -12,7 +12,6 @@ import ExpensesChartCard, {
 } from "@/components/ExpenseChartCard";
 import { DashboardPageProps, ExpenseOverview } from "@/global/dto";
 import Overview from "./overview";
-import Link from "next/link";
 
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);

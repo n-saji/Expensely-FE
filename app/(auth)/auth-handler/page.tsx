@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/config/config";
 import { useDispatch } from "react-redux";
-import { setUser, clearUser } from "@/redux/slices/userSlice";
+import { setUser } from "@/redux/slices/userSlice";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 
 export default function AuthHandler() {
