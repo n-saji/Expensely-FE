@@ -7,10 +7,11 @@ import Image from "next/image";
 import Logout from "@/app/(auth)/logout/logout";
 import { useEffect, useRef, useState } from "react";
 
-import { toggleSidebar } from "@/redux/slices/sidebarSlice";
+import { setLoading, toggleSidebar } from "@/redux/slices/sidebarSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { clearUser } from "@/redux/slices/userSlice";
+import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { RootState } from "@/redux/store";
+import fetchProfileUrl from "@/utils/fetchProfileURl";
 
 export default function Navbar({
   title,
@@ -50,7 +51,29 @@ export default function Navbar({
     };
   }, [profileDropDown]);
 
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (user?.profilePicFilePath && !user.profilePictureUrl) {
+        try {
+          const url = await fetchProfileUrl(user.profilePicFilePath);
+          dispatch(
+            setUser({
+              ...user,
+              profilePictureUrl: url,
+            })
+          );
+        } catch (error) {
+          console.error("Error fetching profile picture:", error);
+        }
+      }
+    };
+
+    fetchProfilePicture();
+  }, [user?.profilePicFilePath]);
+
   const handleLogout = async () => {
+    dispatch(setLoading(true));
+
     try {
       await Logout();
       router.push("/");
@@ -58,6 +81,7 @@ export default function Navbar({
     } catch (error) {
       console.error("Logout failed:", error);
     }
+    dispatch(setLoading(false));
   };
 
   return (

@@ -7,7 +7,6 @@ import validateToken from "@/utils/validate_token";
 
 import { useDispatch } from "react-redux";
 import { setUser, clearUser } from "@/redux/slices/userSlice";
-import fetchProfileUrl from "@/utils/fetchProfileURl";
 import GoogleLogo from "@/assets/icon/google-logo.png";
 import Image from "next/image";
 
@@ -88,26 +87,26 @@ export default function LoginForm() {
           );
           localStorage.setItem("theme", data.user.theme);
 
-          if (data.user.profilePicFilePath) {
-            const profilePictureUrl = fetchProfileUrl(
-              data.user.profilePicFilePath
-            ).catch((error) => {
-              console.error("Error fetching profile picture URL:", error);
-              return "";
-            });
+          // if (data.user.profilePicFilePath) {
+          //   const profilePictureUrl = fetchProfileUrl(
+          //     data.user.profilePicFilePath
+          //   ).catch((error) => {
+          //     console.error("Error fetching profile picture URL:", error);
+          //     return "";
+          //   });
 
-            data.user.profilePictureUrl = await profilePictureUrl;
-            dispatch(
-              setUser({
-                ...data.user,
-                isAuthenticated: true,
-                profilePictureUrl: data.user.profilePictureUrl || "",
-              })
-            );
-            console.log("Profile picture URL:", data.user.profilePictureUrl);
-          } else {
-            data.user.profilePictureUrl = "";
-          }
+          //   data.user.profilePictureUrl = await profilePictureUrl;
+          //   dispatch(
+          //     setUser({
+          //       ...data.user,
+          //       isAuthenticated: true,
+          //       profilePictureUrl: data.user.profilePictureUrl || "",
+          //     })
+          //   );
+          //   console.log("Profile picture URL:", data.user.profilePictureUrl);
+          // } else {
+          //   data.user.profilePictureUrl = "";
+          // }
 
           router.push("/dashboard");
         } else {

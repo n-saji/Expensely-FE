@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
+import Loader from "@/components/loader";
 
 export default function DashboardPage({
   children,
@@ -34,6 +35,8 @@ export default function DashboardPage({
   let reactLink = null;
   let isLink = false;
   const router = useRouter();
+  const loading = useSelector((state: RootState) => state.sidebar.loading);
+  console.log("Loading state:", loading);
   // conditional pathnames
   if (pathname === "/expense/add") {
     isLink = true;
@@ -101,6 +104,7 @@ export default function DashboardPage({
 
   return (
     <>
+      {loading && <Loader />}
       <div
         className={`w-full flex min-h-screen bg-gray-200 min-sm:relative
          dark:bg-gray-900 dark:text-gray-200
