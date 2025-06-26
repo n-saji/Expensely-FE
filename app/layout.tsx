@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins, DM_Mono } from "next/font/google";
 import ReduxProvider from "@/redux/provider";
+import { Analytics } from "@vercel/analytics/next"
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -32,6 +33,7 @@ export default function RootLayout({
         className={`antialiased ${poppins.className} ${dmMono.variable} bg-gray-200 dark:bg-gray-900  dark:text-gray-200`}
       >
         <ReduxProvider>{children}</ReduxProvider>
+        <Analytics />
       </body>
     </html>
   );
