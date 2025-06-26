@@ -1,4 +1,12 @@
 import Logo from "@/components/logo";
+
+export async function generateMetadata() {
+  return {
+    title: "Forgot Password | Expensely",
+  };
+}
+
+
 export default function ForgotPasswordPage() {
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-200">

@@ -12,8 +12,13 @@ import editIconWhite from "@/assets/icon/edit-white.png";
 import { supabase } from "@/utils/supabase";
 import defaultPNG from "@/assets/icon/user.png";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
+import { useRouter } from "next/navigation";
 
-export default function ProfilePage() {
+export default function ProfilePage({
+  reRouteToDashboard,
+}: {
+  reRouteToDashboard?: boolean;
+}) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const user = useSelector((state: RootState) => state.user);
@@ -39,6 +44,7 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const userId = FetchUserId();
   const token = FetchToken();
+  const router = useRouter();
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
@@ -63,11 +69,6 @@ export default function ProfilePage() {
             country_code: data.user.country_code,
             phone: data.user.phone,
             currency: data.user.currency,
-            theme: data.user.theme,
-            language: data.user.language,
-            isActive: data.user.isActive,
-            isAdmin: data.user.isAdmin,
-            notificationsEnabled: data.user.notificationsEnabled,
           })
         );
         setName(data.user.name);
@@ -91,6 +92,8 @@ export default function ProfilePage() {
 
     setLoading(true);
     setError("");
+    const isProfileComplete =
+      name !== "" && email !== "" && countryCode !== "" && phone !== "";
 
     await fetch(`${API_URL}/users/update-profile`, {
       method: "PATCH",
@@ -105,6 +108,7 @@ export default function ProfilePage() {
         phone,
         currency,
         id: userId,
+        profileComplete: isProfileComplete,
       }),
     })
       .then((response) => {
@@ -120,13 +124,16 @@ export default function ProfilePage() {
             phone: phone,
             currency: currency,
             id: userId,
-            theme: user.theme,
-            language: user.language,
-            isActive: user.isActive,
-            isAdmin: user.isAdmin,
-            notificationsEnabled: user.notificationsEnabled,
+            profileComplete: isProfileComplete,
           })
         );
+
+        if (reRouteToDashboard && isProfileComplete) {
+          console.log("Profile updated successfully, redirecting to dashboard...");
+          router.push("/dashboard");
+          return null;
+        }
+
       })
       .catch((error) => {
         setError(`Error updating profile: ${error}`);
@@ -318,7 +325,7 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   className="edit_input"
-                  value={countryCode}
+                  value={countryCode || ""}
                   onChange={(e) => setCountryCode(e.target.value)}
                 />
               ) : (
@@ -335,7 +342,7 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   className="edit_input"
-                  value={phone}
+                  value={phone || ""}
                   onChange={(e) => setPhone(e.target.value)}
                 />
               ) : (
@@ -363,7 +370,9 @@ export default function ProfilePage() {
         </div>
         <div className="w-full flex justify-end mt-4">
           <button
-            className={`${edit ? "button-green px-3 py-1" : "button-gray px-3 py-1"}
+            className={`${
+              edit ? "button-green px-3 py-1" : "button-gray px-3 py-1"
+            }
               ${loading ? "opacity-50 cursor-not-allowed" : ""}
               w-20
               `}

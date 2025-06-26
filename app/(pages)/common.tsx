@@ -85,13 +85,13 @@ export default function DashboardPage({
     return (
       <div className="flex items-center justify-center h-screen text-2xl">
         <h1 className="text-gray-700">
-          Please complete your profile to continue.
+          Please complete your profile to continue.&nbsp;
         </h1>
         <button
           onClick={() => {
             router.push("/complete-profile");
           }}
-          className="text-blue-600 hover:underline"
+          className="text-blue-600 hover:underline cursor-pointer"
         >
           Complete Profile
         </button>

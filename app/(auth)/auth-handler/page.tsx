@@ -32,7 +32,16 @@ export default function AuthHandler() {
         .then((res) => res.json())
         .then(async (data) => {
           if (data.profileIncomplete) {
-            router.push("/profile");
+            dispatch(
+              setUser({
+                isAuthenticated: true,
+                id: data.id,
+                profileComplete: !data.profileIncomplete,
+              })
+            );
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user_id", data.id);
+            router.push("/complete-profile");
           } else {
             if (data.error === "") {
               localStorage.setItem("token", data.token);
@@ -75,7 +84,7 @@ export default function AuthHandler() {
                     isAdmin: data.user.isAdmin,
                     notificationsEnabled: data.user.notificationsEnabled,
                     profilePictureUrl: data.user.profilePictureUrl,
-                      profilePicFilePath: data.user.profilePicFilePath,
+                    profilePicFilePath: data.user.profilePicFilePath,
                     profileComplete: data.user.profileComplete,
                   })
                 );

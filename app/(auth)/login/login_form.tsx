@@ -11,7 +11,7 @@ import fetchProfileUrl from "@/utils/fetchProfileURl";
 import GoogleLogo from "@/assets/icon/google-logo.png";
 import Image from "next/image";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 export default function LoginForm() {
   const router = useRouter();

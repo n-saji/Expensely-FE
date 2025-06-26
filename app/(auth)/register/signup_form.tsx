@@ -3,6 +3,9 @@
 import { API_URL } from "@/config/config";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
+import GoogleLogo from "@/assets/icon/google-logo.png";
+import { signIn } from "next-auth/react";
 
 export default function SignUpForm() {
   const [name, setName] = useState("");
@@ -14,6 +17,10 @@ export default function SignUpForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handleGoogleLogin = async () => {
+    signIn("google", { callbackUrl: "/dashboard" });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,6 +247,7 @@ export default function SignUpForm() {
           }`}
         />
       </div>
+
       <button
         type="submit"
         className="button-green w-full"
@@ -250,6 +258,30 @@ export default function SignUpForm() {
         }}
       >
         {loading ? "Signing Up..." : "Sign Up"}
+      </button>
+
+      <div className="flex items-center justify-between">
+        <hr className="w-full border-gray-300 dark:border-gray-600" />
+        <span className="px-2 text-sm text-gray-500 dark:text-gray-400">
+          OR
+        </span>
+        <hr className="w-full border-gray-300 dark:border-gray-600" />
+      </div>
+
+      <button
+        type="button"
+        className="button-white w-full py-2"
+        onClick={() => {
+          handleGoogleLogin();
+        }}
+      >
+        <Image
+          src={GoogleLogo}
+          alt="Google Logo"
+          width={20}
+          className="inline mr-2"
+        />
+        <span className="hidden sm:inline">Sign Up with Google</span>
       </button>
 
       <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">

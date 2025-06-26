@@ -1,5 +1,10 @@
 import LoginForm from "./login_form";
 import Logo from "@/components/logo";
+export async function generateMetadata() {
+  return {
+    title: "Login | Expensely",
+  };
+}
 export default function LoginPage() {
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-900">
