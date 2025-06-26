@@ -67,17 +67,6 @@ export default function LoginForm() {
         });
         if (response.ok) {
           const data = await response.json();
-          if (data.user.profilePicFilePath) {
-            const profilePictureUrl = await fetchProfileUrl(
-              data.user.profilePicFilePath
-            ).catch((error) => {
-              console.error("Error fetching profile picture URL:", error);
-              return "";
-            });
-            data.user.profilePictureUrl = profilePictureUrl;
-          } else {
-            data.user.profilePictureUrl = "";
-          }
 
           dispatch(
             setUser({
@@ -93,20 +82,40 @@ export default function LoginForm() {
               isActive: data.user.isActive,
               isAdmin: data.user.isAdmin,
               notificationsEnabled: data.user.notificationsEnabled,
-              profilePictureUrl: data.user.profilePictureUrl,
               profilePicFilePath: data.user.profilePicFilePath,
               profileComplete: data.user.profileComplete,
             })
           );
           localStorage.setItem("theme", data.user.theme);
+
+          if (data.user.profilePicFilePath) {
+            const profilePictureUrl = fetchProfileUrl(
+              data.user.profilePicFilePath
+            ).catch((error) => {
+              console.error("Error fetching profile picture URL:", error);
+              return "";
+            });
+
+            data.user.profilePictureUrl = await profilePictureUrl;
+            dispatch(
+              setUser({
+                ...data.user,
+                isAuthenticated: true,
+                profilePictureUrl: data.user.profilePictureUrl || "",
+              })
+            );
+            console.log("Profile picture URL:", data.user.profilePictureUrl);
+          } else {
+            data.user.profilePictureUrl = "";
+          }
+
+          router.push("/dashboard");
         } else {
           const error = await response.json();
           console.error("Error fetching user data:", error);
           setError(error.error || "Failed to fetch user data");
           return;
         }
-
-        router.push("/dashboard");
       } else {
         setLoading(false);
         dispatch(setUser(null));
