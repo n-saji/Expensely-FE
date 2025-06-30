@@ -18,7 +18,7 @@ import { categoryTypes, categorySkeleton } from "@/global/dto";
 export default function CategoryPage() {
   const user = useSelector((state: RootState) => state.user);
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
-  const [showTable, setShowTable] = useState(true);
+  const [showTable, setShowTable] = useState(false);
   const dispatch = useDispatch();
   const token = FetchToken();
   const isCategoryMounted = useRef(false);
@@ -35,6 +35,7 @@ export default function CategoryPage() {
       urlBuilder.searchParams.append("type", type);
 
     try {
+      setLoading(true);
       const response = await fetch(urlBuilder.toString(), {
         method: "GET",
         headers: {
@@ -52,6 +53,8 @@ export default function CategoryPage() {
       setCategories(data);
     } catch (error) {
       console.error("Error fetching expenses:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,7 +71,6 @@ export default function CategoryPage() {
       console.warn("Update already in progress");
       return;
     }
-    setLoading(true);
 
     if (!selectedCategory) return alert("Select one category to edit.");
 
@@ -80,6 +82,7 @@ export default function CategoryPage() {
     const toUpdate = selectedCategory as categorySkeleton;
 
     try {
+      setLoading(true);
       const response = await fetch(
         `${API_URL}/categories/update/${toUpdate.id}`,
         {
@@ -160,7 +163,9 @@ export default function CategoryPage() {
             >
               <tr>
                 <td colSpan={6} className="text-center py-4">
-                  <p className="text-gray-500">No category found</p>
+                  <p className="text-gray-500">
+                    {loading ? "Loading..." : "No category found"}
+                  </p>
                 </td>
               </tr>
             </tbody>

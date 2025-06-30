@@ -36,7 +36,6 @@ export default function DashboardPage({
   let isLink = false;
   const router = useRouter();
   const loading = useSelector((state: RootState) => state.sidebar.loading);
-  console.log("Loading state:", loading);
   // conditional pathnames
   if (pathname === "/expense/add") {
     isLink = true;

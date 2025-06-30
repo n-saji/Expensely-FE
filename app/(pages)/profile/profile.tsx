@@ -20,7 +20,7 @@ export default function ProfilePage({
   reRouteToDashboard?: boolean;
 }) {
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoadingLocal] = useState(false);
   const user = useSelector((state: RootState) => state.user);
 
   const [edit, setEdit] = useState(false);
@@ -49,7 +49,6 @@ export default function ProfilePage({
   useEffect(() => {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
-    console.log("Fetching user profile data...");
 
     const fetchData = async () => {
       const response = await fetch(`${API_URL}/users/${userId}`, {
@@ -90,10 +89,11 @@ export default function ProfilePage({
       return;
     }
 
-    setLoading(true);
-    setError("");
     const isProfileComplete =
       name !== "" && email !== "" && countryCode !== "" && phone !== "";
+
+    setLoadingLocal(true);
+    setError("");
 
     await fetch(`${API_URL}/users/update-profile`, {
       method: "PATCH",
@@ -129,18 +129,16 @@ export default function ProfilePage({
         );
 
         if (reRouteToDashboard && isProfileComplete) {
-          console.log("Profile updated successfully, redirecting to dashboard...");
           router.push("/dashboard");
           return null;
         }
-
       })
       .catch((error) => {
         setError(`Error updating profile: ${error}`);
         setEdit(true);
       })
       .finally(() => {
-        setLoading(false);
+        setLoadingLocal(false);
       });
   };
 
@@ -202,8 +200,6 @@ export default function ProfilePage({
       if (!response.ok) {
         throw new Error("Failed to update profile picture in backend.");
       }
-
-      console.log("Profile picture URL saved to backend.");
     } catch (err) {
       console.error("Error during upload:", err);
     }
@@ -216,11 +212,10 @@ export default function ProfilePage({
       })
     );
   };
-
   return (
     <div className="min-w-1/2 max-md:w-2/3 max-sm:w-96 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
       <div
-        className="relative w-[150px] h-[150px] rounded-full mb-4 bg-gray-300 text-center 
+        className="relative w-[150px] h-[150px] rounded-full mb-4 bg-gray-300 text-center
       dark:bg-gray-700 dark:text-gray-200"
       >
         <Image
@@ -368,25 +363,25 @@ export default function ProfilePage({
             </p>
           </div>
         </div>
-        <div className="w-full flex justify-end mt-4">
-          <button
-            className={`${
-              edit ? "button-green px-3 py-1" : "button-gray px-3 py-1"
-            }
+      </div>
+      <div className="w-full flex justify-end mt-4">
+        <button
+          className={`${
+            edit ? "button-green px-3 py-1" : "button-gray px-3 py-1"
+          }
               ${loading ? "opacity-50 cursor-not-allowed" : ""}
               w-20
               `}
-            onClick={() => {
-              setEdit(!edit);
-              if (edit) {
-                handleProfileUpdate();
-              }
-            }}
-            disabled={loading}
-          >
-            {edit ? "Save" : loading ? "Saving..." : "Edit"}
-          </button>
-        </div>
+          onClick={() => {
+            setEdit(!edit);
+            if (edit) {
+              handleProfileUpdate();
+            }
+          }}
+          disabled={loading}
+        >
+          {edit ? "Save" : loading ? "Saving..." : "Edit"}
+        </button>
       </div>
       {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
     </div>

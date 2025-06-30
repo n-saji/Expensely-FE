@@ -103,13 +103,13 @@ export default function Expense() {
   const token = FetchToken();
   const isExpenseMounted = useRef(false);
   const isCategoryMounted = useRef(false);
-  // const [expenses, setExpenses] = useState<Expense[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const [filter, setFilter] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [loading, setLoading] = useState(false);
   const [expensesList, setExpensesList] = useState<ExpenseListProps>({
     expenses: [],
     totalPages: 0,
@@ -143,6 +143,7 @@ export default function Expense() {
     urlBuilder.searchParams.append("limit", String(limit));
 
     try {
+      setLoading(true);
       const response = await fetch(urlBuilder.toString(), {
         method: "GET",
         headers: {
@@ -158,9 +159,10 @@ export default function Expense() {
         totalElements: data.totalElements,
         pageNumber: data.pageNumber,
       });
-      // setExpenses(data);
     } catch (error) {
       console.error("Error fetching expenses:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -254,6 +256,8 @@ export default function Expense() {
         toDateFilter={toDate}
         setFromDate={setFromDate}
         setToDate={setToDate}
+        setLoading={setLoading}
+        loading={loading}
       />
     </div>
   );
@@ -284,6 +288,8 @@ function ExpenseList({
   toDateFilter = "",
   setFromDate,
   setToDate,
+  setLoading,
+  loading = false,
 }: {
   expensesList: ExpenseListProps;
   setExpensesList: React.Dispatch<React.SetStateAction<ExpenseListProps>>;
@@ -326,10 +332,11 @@ function ExpenseList({
   toDateFilter: string;
   setFromDate: React.Dispatch<React.SetStateAction<string>>;
   setToDate: React.Dispatch<React.SetStateAction<string>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
 }) {
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
