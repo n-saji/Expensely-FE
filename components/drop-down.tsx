@@ -31,7 +31,7 @@ export default function DropDown({
 
   return (
     <div
-      className={`w-40 border border-gray-300 rounded-sm p-2.5  shadow-md flex items-center relative justify-between
+      className={`w-40 border border-gray-300 rounded-sm p-2.5 shadow-md flex items-center relative justify-between
     cursor-pointer ${classname}`}
       onClick={() => setClicked(!clicked)}
     >

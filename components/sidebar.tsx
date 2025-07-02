@@ -44,7 +44,7 @@ export default function Sidebar() {
           className="absolute top-1/2 -right-5 min-lg:hidden 
         w-5 h-20 bg-primary-color flex text-center
         justify-center items-center border-l
-         border-white"
+         border-white bg-secondary-color"
           onClick={() => dispatch(setSidebar(false))}
         >{`<`}</div>
         <div className="h-16 border-b border-gray-200 flex items-center justify-start px-5 sm:px-6">

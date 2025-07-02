@@ -806,7 +806,7 @@ function ExpenseList({
           <button
             className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-l dark:text-gray-200 ${
               pageNumber <= 1
-                ? "cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed opacity-30"
                 : "cursor-pointer"
             }`}
             disabled={pageNumber <= 1}
@@ -830,7 +830,7 @@ function ExpenseList({
           <button
             className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 dark:text-gray-200 ${
               pageNumber <= 1
-                ? "cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed opacity-30"
                 : "cursor-pointer"
             }`}
             disabled={pageNumber <= 1}
@@ -853,12 +853,12 @@ function ExpenseList({
             {`<`}
           </button>
           <span className="px-4 text-gray-600 dark:text-gray-300">
-            Page {pageNumber} of {expensesList.totalPages}
+            Page {pageNumber} of {expensesList.totalPages || 1}
           </span>
           <button
             className={`px-4 py-2 bg-gray-200 dark:bg-gray-800  dark:text-gray-200 ${
               expensesList.pageNumber >= expensesList.totalPages
-                ? "cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed opacity-30"
                 : "cursor-pointer"
             }`}
             disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
@@ -882,7 +882,7 @@ function ExpenseList({
           <button
             className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-r dark:text-gray-200 ${
               expensesList.pageNumber >= expensesList.totalPages
-                ? "cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed opacity-30"
                 : "cursor-pointer"
             }`}
             disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items

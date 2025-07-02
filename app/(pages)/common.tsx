@@ -123,21 +123,24 @@ export default function DashboardPage({
             addButton={
               pathname === "Expense" ? (
                 <Link href="/expense/add">
-                  <button className="button-green-outline p-0 px-1.5 text-md sm:py-0 sm:px-3 sm:text-md">
-                    {deviceWidth < 640 ? "+" : "+ Add Expense"}
+                  <button
+                    className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md
+                  "
+                  >
+                    {deviceWidth < 640 ? "+" : "Add Expense"}
                   </button>
                 </Link>
               ) : pathname === "Category" ? (
                 <Link href="/category/add">
-                  <button className="button-green-outline p-0 px-1.5 text-md sm:py-0 sm:px-3 sm:text-md">
-                    {deviceWidth < 640 ? "+" : "+ Add Category"}
+                  <button className="button-green-outline p-10 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
+                    {deviceWidth < 640 ? "+" : "Add Category"}
                   </button>
                 </Link>
               ) : null
             }
           />
 
-          <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full">
+          <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full ">
             {children}
           </div>
         </div>
