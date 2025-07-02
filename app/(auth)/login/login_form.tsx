@@ -141,7 +141,6 @@ export default function LoginForm() {
               setError("");
             }}
             value={username}
-            autoComplete="username"
           />
         </div>
 
@@ -168,10 +167,10 @@ export default function LoginForm() {
         </div>
 
         <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-          <label className="flex items-center">
+          <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
-              className="mr-2 cursor-pointer"
+              className="mr-2 "
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
@@ -227,7 +226,7 @@ export default function LoginForm() {
 
           <Link
             href="/forgot-password"
-            className="text-blue-600 hover:underline text-sm"
+            className="text-blue-500 hover:underline text-sm"
           >
             Forgot your password?
           </Link>
