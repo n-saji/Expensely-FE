@@ -105,7 +105,7 @@ export default function DashboardPage({
     <>
       {loading && <Loader />}
       <div
-        className={`w-full flex min-h-screen bg-gray-200 min-sm:relative
+        className={`w-full flex min-h-screen bg-primary-color min-sm:relative
          dark:bg-gray-900 dark:text-gray-200
         `}
       >

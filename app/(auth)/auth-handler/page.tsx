@@ -103,7 +103,10 @@ export default function AuthHandler() {
   }, [status]);
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-200 dark:bg-gray-800">
+    <div
+      className="flex items-center justify-center h-screen 
+    bg-primary-color"
+    >
       <p> Please wait...</p>
     </div>
   );

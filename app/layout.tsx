@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`antialiased ${poppins.className} ${dmMono.variable} bg-gray-200 dark:bg-gray-900  dark:text-gray-200`}
+        className={`antialiased ${poppins.className} ${dmMono.variable} bg-primary-color dark:text-gray-200`}
       >
         <ReduxProvider>{children}</ReduxProvider>
         <Analytics />

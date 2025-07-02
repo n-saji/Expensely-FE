@@ -13,8 +13,6 @@ const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/expense", label: "Expense" },
   { href: "/category", label: "Category" },
-  // { href: "/profile", label: "Profile" }, // handled in navbar
-  // { href: "/settings", label: "Settings" }, handled in navbar
 ];
 
 export default function Sidebar() {
@@ -41,7 +39,7 @@ export default function Sidebar() {
         `}
       {...handlers}
     >
-      <div className="w-55 lg:w-full h-screen bg-primary-color relative flex flex-col">
+      <div className="w-55 lg:w-full h-screen bg-secondary-color relative flex flex-col">
         <div
           className="absolute top-1/2 -right-5 min-lg:hidden 
         w-5 h-20 bg-primary-color flex text-center
@@ -52,7 +50,7 @@ export default function Sidebar() {
         <div className="h-16 border-b border-gray-200 flex items-center justify-start px-5 sm:px-6">
           <Logo
             disableIcon={false}
-            className="text-2xl py-4 w-full justify-start text-white "
+            className="text-2xl py-4 w-full justify-start text-white"
             dimension={{ width: 30, height: 30 }}
             redirect={true}
           />
