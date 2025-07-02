@@ -211,7 +211,7 @@ export default function LoginForm() {
             width={20}
             className="inline mr-2"
           />
-          <span className="hidden sm:inline">Log in with Google</span>
+          <span className="sm:inline">Log in with Google</span>
         </button>
 
         <div
@@ -227,7 +227,7 @@ export default function LoginForm() {
 
           <Link
             href="/forgot-password"
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 hover:underline text-sm"
           >
             Forgot your password?
           </Link>

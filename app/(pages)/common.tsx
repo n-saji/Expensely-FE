@@ -140,7 +140,7 @@ export default function DashboardPage({
             }
           />
 
-          <div className="p-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full ">
+          <div className="px-8 pt-24 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full ">
             {children}
           </div>
         </div>

@@ -281,7 +281,7 @@ export default function SignUpForm() {
           width={20}
           className="inline mr-2"
         />
-        <span className="hidden sm:inline">Sign Up with Google</span>
+        <span className="sm:inline">Sign Up with Google</span>
       </button>
 
       <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">

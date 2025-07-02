@@ -235,7 +235,7 @@ export default function Expense() {
   }, []);
 
   return (
-    <div className={`flex flex-col items-center w-full`}>
+    <div className={`flex flex-col w-full h-full flex-grow overflow-hidden`}>
       <ExpenseList
         expensesList={expensesList}
         setExpensesList={setExpensesList}
@@ -456,8 +456,8 @@ function ExpenseList({
   };
 
   return (
-    <div className="block w-full ">
-      <div className="flex justify-between items-center mb-6 ">
+    <div className="flex flex-col w-full h-full flex-grow overflow-hidden">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
           Recent Transactions
         </h1>
@@ -579,12 +579,11 @@ function ExpenseList({
         </div>
       )}
 
-      <div className="">
+      <div className="flex-grow overflow-auto">
         <table
-          className="w-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 
-        text-xs sm:text-sm"
+          className="w-full h-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 
+        text-xs sm:text-sm "
         >
-          {/* divide-gray-300 */}
           <thead
             className="bg-gray-100 text-gray-700  uppercase tracking-wider
             dark:bg-gray-800 dark:text-gray-200"
@@ -801,8 +800,9 @@ function ExpenseList({
           </PopUp>
         )}
       </div>
-      <div className="flex justify-between items-center py-4 w-full">
-        <div className="flex items-center space-x-2 w-full justify-center">
+      <div className="shrink-0 flex justify-center items-center text-xs sm:text-sm 
+       py-4">
+        <div className="flex items-center space-x-2 justify-center">
           <button
             className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-l dark:text-gray-200 ${
               pageNumber <= 1
