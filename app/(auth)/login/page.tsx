@@ -10,7 +10,7 @@ export default function LoginPage() {
     <div className="w-full min-h-screen flex flex-col items-center justify-center 
     bg-primary-color">
       <Logo className="text-4xl p-4 dark:text-green-500" />
-      <div className="max-sm:w-85 bg-gray-50 dark:bg-gray-900 max-sm:p-8 p-16 rounded-2xl shadow-lg w-full max-w-md mt-10 flex flex-col items-center my-4">
+      <div className="max-sm:w-85 bg-gray-50 dark:bg-gray-800 max-sm:p-8 p-16 rounded-2xl shadow-lg w-full max-w-md flex flex-col items-center my-4">
         <h1 className="text-2xl font-semibold text-gray-600 dark:text-gray-200 pb-8">
           Log in to Expensely
         </h1>
