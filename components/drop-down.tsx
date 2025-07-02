@@ -61,7 +61,9 @@ export default function DropDown({
           {options.map((option, index) => (
             <li
               key={index}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-700 dark:text-gray-300"
+              className={`px-4 py-2 hover:bg-gray-100 cursor-pointer
+                 dark:hover:bg-gray-700 dark:text-gray-300
+                 ${option.value === selectedOption ? "bg-gray-200 dark:bg-gray-600" : ""}`}
               onClick={() => {
                 onSelect(option.value);
                 setClicked(false);

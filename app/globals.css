@@ -4,7 +4,7 @@
 
 @layer components {
   .bg-primary-color {
-    @apply bg-gray-200 dark:bg-gray-800;
+    @apply bg-gray-200 dark:bg-gray-900;
   }
   .bg-secondary-color {
     @apply bg-green-500 dark:bg-green-600;
@@ -15,7 +15,7 @@
   .bg-tertiary-color {
     @apply bg-gray-300 dark:bg-gray-950
   }
-  
+
 
   .button-blue {
     @apply bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 cursor-pointer transition duration-200 font-medium;

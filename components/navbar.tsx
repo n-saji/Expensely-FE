@@ -87,7 +87,7 @@ export default function Navbar({
   return (
     <nav
       className={`h-16 px-6 py-4 bg-primary-color shadow-md flex justify-between items-center 
-        fixed top-0 right-0  duration-300 ease-in-out z-50
+        fixed top-0 right-0  duration-300 ease-in-out z-50 border-b border-gray-300 dark:border-gray-700
     ${isOpen ? "min-lg: w-[calc(100%-16rem)] max-lg:w-full" : "w-full"}
      dark:text-gray-200
     `}
