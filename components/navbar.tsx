@@ -103,9 +103,9 @@ export default function Navbar({
         />
         <div className="flex justify-between w-full text-lg">
           {isLink ? ReactLink : title || "Dashboard"}
-
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}
+            <hr className="h-full border-l border-gray-400 dark:border-gray-600" />
             <div
               className="flex items-center space-x-2 cursor-pointer"
               ref={profileToggleRef}
@@ -113,9 +113,9 @@ export default function Navbar({
               <Image
                 src={user.profilePictureUrl || "/default-profile.png"}
                 alt="Profile"
-                width={30}
-                height={30}
-                className="w-[30px] h-[30px] object-cover rounded-full cursor-pointer"
+                height={32}
+                width={32}
+                className="h-10 w-10 rounded-full cursor-pointer object-cover"
                 onClick={() => {
                   setProfileDropdown((prev) => !prev);
                 }}

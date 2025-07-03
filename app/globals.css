@@ -13,7 +13,7 @@
     @apply bg-white dark:bg-black;
   }
   .bg-tertiary-color {
-    @apply bg-gray-300 dark:bg-gray-950
+    @apply bg-gray-300 dark:bg-gray-950;
   }
 
   .button-blue {
@@ -33,6 +33,10 @@
   }
   .button-gray {
     @apply bg-gray-300 text-gray-800 px-6 py-3 rounded-md font-medium hover:bg-gray-400 cursor-pointer transition duration-200;
+  }
+  .button-transparent {
+    @apply bg-transparent text-gray-800 px-6 py-3 
+    rounded-full hover:bg-gray-900 cursor-pointer transition duration-200;
   }
 
   .grid_input {

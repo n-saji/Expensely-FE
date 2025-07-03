@@ -23,7 +23,7 @@ export default function PopUp({
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">{title}</h2>
           <button
-            className="button-green-outline px-3 py-0.5 text-xl font-medium"
+            className="button-transparent px-3 py-1 text-black dark:text-white "
             onClick={() => dispatch(togglePopUp())}
           >
             X

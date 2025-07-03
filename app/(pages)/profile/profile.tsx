@@ -13,6 +13,8 @@ import { supabase } from "@/utils/supabase";
 import defaultPNG from "@/assets/icon/user.png";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 import { useRouter } from "next/navigation";
+import PopUp from "@/components/pop-up";
+import { togglePopUp } from "@/redux/slices/sidebarSlice";
 
 export default function ProfilePage({
   reRouteToDashboard,
@@ -21,6 +23,7 @@ export default function ProfilePage({
 }) {
   const [error, setError] = useState("");
   const [loading, setLoadingLocal] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const user = useSelector((state: RootState) => state.user);
 
   const [edit, setEdit] = useState(false);
@@ -29,7 +32,9 @@ export default function ProfilePage({
   const [countryCode, setCountryCode] = useState("");
   const [phone, setPhone] = useState("");
   const [currency, setCurrency] = useState("");
-  const [editImage, setEditImage] = useState(false);
+  const togglePopup = useSelector(
+    (state: RootState) => state.sidebar.popUpEnabled
+  );
 
   const hasFetchedRef = useRef(false);
 
@@ -142,6 +147,52 @@ export default function ProfilePage({
       });
   };
 
+  const removeProfilePicture = async () => {
+    if (!user.profilePicFilePath) {
+      console.error("No profile picture to remove.");
+      return;
+    }
+    try {
+      setImageLoading(true);
+      const { error: deleteError } = await supabase.storage
+        .from("profiles-expensely")
+        .remove([user.profilePicFilePath]);
+
+      if (deleteError) {
+        console.error("Delete Error:", deleteError.message);
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/users/${userId}/update-profile-picture?filepath=${""}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ imageUrl: "" }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile picture in backend.");
+      }
+
+      dispatch(
+        setUser({
+          ...user,
+          profilePictureUrl: "",
+          profilePicFilePath: "",
+        })
+      );
+    } catch (err) {
+      console.error("Error removing profile picture:", err);
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
   const handleImageUpload = async (file: File) => {
     if (!file) return;
 
@@ -151,8 +202,8 @@ export default function ProfilePage({
     let signedUrl = "";
 
     try {
+      setImageLoading(true);
       if (user.profilePicFilePath) {
-        console.log("Deleting old image from Supabase Storage...");
         const { error: deleteError } = await supabase.storage
           .from("profiles-expensely")
           .remove([user.profilePicFilePath]);
@@ -162,7 +213,6 @@ export default function ProfilePage({
         }
       }
 
-      console.log("Uploading image to Supabase Storage...");
       const { error: uploadError } = await supabase.storage
         .from("profiles-expensely")
         .upload(filePath, file, {
@@ -178,7 +228,6 @@ export default function ProfilePage({
       await fetchProfileUrl(filePath)
         .then((url) => {
           signedUrl = url;
-          console.log("Uploaded image Signed URL:", signedUrl);
         })
         .catch((err) => {
           console.error("Error fetching signed URL:", err);
@@ -202,6 +251,8 @@ export default function ProfilePage({
       }
     } catch (err) {
       console.error("Error during upload:", err);
+    } finally {
+      setImageLoading(false);
     }
 
     dispatch(
@@ -215,7 +266,7 @@ export default function ProfilePage({
   return (
     <div className="min-w-1/2 max-md:w-2/3 max-sm:w-96 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
       <div
-        className="relative w-[150px] h-[150px] rounded-full mb-4 bg-gray-300 text-center
+        className="relative w-[200px] h-[200px] rounded-full mb-4 bg-gray-300 text-center
       dark:bg-gray-700 dark:text-gray-200"
       >
         <Image
@@ -229,35 +280,54 @@ export default function ProfilePage({
           src={user.theme === "light" ? editIcon : editIconWhite}
           width={30}
           height={30}
-          className="absolute bottom-0 right-2  p-1 rounded-full 
+          className="absolute bottom-0 right-5 p-1 rounded-full 
           bg-white dark:bg-gray-800
           cursor-pointer hover:bg-white/40 dark:hover:bg-gray-800/40 transition-all duration-200
           "
-          onClick={() => setEditImage(!editImage)}
+          onClick={() => dispatch(togglePopUp())}
         />
-        {editImage && (
-          <div
-            className="absolute top-full left-full w-25 h-10 bg-gray-800/50 dark:bg-gray-700/50
-            flex items-center justify-center rounded-md"
-          >
-            <label className="text-gray-200 cursor-pointer">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    const file = e.target.files[0];
+        {togglePopup && (
+          <PopUp title="Profile Picture">
+            <div className="flex flex-col items-center space-y-4">
+              <p className="text-gray-200 text-sm text-left">
+                A picture helps people recognize you and lets you know when
+                you’re signed in to your account
+              </p>
+              <label
+                className={`button-gray w-full py-2
+                ${imageLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      const file = e.target.files[0];
 
-                    console.log("Selected file:", file);
-                    handleImageUpload(file);
-                    setEditImage(false);
-                  }
-                }}
-              />
-              <span className="text-xs">Change Profile Picture</span>
-            </label>
-          </div>
+                      await handleImageUpload(file);
+                      dispatch(togglePopUp());
+                    }
+                  }}
+                />
+                {user.profilePictureUrl
+                  ? "📷 Change Profile Picture"
+                  : "📷 Add Profile Picture"}
+              </label>
+              {user.profilePictureUrl && (
+                <button
+                  className={`button-delete w-full py-2
+                    ${imageLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={async () => {
+                    await removeProfilePicture();
+                    dispatch(togglePopUp());
+                  }}
+                >
+                  Remove Profile Picture
+                </button>
+              )}
+            </div>
+          </PopUp>
         )}
       </div>
 
