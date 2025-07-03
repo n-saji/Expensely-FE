@@ -101,7 +101,7 @@ export default function Navbar({
           className="cursor-pointer"
           onClick={() => dispatch(toggleSidebar())}
         />
-        <div className="flex justify-between w-full text-lg">
+        <div className="flex justify-between w-full text-lg items-center">
           {isLink ? ReactLink : title || "Dashboard"}
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}
