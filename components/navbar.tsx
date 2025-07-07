@@ -106,7 +106,7 @@ export default function Navbar({
           {isLink ? ReactLink : title || "Dashboard"}
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}
-            <hr className="h-full border-l border-gray-400 dark:border-gray-600" />
+            <hr className="h-10 border-l border-gray-400 dark:border-gray-600" />
             <div
               className="flex items-center space-x-2 cursor-pointer"
               ref={profileToggleRef}
