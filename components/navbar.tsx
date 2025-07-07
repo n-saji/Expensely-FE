@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { RootState } from "@/redux/store";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
+import defaulProdilePic from "@/assets/icon/user.png";
 
 export default function Navbar({
   title,
@@ -111,7 +112,7 @@ export default function Navbar({
               ref={profileToggleRef}
             >
               <Image
-                src={user.profilePictureUrl || "/default-profile.png"}
+                src={user.profilePictureUrl || defaulProdilePic}
                 alt="Profile"
                 height={32}
                 width={32}
@@ -164,6 +165,22 @@ export default function Navbar({
               Settings
             </button>
             <hr className="my-1 border-gray-400 dark:border-gray-600" />
+            {user.isAdmin && (
+              <>
+                <button
+                  className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
+                dark:hover:bg-gray-700
+                transition-colors duration-300 ease-in-out"
+                  onClick={() => {
+                    setProfileDropdown(false);
+                    router.push("/admin");
+                  }}
+                >
+                  Admin
+                </button>
+                <hr className="my-1 border-gray-400 dark:border-gray-600" />
+              </>
+            )}
             <button
               className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
               dark:hover:bg-gray-700

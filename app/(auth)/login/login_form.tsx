@@ -45,7 +45,6 @@ export default function LoginForm() {
       body: JSON.stringify({ email: username, phone: username, password }),
     });
     if (res.ok) {
-      console.log("Login successful");
       const data = await res.json();
 
       if (data.error === "") {
@@ -83,7 +82,7 @@ export default function LoginForm() {
               notificationsEnabled: data.user.notificationsEnabled,
               profilePicFilePath: data.user.profilePicFilePath,
               profileComplete: data.user.profileComplete,
-              profilePictureUrl: data.user.profilePictureUrl || "",
+              profilePictureUrl: data.user.profilePictureUrl,
             })
           );
           localStorage.setItem("theme", data.user.theme);
