@@ -1,6 +1,13 @@
-"use client";
 import Logo from "@/components/logo";
 import SignUpForm from "./signup_form";
+
+export async function generateMetadata() {
+  return {
+    title: "Register | Expensely",
+    description:
+      "Create an account to start tracking your expenses effortlessly.",
+  };
+}
 
 export default function SignUpPage() {
   return (
