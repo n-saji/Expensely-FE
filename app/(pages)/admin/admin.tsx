@@ -1,7 +1,6 @@
 "use client";
 import { API_URL } from "@/config/config";
 import { RootState } from "@/redux/store";
-import { time } from "console";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -46,24 +45,25 @@ export default function AdminUI() {
   const [adminData, setAdminData] = useState<UsersData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  if (user.isAdmin) {
-    // Fetch admin data only if the user is an admin
 
-    useEffect(() => {
+  // Fetch admin data only if the user is an admin
+
+  useEffect(() => {
+    if (user.isAdmin) {
       const fetchData = async () => {
         setLoading(true);
         try {
           const data = await FetchAdminData();
           setAdminData(data);
         } catch (err) {
-          setError("Failed to fetch admin data");
+          setError("Failed to fetch admin data: " + err);
         } finally {
           setLoading(false);
         }
       };
       fetchData();
-    }, []);
-  }
+    }
+  }, []);
 
   return (
     <div className="flex items-center justify-center  bg-primary-color w-full">
@@ -153,6 +153,11 @@ export default function AdminUI() {
           <p className="mt-2 text-sm text-gray-400">
             Please contact your administrator if you believe this is an error.
           </p>
+        </div>
+      )}
+      {error && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
+          <p className="text-sm">{error}</p>
         </div>
       )}
     </div>
