@@ -607,7 +607,6 @@ function ExpenseList({
               className="bg-white divide-y 
               dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
             >
-              {/* divide-gray-200 */}
               <tr>
                 <td colSpan={6} className="text-center py-4">
                   <p className="text-gray-500">
