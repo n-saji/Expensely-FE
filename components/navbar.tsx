@@ -13,6 +13,7 @@ import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { RootState } from "@/redux/store";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 import defaulProdilePic from "@/assets/icon/user.png";
+import {clearCategories} from "@/redux/slices/category";
 
 export default function Navbar({
   title,
@@ -79,6 +80,7 @@ export default function Navbar({
       await Logout();
       router.push("/");
       dispatch(clearUser());
+      dispatch(clearCategories());
     } catch (error) {
       console.error("Logout failed:", error);
     }

@@ -25,50 +25,6 @@ interface Category {
   name: string;
 }
 
-// interface ExpenseListProps {
-//   expenses: Expense[];
-//   totalPages: number;
-//   totalElements: number;
-//   pageNumber: number;
-//   setPageNumber: React.Dispatch<React.SetStateAction<number>>;
-//   fetchExpenses: ({
-//     fromDate,
-//     toDate,
-//     category,
-//     order,
-//     page,
-//   }: {
-//     fromDate: string;
-//     toDate: string;
-//     category: string;
-//     order: "asc" | "desc";
-//     page?: number;
-//   }) => void;
-//   categories: {
-//     id: string;
-//     type: string;
-//     name: string;
-//   }[];
-//   showTable?: boolean;
-//   user: {
-//     id: string;
-//     email: string;
-//     name: string;
-//     theme: string;
-//   };
-//   token: string | null;
-//   setSelectedExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
-//   selectedExpenses: Expense[];
-//   setFilter: React.Dispatch<React.SetStateAction<boolean>>;
-//   filter: boolean;
-//   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
-//   categoryFilter: string;
-//   fromDateFilter: string;
-//   toDateFilter: string;
-//   setFromDate: React.Dispatch<React.SetStateAction<string>>;
-//   setToDate: React.Dispatch<React.SetStateAction<string>>;
-// }
-
 interface Expense {
   id: string;
   user: {
@@ -210,6 +166,7 @@ export default function Expense() {
             (c) => c.id === category.id
           );
           if (!alreadyExists) {
+
             dispatch(
               addCategory({
                 id: category.id,

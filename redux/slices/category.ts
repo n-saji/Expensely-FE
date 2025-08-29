@@ -1,5 +1,6 @@
 // redux/slices/sidebarSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
+import { clear } from "console";
 
 const categoryExpense = createSlice({
   name: "categoryExpense",
@@ -24,9 +25,12 @@ const categoryExpense = createSlice({
     setCategories: (state, action) => {
       state.categories = action.payload;
     },
+    clearCategories: (state) => {
+      state.categories = [];
+    },
   },
 });
 
-export const { addCategory, removeCategory, setCategories } =
+export const { addCategory, removeCategory, setCategories, clearCategories } =
   categoryExpense.actions;
 export default categoryExpense.reducer;
