@@ -1,6 +1,4 @@
-// redux/slices/sidebarSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
-import { clear } from "console";
 
 const categoryExpense = createSlice({
   name: "categoryExpense",

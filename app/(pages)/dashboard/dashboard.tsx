@@ -9,6 +9,7 @@ import ExpensesChartCard, {
   ExpensesMonthlyBarChartCard,
   ExpensesMonthlyLineChartCard,
   ExpensesTop5Monthly,
+  ExpensesOverDays,
 } from "@/components/ExpenseChartCard";
 import { DashboardPageProps, ExpenseOverview } from "@/global/dto";
 import Overview from "./overview";
@@ -133,6 +134,22 @@ export default function DashboardPage() {
               <Card
                 title="Top 5 Most Expensive Items This Month"
                 description="Loading your top 5 most expensive items..."
+                className=""
+                loading={true}
+              />
+            )}
+            {overview ? (
+              <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
+                <ExpensesOverDays
+                  overTheDaysThisMonth={overview.overTheDaysThisMonth}
+                  darkMode={user.theme === "dark"}
+                  currency={user.currency}
+                />
+              </div>
+            ) : (
+              <Card
+                title="Expenses by Category This Month"
+                description="Loading your expenses by category..."
                 className=""
                 loading={true}
               />

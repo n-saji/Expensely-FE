@@ -15,6 +15,7 @@ import {
   Line,
   ComposedChart,
   Legend,
+  LineChart,
 } from "recharts";
 import Card from "@/components/card";
 
@@ -48,6 +49,10 @@ interface ExpensesMonthlyChartProps {
 
 interface ExpensesTop5MonthlyProps {
   amountByItem: Record<string, number>;
+}
+
+interface OverTheDaysProps {
+  overTheDaysThisMonth: Record<string, number>; // { "1": 50.25, "2": 75.00, ... }
 }
 
 // ========== Pie Chart: Category-wise Spending ==========
@@ -293,7 +298,9 @@ export function ExpensesTop5Monthly({
             labelStyle={{ color: "#fff" }}
             // itemStyle={{ color: "#fff" }}
             cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) => `${currencyMapper(currency)}${value.toFixed(2)}`}
+            formatter={(value: number) =>
+              `${currencyMapper(currency)}${value.toFixed(2)}`
+            }
           />
           <Bar
             dataKey="value"
@@ -302,6 +309,71 @@ export function ExpensesTop5Monthly({
             barSize={30}
           />
         </BarChart>
+      </ResponsiveContainer>
+    </Card>
+  );
+}
+
+export function ExpensesOverDays({
+  overTheDaysThisMonth,
+  darkMode,
+  currency = "USD",
+}: OverTheDaysProps & { darkMode: boolean } & { currency?: string }) {
+  // Transform to recharts-friendly format
+  const chartData = Object.entries(overTheDaysThisMonth || {}).map(
+    ([day, amount]) => ({
+      day,
+      value: amount,
+    })
+  );
+
+
+  return (
+    <Card
+      title="Spending Over Days"
+      description="Tracks your expenses day by day for the current month"
+      className="w-full"
+    >
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={chartData} margin={{ right: 12 }}>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={darkMode ? "#999999" : "#ccc"}
+          />
+          <XAxis
+            dataKey="day"
+            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+            tickFormatter={(value: string) => `${value}${(() => {
+              if (value === "1") return "st";
+              if (value === "2") return "nd";
+              if (value === "3") return "rd";
+              return "th";
+            })()}`}
+            interval={0}
+          />
+          <YAxis
+            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+            tickFormatter={(value: number) =>
+              `${currencyMapper(currency)}${value.toFixed(0)}`
+            }
+          />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+            labelStyle={{ color: "#fff" }}
+            cursor={{ stroke: "#4ade80", strokeWidth: 2 }}
+            formatter={(value: number) =>
+              `${currencyMapper(currency)}${value.toFixed(2)}`
+            }
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="#4ade80"
+            strokeWidth={3}
+            dot={{ r: 4, fill: "#4ade80" }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
       </ResponsiveContainer>
     </Card>
   );
