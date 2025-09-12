@@ -166,7 +166,6 @@ export default function Expense() {
             (c) => c.id === category.id
           );
           if (!alreadyExists) {
-
             dispatch(
               addCategory({
                 id: category.id,
@@ -446,9 +445,9 @@ function ExpenseList({
       </div>
       {filter && (
         <div
-          className="mb-4 gap-2
-          grid grid-cols-2 sm:grid-cols-4
-          md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4
+          className="gap-6 sm:gap-3 md:gap-4 mb-6
+          grid sm:grid-cols-2
+          md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4
           2xl:grid-cols-4
         "
         >
@@ -480,7 +479,9 @@ function ExpenseList({
           <div className="max-sm:w-full">
             <input
               type="date"
-              className="p-2 border border-gray-400 rounded cursor-pointer w-full h-full"
+              className="p-2 rounded cursor-pointer
+              w-full h-full bg-white dark:bg-gray-900
+              outline-none shawdow shadow-md dark:outline dark:border dark:border-gray-400"
               onChange={(e) => {
                 setFromDate(e.target.value);
                 fetchExpenses({
@@ -498,7 +499,10 @@ function ExpenseList({
           <div className="max-sm:w-full">
             <input
               type="date"
-              className="p-2 border border-gray-400 rounded cursor-pointer w-full h-full"
+              className={`p-2 rounded cursor-pointer
+              w-full h-full bg-white dark:bg-gray-900
+              outline-none shawdow shadow-md dark:outline dark:border dark:border-gray-400
+              `}
               onChange={(e) => {
                 fetchExpenses({
                   fromDate:
@@ -756,8 +760,10 @@ function ExpenseList({
           </PopUp>
         )}
       </div>
-      <div className="shrink-0 flex justify-center items-center text-xs sm:text-sm 
-       py-4">
+      <div
+        className="shrink-0 flex justify-center items-center text-xs sm:text-sm 
+       py-4"
+      >
         <div className="flex items-center space-x-2 justify-center">
           <button
             className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-l dark:text-gray-200 ${

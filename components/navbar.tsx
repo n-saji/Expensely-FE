@@ -108,9 +108,9 @@ export default function Navbar({
           {isLink ? ReactLink : title || "Dashboard"}
           <div className="relative flex items-center space-x-4">
             {addButton && <div className="flex items-center">{addButton}</div>}
-            <hr className="h-10 border-l border-gray-400 dark:border-gray-600" />
+            <hr className="h-10 border-l border-gray-400 dark:border-gray-600 " />
             <div
-              className="flex items-center space-x-2 cursor-pointer"
+              className="flex items-center md:space-x-2 cursor-pointer"
               ref={profileToggleRef}
             >
               <Image
@@ -124,7 +124,7 @@ export default function Navbar({
                 }}
               />
               <p
-                className="hover:underline active:underline cursor-pointer text-gray-700 dark:text-gray-300"
+                className="max-sm:hidden hover:underline active:underline cursor-pointer text-gray-700 dark:text-gray-300"
                 onClick={() => {
                   setProfileDropdown((prev) => !prev);
                 }}

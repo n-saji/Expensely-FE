@@ -113,6 +113,8 @@ export default function AddExpensePage() {
             />
             <input
               type="number"
+              step="0.01"
+              min="0"
               placeholder="Amount"
               className="p-2 border border-gray-400 rounded"
               value={expense.amount === 0 ? "" : expense.amount}
