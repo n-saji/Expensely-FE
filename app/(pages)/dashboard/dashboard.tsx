@@ -58,6 +58,8 @@ export default function DashboardPage() {
 
     if (user.id && token) {
       fetchOverview();
+    } else {
+      throw new Error("User ID or token is missing");
     }
   }, []);
 
@@ -80,6 +82,7 @@ export default function DashboardPage() {
   const handleButtonClick = (button: string) => {
     setClickedButton(button);
   };
+
 
   return (
     <>

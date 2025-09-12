@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
 import Loader from "@/components/loader";
+import FetchToken from "@/utils/fetch_token";
 
 export default function DashboardPage({
   children,
@@ -18,6 +19,7 @@ export default function DashboardPage({
 }) {
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
   const user = useSelector((state: RootState) => state.user);
+  const token = FetchToken();
   const [deviceWidth, setDeviceWidth] = React.useState<number>(
     window.innerWidth
   );
@@ -30,6 +32,7 @@ export default function DashboardPage({
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
 
   let pathname = usePathname();
   let reactLink = null;
@@ -72,7 +75,7 @@ export default function DashboardPage({
     };
   }, [popUp]);
 
-  if (!user.isAuthenticated) {
+  if (!user.isAuthenticated || !token) {
     return (
       <div className="flex items-center justify-center h-screen text-2xl">
         <h1 className="text-gray-700">Please log in to continue. </h1>

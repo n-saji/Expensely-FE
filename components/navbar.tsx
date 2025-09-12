@@ -81,6 +81,7 @@ export default function Navbar({
       router.push("/");
       dispatch(clearUser());
       dispatch(clearCategories());
+      
     } catch (error) {
       console.error("Logout failed:", error);
     }

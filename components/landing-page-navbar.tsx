@@ -5,14 +5,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import FetchToken from "@/utils/fetch_token";
 
 export default function LandingPageNavBar() {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
   const [loggedIn, setLoggedIn] = useState(false);
+  const token = FetchToken();
 
   useEffect(() => {
-    if (user.isAuthenticated) {
+    if (user.isAuthenticated && token) {
       setLoggedIn(true);
     }
   }, [router]);
