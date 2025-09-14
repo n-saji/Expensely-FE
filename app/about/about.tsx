@@ -87,7 +87,7 @@ export default function AboutPage() {
             },
             {
               icon: <FaFileExport size={28} color="green" />,
-              title: "Export to CSV/PDF",
+              title: "Export to CSV",
             },
             { icon: <FaBell size={28} color="green" />, title: "Reminders" },
             {

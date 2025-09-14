@@ -17,6 +17,8 @@ import { togglePopUp } from "@/redux/slices/sidebarSlice";
 import filterIcon from "@/assets/icon/filter.png";
 import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
+import DownloadFile from "@/assets/icon/download-file.png";
+import DownloadFileWhite from "@/assets/icon/download-file-white.png";
 
 const CategoryTypeExpense = "expense";
 interface Category {
@@ -411,13 +413,63 @@ function ExpenseList({
     }
   };
 
+  const handleFileDownload = async () => {
+    try {
+      const link = new URL(`${API_URL}/expenses/user/${user.id}/export`);
+      if (fromDateFilter) {
+        const fromDate = new Date(fromDateFilter).toISOString().slice(0, 16);
+        link.searchParams.append("start_date", fromDate);
+      }
+      if (toDateFilter) {
+        const toDate = new Date(toDateFilter).toISOString().slice(0, 16);
+        link.searchParams.append("end_date", toDate);
+      }
+
+      const response = await fetch(link.toString(), {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const file_name =
+        `expenses` +
+        `${
+          fromDateFilter
+            ? `_from_${new Date(fromDateFilter).toISOString().slice(0, 10)}`
+            : ""
+        }` +
+        `${
+          toDateFilter
+            ? `_till_${new Date(toDateFilter).toISOString().slice(0, 10)}`
+            : ""
+        }`;
+      a.download = `${file_name}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    } finally {
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full flex-grow overflow-hidden">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
           Recent Transactions
         </h1>
-        <div>
+        <div className="flex items-center">
           {selectedExpenses.length > 0 && (
             <button
               className={`ml-4 ${
@@ -431,15 +483,21 @@ function ExpenseList({
               <Image
                 src={user.theme === "light" ? deleteIcon : deleteIconWhite}
                 alt="Delete"
-                className="inline-block w-6 h-6"
+                className=" w-6 h-6"
               />
             </button>
           )}
           <Image
             src={user.theme === "light" ? filterIcon : filterIconWhite}
             alt="Filter"
-            className="inline-block w-6 h-6 cursor-pointer ml-4"
+            className="w-6 h-6 cursor-pointer ml-4"
             onClick={() => setFilter(!filter)}
+          />
+          <Image
+            src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
+            alt="Download"
+            className="w-6 h-6 cursor-pointer ml-4"
+            onClick={handleFileDownload}
           />
         </div>
       </div>

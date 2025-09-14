@@ -74,7 +74,7 @@ export default function Sidebar() {
           </ul>
         </div>
         <div>
-          <p className="text-gray-300 text-sm">Version 1.3.1</p>
+          <p className="text-gray-300 text-sm">Version 1.3.2</p>
         </div>
       </div>
     </aside>
