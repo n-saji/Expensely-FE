@@ -1,7 +1,10 @@
 "use client";
 import Image from "next/image";
-import DropDownIcon from "@/assets/icon/drop_down.png";
+import DropDownIcon from "@/assets/icon/drop-down.png";
+import DropDownWhiteIcon from "@/assets/icon/drop-down-white.png";
 import { useEffect, useState } from "react";
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
 
 export default function DropDown({
   options,
@@ -28,10 +31,11 @@ export default function DropDown({
     console.log("Options updated:", options);
   }, [options]);
   const [clicked, setClicked] = useState(false);
+  const user = useSelector((state: RootState) => state.user);
 
   return (
     <div
-      className={`w-40 border border-gray-300 rounded-sm p-2.5 shadow-md flex items-center relative justify-between
+      className={`w-40 border border-gray-300 rounded-sm shadow-md flex items-center relative justify-between
     cursor-pointer ${classname}`}
       onClick={() => setClicked(!clicked)}
     >
@@ -44,7 +48,7 @@ export default function DropDown({
       <div className="flex space-x-4 items-center">
         {customButton ? customButton : null}
         <Image
-          src={DropDownIcon}
+          src={user.theme === "dark" ? DropDownWhiteIcon : DropDownIcon}
           alt="Dropdown Icon"
           width={8}
           height={8}
@@ -63,7 +67,11 @@ export default function DropDown({
               key={index}
               className={`px-4 py-2 hover:bg-gray-100 cursor-pointer
                  dark:hover:bg-gray-700 dark:text-gray-300
-                 ${option.value === selectedOption ? "bg-gray-200 dark:bg-gray-600" : ""}`}
+                 ${
+                   option.value === selectedOption
+                     ? "bg-gray-200 dark:bg-gray-600"
+                     : ""
+                 }`}
               onClick={() => {
                 onSelect(option.value);
                 setClicked(false);

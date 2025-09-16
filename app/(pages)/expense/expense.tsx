@@ -19,6 +19,7 @@ import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 import DownloadFile from "@/assets/icon/download-file.png";
 import DownloadFileWhite from "@/assets/icon/download-file-white.png";
+import DatePicker from "react-datepicker";
 
 const CategoryTypeExpense = "expense";
 interface Category {
@@ -295,7 +296,6 @@ function ExpenseList({
 }) {
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && popUp) {
@@ -504,9 +504,8 @@ function ExpenseList({
       {filter && (
         <div
           className="gap-6 sm:gap-3 md:gap-4 mb-6
-          grid sm:grid-cols-2
-          md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4
-          2xl:grid-cols-4
+          grid sm:grid-cols-3
+          md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7
         "
         >
           <DropDown
@@ -532,18 +531,15 @@ function ExpenseList({
                 order: "desc",
               });
             }}
-            classname="bg-white dark:bg-gray-900 w-full"
+            classname="bg-white dark:bg-gray-900 w-full text-sm px-2 max-sm:py-2"
           />
-          <div className="max-sm:w-full">
-            <input
-              type="date"
-              className="p-2 rounded cursor-pointer
-              w-full h-full bg-white dark:bg-gray-900
-              outline-none shawdow shadow-md dark:outline dark:border dark:border-gray-400"
-              onChange={(e) => {
-                setFromDate(e.target.value);
+          <div className="w-full">
+            <DatePicker
+              selected={fromDateFilter ? new Date(fromDateFilter) : null}
+              onChange={(date) => {
+                setFromDate(date ? date.toISOString().slice(0, 16) : "");
                 fetchExpenses({
-                  fromDate: new Date(e.target.value).toISOString().slice(0, 16),
+                  fromDate: date ? date.toISOString().slice(0, 16) : "",
                   toDate:
                     toDateFilter !== ""
                       ? new Date(toDateFilter).toISOString().slice(0, 16)
@@ -552,35 +548,52 @@ function ExpenseList({
                   order: "desc",
                 });
               }}
+              selectsStart
+              startDate={fromDateFilter ? new Date(fromDateFilter) : null}
+              endDate={toDateFilter ? new Date(toDateFilter) : null}
+              dateFormat="yyyy-MM-dd"
+              className="p-2 rounded cursor-pointer
+              w-full h-full bg-white dark:bg-gray-900
+              outline-none shadow-md dark:outline dark:border dark:border-gray-400
+              text-sm"
+              placeholderText="From"
+              maxDate={toDateFilter ? new Date(toDateFilter) : new Date()}
+              wrapperClassName="w-full h-full"
             />
           </div>
-          <div className="max-sm:w-full">
-            <input
-              type="date"
-              className={`p-2 rounded cursor-pointer
-              w-full h-full bg-white dark:bg-gray-900
-              outline-none shawdow shadow-md dark:outline dark:border dark:border-gray-400
-              `}
-              onChange={(e) => {
+          <div className="w-full">
+            <DatePicker
+              selected={toDateFilter ? new Date(toDateFilter) : null}
+              onChange={(date) => {
+                setToDate(date ? date.toISOString().slice(0, 16) : "");
                 fetchExpenses({
-                  fromDate:
-                    fromDateFilter !== ""
-                      ? new Date(fromDateFilter).toISOString().slice(0, 16)
-                      : "",
-                  toDate: new Date(e.target.value).toISOString().slice(0, 16),
+                  fromDate: fromDateFilter
+                    ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  toDate: date ? date.toISOString().slice(0, 16) : "",
                   category: categoryFilter || "",
                   order: "desc",
                 });
-                setToDate(e.target.value);
               }}
+              selectsEnd
+              startDate={fromDateFilter ? new Date(fromDateFilter) : null}
+              endDate={toDateFilter ? new Date(toDateFilter) : null}
+              dateFormat="yyyy-MM-dd"
+              className="p-2 rounded cursor-pointer
+              w-full h-full bg-white dark:bg-gray-900
+              outline-none shadow-md dark:outline dark:border dark:border-gray-400
+              text-sm"
+              placeholderText="To"
+              minDate={fromDateFilter ? new Date(fromDateFilter) : undefined}
+              wrapperClassName="w-full h-full"
             />
           </div>
 
           <div className="max-sm:w-full">
             <button
-              className="button-blue px-2 py-2 w-full h-full"
+              className="button-blue px-2 py-1 w-full h-full text-md"
               onClick={() => {
-                setFilter(false);
+                // setFilter(false);
                 setFromDate("");
                 setToDate("");
                 setCategoryFilter("");

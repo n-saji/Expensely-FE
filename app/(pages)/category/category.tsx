@@ -139,7 +139,7 @@ export default function CategoryPage() {
               setCategoryFilter(ctType ? ctType.value : "");
               fetchCategories(ctType ? ctType.value : null);
             }}
-            classname="bg-white dark:bg-gray-800"
+            classname="bg-white dark:bg-gray-800 p-2.5"
           />
         </div>
       )}
