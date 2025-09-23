@@ -14,7 +14,6 @@ import filterIcon from "@/assets/icon/filter.png";
 import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 import { categoryTypes, categorySkeleton } from "@/global/dto";
-import Tooltip from "@/components/tooltip";
 
 export default function CategoryPage() {
   const user = useSelector((state: RootState) => state.user);
