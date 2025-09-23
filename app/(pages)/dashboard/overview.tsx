@@ -21,7 +21,7 @@ export default function Overview({
         >
           <div className={card_classname}>
             <div className="card-overview">
-              <span>Total Spent This Year</span>
+              <span className="card-overview-label">Total Spent This Year</span>
               <span className="card-overview-quantity">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.totalAmount.toFixed(2)}
@@ -29,14 +29,14 @@ export default function Overview({
             </div>
 
             <div className="card-overview">
-              <span>Total Transactions</span>
+              <span className="card-overview-label">Total Transactions</span>
               <span className="card-overview-quantity">
                 {overview.totalCount}
               </span>
             </div>
 
             <div className="card-overview">
-              <span>Avg Monthly Expense</span>
+              <span className="card-overview-label">Avg Monthly Expense</span>
               <span className="card-overview-quantity">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.averageMonthlyExpense.toFixed(2)}
@@ -62,7 +62,7 @@ export default function Overview({
         >
           <div className={card_classname}>
             <div className="card-overview">
-              <span>{`Total Spent`}</span>
+              <span className="card-overview-label">{`Total Spent`}</span>
               <span className="card-overview-quantity">
                 {currencyMapper(user?.currency || "USD")}
                 {overview.thisMonthTotalExpense.toFixed(2)}
@@ -70,7 +70,7 @@ export default function Overview({
             </div>
 
             <div className="card-overview">
-              <span>Change from Last Month</span>
+              <span className="card-overview-label">Change from Last Month</span>
               <span
                 className={`card-overview-quantity ${
                   overview.comparedToLastMonthExpense >= 0
@@ -102,13 +102,13 @@ export default function Overview({
         >
           <div className={card_classname}>
             <div className="card-overview">
-              <span>Total Categories</span>
+              <span className="card-overview-label">Total Categories</span>
               <span className="card-overview-quantity">
                 {overview.totalCategories}
               </span>
             </div>
             <div className="card-overview">
-              <span>Most Frequent Category</span>
+              <span className="card-overview-label">Most Frequent Category</span>
               <span className="card-overview-quantity">
                 {overview.mostFrequentCategory || "N/A"}
               </span>
