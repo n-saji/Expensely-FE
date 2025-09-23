@@ -34,6 +34,9 @@ const COLORS = [
   "#0088FE",
 ];
 
+const height = 350;
+const margin = { left: -15, right: 12 };
+
 // ========== Props Interfaces ==========
 interface ExpensesChartCardProps {
   amountByCategory: Record<string, number>;
@@ -71,11 +74,11 @@ export default function ExpensesChartCard({
   return (
     <Card
       title="Spending by Category"
-      description="Your expense distribution across categories"
+      // description="Your expense distribution across categories"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
+      <ResponsiveContainer width="100%" height={height}>
+        <PieChart margin={margin}>
           <Pie
             data={chartData}
             dataKey="value"
@@ -83,7 +86,7 @@ export default function ExpensesChartCard({
             cx="50%"
             cy="50%"
             outerRadius={100}
-            innerRadius={50}
+            innerRadius={0}
             label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
             animationDuration={800}
             animationEasing="ease-in-out"
@@ -97,9 +100,10 @@ export default function ExpensesChartCard({
           </Pie>
           <Legend />
           <Tooltip
+            itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
             contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
             labelStyle={{ color: "#fff" }}
-            itemStyle={{ color: darkMode ? "#fff" : "#000" }}
+            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
             formatter={(value: number, name: string) => [
               `${currencyMapper(currency)}${value.toFixed(2)}`,
               name,
@@ -128,11 +132,11 @@ export function ExpensesMonthlyBarChartCard({
   return (
     <Card
       title="Expense Summary"
-      description="Insights into your spending patterns"
+      // description="Insights into your spending patterns"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={chartData}>
+      <ResponsiveContainer width="100%" height={height}>
+        <ComposedChart data={chartData} margin={margin}>
           <CartesianGrid
             strokeDasharray="3 3"
             stroke={darkMode ? "#999999" : "#ccc"}
@@ -199,16 +203,16 @@ export function ExpensesMonthlyLineChartCard({
   return (
     <Card
       title="Monthly Spending Trends"
-      description="Visual breakdown of expenses by category over the year"
+      // description="Visual breakdown of expenses by category over the year"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={height}>
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">No data available</p>
           </div>
         ) : (
-          <ComposedChart data={chartData}>
+          <ComposedChart data={chartData} margin={margin}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={darkMode ? "#999999" : "#ccc"}
@@ -270,11 +274,11 @@ export function ExpensesTop5Monthly({
   return (
     <Card
       title="Top 5 Costliest Items"
-      description="Highlights your biggest spending items for the current period"
+      // description="Highlights your biggest spending items for the current period"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData} layout="horizontal">
+      <ResponsiveContainer width="100%" height={height}>
+        <BarChart data={chartData} layout="horizontal" margin={margin}>
           <CartesianGrid
             strokeDasharray="3 3"
             stroke={darkMode ? "#999999" : "#ccc"}
@@ -327,15 +331,14 @@ export function ExpensesOverDays({
     })
   );
 
-
   return (
     <Card
       title="Spending Over Days"
-      description="Tracks your expenses day by day for the current month"
+      // description="Tracks your expenses day by day for the current month"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData} margin={{ right: 12 }}>
+      <ResponsiveContainer width="100%" height={height}>
+        <LineChart data={chartData} margin={margin}>
           <CartesianGrid
             strokeDasharray="3 3"
             stroke={darkMode ? "#999999" : "#ccc"}
@@ -343,12 +346,14 @@ export function ExpensesOverDays({
           <XAxis
             dataKey="day"
             tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-            tickFormatter={(value: string) => `${value}${(() => {
-              if (value === "1") return "st";
-              if (value === "2") return "nd";
-              if (value === "3") return "rd";
-              return "th";
-            })()}`}
+            tickFormatter={(value: string) =>
+              `${value}${(() => {
+                if (value === "1") return "st";
+                if (value === "2") return "nd";
+                if (value === "3") return "rd";
+                return "th";
+              })()}`
+            }
             interval={0}
           />
           <YAxis

@@ -135,7 +135,7 @@ export default function DashboardPage({
                 </Link>
               ) : pathname === "Category" ? (
                 <Link href="/category/add">
-                  <button className="button-green-outline p-1 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
+                  <button className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
                     {deviceWidth < 640 ? "+" : "Add Category"}
                   </button>
                 </Link>

@@ -9,12 +9,17 @@ export default function Overview({
 }) {
   const { user } = dashboardProps;
   const overview = dashboardProps.overview;
+  const card_classname = "grid grid-cols-1 sm:grid-cols-2 w-full gap-4 px-4";
 
   return (
     <>
       {overview ? (
-        <Card title="Yearly Expense" description="" className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
+        <Card
+          title="Yearly Expense"
+          // description=""
+          className="space-y-4"
+        >
+          <div className={card_classname}>
             <div className="card-overview">
               <span>Total Spent This Year</span>
               <span className="card-overview-quantity">
@@ -42,7 +47,7 @@ export default function Overview({
       ) : (
         <Card
           title="Expenses Summary For this Year"
-          description="Loading your expenses overview..."
+          // description="Loading your expenses overview..."
           className=""
           loading={true}
         />
@@ -50,8 +55,12 @@ export default function Overview({
 
       {/* Monthly Overview */}
       {overview ? (
-        <Card title="This Month's Expense" description="" className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
+        <Card
+          title="This Month's Expense"
+          // description=""
+          className="space-y-4"
+        >
+          <div className={card_classname}>
             <div className="card-overview">
               <span>{`Total Spent`}</span>
               <span className="card-overview-quantity">
@@ -78,7 +87,7 @@ export default function Overview({
       ) : (
         <Card
           title="Expenses Summary For this Year"
-          description="Loading your expenses overview..."
+          // description="Loading your expenses overview..."
           className=""
           loading={true}
         />
@@ -86,8 +95,12 @@ export default function Overview({
 
       {/* Category Overview */}
       {overview ? (
-        <Card title="Category Overview" description="" className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
+        <Card
+          title="Category Overview"
+          // description=""
+          className="space-y-4"
+        >
+          <div className={card_classname}>
             <div className="card-overview">
               <span>Total Categories</span>
               <span className="card-overview-quantity">
@@ -105,7 +118,7 @@ export default function Overview({
       ) : (
         <Card
           title="Category Overview"
-          description="Loading your category overview..."
+          // description="Loading your category overview..."
           className=""
           loading={true}
         />

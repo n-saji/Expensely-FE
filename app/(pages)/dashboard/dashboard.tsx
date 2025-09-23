@@ -118,7 +118,7 @@ export default function DashboardPage() {
           Monthly
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 w-full py-4">
         {clickedButton === "overview" && (
           <Overview dashboardProps={dashboardProps} />
         )}
@@ -136,7 +136,7 @@ export default function DashboardPage() {
             ) : (
               <Card
                 title="Top 5 Most Expensive Items This Month"
-                description="Loading your top 5 most expensive items..."
+                // description="Loading your top 5 most expensive items..."
                 className=""
                 loading={true}
               />
@@ -152,7 +152,7 @@ export default function DashboardPage() {
             ) : (
               <Card
                 title="Expenses by Category This Month"
-                description="Loading your expenses by category..."
+                // description="Loading your expenses by category..."
                 className=""
                 loading={true}
               />
@@ -173,7 +173,7 @@ export default function DashboardPage() {
             ) : (
               <Card
                 title="Monthly Expenses (Bar)"
-                description="Loading your monthly expenses..."
+                // description="Loading your monthly expenses..."
                 className=""
                 loading={true}
               />
@@ -191,7 +191,7 @@ export default function DashboardPage() {
             ) : (
               <Card
                 title="Expenses by Category"
-                description="Loading your expenses by category..."
+                // description="Loading your expenses by category..."
                 className=""
                 loading={true}
               />
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             ) : (
               <Card
                 title="Monthly Expenses (Line)"
-                description="Loading your monthly expenses..."
+                // description="Loading your monthly expenses..."
                 className=""
                 loading={true}
               />
