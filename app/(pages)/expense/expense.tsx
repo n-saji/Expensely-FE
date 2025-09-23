@@ -837,11 +837,12 @@ function ExpenseList({
       >
         <div className="flex items-center space-x-2 justify-center">
           <button
-            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-l dark:text-gray-200 ${
-              pageNumber <= 1
-                ? "cursor-not-allowed opacity-30"
-                : "cursor-pointer"
-            }`}
+            className={`px-2 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+               ${
+                 pageNumber <= 1
+                   ? "cursor-not-allowed opacity-30"
+                   : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
+               }`}
             disabled={pageNumber <= 1}
             onClick={() => {
               setPageNumber(1);
@@ -861,11 +862,12 @@ function ExpenseList({
             {`<<`}
           </button>
           <button
-            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 dark:text-gray-200 ${
-              pageNumber <= 1
-                ? "cursor-not-allowed opacity-30"
-                : "cursor-pointer"
-            }`}
+            className={`px-3 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+               ${
+                 pageNumber <= 1
+                   ? "cursor-not-allowed opacity-30"
+                   : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
+               }`}
             disabled={pageNumber <= 1}
             onClick={() => {
               const newPageNumber = Math.max(pageNumber - 1, 1);
@@ -889,11 +891,12 @@ function ExpenseList({
             Page {pageNumber} of {expensesList.totalPages || 1}
           </span>
           <button
-            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800  dark:text-gray-200 ${
-              expensesList.pageNumber >= expensesList.totalPages
-                ? "cursor-not-allowed opacity-30"
-                : "cursor-pointer"
-            }`}
+            className={`px-3 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+               ${
+                 expensesList.pageNumber >= expensesList.totalPages
+                   ? "cursor-not-allowed opacity-30"
+                   : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
+               }`}
             disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
             onClick={() => {
               setPageNumber((prev) => prev + 1);
@@ -913,11 +916,13 @@ function ExpenseList({
             {`>`}
           </button>
           <button
-            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-r dark:text-gray-200 ${
-              expensesList.pageNumber >= expensesList.totalPages
-                ? "cursor-not-allowed opacity-30"
-                : "cursor-pointer"
-            }`}
+            className={`px-2 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+              
+              ${
+                expensesList.pageNumber >= expensesList.totalPages
+                  ? "cursor-not-allowed opacity-30"
+                  : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
+              }`}
             disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
             onClick={() => {
               setPageNumber(expensesList.totalPages);

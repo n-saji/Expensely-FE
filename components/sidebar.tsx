@@ -1,25 +1,49 @@
 "use client";
 import Logo from "@/components/logo";
 import { usePathname } from "next/navigation";
-
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setSidebar } from "@/redux/slices/sidebarSlice";
 import Link from "next/link";
-
+import home_white_icon from "@/assets/icon/home-white.png";
+import home_icon from "@/assets/icon/home.png";
+import expense_icon from "@/assets/icon/expense.png";
+import expense_white_icon from "@/assets/icon/expense-white.png";
+import category from "@/assets/icon/category.png";
+import category_white from "@/assets/icon/category-white.png";
+import budget from "@/assets/icon/budget.png";
+import budget_white from "@/assets/icon/budget-white.png";
+import Image from "next/image";
 import { useSwipeable } from "react-swipeable";
+import { useState } from "react";
 
 const navLinks = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/expense", label: "Expense" },
-  { href: "/category", label: "Category" },
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: home_icon,
+    iconWhite: home_white_icon,
+  },
+  {
+    href: "/expense",
+    label: "Expense",
+    icon: expense_icon,
+    iconWhite: expense_white_icon,
+  },
+  {
+    href: "/category",
+    label: "Category",
+    icon: category,
+    iconWhite: category_white,
+  },
+  { href: "/budget", label: "Budget", icon: budget, iconWhite: budget_white },
 ];
 
 export default function Sidebar() {
   const param = usePathname();
-
   const dispatch = useDispatch();
   const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
+  const [hovered, setHovered] = useState<string | null>(null);
 
   const handlers = useSwipeable({
     onSwipedLeft: () => dispatch(setSidebar(false)),
@@ -58,13 +82,26 @@ export default function Sidebar() {
         <div className="flex-grow justify-between">
           <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-700 font-semibold">
             {navLinks.map((link) => {
+              const isActive = param.includes(link.href);
+              const isHovered = hovered === link.href;
+
               return (
-                <li key={link.href}>
+                <li
+                  key={link.href}
+                  className={`flex items-center transition-all duration-150 ${
+                    isActive ? "bg-gray-800" : ""
+                  }  px-3 py-2 rounded-md hover:bg-gray-800 hover:text-gray-100`}
+                  onMouseEnter={() => setHovered(link.href)}
+                  onMouseLeave={() => setHovered(null)}
+                >
+                  <Image
+                    src={isActive || isHovered ? link.iconWhite : link.icon}
+                    alt={link.label}
+                    className="w-5 mr-3"
+                  />
                   <Link
                     href={link.href}
-                    className={`${
-                      param.includes(link.href) ? "text-gray-300" : ""
-                    }  hover:underline`}
+                    className={`${isActive ? "text-gray-100" : ""}`}
                   >
                     {link.label}
                   </Link>
@@ -74,7 +111,7 @@ export default function Sidebar() {
           </ul>
         </div>
         <div>
-          <p className="text-gray-300 text-sm">Version 1.3.3</p>
+          <p className="text-gray-300 text-sm">Version 1.3.5</p>
         </div>
       </div>
     </aside>
