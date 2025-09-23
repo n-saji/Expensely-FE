@@ -51,8 +51,10 @@ export default function LoginForm() {
         setError("");
         if (rememberMe) {
           localStorage.setItem("token", data.token);
+          sessionStorage.removeItem("token");
         } else {
           sessionStorage.setItem("token", data.token);
+          localStorage.removeItem("token");
         }
         localStorage.setItem("user_id", data.id);
 

@@ -12,16 +12,19 @@ const userSlice = createSlice({
     theme: "",
     language: "en",
     isActive: true,
-    isAdmin: false, 
+    isAdmin: false,
     notificationsEnabled: true,
     profilePicFilePath: "",
     profilePictureUrl: "",
-    profileComplete: false, 
+    profileComplete: false,
   },
   reducers: {
     setUser: (state, action) => {
       state.email = action.payload.email;
-      state.isAuthenticated = action.payload.isAuthenticated !== undefined;
+      state.isAuthenticated =
+        action.payload.isAuthenticated !== undefined
+          ? action.payload.isAuthenticated
+          : false;
       state.id = action.payload.id;
       state.name = action.payload.name;
       state.country_code = action.payload.country_code;
@@ -37,9 +40,8 @@ const userSlice = createSlice({
         action.payload.notificationsEnabled !== undefined
           ? action.payload.notificationsEnabled
           : true;
-      state.profilePictureUrl =
-        action.payload.profilePictureUrl || ""; 
-      state.profilePicFilePath = action.payload.profilePicFilePath || ""; 
+      state.profilePictureUrl = action.payload.profilePictureUrl || "";
+      state.profilePicFilePath = action.payload.profilePicFilePath || "";
       state.profileComplete =
         action.payload.profileComplete !== undefined
           ? action.payload.profileComplete

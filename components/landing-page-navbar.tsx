@@ -6,18 +6,32 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
+import validateToken from "@/utils/validate_token";
+import { setUser } from "@/redux/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 export default function LandingPageNavBar() {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
   const [loggedIn, setLoggedIn] = useState(false);
   const token = FetchToken();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (user.isAuthenticated && token) {
-      setLoggedIn(true);
+    if (token) {
+      console.log("Token found:", token);
+      validateToken().then((isValid) => {
+        console.log("Token valid:", isValid);
+        if (isValid) {
+          setLoggedIn(true);
+          dispatch(setUser({ ...user, isAuthenticated: true }));
+        } else {
+          setLoggedIn(false);
+          dispatch(setUser({ ...user, isAuthenticated: false }));
+        }
+      });
     }
-  }, [router]);
+  }, [token, dispatch, router]);
 
   return (
     <nav className="flex justify-between items-center px-6 py-4 shadow">
