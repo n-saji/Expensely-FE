@@ -20,12 +20,10 @@ export default function Card({
     >
       {Icon && <Icon className="text-green-600 w-8 h-8" />}
 
-      <div className="py-3 px-4">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
-          {title}
-        </h3>
-        {/* <p className="text-gray-600 mt-2 dark:text-gray-400">{description}</p> */}
-      </div>
+      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+        {title}
+      </h3>
+      {/* <p className="text-gray-600 mt-2 dark:text-gray-400">{description}</p> */}
       {children && <>{children}</>}
       {loading ? (
         <div className="animate-pulse py-3 px-4 w-full">

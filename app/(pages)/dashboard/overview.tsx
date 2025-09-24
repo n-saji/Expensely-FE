@@ -10,11 +10,6 @@ export default function Overview({
   const { user } = dashboardProps;
   const overview = dashboardProps.overview;
   const card_classname = "grid grid-cols-1 sm:grid-cols-2 w-full gap-4 px-4";
-  const entries_top_five = Object.entries(
-    overview?.topFiveMostExpensiveItemThisMonth || {}
-  );
-  console.log("entries_top_five", entries_top_five);
-
   return (
     <>
       {/* Monthly Overview */}
@@ -73,20 +68,31 @@ export default function Overview({
               </div>
             </div>
 
-            {entries_top_five.length > 0 && (
-              <div className="card-overview">
-                <span className="card-overview-label">Biggest Transaction</span>
-                <div>
-                  <span className="card-overview-quantity">
-                    {currencyMapper(user?.currency || "USD")}
-                    {entries_top_five[0][1].toFixed(2)}
-                  </span>
-                  <span className="card-overview-subtext">
-                    {"(" + entries_top_five[0][0] + ")"}
-                  </span>
-                </div>
-              </div>
-            )}
+            {Object.keys(overview.thisMonthMostExpensiveItem).length > 0 &&
+              (() => {
+                const firstKey = Object.keys(
+                  overview.thisMonthMostExpensiveItem
+                )[0];
+                const firstValue =
+                  overview.thisMonthMostExpensiveItem[firstKey];
+
+                return (
+                  <div className="card-overview">
+                    <span className="card-overview-label">
+                      Biggest Transaction
+                    </span>
+                    <div>
+                      <span className="card-overview-quantity">
+                        {currencyMapper(user?.currency || "USD")}
+                        {firstValue}
+                      </span>
+                      <span className="card-overview-subtext">
+                        {"(" + firstKey + ")"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
           </div>
         </Card>
       ) : (

@@ -75,6 +75,7 @@ export default function ExpensesChartCard({
   );
 
   return (
+    // ========== Pie Chart: Yearly Spending ==========
     <Card
       title={title || "Spending by Category"}
       // description="Your expense distribution across categories"
@@ -118,7 +119,7 @@ export default function ExpensesChartCard({
   );
 }
 
-// ========== Bar Chart: Monthly Spending ==========
+// ========== Bar Chart: Yearly Spending ==========
 export function ExpensesMonthlyBarChartCard({
   amountByMonth,
   darkMode,
@@ -191,7 +192,7 @@ export function ExpensesMonthlyBarChartCard({
   );
 }
 
-// ========== Line Chart: Monthly Expense Trend ==========
+// ========== Line Chart: Yearly Expense Trend ==========
 export function ExpensesMonthlyLineChartCard({
   amountByMonth,
   darkMode,

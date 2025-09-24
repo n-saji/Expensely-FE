@@ -67,6 +67,9 @@ export interface ExpenseOverview {
   topFiveMostExpensiveItemThisMonth: Record<string, number>;
   monthlyCategoryExpense: Record<string, Record<string, number>>;
   overTheDaysThisMonth: Record<string, number>;
+  earliestStartMonth: number;
+  earliestStartYear: number;
+  thisMonthMostExpensiveItem: Record<string, number>;
 }
 
 export interface DashboardPageProps {

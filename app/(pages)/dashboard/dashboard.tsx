@@ -28,38 +28,64 @@ export default function DashboardPage() {
     user: user,
     overview: overview,
   };
+  const fetchOverview = async ({
+    monthYear = currentYear,
+    month = currentMonth,
+    yearly = currentYearForYearly,
+    hasConstraint = false,
+  }: {
+    monthYear?: number;
+    month?: number;
+    yearly?: number;
+    hasConstraint: boolean;
+  }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (hasConstraint) {
+        if (month !== undefined && monthYear !== undefined) {
+          queryParams.append("req_month", month.toString());
+          queryParams.append("req_month_year", monthYear.toString());
+        }
+        if (yearly !== undefined) {
+          queryParams.append("req_year", yearly.toString());
+        }
+      }
+      const res = await fetch(
+        `${API_URL}/expenses/user/${
+          user.id
+        }/overview?${queryParams.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = (await res.json()) as ExpenseOverview;
+      if (data.totalCount === 0) {
+        setNewUser(true);
+      }
+      setOverview(data);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    }
+  };
+
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentYearForYearly, setCurrentYearForYearly] = useState(
+    new Date().getFullYear()
+  );
 
   useEffect(() => {
-    const fetchOverview = async () => {
-      try {
-        const res = await fetch(
-          `${API_URL}/expenses/user/${user.id}/overview`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
-
-        const data = (await res.json()) as ExpenseOverview;
-        if (data.totalCount === 0) {
-          setNewUser(true);
-        }
-        console.log("Expense overview data:", data);
-        setOverview(data);
-      } catch (error) {
-        console.error("There was a problem with the fetch operation:", error);
-      }
-    };
-
     if (user.id && token) {
-      fetchOverview();
+      fetchOverview({ hasConstraint: false });
     } else {
       throw new Error("User ID or token is missing");
     }
@@ -86,40 +112,88 @@ export default function DashboardPage() {
     sessionStorage.setItem("clickedButton", button);
   };
 
+  const min_year = overview ? overview.earliestStartYear : 2000;
+  const min_month = overview ? overview.earliestStartMonth : 1;
   return (
     <>
-      <div className="flex gap-3 items-start w-full flex-wrap">
-        <button
-          className={`dashboard-button ${
-            clickedButton === "overview"
-              ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
-              : ""
-          }`}
-          onClick={() => handleButtonClick("overview")}
-        >
-          Overview
-        </button>
-        <button
-          className={`dashboard-button ${
-            clickedButton === "yearly"
-              ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
-              : ""
-          }`}
-          onClick={() => handleButtonClick("yearly")}
-        >
-          Yearly
-        </button>
-        <button
-          className={`dashboard-button ${
-            clickedButton === "monthly"
-              ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
-              : ""
-          }`}
-          onClick={() => handleButtonClick("monthly")}
-        >
-          Monthly
-        </button>
+      <div className="flex gap-4 w-full max-md:flex-col">
+        <div className="flex gap-3 items-start w-full flex-wrap">
+          <button
+            className={`dashboard-button ${
+              clickedButton === "overview"
+                ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
+                : ""
+            }`}
+            onClick={() => handleButtonClick("overview")}
+          >
+            Overview
+          </button>
+          <button
+            className={`dashboard-button ${
+              clickedButton === "yearly"
+                ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
+                : ""
+            }`}
+            onClick={() => handleButtonClick("yearly")}
+          >
+            Yearly
+          </button>
+          <button
+            className={`dashboard-button ${
+              clickedButton === "monthly"
+                ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
+                : ""
+            }`}
+            onClick={() => handleButtonClick("monthly")}
+          >
+            Monthly
+          </button>
+        </div>
+        {clickedButton === "yearly" && (
+          <select
+            className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit"
+            defaultValue={currentYearForYearly}
+            onChange={(e) => {
+              setCurrentYearForYearly(parseInt(e.target.value));
+              fetchOverview({
+                hasConstraint: true,
+                yearly: parseInt(e.target.value),
+              });
+            }}
+          >
+            {Array.from({ length: currentYear - min_year + 1 }, (_, i) => {
+              const year = currentYear - i;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
+          </select>
+        )}
+        {clickedButton === "monthly" && (
+          <input
+            type="month"
+            min={`${min_year}-${min_month < 10 ? `0${min_month}` : min_month}`}
+            max={new Date().toISOString().slice(0, 7)} /* YYYY-MM */
+            value={`${currentYear}-${
+              currentMonth < 10 ? `0${currentMonth}` : currentMonth
+            }`} /* YYYY-MM */
+            className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit"
+            onChange={(e) => {
+              const [year, month] = e.target.value.split("-");
+              setCurrentYear(parseInt(year));
+              setCurrentMonth(parseInt(month));
+              fetchOverview({
+                hasConstraint: true,
+                month: parseInt(month),
+                monthYear: parseInt(year),
+              });
+            }}
+          />
+        )}
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 w-full py-4">
         {clickedButton === "overview" && (
           <Overview dashboardProps={dashboardProps} />
