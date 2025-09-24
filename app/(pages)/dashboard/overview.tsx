@@ -17,6 +17,87 @@ export default function Overview({
 
   return (
     <>
+      {/* Monthly Overview */}
+      {overview ? (
+        <Card
+          title="This Month's Expense"
+          // description=""
+          className="space-y-4"
+        >
+          <div className={card_classname}>
+            <div className="card-overview">
+              <span className="card-overview-label">{`Total Spent`}</span>
+              <span className="card-overview-quantity">
+                {currencyMapper(user?.currency || "USD")}
+                {overview.thisMonthTotalExpense.toFixed(2)}
+              </span>
+            </div>
+
+            <div className="card-overview">
+              <span className="card-overview-label">
+                Change from Last Month
+              </span>
+              <div>
+                <span
+                  className={`card-overview-quantity ${
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense >=
+                    0
+                      ? "text-red-600"
+                      : "text-green-600"
+                  }`}
+                >
+                  {currencyMapper(user?.currency || "USD")}
+                  {Math.abs(
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense
+                  ).toFixed(2)}
+                </span>
+                <span className="card-overview-subtext ml-2">
+                  {overview.lastMonthTotalExpense === 0
+                    ? "(0%)"
+                    : `(${(
+                        ((overview.thisMonthTotalExpense -
+                          overview.lastMonthTotalExpense) /
+                          overview.lastMonthTotalExpense) *
+                        100
+                      ).toFixed(2)}%) ${
+                        overview.thisMonthTotalExpense -
+                          overview.lastMonthTotalExpense >=
+                        0
+                          ? "↑"
+                          : "↓"
+                      }
+`}
+                </span>
+              </div>
+            </div>
+
+            {entries_top_five.length > 0 && (
+              <div className="card-overview">
+                <span className="card-overview-label">Biggest Transaction</span>
+                <div>
+                  <span className="card-overview-quantity">
+                    {currencyMapper(user?.currency || "USD")}
+                    {entries_top_five[0][1].toFixed(2)}
+                  </span>
+                  <span className="card-overview-subtext">
+                    {"(" + entries_top_five[0][0] + ")"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      ) : (
+        <Card
+          title="This Month's Expense"
+          // description="Loading your expenses overview..."
+          className=""
+          loading={true}
+        />
+      )}
+
       {overview ? (
         <Card
           title="Yearly Expense"
@@ -51,63 +132,6 @@ export default function Overview({
       ) : (
         <Card
           title="Yearly Expense"
-          // description="Loading your expenses overview..."
-          className=""
-          loading={true}
-        />
-      )}
-
-      {/* Monthly Overview */}
-      {overview ? (
-        <Card
-          title="This Month's Expense"
-          // description=""
-          className="space-y-4"
-        >
-          <div className={card_classname}>
-            <div className="card-overview">
-              <span className="card-overview-label">{`Total Spent`}</span>
-              <span className="card-overview-quantity">
-                {currencyMapper(user?.currency || "USD")}
-                {overview.thisMonthTotalExpense.toFixed(2)}
-              </span>
-            </div>
-
-            <div className="card-overview">
-              <span className="card-overview-label">
-                Change from Last Month
-              </span>
-              <span
-                className={`card-overview-quantity ${
-                  overview.thisMonthTotalExpense - overview.lastMonthTotalExpense >= 0
-                    ? "text-red-600"
-                    : "text-green-600"
-                }`}
-              >
-                {currencyMapper(user?.currency || "USD")}
-                {Math.abs(overview.thisMonthTotalExpense - overview.lastMonthTotalExpense).toFixed(2)}
-              </span>
-            </div>
-
-            {entries_top_five.length > 0 && (
-              <div className="card-overview">
-                <span className="card-overview-label">Biggest Transaction</span>
-                <div>
-                  <span className="card-overview-quantity">
-                    {currencyMapper(user?.currency || "USD")}
-                    {entries_top_five[0][1].toFixed(2)}
-                  </span>
-                  <span className="card-overview-subtext">
-                    {"(" + entries_top_five[0][0] + ")"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </Card>
-      ) : (
-        <Card
-          title="This Month's Expense"
           // description="Loading your expenses overview..."
           className=""
           loading={true}

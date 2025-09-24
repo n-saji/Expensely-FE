@@ -18,7 +18,6 @@ import {
   LineChart,
 } from "recharts";
 import Card from "@/components/card";
-import { title } from "process";
 
 const COLORS = [
   "#00C49F",
