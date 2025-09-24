@@ -18,6 +18,7 @@ import {
   LineChart,
 } from "recharts";
 import Card from "@/components/card";
+import { title } from "process";
 
 const COLORS = [
   "#00C49F",
@@ -63,7 +64,10 @@ export default function ExpensesChartCard({
   amountByCategory,
   darkMode = false,
   currency = "USD",
-}: ExpensesChartCardProps & { darkMode?: boolean } & { currency?: string }) {
+  title,
+}: ExpensesChartCardProps & { darkMode?: boolean } & { currency?: string } & {
+  title?: string;
+}) {
   const chartData = Object.entries(amountByCategory || {}).map(
     ([category, amount]) => ({
       name: category,
@@ -73,7 +77,7 @@ export default function ExpensesChartCard({
 
   return (
     <Card
-      title="Spending by Category"
+      title={title || "Spending by Category"}
       // description="Your expense distribution across categories"
       className="w-full"
     >
@@ -120,7 +124,10 @@ export function ExpensesMonthlyBarChartCard({
   amountByMonth,
   darkMode,
   currency = "USD",
-}: ExpensesMonthlyChartProps & { darkMode: boolean } & { currency?: string }) {
+  title,
+}: ExpensesMonthlyChartProps & { darkMode: boolean } & { currency?: string } & {
+  title?: string;
+}) {
   const chartData = Object.entries(amountByMonth || {}).map(
     ([month, amount]) => ({
       name: month,
@@ -131,7 +138,7 @@ export function ExpensesMonthlyBarChartCard({
   console.log(darkMode, currency);
   return (
     <Card
-      title="Expense Summary"
+      title={title || "Expense Summary"}
       // description="Insights into your spending patterns"
       className="w-full"
     >
@@ -190,9 +197,10 @@ export function ExpensesMonthlyLineChartCard({
   amountByMonth,
   darkMode,
   currency = "USD",
+  title,
 }: ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & {
   currency?: string;
-}) {
+} & { title?: string }) {
   const chartData = Object.entries(amountByMonth).map(
     ([month, categories]) => ({
       name: month,
@@ -202,7 +210,7 @@ export function ExpensesMonthlyLineChartCard({
 
   return (
     <Card
-      title="Monthly Spending Trends"
+      title={title || "Monthly Spending Trends"}
       // description="Visual breakdown of expenses by category over the year"
       className="w-full"
     >
@@ -263,7 +271,10 @@ export function ExpensesTop5Monthly({
   amountByItem,
   darkMode,
   currency = "USD",
-}: ExpensesTop5MonthlyProps & { darkMode: boolean } & { currency?: string }) {
+  title,
+}: ExpensesTop5MonthlyProps & { darkMode: boolean } & { currency?: string } & {
+  title?: string;
+}) {
   const chartData = Object.entries(amountByItem || {}).map(
     ([item, amount]) => ({
       name: item,
@@ -273,7 +284,7 @@ export function ExpensesTop5Monthly({
 
   return (
     <Card
-      title="Top 5 Contributors"
+      title={title || "Top 5 Contributors"}
       // description="Highlights your biggest spending items for the current period"
       className="w-full"
     >
@@ -322,7 +333,10 @@ export function ExpensesOverDays({
   overTheDaysThisMonth,
   darkMode,
   currency = "USD",
-}: OverTheDaysProps & { darkMode: boolean } & { currency?: string }) {
+  title,
+}: OverTheDaysProps & { darkMode: boolean } & { currency?: string } & {
+  title?: string;
+}) {
   // Transform to recharts-friendly format
   const chartData = Object.entries(overTheDaysThisMonth || {}).map(
     ([day, amount]) => ({
@@ -333,7 +347,7 @@ export function ExpensesOverDays({
 
   return (
     <Card
-      title="Spending Over Days"
+      title={title || "Spending Over Days"}
       // description="Tracks your expenses day by day for the current month"
       className="w-full"
     >

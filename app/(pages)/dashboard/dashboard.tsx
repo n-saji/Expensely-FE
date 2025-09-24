@@ -19,7 +19,9 @@ export default function DashboardPage() {
   const token = FetchToken();
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [newUser, setNewUser] = useState<boolean>(false);
-  const [clickedButton, setClickedButton] = useState<string>("overview");
+  const [clickedButton, setClickedButton] = useState<string>(
+    sessionStorage.getItem("clickedButton") || "overview"
+  );
   const dashboardProps: DashboardPageProps = {
     userId: user.id,
     token: token,
@@ -81,8 +83,8 @@ export default function DashboardPage() {
 
   const handleButtonClick = (button: string) => {
     setClickedButton(button);
+    sessionStorage.setItem("clickedButton", button);
   };
-
 
   return (
     <>
@@ -131,11 +133,12 @@ export default function DashboardPage() {
                   amountByItem={overview.topFiveMostExpensiveItemThisMonth}
                   darkMode={user.theme === "dark"}
                   currency={user.currency}
+                  title="Top 5 Contributors"
                 />
               </div>
             ) : (
               <Card
-                title="Top 5 Most Expensive Items This Month"
+                title="Top 5 Contributors"
                 // description="Loading your top 5 most expensive items..."
                 className=""
                 loading={true}
@@ -147,11 +150,12 @@ export default function DashboardPage() {
                   overTheDaysThisMonth={overview.overTheDaysThisMonth}
                   darkMode={user.theme === "dark"}
                   currency={user.currency}
+                  title="Spending Over Days"
                 />
               </div>
             ) : (
               <Card
-                title="Expenses by Category This Month"
+                title="Spending Over Days"
                 // description="Loading your expenses by category..."
                 className=""
                 loading={true}
@@ -168,11 +172,12 @@ export default function DashboardPage() {
                   amountByMonth={overview.amountByMonth}
                   darkMode={user.theme === "dark"}
                   currency={user.currency}
+                  title="Expense Summary"
                 />
               </div>
             ) : (
               <Card
-                title="Monthly Expenses (Bar)"
+                title="Expense Summary"
                 // description="Loading your monthly expenses..."
                 className=""
                 loading={true}
@@ -186,11 +191,12 @@ export default function DashboardPage() {
                   amountByCategory={overview.amountByCategory}
                   darkMode={user.theme === "dark"}
                   currency={user.currency}
+                  title="Spending by Category"
                 />
               </div>
             ) : (
               <Card
-                title="Expenses by Category"
+                title="Spending by Category"
                 // description="Loading your expenses by category..."
                 className=""
                 loading={true}
@@ -203,11 +209,12 @@ export default function DashboardPage() {
                   amountByMonth={overview.monthlyCategoryExpense}
                   darkMode={user.theme === "dark"}
                   currency={user.currency}
+                  title="Monthly Spending Trends"
                 />
               </div>
             ) : (
               <Card
-                title="Monthly Expenses (Line)"
+                title="Monthly Spending Trends"
                 // description="Loading your monthly expenses..."
                 className=""
                 loading={true}

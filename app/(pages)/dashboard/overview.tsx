@@ -50,7 +50,7 @@ export default function Overview({
         </Card>
       ) : (
         <Card
-          title="Expenses Summary For this Year"
+          title="Yearly Expense"
           // description="Loading your expenses overview..."
           className=""
           loading={true}
@@ -107,7 +107,7 @@ export default function Overview({
         </Card>
       ) : (
         <Card
-          title="Expenses Summary For this Year"
+          title="This Month's Expense"
           // description="Loading your expenses overview..."
           className=""
           loading={true}
