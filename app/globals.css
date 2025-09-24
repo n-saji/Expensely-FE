@@ -62,4 +62,7 @@
   .card-overview-label {
     @apply text-sm font-medium;
   }
+  .card-overview-subtext {
+    @apply text-gray-500 text-lg ml-2;
+  }
 }

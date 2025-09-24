@@ -61,7 +61,7 @@ export interface ExpenseOverview {
   totalCategories: number;
   mostFrequentCategoryCount: number;
   thisMonthTotalExpense: number;
-  comparedToLastMonthExpense: number;
+  lastMonthTotalExpense: number;
   categoryCount: Record<string, number>;
   averageMonthlyExpense: number;
   topFiveMostExpensiveItemThisMonth: Record<string, number>;

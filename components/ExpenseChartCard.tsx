@@ -273,7 +273,7 @@ export function ExpensesTop5Monthly({
 
   return (
     <Card
-      title="Top 5 Costliest Items"
+      title="Top 5 Contributors"
       // description="Highlights your biggest spending items for the current period"
       className="w-full"
     >
