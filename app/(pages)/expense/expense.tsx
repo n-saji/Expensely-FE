@@ -792,14 +792,23 @@ function ExpenseList({
                       (cat) => cat.id === selectedExpenses[0]?.categoryId
                     )?.id || ""
                   }
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setSelectedExpenses([
                       {
                         ...selectedExpenses[0],
+                        category: {
+                          id: e.target.value,
+                          name:
+                            categories.find((cat) => cat.id === e.target.value)
+                              ?.name || "",
+                        },
                         categoryId: e.target.value,
+                        categoryName:
+                          categories.find((cat) => cat.id === e.target.value)
+                            ?.name || "",
                       },
-                    ])
-                  }
+                    ]);
+                  }}
                 >
                   <option value="" disabled className="text-gray-400">
                     Select Category
