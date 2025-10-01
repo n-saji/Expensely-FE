@@ -18,7 +18,16 @@ export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
   const token = FetchToken();
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [newUser, setNewUser] = useState<boolean>(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const [currentMonthYear, setCurrentMonthYear] = useState(
+    new Date().getFullYear()
+  );
+  const currentYear = new Date().getFullYear();
+  const [currentYearForYearly, setCurrentYearForYearly] = useState(
+    new Date().getFullYear()
+  );
   const [clickedButton, setClickedButton] = useState<string>(
     sessionStorage.getItem("clickedButton") || "overview"
   );
@@ -29,7 +38,7 @@ export default function DashboardPage() {
     overview: overview,
   };
   const fetchOverview = async ({
-    monthYear = currentYear,
+    monthYear = currentMonthYear,
     month = currentMonth,
     yearly = currentYearForYearly,
     hasConstraint = false,
@@ -50,6 +59,7 @@ export default function DashboardPage() {
           queryParams.append("req_year", yearly.toString());
         }
       }
+      setLoading(true);
       const res = await fetch(
         `${API_URL}/expenses/user/${
           user.id
@@ -74,14 +84,10 @@ export default function DashboardPage() {
       setOverview(data);
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [currentYearForYearly, setCurrentYearForYearly] = useState(
-    new Date().getFullYear()
-  );
 
   useEffect(() => {
     if (user.id && token) {
@@ -151,7 +157,9 @@ export default function DashboardPage() {
         </div>
         {clickedButton === "yearly" && (
           <select
-            className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit"
+            className="border border-gray-300 rounded-md px-1.5 focus:outline-none w-fit
+            cursor-pointer bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200
+            text-sm"
             defaultValue={currentYearForYearly}
             onChange={(e) => {
               setCurrentYearForYearly(parseInt(e.target.value));
@@ -163,6 +171,7 @@ export default function DashboardPage() {
           >
             {Array.from({ length: currentYear - min_year + 1 }, (_, i) => {
               const year = currentYear - i;
+              console.log(year);
               return (
                 <option key={year} value={year}>
                   {year}
@@ -176,13 +185,15 @@ export default function DashboardPage() {
             type="month"
             min={`${min_year}-${min_month < 10 ? `0${min_month}` : min_month}`}
             max={new Date().toISOString().slice(0, 7)} /* YYYY-MM */
-            value={`${currentYear}-${
+            value={`${currentMonthYear}-${
               currentMonth < 10 ? `0${currentMonth}` : currentMonth
             }`} /* YYYY-MM */
-            className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit"
+            className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit
+            cursor-pointer bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200
+            text-sm"
             onChange={(e) => {
               const [year, month] = e.target.value.split("-");
-              setCurrentYear(parseInt(year));
+              setCurrentMonthYear(parseInt(year));
               setCurrentMonth(parseInt(month));
               fetchOverview({
                 hasConstraint: true,
@@ -194,31 +205,31 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 w-full py-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full py-4">
         {clickedButton === "overview" && (
           <Overview dashboardProps={dashboardProps} />
         )}
 
         {clickedButton === "monthly" && (
           <>
-            {overview ? (
+            {!loading && overview ? (
               <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
                 <ExpensesTop5Monthly
                   amountByItem={overview.topFiveMostExpensiveItemThisMonth}
                   darkMode={user.theme === "dark"}
                   currency={user.currency}
-                  title="Top 5 Contributors"
+                  title="Top Contributors"
                 />
               </div>
             ) : (
               <Card
-                title="Top 5 Contributors"
+                title="Top Contributors"
                 // description="Loading your top 5 most expensive items..."
                 className=""
                 loading={true}
               />
             )}
-            {overview ? (
+            {!loading && overview ? (
               <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
                 <ExpensesOverDays
                   overTheDaysThisMonth={overview.overTheDaysThisMonth}
@@ -240,7 +251,7 @@ export default function DashboardPage() {
 
         {clickedButton === "yearly" && (
           <>
-            {overview ? (
+            {!loading && overview ? (
               <div className="col-span-1 md:col-span-2 lg:col-span-2">
                 <ExpensesMonthlyBarChartCard
                   amountByMonth={overview.amountByMonth}
@@ -259,7 +270,7 @@ export default function DashboardPage() {
             )}
 
             {/* Expenses by Category */}
-            {overview ? (
+            {!loading && overview ? (
               <div className="col-span-1 md:col-span-1 lg:col-span-1">
                 <ExpensesChartCard
                   amountByCategory={overview.amountByCategory}
@@ -277,7 +288,7 @@ export default function DashboardPage() {
               />
             )}
 
-            {overview ? (
+            {!loading && overview ? (
               <div className="col-span-1 md:col-span-1 lg:col-span-1">
                 <ExpensesMonthlyLineChartCard
                   amountByMonth={overview.monthlyCategoryExpense}

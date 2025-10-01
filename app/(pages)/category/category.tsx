@@ -15,6 +15,9 @@ import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 import { categoryTypes, categorySkeleton } from "@/global/dto";
 
+const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
+const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
+
 export default function CategoryPage() {
   const user = useSelector((state: RootState) => state.user);
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
@@ -151,27 +154,48 @@ export default function CategoryPage() {
             className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider
             dark:bg-gray-800 dark:text-gray-200"
           >
-            <tr className="text-left">
-              <th className="px-4 py-3 font-semibold ">#</th>
-              <th className="px-4 py-3 font-semibold ">Category</th>
-              <th className="px-4 py-3 font-semibold ">Amount</th>
+            <tr className="text-left font-semibold">
+              <th className={`${table_data_classname}`}>#</th>
+              <th className={`${table_data_classname}`}>Category</th>
+              <th className={`${table_data_classname}`}>Amount</th>
             </tr>
           </thead>
-          {!showTable && (
+          {(!showTable || loading) && (
             <tbody
-              className="bg-white divide-y  text-sm
+              className="bg-white divide-y 
               dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
             >
-              <tr>
-                <td colSpan={6} className="text-center py-4">
-                  <p className="text-gray-500">
-                    {loading ? "Loading..." : "No category found"}
-                  </p>
-                </td>
-              </tr>
+              {!loading && (
+                <tr>
+                  <td colSpan={6} className="text-center py-4">
+                    <p className="text-gray-500">No expenses found</p>
+                  </td>
+                </tr>
+              )}
+              {loading && (
+                <>
+                  {[...Array(10)].map((_, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
+                      transition-colors cursor-pointer"
+                    >
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-4 ${table_data_loading}`}></div>
+                      </td>
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-30 ${table_data_loading}`}></div>
+                      </td>
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-16 ${table_data_loading}`}></div>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              )}
             </tbody>
           )}
-          {showTable && (
+          {showTable && !loading && (
             <tbody
               className="bg-white divide-y divide-gray-200 text-sm
               dark:bg-gray-900 dark:text-gray-200
@@ -189,10 +213,10 @@ export default function CategoryPage() {
                     }
                   }}
                 >
-                  <td className="px-4 py-3"></td>
-                  <td className="px-4 py-3">{category.name}</td>
+                  <td className={`${table_data_classname}`}></td>
+                  <td className={`${table_data_classname}`}>{category.name}</td>
 
-                  <td className="px-4 py-3">
+                  <td className={`${table_data_classname}`}>
                     {
                       categoryTypes.find((cat) => cat.value === category.type)
                         ?.label

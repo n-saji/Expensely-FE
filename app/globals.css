@@ -56,13 +56,13 @@
     @apply flex flex-col justify-between text-gray-700 dark:text-gray-400;
   }
   .card-overview-quantity {
-    @apply text-xl font-extrabold text-gray-700 dark:text-gray-300;
+    @apply text-xl font-extrabold text-gray-900 dark:text-gray-100;
     font-family: var(--font-dmmono), monospace;
   }
   .card-overview-label {
-    @apply text-sm font-medium;
+    @apply text-sm font-medium dark:text-gray-500 text-gray-600;
   }
   .card-overview-subtext {
-    @apply text-gray-500 text-lg ml-2;
+    @apply dark:text-gray-300  text-gray-600 text-lg ml-2;
   }
 }

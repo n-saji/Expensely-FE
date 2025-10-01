@@ -34,7 +34,6 @@ export interface categorySkeleton {
   type: string;
 }
 
-
 export interface UserSkeleton {
   email: string;
   isAuthenticated: boolean;
@@ -49,7 +48,6 @@ export interface UserSkeleton {
   isAdmin: boolean;
   notificationsEnabled: boolean;
 }
-
 
 export interface ExpenseOverview {
   userId: string;

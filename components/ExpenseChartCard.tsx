@@ -135,7 +135,7 @@ export function ExpensesMonthlyBarChartCard({
       trend: amount,
     })
   );
-  console.log(darkMode, currency);
+
   return (
     <Card
       title={title || "Expense Summary"}
@@ -284,47 +284,53 @@ export function ExpensesTop5Monthly({
 
   return (
     <Card
-      title={title || "Top 5 Contributors"}
+      title={title || "Top Contributors"}
       // description="Highlights your biggest spending items for the current period"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={chartData} layout="horizontal" margin={margin}>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke={darkMode ? "#999999" : "#ccc"}
-          />
-          <XAxis
-            dataKey="name"
-            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-            tickFormatter={(value: string) =>
-              value.length > 10 ? `${value.slice(0, 10)}...` : value
-            }
-            interval={0}
-          />
-          <YAxis
-            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-            tickFormatter={(value: number) =>
-              `${currencyMapper(currency)}${value.toFixed(0)}`
-            }
-          />
-          <Tooltip
-            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
-            labelStyle={{ color: "#fff" }}
-            // itemStyle={{ color: "#fff" }}
-            cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-            formatter={(value: number) =>
-              `${currencyMapper(currency)}${value.toFixed(2)}`
-            }
-          />
-          <Bar
-            dataKey="value"
-            fill="#4ade80"
-            radius={[4, 4, 0, 0]}
-            barSize={30}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      {chartData.length > 0 ? (
+        <ResponsiveContainer width="100%" height={height}>
+          <BarChart data={chartData} layout="horizontal" margin={margin}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={darkMode ? "#999999" : "#ccc"}
+            />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+              tickFormatter={(value: string) =>
+                value.length > 10 ? `${value.slice(0, 10)}...` : value
+              }
+              interval={0}
+            />
+            <YAxis
+              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+              tickFormatter={(value: number) =>
+                `${currencyMapper(currency)}${value.toFixed(0)}`
+              }
+            />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+              labelStyle={{ color: "#fff" }}
+              // itemStyle={{ color: "#fff" }}
+              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+              formatter={(value: number) =>
+                `${currencyMapper(currency)}${value.toFixed(2)}`
+              }
+            />
+            <Bar
+              dataKey="value"
+              fill="#4ade80"
+              radius={[4, 4, 0, 0]}
+              barSize={30}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="flex items-center justify-center h-full w-full">
+          <p className="text-gray-500">No data available</p>
+        </div>
+      )}
     </Card>
   );
 }
@@ -351,49 +357,55 @@ export function ExpensesOverDays({
       // description="Tracks your expenses day by day for the current month"
       className="w-full"
     >
-      <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={chartData} margin={margin}>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke={darkMode ? "#999999" : "#ccc"}
-          />
-          <XAxis
-            dataKey="day"
-            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-            tickFormatter={(value: string) =>
-              `${value}${(() => {
-                if (value === "1") return "st";
-                if (value === "2") return "nd";
-                if (value === "3") return "rd";
-                return "th";
-              })()}`
-            }
-            interval={0}
-          />
-          <YAxis
-            tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-            tickFormatter={(value: number) =>
-              `${currencyMapper(currency)}${value.toFixed(0)}`
-            }
-          />
-          <Tooltip
-            contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
-            labelStyle={{ color: "#fff" }}
-            cursor={{ stroke: "#4ade80", strokeWidth: 2 }}
-            formatter={(value: number) =>
-              `${currencyMapper(currency)}${value.toFixed(2)}`
-            }
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#4ade80"
-            strokeWidth={3}
-            dot={{ r: 4, fill: "#4ade80" }}
-            activeDot={{ r: 6 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      {chartData.length > 0 ? (
+        <ResponsiveContainer width="100%" height={height}>
+          <LineChart data={chartData} margin={margin}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={darkMode ? "#999999" : "#ccc"}
+            />
+            <XAxis
+              dataKey="day"
+              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+              tickFormatter={(value: string) =>
+                `${value}${(() => {
+                  if (value === "1") return "st";
+                  if (value === "2") return "nd";
+                  if (value === "3") return "rd";
+                  return "th";
+                })()}`
+              }
+              interval={0}
+            />
+            <YAxis
+              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+              tickFormatter={(value: number) =>
+                `${currencyMapper(currency)}${value.toFixed(0)}`
+              }
+            />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+              labelStyle={{ color: "#fff" }}
+              cursor={{ stroke: "#4ade80", strokeWidth: 2 }}
+              formatter={(value: number) =>
+                `${currencyMapper(currency)}${value.toFixed(2)}`
+              }
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#4ade80"
+              strokeWidth={3}
+              dot={{ r: 4, fill: "#4ade80" }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="flex items-center justify-center h-[300px] w-full">
+          <p className="text-gray-500">No data available</p>
+        </div>
+      )}
     </Card>
   );
 }

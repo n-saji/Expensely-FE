@@ -9,7 +9,7 @@ export default function Overview({
 }) {
   const { user } = dashboardProps;
   const overview = dashboardProps.overview;
-  const card_classname = "grid grid-cols-1 sm:grid-cols-2 w-full gap-4 px-4";
+  const card_classname = "grid grid-cols-1 sm:grid-cols-2 w-full gap-4 px-1";
   return (
     <>
       {/* Monthly Overview */}

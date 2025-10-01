@@ -55,6 +55,9 @@ interface ExpenseListProps {
   pageNumber: number;
 }
 
+const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
+const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
+
 export default function Expense() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
@@ -614,41 +617,66 @@ function ExpenseList({
       <div className="flex-grow overflow-auto">
         <table
           className="w-full h-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 
-        text-xs sm:text-sm "
+        text-xs sm:text-sm layout-fixed"
         >
           <thead
             className="bg-gray-100 text-gray-700  uppercase tracking-wider
             dark:bg-gray-800 dark:text-gray-200"
           >
-            <tr className="text-left">
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">#</th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">
-                Category
-              </th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">
-                Amount
-              </th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">
-                Description
-              </th>
-              <th className="px-1 py-3 sm:px-4 sm:py-3 font-semibold ">Date</th>
+            <tr className="text-left font-semibold">
+              <th className={`${table_data_classname} w-1/13`}>#</th>
+              <th className={`${table_data_classname} w-3/13`}>Category</th>
+              <th className={`${table_data_classname} w-2/13`}>Amount</th>
+              <th className={`${table_data_classname} w-4/13`}>Description</th>
+              <th className={`${table_data_classname} w-3/13`}>Date</th>
             </tr>
           </thead>
-          {!showTable && (
+          {(!showTable || loading) && (
             <tbody
               className="bg-white divide-y 
               dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
             >
-              <tr>
-                <td colSpan={6} className="text-center py-4">
-                  <p className="text-gray-500">
-                    {loading ? "Loading..." : "No expenses found"}
-                  </p>
-                </td>
-              </tr>
+              {!loading && (
+                <tr>
+                  <td colSpan={6} className="text-center py-4">
+                    <p className="text-gray-500">
+                      {loading ? "Loading..." : "No expenses found"}
+                    </p>
+                  </td>
+                </tr>
+              )}
+              {loading && (
+                <>
+                  {[...Array(10)].map((_, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
+                      transition-colors cursor-pointer"
+                    >
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-4 ${table_data_loading}`}></div>
+                      </td>
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-20 ${table_data_loading}`}></div>
+                      </td>
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-14 ${table_data_loading}`}></div>
+                      </td>
+                      <td className={table_data_classname}>
+                        <div
+                          className={`h-4 w-full ${table_data_loading}`}
+                        ></div>
+                      </td>
+                      <td className={table_data_classname}>
+                        <div className={`h-4 w-24 ${table_data_loading}`}></div>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              )}
             </tbody>
           )}
-          {showTable && (
+          {showTable && !loading && (
             <tbody
               className="bg-white
               dark:bg-gray-900 dark:text-gray-200
@@ -661,7 +689,7 @@ function ExpenseList({
                   transition-colors cursor-pointer divide-y divide-gray-200 dark:divide-gray-700
                   "
                 >
-                  <td className="px-1 py-3 sm:px-4 sm:py-3">
+                  <td className={table_data_classname}>
                     <input
                       type="checkbox"
                       className="cursor-pointer"
@@ -683,7 +711,7 @@ function ExpenseList({
                     />
                   </td>
                   <td
-                    className="px-1 py-3 sm:px-4 sm:py-3"
+                    className={table_data_classname}
                     onClick={() => {
                       if (window.innerWidth < 640) {
                         setSelectedExpenses([expense]);
@@ -695,7 +723,7 @@ function ExpenseList({
                     {expense.categoryName}
                   </td>
                   <td
-                    className="px-1 py-3 sm:px-4 sm:py-3 font-medium text-green-600"
+                    className={`${table_data_classname} font-medium text-green-600`}
                     onClick={() => {
                       if (window.innerWidth < 640) {
                         setSelectedExpenses([expense]);
@@ -709,7 +737,7 @@ function ExpenseList({
                     )}${expense.amount.toFixed(2)}`}
                   </td>
                   <td
-                    className="px-1 py-3 sm:px-4 sm:py-3"
+                    className={table_data_classname}
                     onClick={() => {
                       if (window.innerWidth < 640) {
                         setSelectedExpenses([expense]);
@@ -720,7 +748,7 @@ function ExpenseList({
                   >
                     {expense.description}
                   </td>
-                  <td className="px-1 py-3 sm:px-4 sm:py-3 text-gray-500">
+                  <td className={`${table_data_classname} text-gray-500`}>
                     {new Date(expense.expenseDate).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
