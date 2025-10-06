@@ -37,9 +37,9 @@ import {
 
 import { BudgetReq } from "@/global/dto";
 import FetchToken from "@/utils/fetch_token";
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { useRouter } from "next/navigation";
 
 const budgetSchema = z.object({
   Category: z.object({
@@ -74,7 +74,8 @@ export default function AddBudgetPage() {
     },
   });
   const watchPeriod = form.watch("period");
-  const [loader, setLoader] = useState(false);
+    const [loader, setLoader] = useState(false);
+    const router = useRouter();
 
   useEffect(() => {
     const start = new Date();
@@ -135,7 +136,7 @@ export default function AddBudgetPage() {
         action: {
           label: "View Budgets",
           onClick: () => {
-            window.location.href = "/budget";
+            router.push("/budget");
           },
         },
       });
@@ -300,10 +301,7 @@ export default function AddBudgetPage() {
           </Card>
         </form>
       </Form>
-      {/* <Alert className="mb-4" variant={"destructive"}>
-        <AlertTitle>Alert</AlertTitle>
-        <AlertDescription></AlertDescription>
-      </Alert> */}
+
     </div>
   );
 }

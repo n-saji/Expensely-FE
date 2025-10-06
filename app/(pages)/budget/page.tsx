@@ -1,13 +1,15 @@
+import Page from "./budget";
+
 export async function generateMetadata() {
   return {
     title: "Budget | Expensely",
   };
 }
 
-export default function Page() {
+export default function BudgePage() {
   return (
-      <>
-          <p>Coming Soon...</p>
+    <>
+      <Page />
     </>
   );
 }
