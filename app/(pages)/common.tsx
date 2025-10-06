@@ -11,6 +11,8 @@ import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
 import Loader from "@/components/loader";
 import FetchToken from "@/utils/fetch_token";
+import { Toaster } from "@/components/ui/sonner"
+
 
 export default function DashboardPage({
   children,
@@ -32,7 +34,6 @@ export default function DashboardPage({
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
 
   let pathname = usePathname();
   let reactLink = null;
@@ -58,6 +59,17 @@ export default function DashboardPage({
         <Link href="/category" className="hover:underline">{`Category`}</Link>
         <span className="text-gray-500">{" > "}</span>
         <Link href="/category/add" className="hover:underline">
+          Add
+        </Link>
+      </div>
+    );
+  } else if (pathname === "/budget/add") {
+    isLink = true;
+    reactLink = (
+      <div className="flex items-center space-x-2">
+        <Link href="/budget" className="hover:underline">{`Budget`}</Link>
+        <span className="text-gray-500">{" > "}</span>
+        <Link href="/budget/add" className="hover:underline">
           Add
         </Link>
       </div>
@@ -107,6 +119,7 @@ export default function DashboardPage({
   return (
     <>
       {loading && <Loader />}
+      <Toaster closeButton/>
       <div
         className={`w-full flex min-h-screen bg-primary-color min-sm:relative
           dark:text-gray-200
@@ -137,6 +150,12 @@ export default function DashboardPage({
                 <Link href="/category/add">
                   <button className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
                     {deviceWidth < 640 ? "+" : "Add Category"}
+                  </button>
+                </Link>
+              ) : pathname === "Budget" ? (
+                <Link href="/budget/add">
+                  <button className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
+                    {deviceWidth < 640 ? "+" : "Add Budget"}
                   </button>
                 </Link>
               ) : null

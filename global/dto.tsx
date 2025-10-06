@@ -27,26 +27,26 @@ export const categoryTypes = [
 
 export interface categorySkeleton {
   id: string;
-  user: {
+  user?: {
     id: string;
   };
-  name: string;
-  type: string;
+  name?: string;
+  type?: string;
 }
 
 export interface UserSkeleton {
-  email: string;
-  isAuthenticated: boolean;
+  email?: string;
+  isAuthenticated?: boolean;
   id: string;
-  name: string;
-  country_code: string;
-  phone: string;
-  currency: string;
-  theme: string;
-  language: string;
-  isActive: boolean;
-  isAdmin: boolean;
-  notificationsEnabled: boolean;
+  name?: string;
+  country_code?: string;
+  phone?: string;
+  currency?: string;
+  theme?: string;
+  language?: string;
+  isActive?: boolean;
+  isAdmin?: boolean;
+  notificationsEnabled?: boolean;
 }
 
 export interface ExpenseOverview {
@@ -75,4 +75,20 @@ export interface DashboardPageProps {
   token: string | null;
   user: UserSkeleton;
   overview: ExpenseOverview | null;
+}
+
+export interface BudgetReq {
+  user: UserSkeleton;
+  category: categorySkeleton;
+  amountLimit: number;
+  period: Period;
+  startDate: string;
+  endDate: string;
+}
+
+export enum Period {
+  Weekly = "WEEKLY",
+  Monthly = "MONTHLY",
+  Yearly = "YEARLY",
+  Custom = "CUSTOM",
 }
