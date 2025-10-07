@@ -23,6 +23,22 @@ export default function LoginForm() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      const usernameField = document.getElementById(
+        "username"
+      ) as HTMLInputElement;
+      const passwordField = document.getElementById(
+        "password"
+      ) as HTMLInputElement;
+
+      if (usernameField?.value) setUsername(usernameField.value);
+      if (passwordField?.value) setPassword(passwordField.value);
+    }, 500); 
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
     validateToken().then((isValid) => {
       if (isValid) {
         router.push("/dashboard");
