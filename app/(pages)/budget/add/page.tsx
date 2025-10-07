@@ -224,6 +224,7 @@ export default function AddBudgetPage() {
                         onValueChange={(value) =>
                           field.onChange(value as Period)
                         }
+                        className="flex flex-wrap overflow-auto"
                       >
                         <TabsList>
                           <TabsTrigger value={Period.Weekly}>
@@ -260,6 +261,7 @@ export default function AddBudgetPage() {
                         type="date"
                         {...field}
                         disabled={watchPeriod !== Period.Custom}
+                        className="w-full min-w-0"
                       />
                     </FormControl>
                     <FormDescription>

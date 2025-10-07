@@ -37,81 +37,91 @@ export default function LoginForm() {
       return;
     }
     setLoading(true);
-    const res = await fetch(`${API_URL}/users/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: username, phone: username, password }),
-    });
-    if (res.ok) {
-      const data = await res.json();
+    try {
+      const res = await fetch(`${API_URL}/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: username, phone: username, password }),
+      });
+      if (res.ok) {
+        const data = await res.json();
 
-      if (data.error === "") {
-        setError("");
-        if (rememberMe) {
-          localStorage.setItem("token", data.token);
-          sessionStorage.removeItem("token");
+        if (data.error === "") {
+          setError("");
+          if (rememberMe) {
+            localStorage.setItem("token", data.token);
+            sessionStorage.removeItem("token");
+          } else {
+            sessionStorage.setItem("token", data.token);
+            localStorage.removeItem("token");
+          }
+          localStorage.setItem("user_id", data.id);
+
+          const response = await fetch(`${API_URL}/users/${data.id}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${data.token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+
+            dispatch(
+              setUser({
+                email: data.user.email,
+                isAuthenticated: true,
+                id: data.user.id,
+                name: data.user.name,
+                country_code: data.user.country_code,
+                phone: data.user.phone,
+                currency: data.user.currency,
+                theme: data.user.theme,
+                language: data.user.language,
+                isActive: data.user.isActive,
+                isAdmin: data.user.isAdmin,
+                notificationsEnabled: data.user.notificationsEnabled,
+                profilePicFilePath: data.user.profilePicFilePath,
+                profileComplete: data.user.profileComplete,
+                profilePictureUrl: data.user.profilePictureUrl,
+              })
+            );
+            localStorage.setItem("theme", data.user.theme);
+
+            router.push("/dashboard");
+          } else {
+            const error = await response.json();
+            console.error("Error fetching user data:", error);
+            setError(error.error || "Failed to fetch user data");
+            return;
+          }
         } else {
-          sessionStorage.setItem("token", data.token);
+          setLoading(false);
+          dispatch(setUser(null));
           localStorage.removeItem("token");
-        }
-        localStorage.setItem("user_id", data.id);
-
-        const response = await fetch(`${API_URL}/users/${data.id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${data.token}`,
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-
-          dispatch(
-            setUser({
-              email: data.user.email,
-              isAuthenticated: true,
-              id: data.user.id,
-              name: data.user.name,
-              country_code: data.user.country_code,
-              phone: data.user.phone,
-              currency: data.user.currency,
-              theme: data.user.theme,
-              language: data.user.language,
-              isActive: data.user.isActive,
-              isAdmin: data.user.isAdmin,
-              notificationsEnabled: data.user.notificationsEnabled,
-              profilePicFilePath: data.user.profilePicFilePath,
-              profileComplete: data.user.profileComplete,
-              profilePictureUrl: data.user.profilePictureUrl,
-            })
-          );
-          localStorage.setItem("theme", data.user.theme);
-
-          router.push("/dashboard");
-        } else {
-          const error = await response.json();
-          console.error("Error fetching user data:", error);
-          setError(error.error || "Failed to fetch user data");
-          return;
+          sessionStorage.removeItem("token");
+          localStorage.removeItem("user_id");
+          setError(data.message || "Login failed");
         }
       } else {
+        const errorData = await res.json();
         setLoading(false);
-        dispatch(setUser(null));
+        dispatch(clearUser());
         localStorage.removeItem("token");
         sessionStorage.removeItem("token");
         localStorage.removeItem("user_id");
-        setError(data.message || "Login failed");
+        setError(errorData.error || "Login failed");
       }
-    } else {
-      const errorData = await res.json();
+    } catch (error) {
+      console.error("Error during login:", error);
       setLoading(false);
       dispatch(clearUser());
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       localStorage.removeItem("user_id");
-      setError(errorData.error || "Login failed");
+      setError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -234,7 +244,7 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <div className={`text-red-500 absolute ${error ? "block" : "hidden"}`}>
+      <div className={`text-red-500  ${error ? "block" : "hidden"} text-sm`}>
         {error.charAt(0).toUpperCase() + error.slice(1)}
       </div>
     </form>

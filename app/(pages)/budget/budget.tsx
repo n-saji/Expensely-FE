@@ -413,7 +413,7 @@ export default function Page() {
       )}
       {openEditDialog && budgetToEdit && (
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
-          <DialogContent>
+          <DialogContent className="overflow-auto max-h-[90vh] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Edit Budget</DialogTitle>
               <DialogDescription>
@@ -555,13 +555,13 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
+                <DialogFooter className="mt-4 max-sm:flex-row w-full justify-end">
+                  <DialogClose>
+                    <Button variant="outline" className="">Cancel</Button>
                   </DialogClose>
                   <Button className="ml-2" type="submit" disabled={loader}>
                     {loader && <Spinner />}
-                    {loader ? "Updating..." : "Update"}
+                    {loader ? "" : "Update"}
                   </Button>
                 </DialogFooter>
               </form>
