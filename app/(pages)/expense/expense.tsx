@@ -20,13 +20,11 @@ import DropDown from "@/components/drop-down";
 import DownloadFile from "@/assets/icon/download-file.png";
 import DownloadFileWhite from "@/assets/icon/download-file-white.png";
 import DatePicker from "react-datepicker";
+import { CategoryTypeExpense } from "@/global/constants";
+import { Category } from "@/global/dto";
 
-const CategoryTypeExpense = "expense";
-interface Category {
-  id: string;
-  type: string;
-  name: string;
-}
+
+
 
 interface Expense {
   id: string;

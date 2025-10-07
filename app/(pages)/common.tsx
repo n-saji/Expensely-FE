@@ -1,9 +1,8 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 
-import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -11,8 +10,13 @@ import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
 import Loader from "@/components/loader";
 import FetchToken from "@/utils/fetch_token";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 
+import { addCategory, removeCategory } from "@/redux/slices/category";
+import { API_URL } from "@/config/config";
+import { CategoryTypeExpense } from "@/global/constants";
+import { Category } from "@/global/dto";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function DashboardPage({
   children,
@@ -40,6 +44,65 @@ export default function DashboardPage({
   let isLink = false;
   const router = useRouter();
   const loading = useSelector((state: RootState) => state.sidebar.loading);
+  const isCategoryMounted = useRef(false);
+  const categories = useSelector((state: RootState) => state.categoryExpense);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (isCategoryMounted.current) {
+        console.log("Component is already mounted, skipping fetch");
+        return;
+      }
+      isCategoryMounted.current = true;
+      try {
+        const response = await fetch(
+          `${API_URL}/categories/user/${user.id}?type=${CategoryTypeExpense}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        if (!data || !Array.isArray(data)) {
+          throw new Error("Invalid categories data");
+        }
+        data.forEach((category: Category) => {
+          const alreadyExists = categories.categories.some(
+            (c) => c.id === category.id
+          );
+          if (!alreadyExists) {
+            dispatch(
+              addCategory({
+                id: category.id,
+                type: category.type,
+                name: category.name,
+              })
+            );
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+
+    dispatch(
+      removeCategory({
+        id: "",
+        type: CategoryTypeExpense,
+        name: "",
+      })
+    );
+  }, []);
+
   // conditional pathnames
   if (pathname === "/expense/add") {
     isLink = true;
@@ -119,7 +182,7 @@ export default function DashboardPage({
   return (
     <>
       {loading && <Loader />}
-      <Toaster closeButton/>
+      <Toaster closeButton />
       <div
         className={`w-full flex min-h-screen bg-primary-color min-sm:relative
           dark:text-gray-200

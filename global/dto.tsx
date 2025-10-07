@@ -92,3 +92,9 @@ export enum Period {
   Yearly = "YEARLY",
   Custom = "CUSTOM",
 }
+
+export interface Category {
+  id: string;
+  type: string;
+  name: string;
+}
