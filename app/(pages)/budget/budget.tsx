@@ -184,6 +184,7 @@ export default function Page() {
         const text = await res.text();
         data = text ? JSON.parse(text) : {};
       } catch (e) {
+        console.error("Failed to parse response:", e);
         data = {};
       }
 
