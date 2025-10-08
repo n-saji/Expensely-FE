@@ -69,13 +69,13 @@ export default function AddBudgetPage() {
       User: { id: user.id || "" },
       amountLimit: 0,
       period: Period.Monthly,
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date().toISOString().split("T")[0],
+      startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0],
+      endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split("T")[0],
     },
   });
   const watchPeriod = form.watch("period");
-    const [loader, setLoader] = useState(false);
-    const router = useRouter();
+  const [loader, setLoader] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const start = new Date();
@@ -303,7 +303,6 @@ export default function AddBudgetPage() {
           </Card>
         </form>
       </Form>
-
     </div>
   );
 }

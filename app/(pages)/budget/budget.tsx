@@ -179,13 +179,20 @@ export default function Page() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const data = await res.json();
+      let data;
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        data = {};
+      }
+
       if (!res.ok) {
         throw new Error(data.error || "Failed to delete budget");
       }
       // Remove deleted budget from state
       setBudgets((prev) => prev.filter((b) => b.id !== budget.id));
-      toast(`Deleted ${budget.category}`, {
+      toast(`Deleted ${budget.category.name}`, {
         description: "Budget deleted successfully",
       });
     } catch (err) {
@@ -413,7 +420,7 @@ export default function Page() {
       )}
       {openEditDialog && budgetToEdit && (
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
-          <DialogContent className="overflow-auto max-h-[90vh] sm:max-w-lg">
+          <DialogContent className="max-h-[90vh] sm:max-w-lg overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Budget</DialogTitle>
               <DialogDescription>
@@ -546,6 +553,7 @@ export default function Page() {
                           type="date"
                           {...field}
                           disabled={watchPeriod !== Period.Custom}
+                          className=""
                         />
                       </FormControl>
                       <FormDescription>
@@ -556,8 +564,10 @@ export default function Page() {
                   )}
                 />
                 <DialogFooter className="mt-4 max-sm:flex-row w-full justify-end">
-                  <DialogClose>
-                    <Button variant="outline" className="">Cancel</Button>
+                  <DialogClose asChild>
+                    <Button variant="outline" className="">
+                      Cancel
+                    </Button>
                   </DialogClose>
                   <Button className="ml-2" type="submit" disabled={loader}>
                     {loader && <Spinner />}

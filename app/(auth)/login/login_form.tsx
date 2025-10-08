@@ -23,22 +23,6 @@ export default function LoginForm() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const usernameField = document.getElementById(
-        "username"
-      ) as HTMLInputElement;
-      const passwordField = document.getElementById(
-        "password"
-      ) as HTMLInputElement;
-
-      if (usernameField?.value) setUsername(usernameField.value);
-      if (passwordField?.value) setPassword(passwordField.value);
-    }, 500); 
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
     validateToken().then((isValid) => {
       if (isValid) {
         router.push("/dashboard");
@@ -131,13 +115,14 @@ export default function LoginForm() {
         setError(errorData.error || "Login failed");
       }
     } catch (error) {
-      console.error("Error during login:", error);
       setLoading(false);
       dispatch(clearUser());
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       localStorage.removeItem("user_id");
-      setError("An unexpected error occurred. Please try again.");
+      setError(
+        `An unexpected error occurred. Please try again. Error: ${error}`
+      );
     }
   };
 
@@ -163,7 +148,7 @@ export default function LoginForm() {
             ${error ? "border-red-500" : ""}`}
             placeholder="email or phone number"
             required
-            autoComplete="email"
+            autoComplete="username"
             onChange={(e) => {
               setUsername(e.target.value);
               setError("");
