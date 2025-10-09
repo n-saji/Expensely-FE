@@ -155,7 +155,7 @@ export default function DashboardPage() {
             Monthly
           </button>
         </div>
-        {clickedButton === "yearly" && (
+        {clickedButton === "yearly" && overview?.earliestStartYear !== null && (
           <select
             className="border border-gray-300 rounded-md px-1.5 focus:outline-none w-fit
             cursor-pointer bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200
@@ -180,7 +180,7 @@ export default function DashboardPage() {
             })}
           </select>
         )}
-        {clickedButton === "monthly" && (
+        {clickedButton === "monthly" && overview?.earliestStartMonth !== null && (
           <input
             type="month"
             min={`${min_year}-${min_month < 10 ? `0${min_month}` : min_month}`}

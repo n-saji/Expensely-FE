@@ -12,29 +12,16 @@ import { setUser } from "@/redux/slices/userSlice";
 import { API_URL } from "@/config/config";
 import FetchToken from "@/utils/fetch_token";
 import UserPreferences from "@/utils/userPreferences";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const [enablePasswordUpdate, setEnablePasswordUpdate] = useState(false);
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [changesMade, setChangesMade] = useState(false);
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const token = FetchToken();
   const hasFetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (!error) return;
-    const timer = setTimeout(() => setError(null), 5000);
-    return () => clearTimeout(timer);
-  }, [error]);
-
-  useEffect(() => {
-    if (!success) return;
-    const timer = setTimeout(() => setSuccess(null), 5000);
-    return () => clearTimeout(timer);
-  }, [success]);
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
@@ -67,10 +54,8 @@ export default function SettingsPage() {
             notificationsEnabled: data.user.notificationsEnabled,
           })
         );
-
-        setError("");
       } else {
-        setError("Failed to fetch user profile data.");
+        toast.error("Failed to fetch user profile data.");
       }
     };
     fetchData();
@@ -88,14 +73,12 @@ export default function SettingsPage() {
 
   const handlePasswordChange = async () => {
     if (!password) {
-      setError("Password cannot be empty.");
-      setSuccess(null);
+      toast.error("Password cannot be empty.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
-      setSuccess(null);
+      toast.error("Password must be at least 6 characters long.");
       return;
     }
     await fetch(`${API_URL}/users/update-password`, {
@@ -112,20 +95,17 @@ export default function SettingsPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.error === null) {
-          dispatch(setUser(data.user));
+          // dispatch(setUser(data.user));
           setPassword("");
           setEnablePasswordUpdate(false);
-          setSuccess("Password updated successfully!");
-          setError(null);
+          toast.success("Password updated successfully!");
         } else {
-          setError(data.message || "Failed to update password.");
-          setSuccess(null);
+          toast.error(data.message || "Failed to update password.");
         }
       })
       .catch((err) => {
         console.error("Error updating password:", err);
-        setError("An error occurred while updating the password.");
-        setSuccess(null);
+        toast.error("An error occurred while updating the password.");
       });
   };
 
@@ -152,24 +132,20 @@ export default function SettingsPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.error === null) {
-          setSuccess("User settings updated successfully!");
-          setError(null);
+          toast.success(`Settings updated successfully!`);
         } else {
-          setError(data.message || "Failed to update user settings.");
-          setSuccess(null);
+          toast.error(data.message || "Failed to update settings.");
         }
       })
       .catch((err) => {
         console.error("Error updating user settings:", err);
-        setError("An error occurred while updating user settings.");
-        setSuccess(null);
+        toast.error("An error occurred while updating user settings.");
       });
   };
 
   const handleUserDeletion = async () => {
     if (!user.id) {
-      setError("User ID is required for deletion.");
-      setSuccess(null);
+      toast.error("User ID is required for deletion.");
       return;
     }
     await fetch(`${API_URL}/users/delete-account/${user.id}`, {
@@ -184,22 +160,19 @@ export default function SettingsPage() {
       .then((data) => {
         if (data.error === null) {
           dispatch(setUser({ ...user, isActive: false }));
-          setSuccess("Account deleted successfully!");
-          setError(null);
+          toast.success("Account deleted successfully!");
 
           localStorage.removeItem("token");
           sessionStorage.removeItem("token");
           localStorage.removeItem("user_id");
           localStorage.removeItem("theme");
         } else {
-          setError(data.message || "Failed to delete account.");
-          setSuccess(null);
+          toast.error(data.message || "Failed to delete account.");
         }
       })
       .catch((err) => {
         console.error("Error deleting account:", err);
-        setError("An error occurred while deleting the account.");
-        setSuccess(null);
+        toast.error("An error occurred while deleting the account.");
       });
   };
 
@@ -297,8 +270,7 @@ export default function SettingsPage() {
                 className="w-6 h-6 ml-2 inline-block cursor-pointer"
                 onClick={async () => {
                   if (!changesMade) {
-                    setError("No changes made to update.");
-                    setSuccess(null);
+                    toast.error("No changes made to update.");
                     return;
                   }
                   await handlePasswordChange();
@@ -342,8 +314,7 @@ export default function SettingsPage() {
                 return;
               }
               handleUserDeletion();
-              setSuccess("Account deleted successfully!");
-              setError(null);
+              toast.success("Account deleted successfully!");
               setTimeout(() => {
                 // Redirect to home or login page after deletion
                 window.location.href = "/";
@@ -355,26 +326,6 @@ export default function SettingsPage() {
         </div>
       </SettingsCard>
 
-      <div
-        className={`fixed w-80 bottom-10 -right-80  text-white  text-xs
-          p-4 text-left rounded-md flex justify-between items-center shadow-lg
-          ${error ? "bg-red-500" : success ? "bg-green-500" : "bg-gray-500"}
-          ${
-            error || success ? "-translate-x-85" : "translate-x-80"
-          } transition-all duration-400 ease-in-out`}
-      >
-        {error && <div>{error}</div>}
-        {success && <div>{success}</div>}
-        <button
-          className=" text-white underline cursor-pointer"
-          onClick={() => {
-            setError(null);
-            setSuccess(null);
-          }}
-        >
-          Close
-        </button>
-      </div>
       <UserPreferences />
     </div>
   );
