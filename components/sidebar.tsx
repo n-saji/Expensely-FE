@@ -86,8 +86,9 @@ export default function Sidebar() {
               const isHovered = hovered === link.href;
 
               return (
-                <li
+                <Link
                   key={link.href}
+                  href={link.href}
                   className={`flex items-center transition-all duration-150 ${
                     isActive ? "bg-gray-800" : ""
                   }  px-3 py-2 rounded-md hover:bg-gray-800 hover:text-gray-100`}
@@ -99,13 +100,11 @@ export default function Sidebar() {
                     alt={link.label}
                     className="w-5 mr-3"
                   />
-                  <Link
-                    href={link.href}
-                    className={`${isActive ? "text-gray-100" : ""}`}
-                  >
+
+                  <span className={`${isActive ? "text-gray-100" : ""}`}>
                     {link.label}
-                  </Link>
-                </li>
+                  </span>
+                </Link>
               );
             })}
           </ul>

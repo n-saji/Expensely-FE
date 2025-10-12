@@ -378,9 +378,7 @@ export default function Page() {
 
   return (
     <div className="block w-full space-y-4">
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
-        All Categories
-      </h1>
+
       {budgetToDelete && (
         <AlertDialog
           open={!!budgetToDelete}
