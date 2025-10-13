@@ -13,7 +13,8 @@ import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { RootState } from "@/redux/store";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 import defaulProdilePic from "@/assets/icon/user.png";
-import {clearCategories} from "@/redux/slices/category";
+import { clearCategories } from "@/redux/slices/category";
+import { LogOut, Settings, ShieldUser, User } from "lucide-react";
 
 export default function Navbar({
   title,
@@ -81,7 +82,6 @@ export default function Navbar({
       router.push("/");
       dispatch(clearUser());
       dispatch(clearCategories());
-      
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -146,50 +146,42 @@ export default function Navbar({
   }`}
           >
             <button
-              className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
-              dark:hover:bg-gray-700
-              transition-colors duration-300 ease-in-out"
+              className="navbar-icons"
               onClick={() => {
                 setProfileDropdown(false);
                 router.push("/profile");
               }}
             >
-              Profile
+              <User className="w-4 h-4" /> Profile
             </button>
             <button
-              className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
-              dark:hover:bg-gray-700
-              transition-colors duration-300 ease-in-out"
+              className="navbar-icons"
               onClick={() => {
                 setProfileDropdown(false);
                 router.push("/settings");
               }}
             >
+              <Settings className="w-4 h-4" />
               Settings
             </button>
             <hr className="my-1 border-gray-400 dark:border-gray-600" />
             {user.isAdmin && (
               <>
                 <button
-                  className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
-                dark:hover:bg-gray-700
-                transition-colors duration-300 ease-in-out"
+                  className="navbar-icons"
                   onClick={() => {
                     setProfileDropdown(false);
                     router.push("/admin");
                   }}
                 >
+                  <ShieldUser className="w-4 h-4" />
                   Admin
                 </button>
                 <hr className="my-1 border-gray-400 dark:border-gray-600" />
               </>
             )}
-            <button
-              className="text-sm hover:underline hover:bg-gray-400 rounded px-3 py-2 w-full text-left cursor-pointer
-              dark:hover:bg-gray-700
-              transition-colors duration-300 ease-in-out"
-              onClick={handleLogout}
-            >
+            <button className="navbar-icons" onClick={handleLogout}>
+              <LogOut className="w-4 h-4" />
               Logout
             </button>
           </div>
