@@ -1,6 +1,5 @@
 "use client";
 import { API_URL } from "@/config/config";
-import { addCategory, removeCategory } from "@/redux/slices/category";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
@@ -20,8 +19,6 @@ import DropDown from "@/components/drop-down";
 import DownloadFile from "@/assets/icon/download-file.png";
 import DownloadFileWhite from "@/assets/icon/download-file-white.png";
 import DatePicker from "react-datepicker";
-import { CategoryTypeExpense } from "@/global/constants";
-import { Category } from "@/global/dto";
 
 interface Expense {
   id: string;
@@ -56,10 +53,8 @@ const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
 export default function Expense({ isDemo }: { isDemo?: boolean }) {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
-  const dispatch = useDispatch();
   const token = FetchToken();
   const isExpenseMounted = useRef(false);
-  const isCategoryMounted = useRef(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const [filter, setFilter] = useState(false);
@@ -137,60 +132,60 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (isCategoryMounted.current) {
-        console.log("Component is already mounted, skipping fetch");
-        return;
-      }
-      isCategoryMounted.current = true;
-      try {
-        const response = await fetch(
-          `${API_URL}/categories/user/${user.id}?type=${CategoryTypeExpense}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  //   useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (isCategoryMounted.current) {
+  //       console.log("Component is already mounted, skipping fetch");
+  //       return;
+  //     }
+  //     isCategoryMounted.current = true;
+  //     try {
+  //       const response = await fetch(
+  //         `${API_URL}/categories/user/${user.id}?type=${CategoryTypeExpense}`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        if (!data || !Array.isArray(data)) {
-          throw new Error("Invalid categories data");
-        }
-        data.forEach((category: Category) => {
-          const alreadyExists = categories.categories.some(
-            (c) => c.id === category.id
-          );
-          if (!alreadyExists) {
-            dispatch(
-              addCategory({
-                id: category.id,
-                type: category.type,
-                name: category.name,
-              })
-            );
-          }
-        });
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       const data = await response.json();
+  //       if (!data || !Array.isArray(data)) {
+  //         throw new Error("Invalid categories data");
+  //       }
+  //       data.forEach((category: Category) => {
+  //         const alreadyExists = categories.categories.some(
+  //           (c) => c.id === category.id
+  //         );
+  //         if (!alreadyExists) {
+  //           dispatch(
+  //             addCategory({
+  //               id: category.id,
+  //               type: category.type,
+  //               name: category.name,
+  //             })
+  //           );
+  //         }
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   };
+  //   fetchData();
 
-    dispatch(
-      removeCategory({
-        id: "",
-        type: CategoryTypeExpense,
-        name: "",
-      })
-    );
-  }, []);
+  //   dispatch(
+  //     removeCategory({
+  //       id: "",
+  //       type: CategoryTypeExpense,
+  //       name: "",
+  //     })
+  //   );
+  // }, []);
 
   return (
     <div className={`flex flex-col w-full h-full flex-grow overflow-hidden`}>
