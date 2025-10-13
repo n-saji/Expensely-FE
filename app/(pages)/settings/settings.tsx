@@ -26,7 +26,6 @@ export default function SettingsPage() {
   useEffect(() => {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
-    console.log("Fetching user profile data...");
 
     const fetchData = async () => {
       const response = await fetch(`${API_URL}/users/${user.id}`, {

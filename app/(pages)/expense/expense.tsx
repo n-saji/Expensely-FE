@@ -23,9 +23,6 @@ import DatePicker from "react-datepicker";
 import { CategoryTypeExpense } from "@/global/constants";
 import { Category } from "@/global/dto";
 
-
-
-
 interface Expense {
   id: string;
   user: {
@@ -56,7 +53,7 @@ interface ExpenseListProps {
 const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
 const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
 
-export default function Expense() {
+export default function Expense({ isDemo }: { isDemo?: boolean }) {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const dispatch = useDispatch();
@@ -135,6 +132,7 @@ export default function Expense() {
         toDate: "",
         category: "",
         order: "desc",
+        limit: isDemo ? 5 : 10,
       });
     }
   }, []);
@@ -218,6 +216,7 @@ export default function Expense() {
         setToDate={setToDate}
         setLoading={setLoading}
         loading={loading}
+        isDemo={isDemo ? true : false}
       />
     </div>
   );
@@ -250,6 +249,7 @@ function ExpenseList({
   setToDate,
   setLoading,
   loading = false,
+  isDemo = false,
 }: {
   expensesList: ExpenseListProps;
   setExpensesList: React.Dispatch<React.SetStateAction<ExpenseListProps>>;
@@ -294,6 +294,7 @@ function ExpenseList({
   setToDate: React.Dispatch<React.SetStateAction<string>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   loading: boolean;
+  isDemo?: boolean;
 }) {
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const dispatch = useDispatch();
@@ -466,10 +467,14 @@ function ExpenseList({
 
   return (
     <div className="flex flex-col w-full h-full flex-grow overflow-hidden">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
-          Recent Transactions
-        </h1>
+      <div
+        className={`flex justify-between items-center ${!isDemo ? "mb-6" : ""}`}
+      >
+        {!isDemo && (
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
+            Recent Transactions
+          </h1>
+        )}
         <div className="flex items-center">
           {selectedExpenses.length > 0 && (
             <button
@@ -488,18 +493,22 @@ function ExpenseList({
               />
             </button>
           )}
-          <Image
-            src={user.theme === "light" ? filterIcon : filterIconWhite}
-            alt="Filter"
-            className="w-6 h-6 cursor-pointer ml-4"
-            onClick={() => setFilter(!filter)}
-          />
-          <Image
-            src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
-            alt="Download"
-            className="w-6 h-6 cursor-pointer ml-4"
-            onClick={handleFileDownload}
-          />
+          {!isDemo && (
+            <Image
+              src={user.theme === "light" ? filterIcon : filterIconWhite}
+              alt="Filter"
+              className="w-6 h-6 cursor-pointer ml-4"
+              onClick={() => setFilter(!filter)}
+            />
+          )}
+          {!isDemo && (
+            <Image
+              src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
+              alt="Download"
+              className="w-6 h-6 cursor-pointer ml-4"
+              onClick={handleFileDownload}
+            />
+          )}
         </div>
       </div>
       {filter && (
@@ -614,15 +623,18 @@ function ExpenseList({
 
       <div className="flex-grow overflow-auto">
         <table
-          className="w-full h-full divide-y shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 
-        text-xs sm:text-sm layout-fixed"
+          className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
+          shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y bg-white dark:bg-gray-900
+          divide-gray-200 dark:divide-gray-700"
         >
           <thead
-            className="bg-gray-100 text-gray-700  uppercase tracking-wider
-            dark:bg-gray-800 dark:text-gray-200"
+            className="text-gray-700 uppercase tracking-wider
+             dark:text-gray-200"
           >
-            <tr className="text-left font-semibold">
-              <th className={`${table_data_classname} w-1/13`}>#</th>
+            <tr className="text-left font-semibold first:rounded-tl-lg last:rounded-tr-lg">
+              {!isDemo && (
+                <th className={`${table_data_classname} w-1/13`}>#</th>
+              )}
               <th className={`${table_data_classname} w-3/13`}>Category</th>
               <th className={`${table_data_classname} w-2/13`}>Amount</th>
               <th className={`${table_data_classname} w-4/13`}>Description</th>
@@ -676,38 +688,42 @@ function ExpenseList({
           )}
           {showTable && !loading && (
             <tbody
-              className="bg-white
-              dark:bg-gray-900 dark:text-gray-200
-              dark:divide-gray-700"
+              className="dark:text-gray-200 divide-y last:rounded-bl-lg last:rounded-br-lg
+                 dark:divide-gray-700 "
             >
               {expensesList.expenses.map((expense) => (
                 <tr
                   key={expense.id}
-                  className="hover:bg-gray-100 py-3 group relative dark:hover:bg-gray-950 
-                  transition-colors cursor-pointer divide-y divide-gray-200 dark:divide-gray-700
+                  className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
+                  transition-colors relative group
                   "
                 >
-                  <td className={table_data_classname}>
-                    <input
-                      type="checkbox"
-                      className="cursor-pointer"
-                      checked={selectedExpenses.some(
-                        (e) => e.id === expense.id
-                      )}
-                      onChange={() => {
-                        const isSelected = selectedExpenses.some(
+                  {!isDemo && (
+                    <td className={table_data_classname}>
+                      <input
+                        type="checkbox"
+                        className="cursor-pointer"
+                        disabled={loading}
+                        checked={selectedExpenses.some(
                           (e) => e.id === expense.id
-                        );
-                        if (isSelected) {
-                          setSelectedExpenses(
-                            selectedExpenses.filter((e) => e.id !== expense.id)
+                        )}
+                        onChange={() => {
+                          const isSelected = selectedExpenses.some(
+                            (e) => e.id === expense.id
                           );
-                        } else {
-                          setSelectedExpenses([...selectedExpenses, expense]);
-                        }
-                      }}
-                    />
-                  </td>
+                          if (isSelected) {
+                            setSelectedExpenses(
+                              selectedExpenses.filter(
+                                (e) => e.id !== expense.id
+                              )
+                            );
+                          } else {
+                            setSelectedExpenses([...selectedExpenses, expense]);
+                          }
+                        }}
+                      />
+                    </td>
+                  )}
                   <td
                     className={table_data_classname}
                     onClick={() => {
@@ -754,17 +770,19 @@ function ExpenseList({
                     })}
                   </td>
 
-                  <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <Image
-                      src={user.theme === "light" ? editIcon : editIconWhite}
-                      alt="Edit"
-                      className="w-4 h-4"
-                      onClick={() => {
-                        setSelectedExpenses([expense]);
-                        dispatch(togglePopUp());
-                      }}
-                    />
-                  </td>
+                  {!isDemo && (
+                    <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                      <Image
+                        src={user.theme === "light" ? editIcon : editIconWhite}
+                        alt="Edit"
+                        className="w-4 h-4"
+                        onClick={() => {
+                          setSelectedExpenses([expense]);
+                          dispatch(togglePopUp());
+                        }}
+                      />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -866,118 +884,120 @@ function ExpenseList({
           </PopUp>
         )}
       </div>
-      <div
-        className="shrink-0 flex justify-center items-center text-xs sm:text-sm 
+      {!isDemo && (
+        <div
+          className="shrink-0 flex justify-center items-center text-xs sm:text-sm 
        py-4"
-      >
-        <div className="flex items-center space-x-2 justify-center">
-          <button
-            className={`px-2 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+        >
+          <div className="flex items-center space-x-2 justify-center">
+            <button
+              className={`px-2 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
                ${
                  pageNumber <= 1
                    ? "cursor-not-allowed opacity-30"
                    : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
                }`}
-            disabled={pageNumber <= 1}
-            onClick={() => {
-              setPageNumber(1);
-              fetchExpenses({
-                fromDate: fromDateFilter
-                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
-                  : "",
-                toDate: toDateFilter
-                  ? new Date(toDateFilter).toISOString().slice(0, 16)
-                  : "",
-                category: categoryFilter || "",
-                order: "desc",
-                page: 1,
-              });
-            }}
-          >
-            {`<<`}
-          </button>
-          <button
-            className={`px-3 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+              disabled={pageNumber <= 1}
+              onClick={() => {
+                setPageNumber(1);
+                fetchExpenses({
+                  fromDate: fromDateFilter
+                    ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  toDate: toDateFilter
+                    ? new Date(toDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  category: categoryFilter || "",
+                  order: "desc",
+                  page: 1,
+                });
+              }}
+            >
+              {`<<`}
+            </button>
+            <button
+              className={`px-3 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
                ${
                  pageNumber <= 1
                    ? "cursor-not-allowed opacity-30"
                    : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
                }`}
-            disabled={pageNumber <= 1}
-            onClick={() => {
-              const newPageNumber = Math.max(pageNumber - 1, 1);
-              setPageNumber(newPageNumber);
-              fetchExpenses({
-                fromDate: fromDateFilter
-                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
-                  : "",
-                toDate: toDateFilter
-                  ? new Date(toDateFilter).toISOString().slice(0, 16)
-                  : "",
-                category: categoryFilter || "",
-                order: "desc",
-                page: newPageNumber,
-              });
-            }}
-          >
-            {`<`}
-          </button>
-          <span className="px-4 text-gray-600 dark:text-gray-300">
-            Page {pageNumber} of {expensesList.totalPages || 1}
-          </span>
-          <button
-            className={`px-3 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+              disabled={pageNumber <= 1}
+              onClick={() => {
+                const newPageNumber = Math.max(pageNumber - 1, 1);
+                setPageNumber(newPageNumber);
+                fetchExpenses({
+                  fromDate: fromDateFilter
+                    ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  toDate: toDateFilter
+                    ? new Date(toDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  category: categoryFilter || "",
+                  order: "desc",
+                  page: newPageNumber,
+                });
+              }}
+            >
+              {`<`}
+            </button>
+            <span className="px-4 text-gray-600 dark:text-gray-300">
+              Page {pageNumber} of {expensesList.totalPages || 1}
+            </span>
+            <button
+              className={`px-3 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
                ${
                  expensesList.pageNumber >= expensesList.totalPages
                    ? "cursor-not-allowed opacity-30"
                    : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
                }`}
-            disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
-            onClick={() => {
-              setPageNumber((prev) => prev + 1);
-              fetchExpenses({
-                fromDate: fromDateFilter
-                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
-                  : "",
-                toDate: toDateFilter
-                  ? new Date(toDateFilter).toISOString().slice(0, 16)
-                  : "",
-                category: categoryFilter || "",
-                order: "desc",
-                page: pageNumber + 1,
-              });
-            }}
-          >
-            {`>`}
-          </button>
-          <button
-            className={`px-2 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
+              disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
+              onClick={() => {
+                setPageNumber((prev) => prev + 1);
+                fetchExpenses({
+                  fromDate: fromDateFilter
+                    ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  toDate: toDateFilter
+                    ? new Date(toDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  category: categoryFilter || "",
+                  order: "desc",
+                  page: pageNumber + 1,
+                });
+              }}
+            >
+              {`>`}
+            </button>
+            <button
+              className={`px-2 py-1 rounded dark:text-gray-200 border border-gray-700 dark:border-gray-700 
               
               ${
                 expensesList.pageNumber >= expensesList.totalPages
                   ? "cursor-not-allowed opacity-30"
                   : "cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700"
               }`}
-            disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
-            onClick={() => {
-              setPageNumber(expensesList.totalPages);
-              fetchExpenses({
-                fromDate: fromDateFilter
-                  ? new Date(fromDateFilter).toISOString().slice(0, 16)
-                  : "",
-                toDate: toDateFilter
-                  ? new Date(toDateFilter).toISOString().slice(0, 16)
-                  : "",
-                category: categoryFilter || "",
-                order: "desc",
-                page: expensesList.totalPages,
-              });
-            }}
-          >
-            {`>>`}
-          </button>
+              disabled={expensesList.pageNumber >= expensesList.totalPages} // Disable if less than 10 items
+              onClick={() => {
+                setPageNumber(expensesList.totalPages);
+                fetchExpenses({
+                  fromDate: fromDateFilter
+                    ? new Date(fromDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  toDate: toDateFilter
+                    ? new Date(toDateFilter).toISOString().slice(0, 16)
+                    : "",
+                  category: categoryFilter || "",
+                  order: "desc",
+                  page: expensesList.totalPages,
+                });
+              }}
+            >
+              {`>>`}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

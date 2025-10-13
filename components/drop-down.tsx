@@ -28,7 +28,6 @@ export default function DropDown({
         value: "",
       });
     }
-    console.log("Options updated:", options);
   }, [options]);
   const [clicked, setClicked] = useState(false);
   const user = useSelector((state: RootState) => state.user);

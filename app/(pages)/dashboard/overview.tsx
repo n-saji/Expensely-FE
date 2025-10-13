@@ -1,6 +1,7 @@
 import Card from "@/components/card";
 import { DashboardPageProps } from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
+import Expense from "../expense/expense";
 
 export default function Overview({
   dashboardProps,
@@ -9,7 +10,8 @@ export default function Overview({
 }) {
   const { user } = dashboardProps;
   const overview = dashboardProps.overview;
-  const card_classname = "grid grid-cols-1 sm:grid-cols-2 w-full gap-4 px-1";
+  const card_classname =
+    "grid grid-cols-1 sm:grid-cols-2 w-full h-full gap-4 px-1";
   return (
     <>
       {/* Monthly Overview */}
@@ -17,7 +19,7 @@ export default function Overview({
         <Card
           title="This Month's Expense"
           // description=""
-          className="space-y-4"
+          className="space-y-4 col-span-2 md:col-span-1"
         >
           <div className={card_classname}>
             <div className="card-overview">
@@ -32,7 +34,7 @@ export default function Overview({
               <span className="card-overview-label">
                 Change from Last Month
               </span>
-              <div>
+              <div className="flex flex-wrap items-center space-x-2">
                 <span
                   className={`card-overview-quantity ${
                     overview.thisMonthTotalExpense -
@@ -48,7 +50,7 @@ export default function Overview({
                       overview.lastMonthTotalExpense
                   ).toFixed(2)}
                 </span>
-                <span className="card-overview-subtext ml-2">
+                <span className="card-overview-subtext">
                   {overview.lastMonthTotalExpense === 0
                     ? "(0%)"
                     : `(${(
@@ -81,7 +83,7 @@ export default function Overview({
                     <span className="card-overview-label">
                       Biggest Transaction
                     </span>
-                    <div>
+                    <div className="flex flex-wrap items-center space-x-2">
                       <span className="card-overview-quantity">
                         {currencyMapper(user?.currency || "USD")}
                         {firstValue}
@@ -108,7 +110,7 @@ export default function Overview({
         <Card
           title="Yearly Expense"
           // description=""
-          className="space-y-4"
+          className="space-y-4 col-span-2 md:col-span-1"
         >
           <div className={card_classname}>
             <div className="card-overview">
@@ -133,6 +135,15 @@ export default function Overview({
                 {overview.averageMonthlyExpense.toFixed(2)}
               </span>
             </div>
+
+            <div className="card-overview">
+              <span className="card-overview-label">
+                Most Frequent Category
+              </span>
+              <span className="card-overview-quantity">
+                {overview.mostFrequentCategory || "N/A"}
+              </span>
+            </div>
           </div>
         </Card>
       ) : (
@@ -145,11 +156,11 @@ export default function Overview({
       )}
 
       {/* Category Overview */}
-      {overview ? (
+      {/* {overview ? (
         <Card
           title="Category Overview"
           // description=""
-          className="space-y-4"
+          className="space-y-4 col-span-2 md:col-span-1"
         >
           <div className={card_classname}>
             <div className="card-overview">
@@ -175,7 +186,12 @@ export default function Overview({
           className=""
           loading={true}
         />
-      )}
+      )} */}
+
+      {/* Recent Transactions */}
+      <Card className="col-span-2" title="Recent Transactions">
+        <Expense isDemo={true} />
+      </Card>
     </>
   );
 }

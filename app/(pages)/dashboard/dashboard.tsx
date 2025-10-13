@@ -171,7 +171,6 @@ export default function DashboardPage() {
           >
             {Array.from({ length: currentYear - min_year + 1 }, (_, i) => {
               const year = currentYear - i;
-              console.log(year);
               return (
                 <option key={year} value={year}>
                   {year}

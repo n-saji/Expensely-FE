@@ -10,7 +10,6 @@ import fetchProfileUrl from "@/utils/fetchProfileURl";
 export default function AuthHandler() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  console.log("Session data:", session);
   const dispatch = useDispatch();
 
   useEffect(() => {

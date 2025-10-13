@@ -6,7 +6,7 @@ export default function Card({
   children,
   loading,
 }: {
-  title: string;
+  title?: string;
   // description?: string;
   icon?: React.ComponentType<{ className?: string }>;
   className?: string;
@@ -20,9 +20,11 @@ export default function Card({
     >
       {Icon && <Icon className="text-green-600 w-8 h-8" />}
 
-      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-300 p-1">
-        {title}
-      </h3>
+      {title && (
+        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-300 p-1">
+          {title}
+        </h3>
+      )}
       {/* <p className="text-gray-600 mt-2 dark:text-gray-400">{description}</p> */}
       {children && <>{children}</>}
       {loading ? (
