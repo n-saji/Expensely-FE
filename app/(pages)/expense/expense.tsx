@@ -105,6 +105,25 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
       });
       if (!response.ok) throw new Error("Failed to fetch expenses");
       const data = await response.json();
+
+      if (page > data.totalPages && data.totalPages > 0) {
+        fetchExpenses({
+          fromDate,
+          toDate,
+          category,
+          order,
+          page: data.totalPages,
+          limit,
+        });
+        setPageNumber(data.totalPages);
+        setExpensesList({
+          ...expensesList,
+          totalPages: data.totalPages,
+          pageNumber: data.totalPages,
+        });
+        return; // Exit current call
+      }
+
       setExpensesList({
         expenses: data.expenses,
         totalPages: data.totalPages,
@@ -131,61 +150,6 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
       });
     }
   }, []);
-
-  //   useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (isCategoryMounted.current) {
-  //       console.log("Component is already mounted, skipping fetch");
-  //       return;
-  //     }
-  //     isCategoryMounted.current = true;
-  //     try {
-  //       const response = await fetch(
-  //         `${API_URL}/categories/user/${user.id}?type=${CategoryTypeExpense}`,
-  //         {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       const data = await response.json();
-  //       if (!data || !Array.isArray(data)) {
-  //         throw new Error("Invalid categories data");
-  //       }
-  //       data.forEach((category: Category) => {
-  //         const alreadyExists = categories.categories.some(
-  //           (c) => c.id === category.id
-  //         );
-  //         if (!alreadyExists) {
-  //           dispatch(
-  //             addCategory({
-  //               id: category.id,
-  //               type: category.type,
-  //               name: category.name,
-  //             })
-  //           );
-  //         }
-  //       });
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     }
-  //   };
-  //   fetchData();
-
-  //   dispatch(
-  //     removeCategory({
-  //       id: "",
-  //       type: CategoryTypeExpense,
-  //       name: "",
-  //     })
-  //   );
-  // }, []);
 
   return (
     <div className={`flex flex-col w-full h-full flex-grow overflow-hidden`}>
