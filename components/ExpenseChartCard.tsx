@@ -145,8 +145,9 @@ export function ExpensesMonthlyBarChartCard({
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={chartData} margin={margin}>
           <CartesianGrid
-            strokeDasharray="3 3"
-            stroke={darkMode ? "#999999" : "#ccc"}
+            // strokeDasharray="3 3"
+            stroke={darkMode ? "#5f6266" : "#ccc"}
+            // strokeLinejoin="round"
           />
           <XAxis
             dataKey="name"
@@ -222,8 +223,9 @@ export function ExpensesMonthlyLineChartCard({
         ) : (
           <ComposedChart data={chartData} margin={margin}>
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={darkMode ? "#999999" : "#ccc"}
+              // strokeDasharray="3 3"
+              stroke={darkMode ? "#5f6266" : "#ccc"}
+              // strokeLinejoin="round"
             />
             <XAxis
               dataKey="name"
@@ -292,8 +294,9 @@ export function ExpensesTop5Monthly({
         <ResponsiveContainer width="100%" height={height}>
           <BarChart data={chartData} layout="horizontal" margin={margin}>
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={darkMode ? "#999999" : "#ccc"}
+              // strokeDasharray="3 3"
+              // stroke={darkMode ? "#999999" : "#ccc"}
+              stroke={darkMode ? "#5f6266" : "#ccc"}
             />
             <XAxis
               dataKey="name"
@@ -360,10 +363,7 @@ export function ExpensesOverDays({
       {chartData.length > 0 ? (
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={chartData} margin={margin}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={darkMode ? "#999999" : "#ccc"}
-            />
+            <CartesianGrid stroke={darkMode ? "#5f6266" : "#ccc"} />
             <XAxis
               dataKey="day"
               tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}

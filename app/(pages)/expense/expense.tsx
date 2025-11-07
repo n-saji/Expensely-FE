@@ -98,7 +98,7 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     if (category) urlBuilder.searchParams.append("category_id", category);
     if (q) urlBuilder.searchParams.append("q", q);
     urlBuilder.searchParams.append("page", String(page));
-    urlBuilder.searchParams.append("limit", String(limit));
+    if (limit) urlBuilder.searchParams.append("limit", String(limit));
 
     try {
       setLoading(true);
@@ -119,7 +119,8 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
           category,
           order,
           page: data.totalPages,
-          limit,
+          limit: isDemo ? 5 : 10,
+
         });
         setPageNumber(data.totalPages);
         setExpensesList({
@@ -230,13 +231,15 @@ function ExpenseList({
     order,
     page,
     q,
+    limit,
   }: {
     fromDate: string;
     toDate: string;
     category: string;
     order: "asc" | "desc";
     page?: number;
-    q?: string;
+      q?: string;
+    limit?: number;
   }) => void;
   categories: {
     id: string;
@@ -399,8 +402,9 @@ function ExpenseList({
         : "",
       category: categoryFilter || "",
       order: "desc",
+      limit: isDemo ? 5 : 10,
     });
-  }, [query, fromDateFilter, toDateFilter, categoryFilter]);
+  }, [query]);
 
   const handleFileDownload = async () => {
     try {
