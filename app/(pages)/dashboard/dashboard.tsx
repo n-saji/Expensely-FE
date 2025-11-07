@@ -127,7 +127,7 @@ export default function DashboardPage() {
           <button
             className={`dashboard-button ${
               clickedButton === "overview"
-                ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
+                ? "dashboard-button-active"
                 : ""
             }`}
             onClick={() => handleButtonClick("overview")}
@@ -137,7 +137,7 @@ export default function DashboardPage() {
           <button
             className={`dashboard-button ${
               clickedButton === "yearly"
-                ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
+                ? "dashboard-button-active"
                 : ""
             }`}
             onClick={() => handleButtonClick("yearly")}
@@ -147,7 +147,7 @@ export default function DashboardPage() {
           <button
             className={`dashboard-button ${
               clickedButton === "monthly"
-                ? "border-green-700 bg-green-600/40 dark:bg-green-600/20 text-white font-bold transition-all duration-300"
+                ? "dashboard-button-active"
                 : ""
             }`}
             onClick={() => handleButtonClick("monthly")}
