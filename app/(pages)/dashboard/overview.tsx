@@ -1,7 +1,10 @@
-import Card from "@/components/card";
+import CardTemplate from "@/components/card";
 import { DashboardPageProps } from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
 import Expense from "../expense/expense";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Overview({
   dashboardProps,
@@ -14,9 +17,62 @@ export default function Overview({
     "grid grid-cols-1 sm:grid-cols-2 w-full h-full gap-4 px-1";
   return (
     <>
+      <Card>
+        <CardHeader>
+          <CardTitle>MONTHLY SUMMARY</CardTitle>
+        </CardHeader>
+        {overview ? (
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <div>
+                <Label className="text-muted-foreground">Total Expenses</Label>
+                <p className="text-lg font-semibold font-mono">
+                  {currencyMapper(user?.currency || "USD")}
+                  {overview?.thisMonthTotalExpense.toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <Label>Change from Last Month</Label>
+                <p>
+                  {currencyMapper(user?.currency || "USD")}
+                  {Math.abs(
+                    overview!.thisMonthTotalExpense -
+                      overview!.lastMonthTotalExpense
+                  ).toFixed(2)}{" "}
+                  {overview!.lastMonthTotalExpense === 0
+                    ? "(0%)"
+                    : `(${(
+                        ((overview!.thisMonthTotalExpense -
+                          overview!.lastMonthTotalExpense) /
+                          overview!.lastMonthTotalExpense) *
+                        100
+                      ).toFixed(2)}%) ${
+                        overview!.thisMonthTotalExpense -
+                          overview!.lastMonthTotalExpense >=
+                        0
+                          ? "↑"
+                          : "↓"
+                      }
+`}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        ) : (
+          <CardContent>
+            <Skeleton className="h-6 w-3/4 mb-4" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/6" />
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
       {/* Monthly Overview */}
       {overview ? (
-        <Card
+        <CardTemplate
           title="This Month's Expense"
           // description=""
           className="space-y-4 col-span-2 md:col-span-1"
@@ -96,9 +152,9 @@ export default function Overview({
                 );
               })()}
           </div>
-        </Card>
+        </CardTemplate>
       ) : (
-        <Card
+        <CardTemplate
           title="This Month's Expense"
           // description="Loading your expenses overview..."
           className=""
@@ -107,7 +163,7 @@ export default function Overview({
       )}
 
       {overview ? (
-        <Card
+        <CardTemplate
           title="Yearly Expense"
           // description=""
           className="space-y-4 col-span-2 md:col-span-1"
@@ -145,9 +201,9 @@ export default function Overview({
               </span>
             </div>
           </div>
-        </Card>
+        </CardTemplate>
       ) : (
-        <Card
+        <CardTemplate
           title="Yearly Expense"
           // description="Loading your expenses overview..."
           className=""
@@ -189,9 +245,9 @@ export default function Overview({
       )} */}
 
       {/* Recent Transactions */}
-      <Card className="col-span-2" title="Recent Transactions">
+      <CardTemplate className="col-span-2" title="Recent Transactions">
         <Expense isDemo={true} />
-      </Card>
+      </CardTemplate>
     </>
   );
 }
