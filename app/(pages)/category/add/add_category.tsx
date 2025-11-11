@@ -94,7 +94,6 @@ export default function AddCategoryPage() {
                 label: c.label,
                 value: c.value,
               }))}
-              defaultValue="Select Category Type"
               selectedOption={category.type}
               onSelect={(option) => {
                 const selectedCategory = categoryTypes.find(
@@ -105,7 +104,6 @@ export default function AddCategoryPage() {
                   type: selectedCategory ? selectedCategory.value : "",
                 });
               }}
-              classname="border border-gray-400 rounded p-2 cursor-pointer w-full"
             />
             <button type="submit" className="button-green" disabled={loader}>
               {loader ? "Adding..." : "Add Category"}

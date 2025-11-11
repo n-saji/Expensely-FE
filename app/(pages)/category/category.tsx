@@ -134,7 +134,6 @@ export default function CategoryPage() {
               label: category.label,
               value: category.value,
             }))}
-            defaultValue="All Types"
             selectedOption={categoryFilter}
             onSelect={(option) => {
               const ctType = categoryTypes.find(
@@ -143,7 +142,6 @@ export default function CategoryPage() {
               setCategoryFilter(ctType ? ctType.value : "");
               fetchCategories(ctType ? ctType.value : null);
             }}
-            classname="bg-white dark:bg-gray-800 p-2.5"
           />
         </div>
       )}

@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
-import Link from "next/link";
 
 export default function AddExpensePage() {
   const user = useSelector((state: RootState) => state.user);
@@ -131,7 +130,6 @@ export default function AddExpensePage() {
                 label: category.name,
                 value: category.id,
               }))}
-              defaultValue="All Categories"
               selectedOption={expense.category.id}
               onSelect={(option) => {
                 const selectedCategory = categories.categories.find(
@@ -144,14 +142,6 @@ export default function AddExpensePage() {
                   },
                 });
               }}
-              classname="border border-gray-400 rounded p-2 cursor-pointer w-full"
-              customButton={
-                <Link href="/category/add" className="z-10">
-                  <button className="button-green-outline px-1.5 py-0">
-                    +
-                  </button>
-                </Link>
-              }
             />
 
             <input

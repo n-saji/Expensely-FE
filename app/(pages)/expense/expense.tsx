@@ -459,6 +459,23 @@ function ExpenseList({
     }
   };
 
+  useEffect(() => {
+    const selectedCategory = categories.find(
+      (category) => category.id === categoryFilter
+    );
+    setCategoryFilter(selectedCategory ? selectedCategory.id : "");
+    fetchExpenses({
+      fromDate: fromDateFilter
+        ? new Date(fromDateFilter).toISOString().slice(0, 16)
+        : "",
+      toDate: toDateFilter
+        ? new Date(toDateFilter).toISOString().slice(0, 16)
+        : "",
+      category: selectedCategory ? selectedCategory.id : "",
+      order: "desc",
+    });
+  }, [categoryFilter]);
+
   return (
     <div className="flex flex-col w-full h-full flex-grow overflow-hidden min-w-[330px]">
       <div
@@ -497,7 +514,6 @@ function ExpenseList({
               label: category.name,
               value: category.id,
             }))}
-            defaultValue="All Categories"
             selectedOption={categoryFilter}
             onSelect={(option) => {
               const selectedCategory = categories.find(
@@ -515,7 +531,6 @@ function ExpenseList({
                 order: "desc",
               });
             }}
-            classname="bg-white dark:bg-gray-900 w-full text-sm px-2 max-sm:py-2"
           />
           <div className="flex space-x-2">
             <DatePicker
