@@ -20,7 +20,8 @@ import DownloadFile from "@/assets/icon/download-file.png";
 import DownloadFileWhite from "@/assets/icon/download-file-white.png";
 import DatePicker from "react-datepicker";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Expense {
   id: string;
@@ -120,7 +121,6 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
           order,
           page: data.totalPages,
           limit: isDemo ? 5 : 10,
-
         });
         setPageNumber(data.totalPages);
         setExpensesList({
@@ -238,7 +238,7 @@ function ExpenseList({
     category: string;
     order: "asc" | "desc";
     page?: number;
-      q?: string;
+    q?: string;
     limit?: number;
   }) => void;
   categories: {
@@ -392,18 +392,21 @@ function ExpenseList({
   };
 
   useEffect(() => {
-    fetchExpenses({
-      q: query,
-      fromDate: fromDateFilter
-        ? new Date(fromDateFilter).toISOString().slice(0, 16)
-        : "",
-      toDate: toDateFilter
-        ? new Date(toDateFilter).toISOString().slice(0, 16)
-        : "",
-      category: categoryFilter || "",
-      order: "desc",
-      limit: isDemo ? 5 : 10,
-    });
+    const timeoutId = setTimeout(() => {
+      fetchExpenses({
+        q: query,
+        fromDate: fromDateFilter
+          ? new Date(fromDateFilter).toISOString().slice(0, 16)
+          : "",
+        toDate: toDateFilter
+          ? new Date(toDateFilter).toISOString().slice(0, 16)
+          : "",
+        category: categoryFilter || "",
+        order: "desc",
+        limit: isDemo ? 5 : 10,
+      });
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [query]);
 
   const handleFileDownload = async () => {
@@ -470,54 +473,16 @@ function ExpenseList({
           </h1>
         )}
         {!isDemo && (
-          <div className="flex items-center max-sm:justify-between">
-            <div
-              className="flex items-center relative border border-gray-500 dark:border-none rounded-md 
-            active:border-none focus:border-none"
-            >
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                className="pl-7"
-                placeholder="Search..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="flex">
-              {selectedExpenses.length > 0 && (
-                <button
-                  className={`ml-4 ${
-                    selectedExpenses.length === 0
-                      ? "opacity-40 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }`}
-                  disabled={selectedExpenses.length === 0}
-                  onClick={handleBulkDelete}
-                >
-                  <Image
-                    src={user.theme === "light" ? deleteIcon : deleteIconWhite}
-                    alt="Delete"
-                    className=" w-6 h-6"
-                  />
-                </button>
-              )}
-
-              <Image
-                src={user.theme === "light" ? filterIcon : filterIconWhite}
-                alt="Filter"
-                className="w-6 h-6 cursor-pointer ml-4"
-                onClick={() => setFilter(!filter)}
-              />
-
-              <Image
-                src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
-                alt="Download"
-                className="w-6 h-6 cursor-pointer ml-4"
-                onClick={handleFileDownload}
-              />
-            </div>
-          </div>
+          <SearchAndFilter
+            query={query}
+            setQuery={setQuery}
+            setFilter={setFilter}
+            selectedExpenses={selectedExpenses}
+            handleBulkDelete={handleBulkDelete}
+            user={user}
+            filter={filter}
+            handleFileDownload={handleFileDownload}
+          />
         )}
       </div>
       {filter && (
@@ -552,7 +517,7 @@ function ExpenseList({
             }}
             classname="bg-white dark:bg-gray-900 w-full text-sm px-2 max-sm:py-2"
           />
-          <div className="w-full">
+          <div className="flex space-x-2">
             <DatePicker
               selected={fromDateFilter ? new Date(fromDateFilter) : null}
               onChange={(date) => {
@@ -579,8 +544,7 @@ function ExpenseList({
               maxDate={toDateFilter ? new Date(toDateFilter) : new Date()}
               wrapperClassName="w-full h-full"
             />
-          </div>
-          <div className="w-full">
+
             <DatePicker
               selected={toDateFilter ? new Date(toDateFilter) : null}
               onChange={(date) => {
@@ -1010,3 +974,147 @@ function ExpenseList({
     </div>
   );
 }
+
+const SearchAndFilter = ({
+  query,
+  setQuery,
+  setFilter,
+  selectedExpenses,
+  handleBulkDelete,
+  user,
+  filter,
+  handleFileDownload,
+}: {
+  query: string;
+  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  setFilter: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedExpenses: Expense[];
+  handleBulkDelete: () => void;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    theme: string;
+  };
+  filter: boolean;
+  handleFileDownload: () => void;
+}) => {
+  return (
+    <div className="flex items-center max-sm:justify-between">
+      <div
+        className="flex items-center relative border border-gray-500 dark:border-none rounded-md 
+            active:border-none focus:border-none max-w-[150px] md:max-w-lg"
+      >
+        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          className="pl-7 text-muted-foreground"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <Button
+            className="absolute right-2  h-[50%] w-2"
+            variant={"ghost"}
+            onClick={() => setQuery("")}
+          >
+            <X className="h-2 w-2" />
+          </Button>
+        )}
+      </div>
+
+      <div className="flex">
+        {selectedExpenses.length > 0 && (
+          <button
+            className={`ml-4 ${
+              selectedExpenses.length === 0
+                ? "opacity-40 cursor-not-allowed"
+                : "cursor-pointer"
+            }`}
+            disabled={selectedExpenses.length === 0}
+            onClick={handleBulkDelete}
+          >
+            <Image
+              src={user.theme === "light" ? deleteIcon : deleteIconWhite}
+              alt="Delete"
+              className=" w-6 h-6"
+            />
+          </button>
+        )}
+
+        <Image
+          src={user.theme === "light" ? filterIcon : filterIconWhite}
+          alt="Filter"
+          className="w-6 h-6 cursor-pointer ml-4"
+          onClick={() => setFilter(!filter)}
+        />
+
+        <Image
+          src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
+          alt="Download"
+          className="w-6 h-6 cursor-pointer ml-4"
+          onClick={handleFileDownload}
+        />
+      </div>
+    </div>
+  );
+};
+
+// TODO: remove later
+// <div className="flex items-center max-sm:justify-between">
+//   <div
+//     className="flex items-center relative border border-gray-500 dark:border-none rounded-md
+//   active:border-none focus:border-none"
+//   >
+//     <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+//     <Input
+//       className="pl-7"
+//       placeholder="Search..."
+//       value={query}
+//       onChange={(e) => setQuery(e.target.value)}
+//     />
+//     {query && (
+//       <Button
+//         className="absolute right-2  h-[50%] w-2"
+//         variant={"ghost"}
+//         onClick={() => setQuery("")}
+//       >
+//         <X className="h-2 w-2" />
+//       </Button>
+//     )}
+//   </div>
+
+//   <div className="flex">
+//     {selectedExpenses.length > 0 && (
+//       <button
+//         className={`ml-4 ${
+//           selectedExpenses.length === 0
+//             ? "opacity-40 cursor-not-allowed"
+//             : "cursor-pointer"
+//         }`}
+//         disabled={selectedExpenses.length === 0}
+//         onClick={handleBulkDelete}
+//       >
+//         <Image
+//           src={user.theme === "light" ? deleteIcon : deleteIconWhite}
+//           alt="Delete"
+//           className=" w-6 h-6"
+//         />
+//       </button>
+//     )}
+
+//     <Image
+//       src={user.theme === "light" ? filterIcon : filterIconWhite}
+//       alt="Filter"
+//       className="w-6 h-6 cursor-pointer ml-4"
+//       onClick={() => setFilter(!filter)}
+//     />
+
+//     <Image
+//       src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
+//       alt="Download"
+//       className="w-6 h-6 cursor-pointer ml-4"
+//       onClick={handleFileDownload}
+//     />
+//   </div>
+// </div>
