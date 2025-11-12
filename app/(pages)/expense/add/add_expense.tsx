@@ -5,6 +5,16 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AddExpensePage() {
   const user = useSelector((state: RootState) => state.user);
@@ -88,9 +98,11 @@ export default function AddExpensePage() {
       className="bg-gray-300 shadow-md rounded-lg p-4 md:p-8 w-full
          flex flex-col items-center justify-center dark:bg-gray-800 dark:text-gray-200"
     >
-      <div className="w-80 sm:w-1/2 text-center">
-        <h1 className="text-2xl font-semibold">Add New Expense</h1>
-        <div className="p-4">
+      <Card className="w-[95%] sm:w-1/2 text-center">
+        <CardHeader>
+          <CardTitle className="text-xl">Add New Expense</CardTitle>
+        </CardHeader>
+        <CardContent>
           <form
             className="flex flex-col space-y-4"
             onSubmit={(event) => {
@@ -98,10 +110,9 @@ export default function AddExpensePage() {
               handleSubmit(event);
             }}
           >
-            <input
+            <Input
               type="text"
               placeholder="Expense Name"
-              className="p-2 border border-gray-400 rounded "
               value={expense.description}
               onChange={(e) =>
                 setExpense({
@@ -110,12 +121,11 @@ export default function AddExpensePage() {
                 })
               }
             />
-            <input
+            <Input
               type="number"
               step="0.01"
               min="0"
               placeholder="Amount"
-              className="p-2 border border-gray-400 rounded"
               value={expense.amount === 0 ? "" : expense.amount}
               onChange={(e) =>
                 setExpense({
@@ -144,9 +154,8 @@ export default function AddExpensePage() {
               }}
             />
 
-            <input
+            <Input
               type="date"
-              className="p-2 border border-gray-400 rounded"
               value={expense.expenseDate}
               onChange={(e) =>
                 setExpense({
@@ -155,21 +164,24 @@ export default function AddExpensePage() {
                 })
               }
             />
-            <button
+            <Button
               type="submit"
-              className="button-green"
               disabled={adding_expense_loading}
+              variant={"secondary"}
             >
-              {adding_expense_loading ? "Adding..." : "Add Expense"}
-            </button>
+              {adding_expense_loading ? <Spinner /> : "Add Expense"}
+            </Button>
           </form>
-        </div>
-      </div>
-      {error && (
-        <div className="text-red-500 mt-2">
-          <p>{error}</p>
-        </div>
-      )}
+        </CardContent>
+        <CardFooter>
+          <div className="w-80 sm:w-1/2 text-center"></div>
+          {error && (
+            <div className="text-red-500 mt-2">
+              <p>{error}</p>
+            </div>
+          )}
+        </CardFooter>
+      </Card>
     </div>
   );
 }
