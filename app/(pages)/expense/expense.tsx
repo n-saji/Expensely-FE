@@ -507,8 +507,16 @@ function ExpenseList({
           className="gap-6 sm:gap-3 md:gap-4 mb-6
           grid sm:grid-cols-3
           md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7
+          bg-white dark:bg-gray-800 p-4 rounded-lg relative 
+          after:content-[''] after:absolute after:-top-5 after:right-8
+          after:border-l-20 after:border-l-transparent
+          after:border-r-20 after:border-r-transparent
+          after:border-b-20 after:border-b-white
+          dark:after:border-b-gray-800
         "
+          
         >
+          
           <DropDown
             options={categories.map((category) => ({
               label: category.name,
@@ -551,7 +559,7 @@ function ExpenseList({
               startDate={fromDateFilter ? new Date(fromDateFilter) : null}
               endDate={toDateFilter ? new Date(toDateFilter) : null}
               dateFormat="yyyy-MM-dd"
-              className="p-2 rounded cursor-pointer
+              className="p-2 rounded-md cursor-pointer
               w-full h-full bg-white dark:bg-gray-900
               outline-none shadow-md dark:outline dark:border dark:border-gray-400
               text-sm"
@@ -577,7 +585,7 @@ function ExpenseList({
               startDate={fromDateFilter ? new Date(fromDateFilter) : null}
               endDate={toDateFilter ? new Date(toDateFilter) : null}
               dateFormat="yyyy-MM-dd"
-              className="p-2 rounded cursor-pointer
+              className="p-2 rounded-md cursor-pointer
               w-full h-full bg-white dark:bg-gray-900
               outline-none shadow-md dark:outline dark:border dark:border-gray-400
               text-sm"
@@ -588,8 +596,7 @@ function ExpenseList({
           </div>
 
           <div className="max-sm:w-full">
-            <button
-              className="button-blue px-2 py-1 w-full h-full text-md"
+            <Button
               onClick={() => {
                 // setFilter(false);
                 setFromDate("");
@@ -604,7 +611,7 @@ function ExpenseList({
               }}
             >
               Clear Filters
-            </button>
+            </Button>
           </div>
         </div>
       )}
