@@ -560,7 +560,7 @@ function ExpenseList({
               endDate={toDateFilter ? new Date(toDateFilter) : null}
               dateFormat="yyyy-MM-dd"
               className="p-2 rounded-md cursor-pointer
-              w-full h-full bg-white dark:bg-gray-900
+              w-full h-full bg-white dark:bg-gray-700
               outline-none shadow-md dark:outline dark:border dark:border-gray-400
               text-sm"
               placeholderText="From"
@@ -586,7 +586,7 @@ function ExpenseList({
               endDate={toDateFilter ? new Date(toDateFilter) : null}
               dateFormat="yyyy-MM-dd"
               className="p-2 rounded-md cursor-pointer
-              w-full h-full bg-white dark:bg-gray-900
+              w-full h-full bg-white dark:bg-gray-700
               outline-none shadow-md dark:outline dark:border dark:border-gray-400
               text-sm"
               placeholderText="To"

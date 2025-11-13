@@ -128,7 +128,13 @@ export default function CategoryPage() {
         </div>
       </div>
       {filter && (
-        <div className="mb-4 flex items-center space-x-4">
+        <div
+          className="gap-6 sm:gap-3 md:gap-4 mb-6
+          grid sm:grid-cols-3
+          md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7
+          bg-white dark:bg-gray-800 p-4 rounded-lg relative 
+          dark:after:border-b-gray-700"
+        >
           <DropDown
             options={categoryTypes.map((category) => ({
               label: category.label,
