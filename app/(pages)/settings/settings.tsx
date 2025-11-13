@@ -1,10 +1,5 @@
 "use client";
-import { SettingsCard } from "@/components/card";
-import EditIcon from "@/assets/icon/edit.png";
-import EditIconWhite from "@/assets/icon/edit-white.png";
-import ConfirmIcon from "@/assets/icon/accept.png";
-import CancelIcon from "@/assets/icon/cancel.png";
-import Image from "next/image";
+
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -13,11 +8,33 @@ import { API_URL } from "@/config/config";
 import FetchToken from "@/utils/fetch_token";
 import UserPreferences from "@/utils/userPreferences";
 import { toast } from "sonner";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Edit2 } from "lucide-react";
 
 export default function SettingsPage() {
-  const [enablePasswordUpdate, setEnablePasswordUpdate] = useState(false);
   const [password, setPassword] = useState("");
-  const [changesMade, setChangesMade] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const token = FetchToken();
@@ -80,6 +97,12 @@ export default function SettingsPage() {
       toast.error("Password must be at least 6 characters long.");
       return;
     }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
     await fetch(`${API_URL}/users/update-password`, {
       method: "PATCH",
       headers: {
@@ -96,7 +119,7 @@ export default function SettingsPage() {
         if (data.error === null) {
           // dispatch(setUser(data.user));
           setPassword("");
-          setEnablePasswordUpdate(false);
+          setConfirmPassword("");
           toast.success("Password updated successfully!");
         } else {
           toast.error(data.message || "Failed to update password.");
@@ -177,18 +200,16 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col w-full items-center space-y-6 ">
-      <SettingsCard
-        title="Dark Mode"
-        description="Toggle dark mode for a better viewing experience."
-      >
-        <div className="flex justify-left sm:justify-center items-center space-x-4">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              value=""
-              className="sr-only peer"
+      <Card className="w-[90%] sm:w-4/5">
+        <CardHeader>
+          <CardTitle>Dark Mode</CardTitle>
+          <CardDescription>
+            Toggle dark mode for a better viewing experience.
+          </CardDescription>
+          <CardAction>
+            <Switch
               checked={user.theme === "dark"}
-              onChange={async () => {
+              onClick={async () => {
                 dispatch(
                   setUser({
                     ...user,
@@ -200,23 +221,20 @@ export default function SettingsPage() {
                 });
               }}
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600"></div>
-            <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-full"></div>
-          </label>
-        </div>
-      </SettingsCard>
-      <SettingsCard
-        title="Notifications"
-        description="Manage your notification preferences."
-      >
-        <div className="flex justify-left sm:justify-center items-center space-x-4">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              value=""
-              className="sr-only peer"
+          </CardAction>
+        </CardHeader>
+      </Card>
+
+      <Card className="w-[90%] sm:w-4/5">
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+          <CardDescription>
+            Manage your notification preferences.
+          </CardDescription>
+          <CardAction>
+            <Switch
               checked={user.notificationsEnabled}
-              onChange={async () => {
+              onClick={async () => {
                 dispatch(
                   setUser({
                     ...user,
@@ -228,102 +246,114 @@ export default function SettingsPage() {
                 });
               }}
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600"></div>
-            <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-full"></div>
-          </label>
-        </div>
-      </SettingsCard>
+          </CardAction>
+        </CardHeader>
+      </Card>
 
-      <SettingsCard
-        title="Update Password"
-        description="Change your password to keep your account secure."
-        className=""
-      >
-        <div className="flex items-center justify-between space-x-2 max-w-3/4">
-          <input
-            type={enablePasswordUpdate ? "text" : "password"}
-            placeholder="Enter new password"
-            className={`p-2 border border-gray-300 rounded
-               placeholder:text-gray-500 text-gray-900 dark:bg-gray-800 dark:text-gray-200 
-            ${
-              enablePasswordUpdate
-                ? "cursor-pointer"
-                : "cursor-not-allowed opacity-50"
-            }
-              w-full`}
-            disabled={!enablePasswordUpdate}
-            autoComplete="new-password"
-            value={password}
-            onChange={async (e) => {
-              setPassword(e.target.value);
-              if (!enablePasswordUpdate) return;
+      <Card className="w-[90%] sm:w-4/5">
+        <CardHeader>
+          <CardTitle>Update Password</CardTitle>
+          <CardDescription>
+            Change your password to keep your account secure.
+          </CardDescription>
+          <CardAction>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Edit2 className="h-5 w-5" />
+              </DialogTrigger>
 
-              setChangesMade(true);
-            }}
-          />
-          {enablePasswordUpdate ? (
-            <div className="flex items-center space-x-2">
-              <Image
-                src={ConfirmIcon}
-                alt="Confirm Icon"
-                className="w-6 h-6 ml-2 inline-block cursor-pointer"
-                onClick={async () => {
-                  if (!changesMade) {
-                    toast.error("No changes made to update.");
-                    return;
-                  }
-                  await handlePasswordChange();
-                  setEnablePasswordUpdate(false);
-                }}
-              />
-              <Image
-                src={CancelIcon}
-                alt="Cancel Icon"
-                className="w-6 h-6 ml-2 inline-block cursor-pointer"
-                onClick={() => {
-                  setEnablePasswordUpdate(false);
-                }}
-              />
-            </div>
-          ) : (
-            <Image
-              src={user.theme === "light" ? EditIcon : EditIconWhite}
-              alt="Edit Icon"
-              className="w-4 h-4 ml-2 inline-block cursor-pointer"
-              onClick={() => setEnablePasswordUpdate(!enablePasswordUpdate)}
-            />
-          )}
-        </div>
-      </SettingsCard>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Update Password</DialogTitle>
+                  <DialogDescription>
+                    Enter your new password below and click &quot;Save changes&quot;
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    await handlePasswordChange();
+                  }}
+                >
+                  <div className="grid gap-4">
+                    <div className="grid gap-3">
+                      <Label htmlFor="password">New Password</Label>
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="password-1">Confirm Password</Label>
+                      <Input
+                        id="password-1"
+                        name="password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter className="mt-4">
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      type="submit"
+                      disabled={
+                        password !== confirmPassword || password.length < 6
+                      }
+                    >
+                      Save changes
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </CardAction>
+        </CardHeader>
+      </Card>
 
-      <SettingsCard
-        title="Delete Account"
-        description="Permanently delete your account. This action cannot be undone."
-      >
-        <div className="flex justify-left sm:justify-center items-center space-x-4">
-          <button
-            className="button-delete py-2 dark:bg-red-600 dark:hover:bg-red-700"
-            onClick={async () => {
-              alert(
-                "Are you sure you want to delete your account? This action cannot be undone."
-              );
-              if (
-                !window.confirm("Are you sure you want to delete your account?")
-              ) {
-                return;
-              }
-              handleUserDeletion();
-              toast.success("Account deleted successfully!");
-              setTimeout(() => {
-                // Redirect to home or login page after deletion
-                window.location.href = "/";
-              }, 2000);
-            }}
-          >
-            Delete Account
-          </button>
-        </div>
-      </SettingsCard>
+      <Card className="w-[90%] sm:w-4/5">
+        <CardHeader>
+          <CardTitle>Delete Account</CardTitle>
+          <CardDescription>
+            Permanently delete your account. This action cannot be undone.
+          </CardDescription>
+          <CardAction>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                alert(
+                  "Are you sure you want to delete your account? This action cannot be undone."
+                );
+                if (
+                  !window.confirm(
+                    "Are you sure you want to delete your account?"
+                  )
+                ) {
+                  return;
+                }
+                handleUserDeletion();
+                toast.success("Account deleted successfully!");
+                setTimeout(() => {
+                  // Redirect to home or login page after deletion
+                  window.location.href = "/";
+                }, 2000);
+              }}
+            >
+              Delete Account
+            </Button>
+          </CardAction>
+        </CardHeader>
+      </Card>
 
       <UserPreferences />
     </div>
