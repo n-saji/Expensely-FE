@@ -16,11 +16,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
+import * as React from "react";
+import { ChevronDownIcon } from "lucide-react";
+
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "sonner";
+
 export default function AddExpensePage() {
   const user = useSelector((state: RootState) => state.user);
-  const [error, setError] = useState("");
   const token = FetchToken();
   const categories = useSelector((state: RootState) => state.categoryExpense);
+  const [open, setOpen] = React.useState(false);
   const [expense, setExpense] = useState({
     user: {
       id: user.id,
@@ -37,19 +48,19 @@ export default function AddExpensePage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!expense.category.id) {
-      setError("Please select a category");
+      toast.error("Please select a category");
       return;
     }
     if (expense.amount === null || expense.amount <= 0) {
-      setError("Please enter a valid amount");
+      toast.error("Please enter a valid amount");
       return;
     }
     if (!expense.description) {
-      setError("Please enter a description");
+      toast.error("Please enter a description");
       return;
     }
     if (!expense.expenseDate) {
-      setError("Please select a date");
+      toast.error("Please select a date");
       return;
     }
 
@@ -89,7 +100,6 @@ export default function AddExpensePage() {
       console.error("Error adding expense:", error);
     } finally {
       setAddingExpenseLoading(false);
-      setError("");
     }
   };
 
@@ -154,33 +164,42 @@ export default function AddExpensePage() {
               }}
             />
 
-            <Input
-              type="date"
-              value={expense.expenseDate}
-              onChange={(e) =>
-                setExpense({
-                  ...expense,
-                  expenseDate: e.target.value,
-                })
-              }
-            />
-            <Button
-              type="submit"
-              disabled={adding_expense_loading}
-              variant={"secondary"}
-            >
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="date"
+                  className="w-full justify-between font-normal"
+                >
+                  {expense ? expense.expenseDate : "Select date"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-full overflow-hidden p-0"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={expense ? new Date(expense.expenseDate) : undefined}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    setOpen(false);
+                    setExpense({
+                      ...expense,
+                      expenseDate: date ? date.toISOString().slice(0, 10) : "",
+                    });
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Button type="submit" disabled={adding_expense_loading}>
               {adding_expense_loading ? <Spinner /> : "Add Expense"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter>
-          <div className="w-80 sm:w-1/2 text-center"></div>
-          {error && (
-            <div className="text-red-500 mt-2">
-              <p>{error}</p>
-            </div>
-          )}
-        </CardFooter>
+        <CardFooter></CardFooter>
       </Card>
     </div>
   );
