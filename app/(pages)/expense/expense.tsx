@@ -714,13 +714,13 @@ function ExpenseList({
                   </td>
                   <td
                     className={`${table_data_classname} font-medium text-green-600`}
-                    onClick={() => {
-                      if (window.innerWidth < 640) {
-                        setSelectedExpenses([expense]);
-                        dispatch(togglePopUp());
-                        return;
-                      }
-                    }}
+                    // onClick={() => {
+                    //   if (window.innerWidth < 640) {
+                    //     setSelectedExpenses([expense]);
+                    //     dispatch(togglePopUp());
+                    //     return;
+                    //   }
+                    // }}
                   >
                     {`${currencyMapper(
                       expense?.currency || "USD"
