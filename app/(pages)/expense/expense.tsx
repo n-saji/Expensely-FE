@@ -623,6 +623,7 @@ function ExpenseList({
               <th className={`${table_data_classname} w-2/13`}>Amount</th>
               <th className={`${table_data_classname} w-4/13`}>Description</th>
               <th className={`${table_data_classname} w-3/13`}>Date</th>
+              <th className={`${table_data_classname} w-1/13`}></th>
             </tr>
           </thead>
           {(!showTable || loading) && (
@@ -708,16 +709,7 @@ function ExpenseList({
                       />
                     </td>
                   )}
-                  <td
-                    className={table_data_classname}
-                    onClick={() => {
-                      if (window.innerWidth < 640) {
-                        setSelectedExpenses([expense]);
-                        dispatch(togglePopUp());
-                        return;
-                      }
-                    }}
-                  >
+                  <td className={table_data_classname}>
                     {expense.categoryName}
                   </td>
                   <td
@@ -753,55 +745,43 @@ function ExpenseList({
                       day: "numeric",
                     })}
                   </td>
-
-                  <td
-                    className={
-                      table_data_classname + "flex justify-center items-center"
-                    }
-                  >
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-5 w-4 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedExpenses([expense]);
-                            dispatch(togglePopUp());
-                          }}
-                          className="text-muted-foreground"
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={async () => {
-                            await handleBulkDelete(expense.id);
-                          }}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-
-                  {/* {!isDemo && (
-                    <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                      <Image
-                        src={user.theme === "light" ? editIcon : editIconWhite}
-                        alt="Edit"
-                        className="w-4 h-4"
-                        onClick={() => {
-                          setSelectedExpenses([expense]);
-                          dispatch(togglePopUp());
-                        }}
-                      />
+                  {!isDemo && (
+                    <td
+                      className={
+                        table_data_classname +
+                        "flex justify-center items-center"
+                      }
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-5 w-4 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedExpenses([expense]);
+                              dispatch(togglePopUp());
+                            }}
+                            className="text-muted-foreground"
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={async () => {
+                              await handleBulkDelete(expense.id);
+                            }}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
-                  )} */}
+                  )}
                 </tr>
               ))}
             </tbody>
