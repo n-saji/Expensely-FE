@@ -144,6 +144,23 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     }
   };
 
+  useEffect(() => {
+    if (!isExpenseMounted.current) return;
+
+    const timeoutId = setTimeout(() => {
+      fetchExpenses({
+        q: query,
+        fromDate: fromDate ? new Date(fromDate).toISOString().slice(0, 16) : "",
+        toDate: toDate ? new Date(toDate).toISOString().slice(0, 16) : "",
+        category: categoryFilter || "",
+        order: "desc",
+        limit: isDemo ? 5 : 10,
+      });
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [query, fromDate, toDate, categoryFilter]);
+
   // initial fetch for expenses
   useEffect(() => {
     if (!isExpenseMounted.current) {
@@ -391,24 +408,6 @@ function ExpenseList({
     }
   };
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchExpenses({
-        q: query,
-        fromDate: fromDateFilter
-          ? new Date(fromDateFilter).toISOString().slice(0, 16)
-          : "",
-        toDate: toDateFilter
-          ? new Date(toDateFilter).toISOString().slice(0, 16)
-          : "",
-        category: categoryFilter || "",
-        order: "desc",
-        limit: isDemo ? 5 : 10,
-      });
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [query]);
-
   const handleFileDownload = async () => {
     try {
       const link = new URL(`${API_URL}/expenses/user/${user.id}/export`);
@@ -459,23 +458,6 @@ function ExpenseList({
     }
   };
 
-  useEffect(() => {
-    const selectedCategory = categories.find(
-      (category) => category.id === categoryFilter
-    );
-    setCategoryFilter(selectedCategory ? selectedCategory.id : "");
-    fetchExpenses({
-      fromDate: fromDateFilter
-        ? new Date(fromDateFilter).toISOString().slice(0, 16)
-        : "",
-      toDate: toDateFilter
-        ? new Date(toDateFilter).toISOString().slice(0, 16)
-        : "",
-      category: selectedCategory ? selectedCategory.id : "",
-      order: "desc",
-    });
-  }, [categoryFilter]);
-
   return (
     <div className="flex flex-col w-full h-full flex-grow overflow-hidden min-w-[330px]">
       <div
@@ -514,9 +496,7 @@ function ExpenseList({
           after:border-b-20 after:border-b-white
           dark:after:border-b-gray-800
         "
-          
         >
-          
           <DropDown
             options={categories.map((category) => ({
               label: category.name,
