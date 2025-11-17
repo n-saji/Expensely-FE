@@ -8,8 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { currencyMapper } from "@/utils/currencyMapper";
 import deleteIcon from "@/assets/icon/delete.png";
 import deleteIconWhite from "@/assets/icon/delete-white.png";
-import editIcon from "@/assets/icon/edit.png";
-import editIconWhite from "@/assets/icon/edit-white.png";
 import Image from "next/image";
 import PopUp from "@/components/pop-up";
 import { togglePopUp } from "@/redux/slices/sidebarSlice";
@@ -20,8 +18,15 @@ import DownloadFile from "@/assets/icon/download-file.png";
 import DownloadFileWhite from "@/assets/icon/download-file-white.png";
 import DatePicker from "react-datepicker";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { MoreHorizontal, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Expense {
   id: string;
@@ -305,10 +310,14 @@ function ExpenseList({
     };
   }, [dispatch, popUp]);
 
-  const handleBulkDelete = async () => {
-    if (selectedExpenses.length === 0) {
+  const handleBulkDelete = async (expenseId?: string) => {
+    if (selectedExpenses.length === 0 && !expenseId) {
       console.warn("No expenses selected for deletion");
       return;
+    }
+    const ids = selectedExpenses.map((id) => ({ id: id.id }));
+    if (expenseId && !selectedExpenses.find((e) => e.id === expenseId)) {
+      ids.push({ id: expenseId });
     }
     if (!token) {
       console.error("No token found for authentication");
@@ -325,7 +334,7 @@ function ExpenseList({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(selectedExpenses.map((id) => ({ id: id.id }))),
+          body: JSON.stringify(ids),
         }
       );
 
@@ -459,7 +468,7 @@ function ExpenseList({
   };
 
   return (
-    <div className="flex flex-col w-full h-full flex-grow overflow-hidden min-w-[330px]">
+    <div className="flex flex-col w-full h-full flex-grow overflow-hidden min-w-[360px]">
       <div
         className={`flex flex-col sm:flex-row w-full sm:justify-between sm:items-center ${
           !isDemo ? "mb-6" : ""
@@ -745,7 +754,42 @@ function ExpenseList({
                     })}
                   </td>
 
-                  {!isDemo && (
+                  <td
+                    className={
+                      table_data_classname + "flex justify-center items-center"
+                    }
+                  >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-5 w-4 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedExpenses([expense]);
+                            dispatch(togglePopUp());
+                          }}
+                          className="text-muted-foreground"
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={async () => {
+                            await handleBulkDelete(expense.id);
+                          }}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+
+                  {/* {!isDemo && (
                     <td className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                       <Image
                         src={user.theme === "light" ? editIcon : editIconWhite}
@@ -757,7 +801,7 @@ function ExpenseList({
                         }}
                       />
                     </td>
-                  )}
+                  )} */}
                 </tr>
               ))}
             </tbody>
@@ -1034,7 +1078,7 @@ const SearchAndFilter = ({
                 : "cursor-pointer"
             }`}
             disabled={selectedExpenses.length === 0}
-            onClick={handleBulkDelete}
+            onClick={() => handleBulkDelete()}
           >
             <Image
               src={user.theme === "light" ? deleteIcon : deleteIconWhite}

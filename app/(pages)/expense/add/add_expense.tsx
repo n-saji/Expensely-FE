@@ -5,13 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -169,7 +163,7 @@ export default function AddExpensePage() {
                 <Button
                   variant="outline"
                   id="date"
-                  className="w-full justify-between font-normal"
+                  className="w-full justify-between text-muted-foreground"
                 >
                   {expense ? expense.expenseDate : "Select date"}
                   <ChevronDownIcon />
@@ -199,7 +193,6 @@ export default function AddExpensePage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter></CardFooter>
       </Card>
     </div>
   );
