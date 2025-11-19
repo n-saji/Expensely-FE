@@ -68,6 +68,7 @@ export interface ExpenseOverview {
   earliestStartMonth: number;
   earliestStartYear: number;
   thisMonthMostExpensiveItem: Record<string, number>;
+  budgetServiceMap: Record<string, Budget>;
 }
 
 export interface DashboardPageProps {
@@ -97,4 +98,17 @@ export interface Category {
   id: string;
   type: string;
   name: string;
+}
+
+export interface Budget {
+  id: string;
+  user: UserSkeleton;
+  category: Category;
+  amountLimit: number;
+  amountSpent: number;
+  period: Period;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
 }

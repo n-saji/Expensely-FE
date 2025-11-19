@@ -30,7 +30,6 @@ const handler = NextAuth({
       return `${baseUrl}/auth-handler`;
     },
     async session({ session, token }) {
-      console.log("Session callback:", session, token);
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
 

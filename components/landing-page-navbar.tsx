@@ -19,9 +19,7 @@ export default function LandingPageNavBar() {
 
   useEffect(() => {
     if (token) {
-      console.log("Token found:", token);
       validateToken().then((isValid) => {
-        console.log("Token valid:", isValid);
         if (isValid) {
           setLoggedIn(true);
           dispatch(setUser({ ...user, isAuthenticated: true }));

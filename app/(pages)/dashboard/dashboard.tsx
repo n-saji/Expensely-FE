@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { currencyMapper } from "@/utils/currencyMapper";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProgressBar } from "@/components/ProgressBar";
 
 const SkeletonLoader = ({
   title,
@@ -63,7 +64,6 @@ export default function DashboardPage() {
     type?: string;
   }) => {
     try {
-      console.log(loadingMonth, loadingYear, type);
       const queryParams = new URLSearchParams();
       if (hasConstraint) {
         if (month !== undefined && monthYear !== undefined) {
@@ -159,8 +159,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row w-full gap-6 h-full">
-      <div className="flex-1/3 grid grid-cols-1 gap-4 w-full h-full">
+    <div className="flex flex-col flex-wrap lg:flex-row w-full gap-4 h-full">
+      {/* left module */}
+      <div className="flex-1/4 grid grid-cols-1 gap-4 w-full ">
+        {/* Monthly Summary */}
         {overview ? (
           <Card>
             <CardHeader>
@@ -230,6 +232,7 @@ export default function DashboardPage() {
           <SkeletonLoader title="MONTHLY SUMMARY" className="h-[150px]" />
         )}
 
+        {/* Yearly Summary */}
         {overview ? (
           <Card>
             <CardHeader>
@@ -261,20 +264,44 @@ export default function DashboardPage() {
           <SkeletonLoader title="YEARLY SUMMARY" className="h-[150px]" />
         )}
 
-        {!loadingYear && overview ? (
-          <ExpensesChartCard
-            amountByCategory={overview.amountByCategory}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            title="Spending by Category"
-            setCurrentYearForYearly={setCurrentYearForYearly}
-            currentYearForYearly={currentYearForYearly}
-            min_year={min_year}
-          />
+        {/* Budget */}
+        {overview && overview.budgetServiceMap ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Budgets</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {Object.values(overview.budgetServiceMap).map((budget) => (
+                <div key={budget.id} className="mb-4">
+                  <div className="flex justify-between mb-1 items-center">
+                    <Label className="text-muted-foreground text-sm" >
+                      {budget.category.name}
+                    </Label>
+                    <Label className="text-muted-foreground text-xs" >
+                      {currencyMapper(user?.currency || "USD")}
+                      {budget.amountSpent.toFixed(2)} /{" "}
+                      {currencyMapper(user?.currency || "USD")}
+                      {budget.amountLimit.toFixed(2)}
+                    </Label>
+                  </div>
+
+                  <ProgressBar
+                    value={budget.amountSpent}
+                    max={budget.amountLimit}
+                    variant={budgetVariant(
+                      budget.amountSpent,
+                      budget.amountLimit
+                    )}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         ) : (
-          <SkeletonLoader title="Spending by Category" className="h-[300px]" />
+          <SkeletonLoader title="Budgets" className="h-[150px]" />
         )}
       </div>
+      {/* right module */}
       <div className="flex-2/3 gap-4 w-full grid grid-cols-1">
         {!loadingYear && overview ? (
           <ExpensesMonthlyBarChartCard
@@ -290,14 +317,6 @@ export default function DashboardPage() {
           <SkeletonLoader title="Expense Summary" className="h-[300px]" />
         )}
 
-        {/* <Card className="h-[250px]">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Expense isDemo={true} />
-          </CardContent>
-        </Card> */}
         <div className="flex flex-col md:flex-row gap-4">
           {!loadingYear && overview ? (
             <ExpensesMonthlyLineChartCard
@@ -333,189 +352,35 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+      {/* down module */}
+      <div className="flex-1/4 gap-4 w-full grid grid-cols-1 ">
+        {/* Spending by Category */}
+        {!loadingYear && overview ? (
+          <ExpensesChartCard
+            amountByCategory={overview.amountByCategory}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            title="Spending by Category"
+            setCurrentYearForYearly={setCurrentYearForYearly}
+            currentYearForYearly={currentYearForYearly}
+            min_year={min_year}
+          />
+        ) : (
+          <SkeletonLoader title="Spending by Category" className="h-[300px]" />
+        )}
+      </div>
     </div>
   );
 }
 
-// <div className="flex gap-4 w-full max-md:flex-col">
-//   <div className="flex gap-3 items-start w-full flex-wrap">
-//     <button
-//       className={`dashboard-button ${
-//         clickedButton === "overview" ? "dashboard-button-active" : ""
-//       }`}
-//       onClick={() => handleButtonClick("overview")}
-//     >
-//       Overview
-//     </button>
-//     <button
-//       className={`dashboard-button ${
-//         clickedButton === "yearly" ? "dashboard-button-active" : ""
-//       }`}
-//       onClick={() => handleButtonClick("yearly")}
-//     >
-//       Yearly
-//     </button>
-//     <button
-//       className={`dashboard-button ${
-//         clickedButton === "monthly" ? "dashboard-button-active" : ""
-//       }`}
-//       onClick={() => handleButtonClick("monthly")}
-//     >
-//       Monthly
-//     </button>
-//   </div>
-//   {clickedButton === "yearly" && overview?.earliestStartYear !== null && (
-//     <select
-//       className="border border-gray-300 rounded-md px-1.5 focus:outline-none w-fit
-//       cursor-pointer bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200
-//       text-sm"
-//       defaultValue={currentYearForYearly}
-//       onChange={(e) => {
-//         setCurrentYearForYearly(parseInt(e.target.value));
-//         fetchOverview({
-//           hasConstraint: true,
-//           yearly: parseInt(e.target.value),
-//         });
-//       }}
-//     >
-//       {Array.from({ length: currentYear - min_year + 1 }, (_, i) => {
-//         const year = currentYear - i;
-//         return (
-//           <option key={year} value={year}>
-//             {year}
-//           </option>
-//         );
-//       })}
-//     </select>
-//   )}
-//   {clickedButton === "monthly" &&
-//     overview?.earliestStartMonth !== null && (
-//       <input
-//         type="month"
-//         min={`${min_year}-${
-//           min_month < 10 ? `0${min_month}` : min_month
-//         }`}
-//         max={new Date().toISOString().slice(0, 7)} /* YYYY-MM */
-//         value={`${currentMonthYear}-${
-//           currentMonth < 10 ? `0${currentMonth}` : currentMonth
-//         }`} /* YYYY-MM */
-//         className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit
-//       cursor-pointer bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200
-//       text-sm"
-//         onChange={(e) => {
-//           const [year, month] = e.target.value.split("-");
-//           setCurrentMonthYear(parseInt(year));
-//           setCurrentMonth(parseInt(month));
-//           fetchOverview({
-//             hasConstraint: true,
-//             month: parseInt(month),
-//             monthYear: parseInt(year),
-//           });
-//         }}
-//       />
-//     )}
-// </div>
+function budgetVariant(amountSpent: number, amountLimit: number) {
+  const usagePercentage = (amountSpent / amountLimit) * 100;
 
-// <div className="w-full flex flex-wrap py-4 gap-6">
-//   {clickedButton === "overview" && (
-//     <Overview dashboardProps={dashboardProps} />
-//   )}
-
-//   {clickedButton === "monthly" && (
-//     <>
-//       {!loading && overview ? (
-//         <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
-//           <ExpensesTop5Monthly
-//             amountByItem={overview.topFiveMostExpensiveItemThisMonth}
-//             darkMode={user.theme === "dark"}
-//             currency={user.currency}
-//             title="Top Contributors"
-//           />
-//         </div>
-//       ) : (
-//         <CardTemplate
-//           title="Top Contributors"
-//           // description="Loading your top 5 most expensive items..."
-//           className=""
-//           loading={true}
-//         />
-//       )}
-//       {!loading && overview ? (
-//         <div className="col-span-1 md:col-span-1 lg:col-span-1 h-full">
-//           <ExpensesOverDays
-//             overTheDaysThisMonth={overview.overTheDaysThisMonth}
-//             darkMode={user.theme === "dark"}
-//             currency={user.currency}
-//             title="Spending Over Days"
-//           />
-//         </div>
-//       ) : (
-//         <CardTemplate
-//           title="Spending Over Days"
-//           // description="Loading your expenses by category..."
-//           className=""
-//           loading={true}
-//         />
-//       )}
-//     </>
-//   )}
-
-//   {clickedButton === "yearly" && (
-//     <>
-//       {!loading && overview ? (
-//         <div className="col-span-1 md:col-span-2 lg:col-span-2">
-//           <ExpensesMonthlyBarChartCard
-//             amountByMonth={overview.amountByMonth}
-//             darkMode={user.theme === "dark"}
-//             currency={user.currency}
-//             title="Expense Summary"
-//           />
-//         </div>
-//       ) : (
-//         <CardTemplate
-//           title="Expense Summary"
-//           // description="Loading your monthly expenses..."
-//           className=""
-//           loading={true}
-//         />
-//       )}
-
-//       {/* Expenses by Category */}
-//       {!loading && overview ? (
-//         <div className="col-span-1 md:col-span-1 lg:col-span-1">
-//           <ExpensesChartCard
-//             amountByCategory={overview.amountByCategory}
-//             darkMode={user.theme === "dark"}
-//             currency={user.currency}
-//             title="Spending by Category"
-//           />
-//         </div>
-//       ) : (
-//         <CardTemplate
-//           title="Spending by Category"
-//           // description="Loading your expenses by category..."
-//           className=""
-//           loading={true}
-//         />
-//       )}
-
-//       {!loading && overview ? (
-//         <div className="col-span-1 md:col-span-1 lg:col-span-1">
-//           <ExpensesMonthlyLineChartCard
-//             amountByMonth={overview.monthlyCategoryExpense}
-//             darkMode={user.theme === "dark"}
-//             currency={user.currency}
-//             title="Monthly Spending Trends"
-//           />
-//         </div>
-//       ) : (
-//         <CardTemplate
-//           title="Monthly Spending Trends"
-//           // description="Loading your monthly expenses..."
-//           className=""
-//           loading={true}
-//         />
-//       )}
-//     </>
-//   )}
-// </div>
+  if (usagePercentage <= 70) {
+    return "success";
+  } else if (usagePercentage > 70 && usagePercentage <= 100) {
+    return "warning";
+  } else {
+    return "error";
+  }
+}

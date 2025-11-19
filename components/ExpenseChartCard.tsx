@@ -15,6 +15,7 @@ import {
   Line,
   ComposedChart,
   LineChart,
+  Legend,
 } from "recharts";
 import CardTemplate from "@/components/card";
 import {
@@ -157,7 +158,11 @@ export default function ExpensesChartCard({
                 />
               ))}
             </Pie>
-            {/* <Legend /> */}
+            <Legend
+              verticalAlign={window.screen.width > 530 ? "middle" : "bottom"}
+              layout={window.screen.width > 530 ? "vertical" : "horizontal"}
+              align={window.screen.width > 530 ? "right" : "center"}
+            />
             <Tooltip
               itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
               contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
@@ -506,7 +511,6 @@ export function ExpensesOverDays({
       value: amount,
     })
   );
-
 
   return (
     <Card
