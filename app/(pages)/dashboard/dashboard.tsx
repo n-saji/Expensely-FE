@@ -161,7 +161,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col flex-wrap lg:flex-row w-full gap-4 h-full">
       {/* left module */}
-      <div className="flex-1/4 grid grid-cols-1 gap-4 w-full ">
+      <div className="flex-1/4 grid grid-cols-1 w-full gap-4">
         {/* Monthly Summary */}
         {overview ? (
           <Card>
@@ -274,10 +274,10 @@ export default function DashboardPage() {
               {Object.values(overview.budgetServiceMap).map((budget) => (
                 <div key={budget.id} className="mb-4">
                   <div className="flex justify-between mb-1 items-center">
-                    <Label className="text-muted-foreground text-sm" >
+                    <Label className="text-muted-foreground text-sm">
                       {budget.category.name}
                     </Label>
-                    <Label className="text-muted-foreground text-xs" >
+                    <Label className="text-muted-foreground text-xs">
                       {currencyMapper(user?.currency || "USD")}
                       {budget.amountSpent.toFixed(2)} /{" "}
                       {currencyMapper(user?.currency || "USD")}

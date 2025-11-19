@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
   "#00C49F",
@@ -98,6 +99,8 @@ export default function ExpensesChartCard({
     })
   );
 
+  const isDesktop = useMediaQuery("(min-width: 530px)");
+
   return (
     // ========== Pie Chart: Yearly Spending ==========
     <Card
@@ -159,9 +162,9 @@ export default function ExpensesChartCard({
               ))}
             </Pie>
             <Legend
-              verticalAlign={window.screen.width > 530 ? "middle" : "bottom"}
-              layout={window.screen.width > 530 ? "vertical" : "horizontal"}
-              align={window.screen.width > 530 ? "right" : "center"}
+              verticalAlign={isDesktop ? "middle" : "bottom"}
+              layout={isDesktop ? "vertical" : "horizontal"}
+              align={isDesktop ? "right" : "center"}
             />
             <Tooltip
               itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
