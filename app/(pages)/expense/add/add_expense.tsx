@@ -20,8 +20,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function AddExpensePage() {
+  const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
   const token = FetchToken();
   const categories = useSelector((state: RootState) => state.categoryExpense);
@@ -35,7 +37,7 @@ export default function AddExpensePage() {
     },
     amount: 0,
     description: "",
-    expenseDate: new Date().toISOString().slice(0, 10), // Default to current date
+    expenseDate: new Date().toLocaleString().slice(0, 10),
   });
   const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
 
@@ -62,7 +64,12 @@ export default function AddExpensePage() {
     try {
       // convert date to datetime
       const expenseDate = new Date(expense.expenseDate);
-      expense.expenseDate = expenseDate.toISOString();
+
+      expense.expenseDate =
+        expenseDate.toISOString().slice(0, 10) +
+        "T" +
+        new Date().toTimeString().slice(0, 8) +
+        ".000Z";
 
       const response = await fetch(`${API_URL}/expenses/create`, {
         method: "POST",
@@ -88,7 +95,16 @@ export default function AddExpensePage() {
         description: "",
         expenseDate: expense.expenseDate
           ? expense.expenseDate.slice(0, 10)
-          : new Date().toISOString().slice(0, 10),
+          : new Date().toLocaleString().slice(0, 10),
+      });
+
+      toast.success("Expense added successfully", {
+        action: {
+          label: "View Expenses",
+          onClick: () => {
+            router.push("/expense");
+          },
+        },
       });
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -127,7 +143,7 @@ export default function AddExpensePage() {
             />
             <Input
               type="number"
-              step="0.01"
+              step="0.5"
               min="0"
               placeholder="Amount"
               value={expense.amount === 0 ? "" : expense.amount}
@@ -181,7 +197,9 @@ export default function AddExpensePage() {
                     setOpen(false);
                     setExpense({
                       ...expense,
-                      expenseDate: date ? date.toISOString().slice(0, 10) : "",
+                      expenseDate: date
+                        ? date.toLocaleString().slice(0, 10)
+                        : "",
                     });
                   }}
                 />

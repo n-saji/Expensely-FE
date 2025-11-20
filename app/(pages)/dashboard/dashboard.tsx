@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { currencyMapper } from "@/utils/currencyMapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProgressBar } from "@/components/ProgressBar";
+import { AlertTriangle, FileWarning } from "lucide-react";
 
 const SkeletonLoader = ({
   title,
@@ -167,10 +168,8 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {new Date()
-                  .toLocaleString("default", { month: "long" })
-                  .toLocaleUpperCase()}{" "}
-                SUMMARY
+                {new Date().toLocaleString("default", { month: "long" })}{" "}
+                Summary
               </CardTitle>
             </CardHeader>
 
@@ -236,7 +235,7 @@ export default function DashboardPage() {
         {overview ? (
           <Card>
             <CardHeader>
-              <CardTitle>YEARLY SUMMARY</CardTitle>
+              <CardTitle>Yearly Summary</CardTitle>
             </CardHeader>
 
             <CardContent>
@@ -271,13 +270,19 @@ export default function DashboardPage() {
               <CardTitle>Budgets</CardTitle>
             </CardHeader>
             <CardContent>
+              {Object.values(overview.budgetServiceMap).length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No budgets found.
+                </p>
+              )}
               {Object.values(overview.budgetServiceMap).map((budget) => (
                 <div key={budget.id} className="mb-4">
                   <div className="flex justify-between mb-1 items-center">
-                    <Label className="text-muted-foreground text-sm">
-                      {budget.category.name}
+                    <Label className="text-sm">
+                      {budget.category.name}{" "}
+                      {budgetIcon(budget.amountSpent, budget.amountLimit)}
                     </Label>
-                    <Label className="text-muted-foreground text-xs">
+                    <Label className="text-sm text-muted-foreground">
                       {currencyMapper(user?.currency || "USD")}
                       {budget.amountSpent.toFixed(2)} /{" "}
                       {currencyMapper(user?.currency || "USD")}
@@ -292,6 +297,7 @@ export default function DashboardPage() {
                       budget.amountSpent,
                       budget.amountLimit
                     )}
+                    showAnimation={true}
                   />
                 </div>
               ))}
@@ -382,5 +388,16 @@ function budgetVariant(amountSpent: number, amountLimit: number) {
     return "warning";
   } else {
     return "error";
+  }
+}
+
+function budgetIcon(amountSpent: number, amountLimit: number) {
+  const usagePercentage = (amountSpent / amountLimit) * 100;
+  if (usagePercentage <= 70) {
+    return <></>;
+  } else if (usagePercentage > 70 && usagePercentage <= 100) {
+    return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+  } else {
+    return <FileWarning className="h-4 w-4 text-red-500" />;
   }
 }
