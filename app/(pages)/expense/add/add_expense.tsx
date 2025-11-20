@@ -143,7 +143,7 @@ export default function AddExpensePage() {
             />
             <Input
               type="number"
-              step="0.5"
+              step="0.01"
               min="0"
               placeholder="Amount"
               value={expense.amount === 0 ? "" : expense.amount}
