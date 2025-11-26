@@ -132,8 +132,8 @@ export default function CategoryPage() {
           className="gap-6 sm:gap-3 md:gap-4 mb-6
           grid sm:grid-cols-3
           md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7
-          bg-white dark:bg-gray-800 p-4 rounded-lg relative 
-          dark:after:border-b-gray-700"
+          bg-card p-4 rounded-lg relative 
+          dark:after:border-b-card"
         >
           <DropDown
             options={categoryTypes.map((category) => ({
@@ -152,12 +152,12 @@ export default function CategoryPage() {
         </div>
       )}
       <div className="overflow-x-auto">
-        <table className="w-full divide-y  shadow-lg rounded-lg overflow-hidden dark:divide-gray-700 ">
-          {/* divide-gray-300 */}
-          <thead
-            className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider
-            dark:bg-gray-800 dark:text-gray-200"
-          >
+        <table
+          className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
+          shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y
+          divide-gray-200 dark:divide-gray-700"
+        >
+          <thead className=" text-sm uppercase tracking-wider">
             <tr className="text-left font-semibold">
               <th className={`${table_data_classname}`}>#</th>
               <th className={`${table_data_classname}`}>Category</th>
@@ -201,14 +201,13 @@ export default function CategoryPage() {
           )}
           {showTable && !loading && (
             <tbody
-              className="bg-white divide-y divide-gray-200 text-sm
-              dark:bg-gray-900 dark:text-gray-200
+              className=" divide-y divide-gray-200 text-sm
               dark:divide-gray-700"
             >
               {categoriesList.map((category) => (
                 <tr
                   key={category.id}
-                  className="hover:bg-gray-100 py-3 group relative dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className=" py-3 group relative transition-colors cursor-pointer"
                   onClick={() => {
                     if (window.innerWidth < 640) {
                       setSelectedCategory(category);
@@ -298,63 +297,6 @@ export default function CategoryPage() {
           </PopUp>
         )}
       </div>
-      {/* <div className="flex justify-between items-center py-4 w-full">
-        <div className="flex items-center space-x-2 w-full justify-center">
-          <button
-                  Save Changes
-                </button>
-              </form>
-            </div>
-          </PopUp>
-        )}
-      </div>
-      {/* <div className="flex justify-between items-center py-4 w-full">
-        <div className="flex items-center space-x-2 w-full justify-center">
-          <button
-            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-l dark:text-gray-200 ${
-              pageNumber <= 1
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer"
-            }`}
-            disabled={pageNumber <= 1}
-            aria-disabled={pageNumber <= 1}
-            onClick={() => {
-              setPageNumber((prev) => Math.max(prev - 1, 1));
-              fetchExpenses({
-                fromDate: "",
-                toDate: "",
-                category: "",
-                order: "desc",
-                page: Math.max(pageNumber - 1, 1),
-              });
-            }}
-          >
-            {`< Prev`}
-          </button>
-          <span className="px-4">Page {pageNumber}</span>
-          <button
-            className={`px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-r dark:text-gray-200 ${
-              expenses.length < 10
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer"
-            }`}
-            disabled={expenses.length < 10} // Disable if less than 10 items
-            aria-disabled={expenses.length < 10}
-            onClick={() => {
-              setPageNumber((prev) => prev + 1);
-              fetchExpenses({
-                fromDate: "",
-                toDate: "",
-                category: "",
-                order: "desc",
-                page: pageNumber + 1,
-              });
-            }}
-          >
-            {`Next >`}
-          </button>
-        </div>
-      </div> */}
     </div>
   );
 }
