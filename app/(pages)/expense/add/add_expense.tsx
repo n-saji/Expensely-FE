@@ -115,8 +115,8 @@ export default function AddExpensePage() {
 
   return (
     <div
-      className="bg-gray-300 shadow-md rounded-lg p-4 md:p-8 w-full
-         flex flex-col items-center justify-center dark:bg-gray-800 dark:text-gray-200"
+      className=" shadow-md rounded-lg p-4 md:p-8 w-full
+         flex flex-col items-center justify-center  "
     >
       <Card className="w-[95%] sm:w-1/2 text-center">
         <CardHeader>

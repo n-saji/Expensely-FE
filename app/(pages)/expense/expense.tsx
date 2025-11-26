@@ -495,15 +495,14 @@ function ExpenseList({
       </div>
       {filter && (
         <div
-          className="gap-6 sm:gap-3 md:gap-4 mb-6
+          className="gap-6 sm:gap-3 md:gap-4 mb-6 bg-card
           grid sm:grid-cols-3
           md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7
-          bg-white dark:bg-gray-800 p-4 rounded-lg relative 
+           p-4 rounded-lg relative 
           after:content-[''] after:absolute after:-top-5 after:right-8
           after:border-l-20 after:border-l-transparent
           after:border-r-20 after:border-r-transparent
-          after:border-b-20 after:border-b-white
-          dark:after:border-b-gray-800
+          after:border-b-20 after:border-b-card
         "
         >
           <DropDown
@@ -549,7 +548,7 @@ function ExpenseList({
               endDate={toDateFilter ? new Date(toDateFilter) : null}
               dateFormat="yyyy-MM-dd"
               className="p-2 rounded-md cursor-pointer
-              w-full h-full bg-white dark:bg-gray-700
+              w-full h-full bg-card
               outline-none shadow-md dark:outline dark:border dark:border-gray-400
               text-sm"
               placeholderText="From"
@@ -575,7 +574,7 @@ function ExpenseList({
               endDate={toDateFilter ? new Date(toDateFilter) : null}
               dateFormat="yyyy-MM-dd"
               className="p-2 rounded-md cursor-pointer
-              w-full h-full bg-white dark:bg-gray-700
+              w-full h-full bg-card
               outline-none shadow-md dark:outline dark:border dark:border-gray-400
               text-sm"
               placeholderText="To"
@@ -586,6 +585,7 @@ function ExpenseList({
 
           <div className="max-sm:w-full">
             <Button
+              variant={"outline"}
               onClick={() => {
                 // setFilter(false);
                 setFromDate("");
@@ -605,15 +605,15 @@ function ExpenseList({
         </div>
       )}
 
-      <div className="flex-grow overflow-auto">
+      <div className="relative ">
         <table
           className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
-          shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y bg-white dark:bg-gray-900
+          shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y
           divide-gray-200 dark:divide-gray-700"
         >
           <thead
-            className="text-gray-700 uppercase tracking-wider
-             dark:text-gray-200"
+            className=" uppercase tracking-wider
+             "
           >
             <tr className="text-left font-semibold first:rounded-tl-lg last:rounded-tr-lg">
               {!isDemo && (
@@ -628,8 +628,8 @@ function ExpenseList({
           </thead>
           {(!showTable || loading) && (
             <tbody
-              className="bg-white divide-y 
-              dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
+              className=" divide-y 
+               "
             >
               {!loading && (
                 <tr>
@@ -673,16 +673,11 @@ function ExpenseList({
           )}
           {showTable && !loading && (
             <tbody
-              className="dark:text-gray-200 divide-y last:rounded-bl-lg last:rounded-br-lg
-                 dark:divide-gray-700 "
+              className=" divide-y last:rounded-bl-lg last:rounded-br-lg
+                  "
             >
               {expensesList.expenses.map((expense) => (
-                <tr
-                  key={expense.id}
-                  className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
-                  transition-colors relative group
-                  "
-                >
+                <tr key={expense.id} className=" relative group    ">
                   {!isDemo && (
                     <td className={table_data_classname}>
                       <input
@@ -714,13 +709,6 @@ function ExpenseList({
                   </td>
                   <td
                     className={`${table_data_classname} font-medium text-green-600`}
-                    // onClick={() => {
-                    //   if (window.innerWidth < 640) {
-                    //     setSelectedExpenses([expense]);
-                    //     dispatch(togglePopUp());
-                    //     return;
-                    //   }
-                    // }}
                   >
                     {`${currencyMapper(
                       expense?.currency || "USD"
@@ -885,8 +873,8 @@ function ExpenseList({
       </div>
       {!isDemo && (
         <div
-          className="shrink-0 flex justify-center items-center text-xs sm:text-sm 
-       py-4"
+          className="flex justify-center items-center text-xs sm:text-sm 
+       py-4 "
         >
           <div className="flex items-center space-x-2 justify-center">
             <button
@@ -1085,62 +1073,3 @@ const SearchAndFilter = ({
     </div>
   );
 };
-
-// TODO: remove later
-// <div className="flex items-center max-sm:justify-between">
-//   <div
-//     className="flex items-center relative border border-gray-500 dark:border-none rounded-md
-//   active:border-none focus:border-none"
-//   >
-//     <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-//     <Input
-//       className="pl-7"
-//       placeholder="Search..."
-//       value={query}
-//       onChange={(e) => setQuery(e.target.value)}
-//     />
-//     {query && (
-//       <Button
-//         className="absolute right-2  h-[50%] w-2"
-//         variant={"ghost"}
-//         onClick={() => setQuery("")}
-//       >
-//         <X className="h-2 w-2" />
-//       </Button>
-//     )}
-//   </div>
-
-//   <div className="flex">
-//     {selectedExpenses.length > 0 && (
-//       <button
-//         className={`ml-4 ${
-//           selectedExpenses.length === 0
-//             ? "opacity-40 cursor-not-allowed"
-//             : "cursor-pointer"
-//         }`}
-//         disabled={selectedExpenses.length === 0}
-//         onClick={handleBulkDelete}
-//       >
-//         <Image
-//           src={user.theme === "light" ? deleteIcon : deleteIconWhite}
-//           alt="Delete"
-//           className=" w-6 h-6"
-//         />
-//       </button>
-//     )}
-
-//     <Image
-//       src={user.theme === "light" ? filterIcon : filterIconWhite}
-//       alt="Filter"
-//       className="w-6 h-6 cursor-pointer ml-4"
-//       onClick={() => setFilter(!filter)}
-//     />
-
-//     <Image
-//       src={user.theme === "light" ? DownloadFile : DownloadFileWhite}
-//       alt="Download"
-//       className="w-6 h-6 cursor-pointer ml-4"
-//       onClick={handleFileDownload}
-//     />
-//   </div>
-// </div>

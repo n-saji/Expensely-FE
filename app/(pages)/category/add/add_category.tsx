@@ -10,12 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AddCategoryPage() {
   const user = useSelector((state: RootState) => state.user);
@@ -72,8 +67,8 @@ export default function AddCategoryPage() {
 
   return (
     <div
-      className="bg-gray-300 shadow-md rounded-lg p-4 md:p-8 w-full
-         flex flex-col items-center justify-center dark:bg-gray-800 dark:text-gray-200"
+      className="shadow-md rounded-lg p-4 md:p-8 w-full
+         flex flex-col items-center justify-center  "
     >
       <Card className="w-[95%] sm:w-1/2 text-center">
         <CardHeader>

@@ -23,7 +23,6 @@ export default function DashboardPage({
 }: {
   children: React.ReactNode;
 }) {
-
   const user = useSelector((state: RootState) => state.user);
   const token = FetchToken();
 
@@ -88,8 +87,6 @@ export default function DashboardPage({
     );
   }, []);
 
-
-
   const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
 
   useEffect(() => {
@@ -140,39 +137,10 @@ export default function DashboardPage({
         <AppSidebar />
         {/* <Sidebar /> */}
 
-        <div className={`w-full transition-all duration-300`}>
-          {/* <Navbar
-            title={pathname}
-            isLink={isLink}
-            ReactLink={reactLink}
-            addButton={
-              pathname === "Expense" ? (
-                <Link href="/expense/add">
-                  <button
-                    className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md
-                  "
-                  >
-                    {deviceWidth < 640 ? "+" : "Add Expense"}
-                  </button>
-                </Link>
-              ) : pathname === "Category" ? (
-                <Link href="/category/add">
-                  <button className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
-                    {deviceWidth < 640 ? "+" : "Add Category"}
-                  </button>
-                </Link>
-              ) : pathname === "Budget" ? (
-                <Link href="/budget/add">
-                  <button className="button-green-outline p-0 px-1.5 text-sm sm:py-1 sm:px-3 sm:text-md">
-                    {deviceWidth < 640 ? "+" : "Add Budget"}
-                  </button>
-                </Link>
-              ) : null
-            }
-          /> */}
+        <div className={`w-full transition-all duration-300  flex flex-col`}>
           <Navbar />
 
-          <div className="px-8 py-8 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full ">
+          <div className="px-8 pt-8 w-full h-[calc(100vh-3rem)]">
             {children}
           </div>
         </div>

@@ -107,7 +107,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" > 
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -153,7 +153,10 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem key={"Expense-show"}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/expense"}
+                      >
                         <Link href={"/expense"}>
                           <LayoutList />
                           <span>Recent Transactions</span>
@@ -161,7 +164,10 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem key={"Expense-add"}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/expense/add"}
+                      >
                         <Link href={"/expense/add"}>
                           <CircleDollarSign />
                           <span>Add Expense</span>
@@ -186,7 +192,10 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem key={"Expense-show"}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/budget"}
+                      >
                         <Link href={"/budget"}>
                           <LayoutList />
                           <span>Existing Budgets</span>
@@ -194,7 +203,10 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem key={"Expense-add"}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/budget/add"}
+                      >
                         <Link href={"/budget/add"}>
                           <Plus />
                           <span>Add Budget</span>
@@ -219,7 +231,10 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem key={"Expense-show"}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/category"}
+                      >
                         <Link href={"/category"}>
                           <LayoutList />
                           <span>Existing Categories</span>
@@ -227,7 +242,10 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem key={"Expense-add"}>
-                      <SidebarMenuButton asChild>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/category/add"}
+                      >
                         <Link href={"/category/add"}>
                           <Plus />
                           <span>Add Category</span>
@@ -260,13 +278,13 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-64">
-                <DropdownMenuItem
+                <DropdownMenuItem 
                   onClick={() => {
                     router.push("/profile");
                   }}
                 >
                   <span className="flex items-center gap-2">
-                    <User /> Account
+                    <User /> Profile
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
