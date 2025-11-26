@@ -6,6 +6,9 @@ import { useState } from "react";
 import Image from "next/image";
 import GoogleLogo from "@/assets/icon/google-logo.png";
 import { signIn } from "next-auth/react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function SignUpForm() {
   const [name, setName] = useState("");
@@ -116,13 +119,13 @@ export default function SignUpForm() {
     <form className="space-y-5 w-full">
       {/* name */}
       <div>
-        <label
+        <Label
           htmlFor="name"
           className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Name
-        </label>
-        <input
+        </Label>
+        <Input
           id="name"
           type="text"
           placeholder="Enter your name"
@@ -139,13 +142,13 @@ export default function SignUpForm() {
       </div>
       {/* email */}
       <div>
-        <label
+        <Label
           htmlFor="email"
           className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Email
-        </label>
-        <input
+        </Label>
+        <Input
           id="email"
           type="email"
           placeholder="Enter your email"
@@ -163,14 +166,14 @@ export default function SignUpForm() {
 
       {/* phone */}
       <div>
-        <label
+        <Label
           htmlFor="phone"
           className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Phone
-        </label>
+        </Label>
         <div className="flex space-x-2">
-          <input
+          <Input
             type="text"
             value={countryCode}
             className="mt-1 block w-1/5 border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -178,8 +181,8 @@ export default function SignUpForm() {
               setCountryCode(e.target.value);
               setError("");
             }}
-          ></input>
-          <input
+          />
+          <Input
             id="phone"
             type="tel"
             placeholder="Enter your phone number"
@@ -203,13 +206,13 @@ export default function SignUpForm() {
 
       {/* password */}
       <div>
-        <label
+        <Label
           htmlFor="password"
           className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Password
-        </label>
-        <input
+        </Label>
+        <Input
           id="password"
           type="password"
           placeholder="Enter your password"
@@ -226,13 +229,13 @@ export default function SignUpForm() {
       </div>
       {/* confirm password */}
       <div>
-        <label
+        <Label
           htmlFor="confirm-password"
           className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Confirm Password
-        </label>
-        <input
+        </Label>
+        <Input
           id="confirm-password"
           type="password"
           placeholder="Confirm your password"
@@ -248,9 +251,9 @@ export default function SignUpForm() {
         />
       </div>
 
-      <button
+      <Button
         type="submit"
-        className="button-green w-full"
+        className="w-full"
         onClick={(e) => {
           handleSubmit(e);
           setPassword("");
@@ -258,7 +261,7 @@ export default function SignUpForm() {
         }}
       >
         {loading ? "Signing Up..." : "Sign Up"}
-      </button>
+      </Button>
 
       <div className="flex items-center justify-between">
         <hr className="w-full border-gray-300 dark:border-gray-600" />
@@ -268,9 +271,9 @@ export default function SignUpForm() {
         <hr className="w-full border-gray-300 dark:border-gray-600" />
       </div>
 
-      <button
-        type="button"
-        className="button-white w-full py-2"
+      <Button
+        variant={"outline"}
+        className="w-full"
         onClick={() => {
           handleGoogleLogin();
         }}
@@ -282,7 +285,7 @@ export default function SignUpForm() {
           className="inline mr-2"
         />
         <span className="sm:inline">Sign Up with Google</span>
-      </button>
+      </Button>
 
       <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
         Already have an account?{" "}

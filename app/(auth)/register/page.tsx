@@ -1,5 +1,6 @@
 import Logo from "@/components/logo";
 import SignUpForm from "./signup_form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export async function generateMetadata() {
   return {
@@ -11,14 +12,16 @@ export async function generateMetadata() {
 
 export default function SignUpPage() {
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-900">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-background">
       <Logo className="text-4xl p-4" />
-      <div className="max-sm:w-85 bg-gray-50 dark:bg-gray-800 max-sm:p-8 px-16 py-8 rounded-2xl shadow-lg w-full max-w-md  flex flex-col items-center my-4">
-        <h1 className="text-2xl font-semibold text-gray-600 pb-8 dark:text-gray-200">
-          Create An Account
-        </h1>
-        <SignUpForm />
-      </div>
+      <Card className="max-sm:w-85 p-8 w-full max-w-md my-6">
+        <CardHeader>
+          <CardTitle className="text-xl">Create An Account</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SignUpForm />
+        </CardContent>
+      </Card>
     </div>
   );
 }

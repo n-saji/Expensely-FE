@@ -1,8 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import menubar from "@/assets/icon/menu.png";
-import menubarwhite from "@/assets/icon/menu-white.png";
 import Image from "next/image";
 import Logout from "@/app/(auth)/logout/logout";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +13,7 @@ import fetchProfileUrl from "@/utils/fetchProfileURl";
 import defaulProdilePic from "@/assets/icon/user.png";
 import { clearCategories } from "@/redux/slices/category";
 import { LogOut, Settings, ShieldUser, User } from "lucide-react";
+import { SidebarTrigger } from "./ui/sidebar";
 
 export default function Navbar({
   title,
@@ -31,7 +30,6 @@ export default function Navbar({
   const [profileDropDown, setProfileDropdown] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
-  const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
   const profileDropDownRef = useRef<HTMLDivElement>(null);
   const profileToggleRef = useRef<HTMLDivElement>(null);
 
@@ -90,21 +88,13 @@ export default function Navbar({
 
   return (
     <nav
-      className={`h-16 px-6 py-4 bg-primary-color shadow-md flex justify-between items-center 
-        fixed top-0 right-0  duration-300 ease-in-out z-50 border-b border-gray-300 dark:border-gray-700
-    ${isOpen ? "min-lg: w-[calc(100%-16rem)] max-lg:w-full" : "w-full"}
-     dark:text-gray-200
+      className={`h-16 px-6 py-4 bg-background flex justify-between items-center 
+        duration-300 ease-in-out z-50 sticky top-0
+        border-b  dark:text-gray-200
     `}
     >
       <div className="space-x-4 flex items-center w-full">
-        <Image
-          src={user.theme === "light" ? menubar : menubarwhite}
-          alt="hamburger menu"
-          width={30}
-          height={30}
-          className="cursor-pointer"
-          onClick={() => dispatch(toggleSidebar())}
-        />
+        <SidebarTrigger onClick={() => dispatch(toggleSidebar())} />
         <div className="flex justify-between w-full text-lg items-center">
           {isLink ? ReactLink : title || "Dashboard"}
           <div className="relative flex items-center space-x-4">

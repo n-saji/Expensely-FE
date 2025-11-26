@@ -9,6 +9,7 @@ import FetchToken from "@/utils/fetch_token";
 import validateToken from "@/utils/validate_token";
 import { setUser } from "@/redux/slices/userSlice";
 import { useDispatch } from "react-redux";
+import { Button } from "./ui/button";
 
 export default function LandingPageNavBar() {
   const router = useRouter();
@@ -34,24 +35,21 @@ export default function LandingPageNavBar() {
   return (
     <nav className="flex justify-between items-center px-6 py-4 shadow">
       <Logo
-        className="text-xl sm:text-3xl font-bold text-green-600"
+        className="text-xl sm:text-3xl font-bold text-primary"
         dimension={{ width: 30, height: 30 }}
       />
-      <div className="space-x-4">
+      <div>
         {loggedIn ? (
           <Link href="/dashboard" className="text-medium hover:underline">
-            Dashboard
+            <Button variant={"ghost"}>Dashboard</Button>
           </Link>
         ) : (
           <>
             <Link href="/login" className="text-medium hover:underline">
-              Login
+              <Button>Login</Button>
             </Link>
-            <Link
-              href="/register"
-              className="bg-green-600 text-white px-4 py-2 rounded-md text-sm"
-            >
-              Register
+            <Link href="/register" className="px-4 py-2 rounded-md text-sm">
+              <Button variant={"outline"}>Register</Button>
             </Link>
           </>
         )}

@@ -54,16 +54,17 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-full lg:w-64 shadow-md max-lg:z-60 fixed z-40
+      className={`w-full lg:w-64  max-lg:z-60 fixed z-40
         top-0 left-0 h-screen 
         transition-transform
         transform duration-300 ease-in-out
+        border-r
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         ${isOpen ? "bg-black/50" : "bg-transparent"}
         `}
       {...handlers}
     >
-      <div className="w-55 lg:w-full h-screen bg-secondary-color relative flex flex-col">
+      <div className="w-55 lg:w-full h-screen bg-background relative flex flex-col">
         <div
           className="absolute top-1/2 -right-5 min-lg:hidden 
         w-5 h-20 bg-primary-color flex text-center
@@ -71,14 +72,15 @@ export default function Sidebar() {
          border-white bg-secondary-color"
           onClick={() => dispatch(setSidebar(false))}
         >{`<`}</div>
-        <div className="h-16 border-b border-gray-200 flex items-center justify-start px-5 sm:px-6">
+        <div className="h-16 flex items-center justify-start px-5 sm:px-6">
           <Logo
             disableIcon={false}
-            className="text-2xl py-4 w-full justify-start text-white"
+            className="text-2xl py-4 w-full justify-start text-primary-color"
             dimension={{ width: 30, height: 30 }}
             redirect={true}
           />
         </div>
+
         <div className="flex-grow justify-between">
           <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-700 font-semibold">
             {navLinks.map((link) => {

@@ -1,3 +1,5 @@
+import { SidebarProvider } from "@/components/ui/sidebar";
+
 import DashboardPage from "./common";
 
 export default function RootLayout({
@@ -7,7 +9,9 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <DashboardPage>{children}</DashboardPage>
+      <SidebarProvider>
+        <DashboardPage>{children}</DashboardPage>
+      </SidebarProvider>
     </>
   );
 }

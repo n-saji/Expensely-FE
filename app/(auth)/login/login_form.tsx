@@ -11,6 +11,9 @@ import GoogleLogo from "@/assets/icon/google-logo.png";
 import Image from "next/image";
 
 import { signIn } from "next-auth/react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -134,13 +137,13 @@ export default function LoginForm() {
     <form className="space-y-5 w-full">
       <div className="flex flex-col space-y-4">
         <div>
-          <label
+          <Label
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Username
-          </label>
-          <input
+          </Label>
+          <Input
             id="username"
             type="text"
             className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md 
@@ -158,13 +161,13 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label
+          <Label
             htmlFor="password"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Password
-          </label>
-          <input
+          </Label>
+          <Input
             id="password"
             type="password"
             className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
@@ -180,19 +183,18 @@ export default function LoginForm() {
           />
         </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="mr-2 "
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            Remember me
-          </label>
+        <div className="flex items-center space-x-2 text-sm">
+          <Input
+            type="checkbox"
+            className="w-4 h-4"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            id="rememberMe"
+          />
+          <Label className="" htmlFor="rememberMe">Remember me</Label>
         </div>
 
-        <button
+        <Button
           type="submit"
           className={`button-green w-full py-2
             ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
@@ -201,7 +203,7 @@ export default function LoginForm() {
           disabled={loading}
         >
           {loading ? "Logging in..." : "Log In"}
-        </button>
+        </Button>
 
         <div className="flex items-center justify-between">
           <hr className="w-full border-gray-300 dark:border-gray-600" />
@@ -211,9 +213,9 @@ export default function LoginForm() {
           <hr className="w-full border-gray-300 dark:border-gray-600" />
         </div>
 
-        <button
+        <Button
           type="button"
-          className="button-white w-full py-2"
+          variant={"outline"}
           onClick={() => {
             handleGoogleLogin();
           }}
@@ -225,7 +227,7 @@ export default function LoginForm() {
             className="inline mr-2"
           />
           <span className="sm:inline">Log in with Google</span>
-        </button>
+        </Button>
 
         <div
           className="mt-4 flex flex-col items-center justify-center space-y-4

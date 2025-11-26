@@ -1,14 +1,15 @@
 import LandingPageNavBar from "@/components/landing-page-navbar";
+import { Button } from "@/components/ui/button";
 import UserPreferences from "@/utils/userPreferences";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+    <div className="min-h-screen bg-background">
       <LandingPageNavBar />
 
       {/* Hero Section */}
-      <section className="text-center px-6 py-20 bg-gray-50 dark:bg-gray-800 dark:text-gray-200">
+      <section className="text-center px-6 py-20 bg-primary/10">
         <h1 className="text-4xl sm:text-5xl font-bold mb-4">
           Track your expenses effortlessly 💰
         </h1>
@@ -18,16 +19,16 @@ export default function Home() {
         </p>
         <div className="flex justify-center space-x-4">
           <Link href="/register">
-            <button className="button-green">Get Started</button>
+            <Button>Get Started</Button>
           </Link>
           <Link href="/about">
-            <button className="button-green-outline">Learn More</button>
+            <Button variant={"ghost"}>Learn More</Button>
           </Link>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-16 px-6 bg-white dark:bg-gray-900 dark:text-gray-200">
+      <section className="py-16 px-6 bg-primary/0">
         <div className="grid sm:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
           <div>
             <h3 className="text-xl font-semibold mb-2">💼 Budgeting</h3>
@@ -51,17 +52,17 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="bg-green-600 text-white text-center py-12 px-6">
+      <section className="text-center py-12 px-6 bg-primary/10">
         <h2 className="text-3xl font-bold mb-4">
           Start managing your money smarter today.
         </h2>
         <Link href="/register">
-          <button className="button-white">Create Free Account</button>
+          <Button>Create Free Account</Button>
         </Link>
       </section>
 
       {/* Footer */}
-      <footer className="text-center text-sm py-6 text-gray-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+      <footer className="text-center text-sm py-6 bg-primary/0">
         © 2025 Expensely · Privacy Policy · Contact
       </footer>
       <UserPreferences />
