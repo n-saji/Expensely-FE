@@ -605,7 +605,7 @@ function ExpenseList({
         </div>
       )}
 
-      <div className="relative ">
+      <div className="flex-grow overflow-auto">
         <table
           className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
           shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y

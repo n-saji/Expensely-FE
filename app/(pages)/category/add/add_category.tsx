@@ -67,7 +67,7 @@ export default function AddCategoryPage() {
 
   return (
     <div
-      className="shadow-md rounded-lg p-4 md:p-8 w-full
+      className="p-4 md:p-8 w-full
          flex flex-col items-center justify-center  "
     >
       <Card className="w-[95%] sm:w-1/2 text-center">

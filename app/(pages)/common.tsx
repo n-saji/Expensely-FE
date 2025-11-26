@@ -137,10 +137,9 @@ export default function DashboardPage({
         <AppSidebar />
         {/* <Sidebar /> */}
 
-        <div className={`w-full transition-all duration-300  flex flex-col`}>
+        <div className={`w-full transition-all duration-300 `}>
           <Navbar />
-
-          <div className="px-8 pt-8 w-full h-[calc(100vh-3rem)]">
+          <div className="px-8 py-8 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full">
             {children}
           </div>
         </div>
