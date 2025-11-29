@@ -27,6 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface Expense {
   id: string;
@@ -619,9 +620,8 @@ function ExpenseList({
               {!isDemo && (
                 <th className={`${table_data_classname} w-1/13`}>#</th>
               )}
-              <th className={`${table_data_classname} w-3/13`}>Category</th>
+              <th className={`${table_data_classname} w-6/13`}>Description</th>
               <th className={`${table_data_classname} w-2/13`}>Amount</th>
-              <th className={`${table_data_classname} w-4/13`}>Description</th>
               <th className={`${table_data_classname} w-3/13`}>Date</th>
               <th className={`${table_data_classname} w-1/13`}></th>
             </tr>
@@ -633,7 +633,7 @@ function ExpenseList({
             >
               {!loading && (
                 <tr>
-                  <td colSpan={6} className="text-center py-4">
+                  <td colSpan={5} className="text-center py-4">
                     <p className="text-gray-500">
                       {loading ? "Loading..." : "No expenses found"}
                     </p>
@@ -677,7 +677,10 @@ function ExpenseList({
                   "
             >
               {expensesList.expenses.map((expense) => (
-                <tr key={expense.id} className=" relative group    ">
+                <tr
+                  key={expense.id}
+                  className=" relative group  hover:bg-muted/40  "
+                >
                   {!isDemo && (
                     <td className={table_data_classname}>
                       <input
@@ -704,16 +707,6 @@ function ExpenseList({
                       />
                     </td>
                   )}
-                  <td className={table_data_classname}>
-                    {expense.categoryName}
-                  </td>
-                  <td
-                    className={`${table_data_classname} font-medium text-green-600`}
-                  >
-                    {`${currencyMapper(
-                      expense?.currency || "USD"
-                    )}${expense.amount.toFixed(2)}`}
-                  </td>
                   <td
                     className={table_data_classname}
                     onClick={() => {
@@ -724,8 +717,21 @@ function ExpenseList({
                       }
                     }}
                   >
-                    {expense.description}
+                    <div className="flex justify-start items-center gap-x-2 ">
+                      {expense.description}
+                      <Badge className={`ml-0 text-[10px]`}>
+                        {expense.categoryName}
+                      </Badge>
+                    </div>
                   </td>
+                  <td
+                    className={`${table_data_classname} font-medium text-green-600`}
+                  >
+                    {`${currencyMapper(
+                      expense?.currency || "USD"
+                    )}${expense.amount.toFixed(2)}`}
+                  </td>
+
                   <td className={`${table_data_classname} text-gray-500`}>
                     {new Date(expense.expenseDate).toLocaleDateString("en-US", {
                       year: "numeric",
