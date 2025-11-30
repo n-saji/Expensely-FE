@@ -20,6 +20,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -55,15 +56,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-
-// Menu items.
-const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-];
 
 export function AppSidebar() {
   const router = useRouter();
@@ -107,7 +99,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" > 
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -120,7 +112,7 @@ export function AppSidebar() {
                   height={20}
                   className="mr-2"
                 />
-                <h1 className="font-bold">Expensely</h1>
+                <h1 className="font-bold text-xl">Expensely</h1>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -128,20 +120,22 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarMenu>
-            {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathName === item.url}>
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathName === "/dashboard"}>
+                <Link href={"/dashboard"}>
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Manage</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible defaultOpen className="group/collapsible">
+            <Collapsible className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton>
@@ -180,7 +174,7 @@ export function AppSidebar() {
             </Collapsible>
           </SidebarMenu>
           <SidebarMenu>
-            <Collapsible defaultOpen className="group/collapsible">
+            <Collapsible className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton>
@@ -219,7 +213,7 @@ export function AppSidebar() {
             </Collapsible>
           </SidebarMenu>
           <SidebarMenu>
-            <Collapsible defaultOpen className="group/collapsible">
+            <Collapsible className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton>
@@ -278,7 +272,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-64">
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => {
                     router.push("/profile");
                   }}
