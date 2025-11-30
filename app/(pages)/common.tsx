@@ -11,12 +11,12 @@ import FetchToken from "@/utils/fetch_token";
 import { Toaster } from "@/components/ui/sonner";
 
 import { addCategory, removeCategory } from "@/redux/slices/category";
-import { API_URL } from "@/config/config";
 import { CategoryTypeExpense } from "@/global/constants";
 import { Category } from "@/global/dto";
 import { useDispatch, useSelector } from "react-redux";
 import { AppSidebar } from "@/components/sidebar_new";
 import Navbar from "@/components/navbar_new";
+import api from "@/lib/api";
 
 export default function DashboardPage({
   children,
@@ -40,21 +40,14 @@ export default function DashboardPage({
       }
       isCategoryMounted.current = true;
       try {
-        const response = await fetch(
-          `${API_URL}/categories/user/${user.id}?type=${CategoryTypeExpense}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await api.get(
+          `/categories/user/${user.id}?type=${CategoryTypeExpense}`
         );
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error("Network response was not ok");
         }
-        const data = await response.json();
+        const data = response.data;
         if (!data || !Array.isArray(data)) {
           throw new Error("Invalid categories data");
         }

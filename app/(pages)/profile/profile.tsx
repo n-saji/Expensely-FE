@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import FetchToken, { FetchUserId } from "@/utils/fetch_token";
-import { API_URL } from "@/config/config";
+import { FetchUserId } from "@/utils/fetch_token";
 import { setUser } from "@/redux/slices/userSlice";
 import editIcon from "@/assets/icon/edit.png";
 import editIconWhite from "@/assets/icon/edit-white.png";
@@ -25,6 +24,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import api from "@/lib/api";
 
 export default function ProfilePage({
   reRouteToDashboard,
@@ -58,7 +58,6 @@ export default function ProfilePage({
 
   const dispatch = useDispatch();
   const userId = FetchUserId();
-  const token = FetchToken();
   const router = useRouter();
 
   useEffect(() => {
@@ -66,15 +65,9 @@ export default function ProfilePage({
     hasFetchedRef.current = true;
 
     const fetchData = async () => {
-      const response = await fetch(`${API_URL}/users/${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const response = await api.get(`/users/${userId}`);
+      if (response.status === 200) {
+        const data = await response.data;
         dispatch(
           setUser({
             ...user,
@@ -110,13 +103,8 @@ export default function ProfilePage({
     setLoadingLocal(true);
     setError("");
 
-    await fetch(`${API_URL}/users/update-profile`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
+    await api
+      .patch(`/users/update-profile`, {
         name,
         email,
         country_code: countryCode,
@@ -124,10 +112,10 @@ export default function ProfilePage({
         currency,
         id: userId,
         profileComplete: isProfileComplete,
-      }),
-    })
+      })
+
       .then((response) => {
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error("Failed to update profile.");
         }
         dispatch(
@@ -173,19 +161,12 @@ export default function ProfilePage({
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/users/${userId}/update-profile-picture?filepath=${""}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ imageUrl: "" }),
-        }
+      const response = await api.patch(
+        `/users/${userId}/update-profile-picture?filepath=${""}`,
+        { imageUrl: "" }
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to update profile picture in backend.");
       }
 
@@ -244,19 +225,13 @@ export default function ProfilePage({
           throw new Error("Failed to fetch signed URL for profile picture");
         });
 
-      const response = await fetch(
-        `${API_URL}/users/${userId}/update-profile-picture?filepath=${filePath}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ imageUrl: signedUrl }),
-        }
+      const response = await api.patch(
+        `/users/${userId}/update-profile-picture?filepath=${filePath}`,
+
+        { imageUrl: signedUrl }
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to update profile picture in backend.");
       }
     } catch (err) {

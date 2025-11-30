@@ -62,6 +62,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
+import api from "@/lib/api";
 
 const budgetSchema = z.object({
   Category: z.object({
@@ -86,21 +87,11 @@ async function fetchBudgets({ userId }: { userId: string }): Promise<Budget[]> {
     toast("User not found", { description: "error" });
     return [];
   }
-  const token = FetchToken();
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/budgets/user/${userId}`,
-    {
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  if (!res.ok) {
+  const res = await api.get(`/budgets/user/${userId}`);
+  if (res.status !== 200) {
     throw new Error("Failed to fetch budgets");
   }
-  return res.json();
+  return res.data;
 }
 
 export default function Page() {
@@ -112,7 +103,6 @@ export default function Page() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
   const [loader, setLoader] = useState(false);
-  const token = localStorage.getItem("token");
   const categories = useSelector((state: RootState) => state.categoryExpense);
 
   useEffect(() => {
@@ -127,22 +117,17 @@ export default function Page() {
 
     async function loadBudgets() {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/budgets/user/${userId}`,
-          {
-            cache: "no-store",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await api.get(`/budgets/user/${userId}`);
 
-        if (!res.ok) {
+        if (res.status !== 200) {
           throw new Error("Failed to fetch budgets");
         }
 
-        const data = await res.json();
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch budgets");
+        }
+
+        const data = res.data;
         const formatted: Budget[] = data.map((b: any) => ({
           id: b.id,
           category: {
@@ -172,23 +157,17 @@ export default function Page() {
     if (!budget) return;
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/budgets/${budget.id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await api.delete(`/budgets/${budget.id}`);
       let data;
       try {
-        const text = await res.text();
+        const text = await res.data;
         data = text ? JSON.parse(text) : {};
       } catch (e) {
         console.error("Failed to parse response:", e);
         data = {};
       }
 
-      if (!res.ok) {
+      if (res.status !== 200) {
         throw new Error(data.error || "Failed to delete budget");
       }
       // Remove deleted budget from state
@@ -242,8 +221,7 @@ export default function Page() {
   async function onSubmit(data: z.infer<typeof budgetSchema>) {
     try {
       setLoader(true);
-      const api_url =
-        process.env.NEXT_PUBLIC_API_URL + "/budgets/" + budgetToEdit?.id;
+      const api_url = "/budgets/" + budgetToEdit?.id;
       const budgetData: BudgetReq = {
         category: {
           id: data.Category.id,
@@ -256,17 +234,10 @@ export default function Page() {
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
       };
-      const response = await fetch(api_url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(budgetData),
-      });
-      const resData = await response.json();
+      const response = await api.put(api_url, budgetData);
+      const resData = await response.data;
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         toast("Failed to create budget", {
           description: resData.error || "Something went wrong.",
         });
@@ -378,7 +349,6 @@ export default function Page() {
 
   return (
     <div className="block w-full space-y-4">
-
       {budgetToDelete && (
         <AlertDialog
           open={!!budgetToDelete}

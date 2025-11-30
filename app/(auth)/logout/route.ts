@@ -1,5 +1,4 @@
-
-import { API_URL } from "@/config/config";
+import api from "@/lib/api";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -8,25 +7,20 @@ export async function GET(request: NextRequest) {
 
   if (token) {
     try {
-      const res = await fetch(`${API_URL}/users/logout`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await api.get(`/users/logout`);
 
-      if (!res.ok) {
-        console.error("Logout API call failed:", await res.text());
+      if (res.status !== 200) {
+        console.error("Logout API call failed:", await res.data);
       }
     } catch (error) {
       console.error("Error during logout:", error);
     }
   }
 
-    // Optional: clear token cookie if you set it on login
+  // Optional: clear token cookie if you set it on login
+  const response = NextResponse.redirect(new URL("/", request.url));
+  response.cookies.set("refreshToken", "", { maxAge: 0 }); // remove cookie
+  response.cookies.set("accessToken", "", { maxAge: 0 }); // remove cookie
 
-  const response = NextResponse.redirect(new URL("/login", request.url));
-  response.cookies.set("token", "", { maxAge: 0 }); // remove cookie
   return response;
 }

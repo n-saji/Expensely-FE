@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
-import { API_URL } from "@/config/config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,11 +19,11 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 export default function AddExpensePage() {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
-  const token = FetchToken();
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const [open, setOpen] = React.useState(false);
   const [expense, setExpense] = useState({
@@ -71,16 +69,9 @@ export default function AddExpensePage() {
         new Date().toTimeString().slice(0, 8) +
         ".000Z";
 
-      const response = await fetch(`${API_URL}/expenses/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(expense),
-      });
+      const response = await api.post(`/expenses/create`, expense);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to add expense");
       }
 

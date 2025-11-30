@@ -31,6 +31,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Edit2 } from "lucide-react";
+import api from "@/lib/api";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
@@ -45,15 +46,9 @@ export default function SettingsPage() {
     hasFetchedRef.current = true;
 
     const fetchData = async () => {
-      const response = await fetch(`${API_URL}/users/${user.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const response = await api.get(`/users/${user.id}`);
+      if (response.status === 200) {
+        const data = await response.data;
         dispatch(
           setUser({
             ...user,
@@ -103,18 +98,12 @@ export default function SettingsPage() {
       return;
     }
 
-    await fetch(`${API_URL}/users/update-password`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
+    await api
+      .patch(`${API_URL}/users/update-password`, {
         password: password,
         id: user.id,
-      }),
-    })
-      .then((res) => res.json())
+      })
+      .then((res) => res.data)
       .then((data) => {
         if (data.error === null) {
           // dispatch(setUser(data.user));
@@ -138,20 +127,14 @@ export default function SettingsPage() {
     theme?: string | null;
     notification?: boolean | null;
   }) => {
-    await fetch(`${API_URL}/users/update-settings`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
+    await api
+      .patch(`/users/update-settings`, {
         ...user,
         theme: theme || user.theme,
         notificationsEnabled:
           notification !== null ? notification : user.notificationsEnabled,
-      }),
-    })
-      .then((res) => res.json())
+      })
+      .then((res) => res.data)
       .then((data) => {
         if (data.error === null) {
           toast.success(`Settings updated successfully!`);
@@ -170,15 +153,9 @@ export default function SettingsPage() {
       toast.error("User ID is required for deletion.");
       return;
     }
-    await fetch(`${API_URL}/users/delete-account/${user.id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ userId: user.id }),
-    })
-      .then((res) => res.json())
+    await api
+      .delete(`${API_URL}/users/delete-account/${user.id}`)
+      .then((res) => res.data)
       .then((data) => {
         if (data.error === null) {
           dispatch(setUser({ ...user, isActive: false }));
@@ -266,7 +243,8 @@ export default function SettingsPage() {
                 <DialogHeader>
                   <DialogTitle>Update Password</DialogTitle>
                   <DialogDescription>
-                    Enter your new password below and click &quot;Save changes&quot;
+                    Enter your new password below and click &quot;Save
+                    changes&quot;
                   </DialogDescription>
                 </DialogHeader>
                 <form

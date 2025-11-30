@@ -1,5 +1,5 @@
 "use client";
-import { API_URL } from "@/config/config";
+import api from "@/lib/api";
 import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -25,18 +25,12 @@ interface UsersData {
 async function FetchAdminData() {
   // This function can be used to fetch any admin-specific data if needed
   // For now, it just returns a placeholder
-  const response = await fetch(`${API_URL}/users/all`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
+  const response = await api.get(`/users/all`, );
 
-  if (!response.ok) {
+  if (response.status !== 200) {
     throw new Error("Failed to fetch admin data");
   }
-  const data = await response.json();
+  const data = response.data;
   return data as UsersData[];
 }
 

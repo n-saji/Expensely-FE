@@ -1,5 +1,4 @@
 "use client";
-import { API_URL } from "@/config/config";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +13,7 @@ import filterIcon from "@/assets/icon/filter.png";
 import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 import { categoryTypes, categorySkeleton } from "@/global/dto";
+import api from "@/lib/api";
 
 const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
 const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
@@ -33,21 +33,13 @@ export default function CategoryPage() {
     useState<categorySkeleton | null>(null);
 
   const fetchCategories = async (type: string | null) => {
-    const urlBuilder = new URL(`${API_URL}/categories/user/${user.id}`);
-    if (type !== null && type !== "")
-      urlBuilder.searchParams.append("type", type);
-
     try {
       setLoading(true);
-      const response = await fetch(urlBuilder.toString(), {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch expenses");
-      const data = await response.json();
+      const response = await api.get(
+        `/categories/user/${user.id}${type ? `?type=${type}` : ""}`
+      );
+      if (response.status !== 200) throw new Error("Failed to fetch expenses");
+      const data = await response.data;
       if (data.length === 0) {
         setShowTable(false);
       } else {
@@ -86,19 +78,12 @@ export default function CategoryPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${API_URL}/categories/update/${toUpdate.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(toUpdate),
-        }
+      const response = await api.patch(
+        `/categories/update/${toUpdate.id}`,
+        toUpdate
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to update expense");
       }
 

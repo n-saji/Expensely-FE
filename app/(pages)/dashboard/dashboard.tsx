@@ -1,9 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { API_URL } from "@/config/config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import FetchToken from "@/utils/fetch_token";
 import ExpensesChartCard, {
   ExpensesMonthlyBarChartCard,
   ExpensesMonthlyLineChartCard,
@@ -16,6 +14,7 @@ import { currencyMapper } from "@/utils/currencyMapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { AlertTriangle, FileWarning } from "lucide-react";
+import api from "@/lib/api";
 
 const SkeletonLoader = ({
   title,
@@ -38,7 +37,6 @@ const SkeletonLoader = ({
 
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
-  const token = FetchToken();
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [loadingYear, setLoadingYear] = useState<boolean>(true);
   const [loadingMonth, setLoadingMonth] = useState<boolean>(true);
@@ -85,24 +83,15 @@ export default function DashboardPage() {
       if (type === "year") {
         setLoadingYear(true);
       }
-      const res = await fetch(
-        `${API_URL}/expenses/user/${
-          user.id
-        }/overview?${queryParams.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const res = await api.get(
+        `/expenses/user/${user.id}/overview?${queryParams.toString()}`
       );
 
-      if (!res.ok) {
+      if (res.status !== 200) {
         throw new Error("Network response was not ok");
       }
 
-      const data = (await res.json()) as ExpenseOverview;
+      const data = (await res.data) as ExpenseOverview;
       if (data.totalCount === 0) {
         setNewUser(true);
       }

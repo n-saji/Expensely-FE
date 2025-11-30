@@ -2,8 +2,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL, 
-  withCredentials: true, 
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  withCredentials: true,
 });
 
 // --- Response interceptor ---
@@ -11,14 +11,19 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    if (originalRequest.url?.includes("/users/refresh")) {
+      return Promise.reject(error);
+    }
 
     // If access token expired (401) and not already retried
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
+      if (originalRequest.url?.includes("/users/check-auth")) {
+        return Promise.reject(error);
+      }
       try {
         // Try refreshing token
-        await api.post("/auth/refresh");
+        await api.get("/users/refresh");
 
         // Retry the original request
         return api(originalRequest);

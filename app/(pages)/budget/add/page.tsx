@@ -36,10 +36,10 @@ import {
 } from "@/components/ui/form";
 
 import { BudgetReq } from "@/global/dto";
-import FetchToken from "@/utils/fetch_token";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 const budgetSchema = z.object({
   Category: z.object({
@@ -61,7 +61,6 @@ const budgetSchema = z.object({
 export default function AddBudgetPage() {
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const user = useSelector((state: RootState) => state.user);
-  const token = FetchToken();
   const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema) as any,
     defaultValues: {
@@ -69,8 +68,12 @@ export default function AddBudgetPage() {
       User: { id: user.id || "" },
       amountLimit: 0,
       period: Period.Monthly,
-      startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0],
-      endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split("T")[0],
+      startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        .toISOString()
+        .split("T")[0],
+      endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+        .toISOString()
+        .split("T")[0],
     },
   });
   const watchPeriod = form.watch("period");
@@ -102,7 +105,7 @@ export default function AddBudgetPage() {
   async function onSubmit(data: z.infer<typeof budgetSchema>) {
     try {
       setLoader(true);
-      const api_url = process.env.NEXT_PUBLIC_API_URL + "/budgets/create";
+      const api_url = "/budgets/create";
       const budgetData: BudgetReq = {
         category: {
           id: data.Category.id,
@@ -115,17 +118,10 @@ export default function AddBudgetPage() {
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
       };
-      const response = await fetch(api_url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(budgetData),
-      });
-      const resData = await response.json();
+      const response = await api.post(api_url, budgetData);
+      const resData = await response.data;
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         toast("Failed to create budget", {
           description: resData.error || "Something went wrong.",
         });

@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
-import { API_URL } from "@/config/config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import FetchToken from "@/utils/fetch_token";
 import DropDown from "@/components/drop-down";
 import { categoryTypes } from "@/global/dto";
 import { Input } from "@/components/ui/input";
@@ -11,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import api from "@/lib/api";
 
 export default function AddCategoryPage() {
   const user = useSelector((state: RootState) => state.user);
-  const token = FetchToken();
   const [category, setCategory] = useState({
     user: {
       id: user.id,
@@ -37,16 +35,9 @@ export default function AddCategoryPage() {
     setLoader(true);
 
     try {
-      const response = await fetch(`${API_URL}/categories/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(category),
-      });
+      const response = await api.post(`/categories/create`, category);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to add category");
       }
 

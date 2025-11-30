@@ -2,10 +2,10 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { API_URL } from "@/config/config";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
+import api from "@/lib/api";
 
 export default function AuthHandler() {
   const { data: session, status } = useSession();
@@ -14,21 +14,23 @@ export default function AuthHandler() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetch(`${API_URL}/users/verify-oauth-login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.idToken}`,
-        },
-
-        body: JSON.stringify({
-          email: session.user ? session.user.email : null,
-          name: session.user ? session.user.name : null,
-          image: session.user ? session.user.image : null,
-          token: session.accessToken,
-        }),
-      })
-        .then((res) => res.json())
+      api
+        .post(
+          `/users/verify-oauth-login`,
+          {
+            email: session.user ? session.user.email : null,
+            name: session.user ? session.user.name : null,
+            image: session.user ? session.user.image : null,
+            token: session.accessToken,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.idToken}`,
+            },
+          }
+        )
+        .then((res) => res.data)
         .then(async (data) => {
           if (data.profileIncomplete) {
             dispatch(
@@ -47,15 +49,9 @@ export default function AuthHandler() {
 
               localStorage.setItem("user_id", data.id);
 
-              const response = await fetch(`${API_URL}/users/${data.id}`, {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${data.token}`,
-                },
-              });
-              if (response.ok) {
-                const data = await response.json();
+              const response = await api.get(`/users/${data.id}`);
+              if (response.status === 200) {
+                const data = await response.data;
                 if (data.user.profilePicFilePath) {
                   const profilePictureUrl = await fetchProfileUrl(
                     data.user.profilePicFilePath
@@ -89,7 +85,7 @@ export default function AuthHandler() {
                 );
                 localStorage.setItem("theme", data.user.theme);
               } else {
-                const error = await response.json();
+                const error = await response.data;
                 console.error("Error fetching user data:", error);
                 return;
               }

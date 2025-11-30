@@ -2,10 +2,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { API_URL } from "@/config/config";
 import validateToken from "@/utils/validate_token";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "@/redux/slices/userSlice";
 import GoogleLogo from "@/assets/icon/google-logo.png";
 import Image from "next/image";
@@ -14,6 +13,9 @@ import { signIn } from "next-auth/react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
+import { RootState } from "@/redux/store";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -22,14 +24,24 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
+  const user = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
+    setLoading(true);
     validateToken().then((isValid) => {
       if (isValid) {
+        dispatch(
+          setUser({
+            ...user,
+            isAuthenticated: true,
+          })
+        );
         router.push("/dashboard");
       }
+
+      setLoading(false);
     });
   }, [router]);
 
@@ -41,15 +53,14 @@ export default function LoginForm() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: username, phone: username, password }),
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const payload = {
+        email: username,
+        password: password,
+        phone: username,
+      };
+      const res = await api.post(`/users/login`, payload);
+      if (res.status === 200) {
+        const data = await res.data;
 
         if (data.error === "") {
           setError("");
@@ -62,15 +73,15 @@ export default function LoginForm() {
           }
           localStorage.setItem("user_id", data.id);
 
-          const response = await fetch(`${API_URL}/users/${data.id}`, {
+          const response = await api.get(`/users/${data.id}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${data.token}`,
             },
           });
-          if (response.ok) {
-            const data = await response.json();
+          if (response.status === 200) {
+            const data = await response.data;
 
             dispatch(
               setUser({
@@ -95,7 +106,7 @@ export default function LoginForm() {
 
             router.push("/dashboard");
           } else {
-            const error = await response.json();
+            const error = await response.data;
             console.error("Error fetching user data:", error);
             setError(error.error || "Failed to fetch user data");
             return;
@@ -109,7 +120,7 @@ export default function LoginForm() {
           setError(data.message || "Login failed");
         }
       } else {
-        const errorData = await res.json();
+        const errorData = await res.data;
         setLoading(false);
         dispatch(clearUser());
         localStorage.removeItem("token");
@@ -191,7 +202,9 @@ export default function LoginForm() {
             onChange={(e) => setRememberMe(e.target.checked)}
             id="rememberMe"
           />
-          <Label className="" htmlFor="rememberMe">Remember me</Label>
+          <Label className="" htmlFor="rememberMe">
+            Remember me
+          </Label>
         </div>
 
         <Button
@@ -202,7 +215,7 @@ export default function LoginForm() {
           onClick={(event) => handleSubmit(event)}
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Log In"}
+          {loading ? <Spinner /> : "Log In"}
         </Button>
 
         <div className="flex items-center justify-between">

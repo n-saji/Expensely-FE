@@ -1,5 +1,4 @@
 "use client";
-import { API_URL } from "@/config/config";
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import api from "@/lib/api";
 
 interface Expense {
   id: string;
@@ -97,28 +97,20 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     limit?: number;
     q?: string;
   }) => {
-    const urlBuilder = new URL(
-      `${API_URL}/expenses/user/${user.id}/fetch-with-conditions`
-    );
-    urlBuilder.searchParams.append("order", order);
-    if (fromDate) urlBuilder.searchParams.append("start_date", fromDate);
-    if (toDate) urlBuilder.searchParams.append("end_date", toDate);
-    if (category) urlBuilder.searchParams.append("category_id", category);
-    if (q) urlBuilder.searchParams.append("q", q);
-    urlBuilder.searchParams.append("page", String(page));
-    if (limit) urlBuilder.searchParams.append("limit", String(limit));
+    const URL =
+      `/expenses/user/${user.id}/fetch-with-conditions?order=${order}` +
+      `${fromDate ? `&start_date=${fromDate}` : ""}` +
+      `${toDate ? `&end_date=${toDate}` : ""}` +
+      `${category ? `&category_id=${category}` : ""}` +
+      `${q ? `&q=${q}` : ""}` +
+      `&page=${page}` +
+      `${limit ? `&limit=${limit}` : ""}`;
 
     try {
       setLoading(true);
-      const response = await fetch(urlBuilder.toString(), {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch expenses");
-      const data = await response.json();
+      const response = await api.get(URL);
+      if (response.status !== 200) throw new Error("Failed to fetch expenses");
+      const data = await response.data;
 
       if (page > data.totalPages && data.totalPages > 0) {
         fetchExpenses({
@@ -328,19 +320,12 @@ function ExpenseList({
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${API_URL}/expenses/user/${user.id}/bulk-delete`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(ids),
-        }
+      const response = await api.post(
+        `/expenses/user/${user.id}/bulk-delete`,
+        ids
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to delete expenses");
       }
 
@@ -385,19 +370,12 @@ function ExpenseList({
     }
 
     try {
-      const response = await fetch(
-        `${API_URL}/expenses/update/${expenseToUpdate.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(expenseToUpdate),
-        }
+      const response = await api.put(
+        `/expenses/update/${expenseToUpdate.id}`,
+        expenseToUpdate
       );
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to update expense");
       }
 
@@ -421,28 +399,30 @@ function ExpenseList({
 
   const handleFileDownload = async () => {
     try {
-      const link = new URL(`${API_URL}/expenses/user/${user.id}/export`);
-      if (fromDateFilter) {
-        const fromDate = new Date(fromDateFilter).toISOString().slice(0, 16);
-        link.searchParams.append("start_date", fromDate);
-      }
-      if (toDateFilter) {
-        const toDate = new Date(toDateFilter).toISOString().slice(0, 16);
-        link.searchParams.append("end_date", toDate);
-      }
+      const link =
+        `/expenses/user/${user.id}/export` +
+        `${(fromDateFilter || toDateFilter) && "?"}` +
+        `${
+          fromDateFilter
+            ? `start_date=${new Date(fromDateFilter)
+                .toISOString()
+                .slice(0, 16)}`
+            : ""
+        }` +
+        `${fromDateFilter && toDateFilter ? "&" : ""}` +
+        `${
+          toDateFilter
+            ? `end_date=${new Date(toDateFilter).toISOString().slice(0, 16)}`
+            : ""
+        }`;
 
-      const response = await fetch(link.toString(), {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get(link, { responseType: "blob" });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to download file");
       }
 
-      const blob = await response.blob();
+      const blob = await response.data;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -477,9 +457,7 @@ function ExpenseList({
         }
           max-sm:space-y-4`}
       >
-        {!isDemo && (
-          <Label className="text-lg">Recent Transactions</Label>
-        )}
+        {!isDemo && <Label className="text-lg">Recent Transactions</Label>}
         {!isDemo && (
           <SearchAndFilter
             query={query}

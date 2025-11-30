@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import UserPreferences from "@/utils/userPreferences";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+
   return (
     <div className="min-h-screen bg-background">
-      <LandingPageNavBar />
+      <LandingPageNavBar/>
 
       {/* Hero Section */}
       <section className="text-center px-6 py-20 bg-primary/10">

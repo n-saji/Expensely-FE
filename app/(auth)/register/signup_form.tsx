@@ -1,6 +1,5 @@
 "use client";
 
-import { API_URL } from "@/config/config";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
@@ -9,6 +8,7 @@ import { signIn } from "next-auth/react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
 
 export default function SignUpForm() {
   const [name, setName] = useState("");
@@ -72,28 +72,25 @@ export default function SignUpForm() {
       return;
     }
     setLoading(true);
-    await fetch(`${API_URL}/users/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        country_code: countryCode,
-        phone,
-        password,
-      }),
-    })
+    await api
+      .post(
+        `/users/register`,
+        {
+          name,
+          email,
+          country_code: countryCode,
+          phone,
+          password,
+        }
+      )
       .then((response) => {
-        if (!response.ok) {
-          response.json().then((data) => {
-            if (data.error) {
-              setError(data.error);
-            } else {
-              setError("An unexpected error occurred. Please try again.");
-            }
-          });
+        if (response.status !== 200) {
+          if (response.data.error) {
+            setError(response.data.error);
+          } else {
+            setError("An unexpected error occurred. Please try again.");
+          }
+
           return;
         }
         setLoading(false);
