@@ -4,14 +4,11 @@ import {
   LogOut,
   Settings,
   User,
-  CircleDollarSign,
   Wallet,
   ShieldUser,
   ChevronDown,
-  Plus,
   LayoutDashboard,
   DollarSign,
-  LayoutList,
   Logs,
 } from "lucide-react";
 
@@ -152,7 +149,6 @@ export function AppSidebar() {
                         isActive={pathName === "/expense"}
                       >
                         <Link href={"/expense"}>
-                          <LayoutList />
                           <span>Recent Transactions</span>
                         </Link>
                       </SidebarMenuButton>
@@ -163,7 +159,6 @@ export function AppSidebar() {
                         isActive={pathName === "/expense/add"}
                       >
                         <Link href={"/expense/add"}>
-                          <CircleDollarSign />
                           <span>Add Expense</span>
                         </Link>
                       </SidebarMenuButton>
@@ -191,8 +186,7 @@ export function AppSidebar() {
                         isActive={pathName === "/budget"}
                       >
                         <Link href={"/budget"}>
-                          <LayoutList />
-                          <span>Existing Budgets</span>
+                          <span>Active Budgets</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuSubItem>
@@ -202,7 +196,6 @@ export function AppSidebar() {
                         isActive={pathName === "/budget/add"}
                       >
                         <Link href={"/budget/add"}>
-                          <Plus />
                           <span>Add Budget</span>
                         </Link>
                       </SidebarMenuButton>
@@ -230,8 +223,7 @@ export function AppSidebar() {
                         isActive={pathName === "/category"}
                       >
                         <Link href={"/category"}>
-                          <LayoutList />
-                          <span>Existing Categories</span>
+                          <span>Categories</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuSubItem>
@@ -241,7 +233,6 @@ export function AppSidebar() {
                         isActive={pathName === "/category/add"}
                       >
                         <Link href={"/category/add"}>
-                          <Plus />
                           <span>Add Category</span>
                         </Link>
                       </SidebarMenuButton>

@@ -35,7 +35,7 @@ export default function LandingPageNavBar() {
   return (
     <nav className="flex justify-between items-center px-6 py-4 shadow">
       <Logo
-        className="text-xl sm:text-3xl font-bold text-primary"
+        className="text-xl sm:text-3xl font-bold"
         dimension={{ width: 30, height: 30 }}
       />
       <div>
