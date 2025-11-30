@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 
 interface Expense {
   id: string;
@@ -477,9 +478,7 @@ function ExpenseList({
           max-sm:space-y-4`}
       >
         {!isDemo && (
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
-            Recent Transactions
-          </h1>
+          <Label className="text-lg">Recent Transactions</Label>
         )}
         {!isDemo && (
           <SearchAndFilter
@@ -606,17 +605,16 @@ function ExpenseList({
         </div>
       )}
 
-      <div className="flex-grow overflow-auto">
+      <div className="flex-grow">
         <table
           className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
-          shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y
-          divide-gray-200 dark:divide-gray-700"
+          rounded-lg text-xs sm:text-sm divide-y divide-gray-200 dark:divide-gray-700"
         >
           <thead
-            className=" uppercase tracking-wider
+            className="tracking-wider
              "
           >
-            <tr className="text-left font-semibold first:rounded-tl-lg last:rounded-tr-lg">
+            <tr className="text-left first:rounded-tl-lg last:rounded-tr-lg">
               {!isDemo && (
                 <th className={`${table_data_classname} w-1/13`}>#</th>
               )}

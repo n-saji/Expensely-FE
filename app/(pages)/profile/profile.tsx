@@ -15,6 +15,16 @@ import fetchProfileUrl from "@/utils/fetchProfileURl";
 import { useRouter } from "next/navigation";
 import PopUp from "@/components/pop-up";
 import { togglePopUp } from "@/redux/slices/sidebarSlice";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ProfilePage({
   reRouteToDashboard,
@@ -264,10 +274,10 @@ export default function ProfilePage({
     );
   };
   return (
-    <div className="min-w-1/2 max-md:w-2/3 max-sm:w-96 bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 max-sm:p-6 flex flex-col items-center relative">
+    <Card className="min-w-1/2 max-md:w-2/3 max-sm:w-96 p-8 max-sm:p-6 flex flex-col items-center relative">
       <div
-        className="relative w-[200px] h-[200px] rounded-full mb-4 bg-gray-300 text-center
-      dark:bg-gray-700 dark:text-gray-200"
+        className="relative w-[200px] h-[200px] rounded-full mb-4  text-center
+      "
       >
         <Image
           alt="Profile Picture"
@@ -281,7 +291,6 @@ export default function ProfilePage({
           width={30}
           height={30}
           className="absolute bottom-0 right-5 p-1 rounded-full 
-          bg-white dark:bg-gray-800
           cursor-pointer hover:bg-white/40 dark:hover:bg-gray-800/40 transition-all duration-200
           "
           onClick={() => dispatch(togglePopUp())}
@@ -332,25 +341,19 @@ export default function ProfilePage({
       </div>
 
       <div className="flex flex-col items-center space-y-2">
-        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-          {user.name}
-        </h2>
+        <h2 className="text-2xl font-semibold ">{user.name}</h2>
         <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
       </div>
-      <div className="bg-gray-200 dark:bg-gray-700 w-full mt-4 flex justify-center flex-col items-center space-y-2 p-4 rounded-lg">
-        <div className="w-full flex items-start border-b border-gray-300 dark:border-gray-600 pb-2 mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 block text-left">
-            Profile
-          </h1>
-        </div>
-        <div
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+        </CardHeader>
+        <CardContent
           className="flex flex-col max-sm:gap-3 min-md:gap-4 w-full
                 "
         >
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">
-              Full Name
-            </p>
+            <Label htmlFor="fullName">Full Name</Label>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -365,9 +368,7 @@ export default function ProfilePage({
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">
-              Email
-            </p>
+            <Label htmlFor="emailAddress">Email</Label>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -382,9 +383,8 @@ export default function ProfilePage({
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">
-              Country Code
-            </p>
+            <Label htmlFor="countryCode">Country Code</Label>
+
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -399,9 +399,7 @@ export default function ProfilePage({
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">
-              Phone
-            </p>
+            <Label htmlFor="phoneNumber">Phone</Label>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -416,9 +414,7 @@ export default function ProfilePage({
             </p>
           </div>
           <div className="grid_input">
-            <p className="font-semibold text-gray-600 dark:text-gray-300">
-              Currency
-            </p>
+            <Label htmlFor="currency">Currency</Label>
             <p className="text-gray-500 dark:text-gray-400">
               {edit ? (
                 <input
@@ -432,16 +428,11 @@ export default function ProfilePage({
               )}
             </p>
           </div>
-        </div>
-      </div>
-      <div className="w-full flex justify-end mt-4">
-        <button
-          className={`${
-            edit ? "button-green px-3 py-1" : "button-gray px-3 py-1"
-          }
-              ${loading ? "opacity-50 cursor-not-allowed" : ""}
-              w-20
-              `}
+        </CardContent>
+      </Card>
+      <CardFooter className="w-full flex justify-end">
+        <Button
+          variant={edit ? "default" : loading ? "ghost" : "outline"}
           onClick={() => {
             setEdit(!edit);
             if (edit) {
@@ -450,10 +441,10 @@ export default function ProfilePage({
           }}
           disabled={loading}
         >
-          {edit ? "Save" : loading ? "Saving..." : "Edit"}
-        </button>
-      </div>
+          {edit ? "Save" : loading ? <Spinner /> : "Edit"}
+        </Button>
+      </CardFooter>
       {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
-    </div>
+    </Card>
   );
 }
