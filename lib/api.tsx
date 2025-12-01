@@ -18,18 +18,18 @@ api.interceptors.response.use(
     // If access token expired (401) and not already retried
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      if (originalRequest.url?.includes("/users/check-auth")) {
-        return Promise.reject(error);
-      }
+
       try {
         // Try refreshing token
-        await api.get("/users/refresh");
+        await api.get("/users/refresh").then((e) => {
+          console.log("Token refreshed", e);
+        });
 
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
         // Refresh failed → redirect to login
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && !window.location.href.includes("/login")) {
           window.location.href = "/login";
         }
         return Promise.reject(refreshError);
