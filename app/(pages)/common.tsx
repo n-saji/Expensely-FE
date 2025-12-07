@@ -91,7 +91,7 @@ export default function DashboardPage({
 
   if (!user.isAuthenticated || !token) {
     return (
-      <div className="flex items-center justify-center h-screen text-2xl">
+      <div className="flex items-center justify-center h-screen text-2xl w-full">
         <h1 className="text-gray-700">Please log in to continue. </h1>
         <Link href="/login" className="text-blue-600 hover:underline">
           Log In
