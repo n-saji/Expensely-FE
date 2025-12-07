@@ -73,13 +73,7 @@ export default function LoginForm() {
           }
           localStorage.setItem("user_id", data.id);
 
-          const response = await api.get(`/users/${data.id}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${data.token}`,
-            },
-          });
+          const response = await api.get(`/users/${data.id}`);
           if (response.status === 200) {
             const data = await response.data;
 

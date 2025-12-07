@@ -26,7 +26,7 @@ export default function AuthHandler() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session.idToken}`,
+              Authorization: `Bearer ${session.idToken}`, //dont remove - token from google
             },
           }
         )

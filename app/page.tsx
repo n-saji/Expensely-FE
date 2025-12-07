@@ -4,10 +4,24 @@ import UserPreferences from "@/utils/userPreferences";
 import Link from "next/link";
 
 export default async function Home() {
+  const maintenanceMode = process.env.NEXT_MAINTENANCE_MODE === "true";
+
+  if (maintenanceMode) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-4">
+        <h1 className="text-3xl font-semibold mb-2">We’ll be back soon!</h1>
+        <p className="text-gray-600 text-lg">
+          Our site is currently undergoing scheduled maintenance.
+          <br />
+          Thank you for your patience.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      <LandingPageNavBar/>
+      <LandingPageNavBar />
 
       {/* Hero Section */}
       <section className="text-center px-6 py-20 bg-primary/10">
