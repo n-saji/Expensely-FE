@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*", // all /api calls
-        destination: process.env.NEXT_PUBLIC_API_URL + "/:path*", // redirect to Spring Boot locally
+        source: "/api/:path*", 
+        destination: process.env.NEXT_PUBLIC_API_URL + "/:path*", 
       },
     ];
   },
