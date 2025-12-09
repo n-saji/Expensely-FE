@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://expensely-server-4qnvj.ondigitalocean.app/api/:path*"
+    }
+  ]
+}
