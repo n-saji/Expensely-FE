@@ -8,13 +8,24 @@ import ExpensesChartCard, {
   ExpensesOverDays,
 } from "@/components/ExpenseChartCard";
 import { ExpenseOverview } from "@/global/dto";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { currencyMapper } from "@/utils/currencyMapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProgressBar } from "@/components/ProgressBar";
-import { AlertTriangle, FileWarning } from "lucide-react";
+import {
+  AlertTriangle,
+  FileWarning,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import api from "@/lib/api";
+import CardComponent from "@/components/CardComponent";
 
 const SkeletonLoader = ({
   title,
@@ -132,6 +143,9 @@ export default function DashboardPage() {
     });
   }, [currentYearForYearly]);
 
+  const mostExp = overview?.thisMonthMostExpensiveItem;
+  const [itemName, itemValue] = mostExp ? Object.entries(mostExp)[0] : [];
+
   if (newUser) {
     return (
       <div className="flex flex-col items-center justify-center">
@@ -148,152 +162,104 @@ export default function DashboardPage() {
     );
   }
 
+
   return (
-    <div className="flex flex-col flex-wrap lg:flex-row w-full gap-4 h-full">
+    <div className="flex flex-col flex-wrap w-full gap-4 h-full">
       {/* left module */}
-      <div className="flex-1/4 grid grid-cols-1 w-full gap-4">
+      <div className="flex-1/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4">
         {/* Monthly Summary */}
         {overview ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {new Date().toLocaleString("default", { month: "long" })}{" "}
-                Summary
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <div className="flex flex-wrap justify-between gap-2">
-                <div>
-                  <Label className="text-muted-foreground">
-                    Total Expenses
-                  </Label>
-                  <p className="text-lg font-semibold font-mono">
-                    {currencyMapper(user?.currency || "USD")}
-                    {overview?.thisMonthTotalExpense.toFixed(2)}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">
-                    Change from Last Month
-                  </Label>
-                  <p className="text-lg font-semibold font-mono">
-                    <span
-                      className={
-                        overview!.lastMonthTotalExpense -
-                          overview!.thisMonthTotalExpense >=
-                        0
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }
-                    >
-                      {currencyMapper(user?.currency || "USD")}
-
-                      {Math.abs(
-                        overview!.thisMonthTotalExpense -
-                          overview!.lastMonthTotalExpense
-                      ).toFixed(2)}
-                    </span>{" "}
-                    <span className="text-sm font-normal">
-                      {overview!.lastMonthTotalExpense === 0
-                        ? "(0%)"
-                        : `(${(
-                            ((overview!.thisMonthTotalExpense -
-                              overview!.lastMonthTotalExpense) /
-                              overview!.lastMonthTotalExpense) *
-                            100
-                          ).toFixed(2)}%) ${
-                            overview!.thisMonthTotalExpense -
-                              overview!.lastMonthTotalExpense >=
-                            0
-                              ? "↑"
-                              : "↓"
-                          }
+          <CardComponent
+            title={`${new Date().toLocaleString("default", {
+              month: "long",
+            })} Expense`}
+            cardAction={
+              <div className="flex items-center gap-1 border rounded-md px-2 py-1">
+                {overview!.thisMonthTotalExpense -
+                  overview!.lastMonthTotalExpense >
+                0 ? (
+                  <TrendingUp className="h-4 w-4" />
+                ) : (
+                  <TrendingDown className="h-4 w-4" />
+                )}
+                <p className="text-xs font-mono">
+                  {overview!.lastMonthTotalExpense === 0
+                    ? "0%"
+                    : `${(
+                        ((overview!.thisMonthTotalExpense -
+                          overview!.lastMonthTotalExpense) /
+                          overview!.lastMonthTotalExpense) *
+                        100
+                      ).toFixed(2)}%
 `}
-                    </span>
-                  </p>
-                </div>
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            }
+            numberData={`${currencyMapper(
+              user?.currency || "USD"
+            )}${overview?.thisMonthTotalExpense.toFixed(2)}`}
+            description={`You have spent ${currencyMapper(
+              user?.currency || "USD"
+            )}${Math.abs(
+              overview?.thisMonthTotalExpense - overview?.lastMonthTotalExpense
+            ).toFixed(2)} ${
+              overview?.thisMonthTotalExpense -
+                overview?.lastMonthTotalExpense >
+              0
+                ? "more"
+                : "less"
+            } than last month.`}
+          />
         ) : (
-          <SkeletonLoader title="MONTHLY SUMMARY" className="h-[150px]" />
+          <SkeletonLoader
+            title={`${new Date().toLocaleString("default", {
+              month: "long",
+            })} Expense`}
+            className="h-[150px]"
+          />
         )}
 
         {/* Yearly Summary */}
         {overview ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Yearly Summary</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <div className="flex flex-wrap justify-between gap-2">
-                <div>
-                  <Label className="text-muted-foreground">Total Spent</Label>
-                  <p className="text-lg font-semibold font-mono">
-                    {currencyMapper(user?.currency || "USD")}
-                    {overview?.totalAmount.toFixed(2)}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">
-                    Average Monthly Spend
-                  </Label>
-                  <p className="text-lg font-semibold font-mono">
-                    {currencyMapper(user?.currency || "USD")}
-                    {overview?.averageMonthlyExpense.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <CardComponent
+            title="This Year's Expense"
+            numberData={`${currencyMapper(
+              user?.currency || "USD"
+            )}${overview?.totalAmount.toFixed(2)}`}
+            description={`On an average you have spent ${currencyMapper(
+              user?.currency || "USD"
+            )}${overview?.averageMonthlyExpense.toFixed(
+              2
+            )} every month this year.`}
+          />
         ) : (
-          <SkeletonLoader title="YEARLY SUMMARY" className="h-[150px]" />
+          <SkeletonLoader title="This Year's Expense" className="h-[150px]" />
         )}
 
-        {/* Budget */}
-        {overview && overview.budgetServiceMap ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Budgets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {Object.values(overview.budgetServiceMap).length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No budgets found.
-                </p>
-              )}
-              {Object.values(overview.budgetServiceMap).map((budget) => (
-                <div key={budget.id} className="mb-4">
-                  <div className="flex justify-between mb-1 items-center">
-                    <Label className="text-sm">
-                      {budget.category.name}{" "}
-                      {budgetIcon(budget.amountSpent, budget.amountLimit)}
-                    </Label>
-                    <Label className="text-sm text-muted-foreground">
-                      {currencyMapper(user?.currency || "USD")}
-                      {budget.amountSpent.toFixed(2)} /{" "}
-                      {currencyMapper(user?.currency || "USD")}
-                      {budget.amountLimit.toFixed(2)}
-                    </Label>
-                  </div>
-
-                  <ProgressBar
-                    value={budget.amountSpent}
-                    max={budget.amountLimit}
-                    variant={budgetVariant(
-                      budget.amountSpent,
-                      budget.amountLimit
-                    )}
-                    showAnimation={true}
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        {/* Category */}
+        {overview ? (
+          <CardComponent
+            title="Total Categories"
+            numberData={`${overview?.totalCategories || 0}`}
+            description={`Most used category: ${
+              overview?.mostFrequentCategory || "N/A"
+            }`}
+          />
         ) : (
-          <SkeletonLoader title="Budgets" className="h-[150px]" />
+          <SkeletonLoader title="Total Categories" className="h-[150px]" />
+        )}
+        {/* Dummy - 2 */}
+
+        {overview ? (
+          <CardComponent
+            title="This month most expensive item"
+            numberData={itemName && itemValue ? `${currencyMapper(
+              user?.currency || "USD"
+            )}${(itemValue as number).toFixed(2)}` : "N/A"}
+            description={itemName ? `You spent most on ${itemName}` : ""}
+          />
+        ) : (
+          <SkeletonLoader title="This month most expensive item" className="h-[150px]" />
         )}
       </div>
       {/* right module */}
@@ -348,7 +314,7 @@ export default function DashboardPage() {
         </div>
       </div>
       {/* down module */}
-      <div className="flex-1/4 gap-4 w-full grid grid-cols-1 ">
+      <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
         {/* Spending by Category */}
         {!loadingYear && overview ? (
           <ExpensesChartCard
@@ -362,6 +328,49 @@ export default function DashboardPage() {
           />
         ) : (
           <SkeletonLoader title="Spending by Category" className="h-[300px]" />
+        )}
+        {/* Budget */}
+        {overview && overview.budgetServiceMap ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Budgets</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {Object.values(overview.budgetServiceMap).length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No budgets found.
+                </p>
+              )}
+              {Object.values(overview.budgetServiceMap).map((budget) => (
+                <div key={budget.id} className="mb-4">
+                  <div className="flex justify-between mb-1 items-center">
+                    <Label className="text-sm">
+                      {budget.category.name}{" "}
+                      {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                    </Label>
+                    <Label className="text-sm text-muted-foreground">
+                      {currencyMapper(user?.currency || "USD")}
+                      {budget.amountSpent.toFixed(2)} /{" "}
+                      {currencyMapper(user?.currency || "USD")}
+                      {budget.amountLimit.toFixed(2)}
+                    </Label>
+                  </div>
+
+                  <ProgressBar
+                    value={budget.amountSpent}
+                    max={budget.amountLimit}
+                    variant={budgetVariant(
+                      budget.amountSpent,
+                      budget.amountLimit
+                    )}
+                    showAnimation={true}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ) : (
+          <SkeletonLoader title="Budgets" className="h-[150px]" />
         )}
       </div>
     </div>

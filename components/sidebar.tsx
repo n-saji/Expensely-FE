@@ -1,120 +1,317 @@
 "use client";
-import Logo from "@/components/logo";
-import { usePathname } from "next/navigation";
+import {
+  ChevronUp,
+  LogOut,
+  Settings,
+  User,
+  Wallet,
+  ShieldUser,
+  ChevronDown,
+  LayoutDashboard,
+  DollarSign,
+  Logs,
+} from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import defaulProfilePic from "@/assets/icon/user.png";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useEffect } from "react";
+import fetchProfileUrl from "@/utils/fetchProfileURl";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { setSidebar } from "@/redux/slices/sidebarSlice";
-import Link from "next/link";
-import home_white_icon from "@/assets/icon/home-white.png";
-import home_icon from "@/assets/icon/home.png";
-import expense_icon from "@/assets/icon/expense.png";
-import expense_white_icon from "@/assets/icon/expense-white.png";
-import category from "@/assets/icon/category.png";
-import category_white from "@/assets/icon/category-white.png";
-import budget from "@/assets/icon/budget.png";
-import budget_white from "@/assets/icon/budget-white.png";
+import { clearUser, setUser } from "@/redux/slices/userSlice";
 import Image from "next/image";
-import { useSwipeable } from "react-swipeable";
-import { useState } from "react";
+import logo from "@/assets/icon/logo.png";
+import { setLoading } from "@/redux/slices/sidebarSlice";
+import { clearCategories } from "@/redux/slices/category";
+import Logout from "@/app/(auth)/logout/logout";
 
-const navLinks = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: home_icon,
-    iconWhite: home_white_icon,
-  },
-  {
-    href: "/expense",
-    label: "Expense",
-    icon: expense_icon,
-    iconWhite: expense_white_icon,
-  },
-  {
-    href: "/category",
-    label: "Category",
-    icon: category,
-    iconWhite: category_white,
-  },
-  { href: "/budget", label: "Budget", icon: budget, iconWhite: budget_white },
-];
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-export default function Sidebar() {
-  const param = usePathname();
+export function AppSidebar() {
+  const router = useRouter();
+  const pathName = usePathname();
+
+  const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
-  const isOpen = useSelector((state: RootState) => state.sidebar.enabled);
-  const [hovered, setHovered] = useState<string | null>(null);
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => dispatch(setSidebar(false)),
-    onSwipedRight: () => dispatch(setSidebar(true)),
-    preventScrollOnSwipe: true,
-    trackTouch: true,
-  });
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (user?.profilePicFilePath && !user.profilePictureUrl) {
+        try {
+          const url = await fetchProfileUrl(user.profilePicFilePath);
+          dispatch(
+            setUser({
+              ...user,
+              profilePictureUrl: url,
+            })
+          );
+        } catch (error) {
+          console.error("Error fetching profile picture:", error);
+        }
+      }
+    };
+
+    fetchProfilePicture();
+  }, [user?.profilePicFilePath]);
+
+  const handleLogout = async () => {
+    dispatch(setLoading(true));
+
+    try {
+      await Logout();
+      router.push("/");
+      dispatch(clearUser());
+      dispatch(clearCategories());
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    dispatch(setLoading(false));
+  };
 
   return (
-    <aside
-      className={`w-full lg:w-64  max-lg:z-60 fixed z-40
-        top-0 left-0 h-screen 
-        transition-transform
-        transform duration-300 ease-in-out
-        border-r
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        ${isOpen ? "bg-black/50" : "bg-transparent"}
-        `}
-      {...handlers}
-    >
-      <div className="w-55 lg:w-full h-screen bg-background relative flex flex-col">
-        <div
-          className="absolute top-1/2 -right-5 min-lg:hidden 
-        w-5 h-20 bg-primary-color flex text-center
-        justify-center items-center border-l
-         border-white bg-secondary-color"
-          onClick={() => dispatch(setSidebar(false))}
-        >{`<`}</div>
-        <div className="h-16 flex items-center justify-start px-5 sm:px-6">
-          <Logo
-            disableIcon={false}
-            className="text-2xl py-4 w-full justify-start text-primary-color"
-            dimension={{ width: 30, height: 30 }}
-            redirect={true}
-          />
-        </div>
-
-        <div className="flex-grow justify-between">
-          <ul className="space-y-4 w-full px-5 sm:px-6 py-4 text-lg text-gray-700 font-semibold">
-            {navLinks.map((link) => {
-              const isActive = param.includes(link.href);
-              const isHovered = hovered === link.href;
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center transition-all duration-150 ${
-                    isActive ? "bg-gray-800" : ""
-                  }  px-3 py-2 rounded-md hover:bg-gray-800 hover:text-gray-100`}
-                  onMouseEnter={() => setHovered(link.href)}
-                  onMouseLeave={() => setHovered(null)}
-                >
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/">
+                <Image
+                  src={logo}
+                  alt="Logo"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                <h1 className="font-bold text-xl">Expensely</h1>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathName === "/dashboard"}>
+                <Link href={"/dashboard"}>
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Manage</SidebarGroupLabel>
+          <SidebarMenu>
+            <Collapsible className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton>
+                    <DollarSign />
+                    Expense
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem key={"Expense-show"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/expense"}
+                      >
+                        <Link href={"/expense"}>
+                          <span>Recent Transactions</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem key={"Expense-add"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/expense/add"}
+                      >
+                        <Link href={"/expense/add"}>
+                          <span>Add Expense</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+          <SidebarMenu>
+            <Collapsible className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton>
+                    <Wallet />
+                    Budget
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem key={"Expense-show"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/budget"}
+                      >
+                        <Link href={"/budget"}>
+                          <span>Active Budgets</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem key={"Expense-add"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/budget/add"}
+                      >
+                        <Link href={"/budget/add"}>
+                          <span>Add Budget</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+          <SidebarMenu>
+            <Collapsible className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton>
+                    <Logs />
+                    Category
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem key={"Expense-show"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/category"}
+                      >
+                        <Link href={"/category"}>
+                          <span>Categories</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem key={"Expense-add"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathName === "/category/add"}
+                      >
+                        <Link href={"/category/add"}>
+                          <span>Add Category</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem className="mt-auto w-full">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton className="w-full">
                   <Image
-                    src={isActive || isHovered ? link.iconWhite : link.icon}
-                    alt={link.label}
-                    className="w-5 mr-3"
+                    src={user.profilePictureUrl || defaulProfilePic}
+                    alt="Avatar"
+                    width={28}
+                    height={28}
+                    className="object-cover rounded-full"
                   />
 
-                  <span className={`${isActive ? "text-gray-100" : ""}`}>
-                    {link.label}
+                  {user.name || "Guest"}
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" className="w-64">
+                <DropdownMenuItem
+                  onClick={() => {
+                    router.push("/profile");
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <User /> Profile
                   </span>
-                </Link>
-              );
-            })}
-          </ul>
-        </div>
-        {/* <div>
-          <p className="text-gray-300 text-sm">Version 1.4.7</p>
-        </div> */}
-      </div>
-    </aside>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    router.push("/settings");
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <Settings /> Settings
+                  </span>
+                </DropdownMenuItem>
+                {user.isAdmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push("/admin");
+                      }}
+                    >
+                      <span className="flex items-center gap-2">
+                        <ShieldUser className="w-4 h-4" />
+                        Admin
+                      </span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={async () => {
+                    // Clear local storage and redirect to login page
+                    await handleLogout();
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <LogOut /> Sign out
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

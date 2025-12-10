@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased bg-background `}>
+      <body className={`antialiased`}>
         <ReduxProvider>
           {maintenanceMode && (
             <div className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-4">

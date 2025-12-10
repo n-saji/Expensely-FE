@@ -14,8 +14,8 @@ import { addCategory, removeCategory } from "@/redux/slices/category";
 import { CategoryTypeExpense } from "@/global/constants";
 import { Category } from "@/global/dto";
 import { useDispatch, useSelector } from "react-redux";
-import { AppSidebar } from "@/components/sidebar_new";
-import Navbar from "@/components/navbar_new";
+import { AppSidebar } from "@/components/sidebar";
+import Navbar from "@/components/navbar";
 import api from "@/lib/api";
 
 export default function DashboardPage({
@@ -122,11 +122,7 @@ export default function DashboardPage({
     <>
       {loading && <Loader />}
       <Toaster closeButton />
-      <div
-        className={`w-full flex min-h-screen bg-background min-sm:relative
-          dark:text-gray-200
-        `}
-      >
+      <div className={`w-full flex min-h-screen bg-background min-sm:relative`}>
         <AppSidebar />
         {/* <Sidebar /> */}
 

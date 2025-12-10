@@ -15,7 +15,7 @@ import {
   Line,
   ComposedChart,
   LineChart,
-  Legend,
+  // Legend,
 } from "recharts";
 import CardTemplate from "@/components/card";
 import {
@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useMediaQuery from "@/utils/useMediaQuery";
+// import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
   "#00C49F",
@@ -99,7 +99,7 @@ export default function ExpensesChartCard({
     })
   );
 
-  const isDesktop = useMediaQuery("(min-width: 530px)");
+  // const isDesktop = useMediaQuery("(min-width: 530px)");
 
   return (
     // ========== Pie Chart: Yearly Spending ==========
@@ -141,7 +141,7 @@ export default function ExpensesChartCard({
       </CardHeader>
       <CardContent className="flex justify-center items-center w-full h-full">
         <ResponsiveContainer width="100%" height={height}>
-          <PieChart margin={margin}>
+          <PieChart >
             <Pie
               data={chartData}
               dataKey="value"
@@ -161,11 +161,14 @@ export default function ExpensesChartCard({
                 />
               ))}
             </Pie>
-            <Legend
-              verticalAlign={isDesktop ? "middle" : "bottom"}
-              layout={isDesktop ? "vertical" : "horizontal"}
-              align={isDesktop ? "right" : "center"}
-            />
+            {/* <Legend
+              // verticalAlign={isDesktop ? "middle" : "bottom"}
+              // layout={isDesktop ? "vertical" : "horizontal"}
+              // align={isDesktop ? "right" : "center"}
+              verticalAlign="bottom"
+              layout="horizontal"
+              align="center"
+            /> */}
             <Tooltip
               itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
               contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
