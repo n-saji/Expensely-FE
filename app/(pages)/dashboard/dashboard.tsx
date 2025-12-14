@@ -8,12 +8,7 @@ import ExpensesChartCard, {
   ExpensesOverDays,
 } from "@/components/ExpenseChartCard";
 import { ExpenseOverview } from "@/global/dto";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { currencyMapper } from "@/utils/currencyMapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -162,7 +157,6 @@ export default function DashboardPage() {
     );
   }
 
-
   return (
     <div className="flex flex-col flex-wrap w-full gap-4 h-full">
       {/* left module */}
@@ -197,12 +191,18 @@ export default function DashboardPage() {
             }
             numberData={`${currencyMapper(
               user?.currency || "USD"
-            )}${overview?.thisMonthTotalExpense.toFixed(2)}`}
+            )}${overview?.thisMonthTotalExpense.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
             description={`You have spent ${currencyMapper(
               user?.currency || "USD"
             )}${Math.abs(
               overview?.thisMonthTotalExpense - overview?.lastMonthTotalExpense
-            ).toFixed(2)} ${
+            ).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })} ${
               overview?.thisMonthTotalExpense -
                 overview?.lastMonthTotalExpense >
               0
@@ -225,12 +225,13 @@ export default function DashboardPage() {
             title="This Year's Expense"
             numberData={`${currencyMapper(
               user?.currency || "USD"
-            )}${overview?.totalAmount.toFixed(2)}`}
+            )}${overview?.totalAmount.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
             description={`On an average you have spent ${currencyMapper(
               user?.currency || "USD"
-            )}${overview?.averageMonthlyExpense.toFixed(
-              2
-            )} every month this year.`}
+            )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
           />
         ) : (
           <SkeletonLoader title="This Year's Expense" className="h-[150px]" />
@@ -253,13 +254,23 @@ export default function DashboardPage() {
         {overview ? (
           <CardComponent
             title="This month most expensive item"
-            numberData={itemName && itemValue ? `${currencyMapper(
-              user?.currency || "USD"
-            )}${(itemValue as number).toFixed(2)}` : "N/A"}
-            description={itemName ? `You spent most on ${itemName}` : ""}
+            numberData={itemName && itemValue ? `${itemName}` : "N/A"}
+            description={
+              itemName
+                ? `You have spent ${currencyMapper(user?.currency || "USD")}${(
+                    itemValue as number
+                  ).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : ""
+            }
           />
         ) : (
-          <SkeletonLoader title="This month most expensive item" className="h-[150px]" />
+          <SkeletonLoader
+            title="This month most expensive item"
+            className="h-[150px]"
+          />
         )}
       </div>
       {/* right module */}

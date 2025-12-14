@@ -18,7 +18,7 @@ export default function CardComponent({
   description?: string;
 }) {
   return (
-    <Card>
+    <Card className="flex flex-col justify-between">
       <CardContent>
         <Label className="text-sm text-muted-foreground mb-2 flex justify-between">
           {title !== "" ? title : "Default Title"}{" "}
@@ -29,7 +29,7 @@ export default function CardComponent({
           {numberData ? numberData : "0"}
         </p>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="">
         <Label className="text-sm text-muted-foreground">{description ? description : ""}</Label>
       </CardFooter>
     </Card>
