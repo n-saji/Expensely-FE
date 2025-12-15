@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useSelector } from "react-redux";
 import { columns, Expense } from "./columns";
 import { DataTable } from "./data-table";
@@ -57,6 +58,7 @@ import {
 import {
   ChevronDown,
   Download,
+  FilterX,
   MoreHorizontal,
   Search,
   Trash,
@@ -81,6 +83,9 @@ import {
 } from "@tanstack/react-table";
 
 import { DateRange } from "react-day-picker";
+import { Card, CardContent } from "@/components/ui/card";
+import DropDown from "@/components/drop-down";
+import { Label } from "@/components/ui/label";
 
 interface expense {
   id: string;
@@ -452,16 +457,7 @@ export default function ExpenseTableComponent() {
   }
 
   const tableColumns = useMemo(() => {
-    return columns(
-      user?.currency,
-      dateRange,
-      setDateRange,
-      open,
-      setOpen,
-      categories,
-      categoryFilter,
-      setCategoryFilter
-    ).map((col) => {
+    return columns(user?.currency).map((col) => {
       if (col.id === "actions") {
         return {
           ...col,
@@ -512,7 +508,7 @@ export default function ExpenseTableComponent() {
       }
       return col;
     });
-  }, [user?.currency, open, dateRange]);
+  }, [user?.currency]);
 
   const handleBulkDelete = async (expenseId?: string) => {
     if (selectedExpenses.length === 0 && !expenseId) {
@@ -595,6 +591,17 @@ export default function ExpenseTableComponent() {
     }
   };
 
+  const ClearFilters = () => {
+    setDateRange(undefined);
+    setCategoryFilter("");
+    setQuery("");
+    setPageNumber(1);
+  };
+
+  useEffect(() => {
+    setPageNumber(1);
+  }, [dateRange, categoryFilter, query]);
+
   return (
     <div className="block w-full space-y-4">
       {expenseToDelete && (
@@ -632,6 +639,14 @@ export default function ExpenseTableComponent() {
         selectedExpenses={selectedExpenses}
         handleBulkDelete={handleBulkDelete}
         handleFileDownload={handleFileDownload}
+        categories={categories}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        clearFilters={ClearFilters}
+        open={open}
+        setOpen={setOpen}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
       />
       <DataTable
         columns={tableColumns}
@@ -815,56 +830,134 @@ const SearchAndFilter = ({
   selectedExpenses,
   handleBulkDelete,
   handleFileDownload,
+  categories,
+  categoryFilter,
+  setCategoryFilter,
+  clearFilters,
+  open,
+  setOpen,
+  dateRange,
+  setDateRange,
 }: {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   selectedExpenses: Expense[];
   handleBulkDelete: () => void;
   handleFileDownload: () => void;
+  categories: RootState["categoryExpense"];
+  categoryFilter: string;
+  setCategoryFilter: (category: string) => void;
+  clearFilters: () => void;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  dateRange: DateRange | undefined;
+  setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
 }) => {
   return (
-    <div className="flex md:space-x-2 justify-between items-center">
-      <div
-        className="flex items-center relative border border-gray-500 dark:border-none rounded-md 
-            active:border-none focus:border-none w-[200px] md:w-md lg:w-lg"
-      >
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          className="pl-7 text-muted-foreground"
-          placeholder="Search expenses..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        {query && (
-          <Button
-            className="absolute right-2  h-[50%] w-2"
-            variant={"ghost"}
-            onClick={() => setQuery("")}
-          >
-            <X className="h-2 w-2" />
-          </Button>
-        )}
-      </div>
+    <Card>
+      <CardContent className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-between md:items-end">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div>
+            <Label className=" mb-2 text-sm font-extrabold">
+              What are you looking for?
+            </Label>
+            <div className="flex items-center relative  rounded-md  sm:w-full md:w-md lg:w-lg">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                className="pl-7 text-muted-foreground"
+                placeholder="Search expenses..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {query && (
+                <Button
+                  className="absolute right-2 h-[50%] w-2"
+                  variant={"ghost"}
+                  onClick={() => setQuery("")}
+                >
+                  <X className="h-2 w-2" />
+                </Button>
+              )}
+            </div>
+          </div>
 
-      <div className="flex gap-2">
-        {selectedExpenses.length > 0 && (
-          <Button
-            className={`ml-4 ${
-              selectedExpenses.length === 0
-                ? "opacity-40 cursor-not-allowed"
-                : "cursor-pointer"
-            }`}
-            disabled={selectedExpenses.length === 0}
-            onClick={() => handleBulkDelete()}
-          >
-            <Trash />
-          </Button>
-        )}
+          <div className="w-[200px]">
+            <Label className="mb-2 text-sm font-extrabold">Category</Label>
+            <DropDown
+              options={categories.categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              }))}
+              selectedOption={categoryFilter}
+              onSelect={(option) => {
+                const selectedCategory = categories.categories.find(
+                  (category) => category.id === option
+                );
+                setCategoryFilter(selectedCategory ? selectedCategory.id : "");
+              }}
+            />
+          </div>
 
-        <Button onClick={handleFileDownload}>
-          <Download className="h-6 w-6" />
-        </Button>
-      </div>
-    </div>
+          <div className="w-[200px]">
+            <Label className="mb-2 text-sm font-extrabold">Date Range</Label>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="date"
+                  className="w-full justify-between text-muted-foreground"
+                >
+                  {dateRange?.from && dateRange?.to
+                    ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
+                    : "Select date range"}
+                  <ChevronDown />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-full overflow-hidden p-0"
+                align="start"
+              >
+                <Calendar
+                  mode="range"
+                  defaultMonth={dateRange?.from || new Date()}
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  numberOfMonths={1}
+                  className="rounded-lg border shadow-sm"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          {selectedExpenses.length > 0 && (
+            <Button
+              className={`${
+                selectedExpenses.length === 0
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
+              disabled={selectedExpenses.length === 0}
+              onClick={() => handleBulkDelete()}
+              variant={"destructive"}
+            >
+              <Trash />
+            </Button>
+          )}
+
+          <Button onClick={handleFileDownload}>
+            <Download className="h-6 w-6" />
+          </Button>
+          <Button
+            onClick={() => clearFilters()}
+            disabled={!dateRange && !categoryFilter && !query}
+            variant={"outline"}
+          >
+            <FilterX className="h-6 w-6"/>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

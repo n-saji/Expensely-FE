@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import CardComponent from "@/components/CardComponent";
+import Expense from "../expense/expense_old/expense";
 
 const SkeletonLoader = ({
   title,
@@ -383,6 +384,16 @@ export default function DashboardPage() {
         ) : (
           <SkeletonLoader title="Budgets" className="h-[150px]" />
         )}
+      </div>
+      <div className="w-full">
+        <Card >
+          <CardHeader>
+            <CardTitle>Recent Transactions</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-scroll">
+            <Expense isDemo={true} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

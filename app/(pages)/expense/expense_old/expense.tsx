@@ -585,8 +585,8 @@ function ExpenseList({
 
       <div className="flex-grow">
         <table
-          className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
-          rounded-lg text-xs sm:text-sm divide-y divide-gray-200 dark:divide-gray-700"
+          className="w-full h-full layout-fixed border 
+          rounded-lg text-xs sm:text-sm divide-y "
         >
           <thead
             className="tracking-wider

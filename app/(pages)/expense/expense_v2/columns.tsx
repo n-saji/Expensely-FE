@@ -10,12 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ArrowUpDown,
-  CalendarIcon,
-  CalendarRange,
-  MoreHorizontal,
-} from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 export type Expense = {
   id: string;
@@ -27,27 +22,10 @@ export type Expense = {
   currency: string;
 };
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { DateRange } from "react-day-picker";
-import DropDown from "@/components/drop-down";
-import { RootState } from "@/redux/store";
 
 export const columns = (
-  userCurrency: string | undefined,
-  dateRange: DateRange | undefined,
-  setDateRange: (range: DateRange | undefined) => void,
-  open: boolean,
-  setOpen: (open: boolean) => void,
-  categories: RootState["categoryExpense"],
-  categoryFilter: string,
-  setCategoryFilter: (category: string) => void
+  userCurrency: string | undefined
 ): ColumnDef<Expense>[] => [
   {
     id: "select",
@@ -78,13 +56,13 @@ export const columns = (
   {
     accessorKey: "amount",
     header: ({ column }) => (
-      <Button
-        variant="ghost"
+      <div
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex cursor-pointer items-center"
       >
         Amount
         <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
-      </Button>
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
@@ -100,48 +78,19 @@ export const columns = (
   },
   {
     accessorKey: "expenseDate",
-    header: () => (
-      <div className="flex items-center gap-2">
+    header: ({ column }) => (
+      <div
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="flex cursor-pointer items-center"
+      >
         Expense Date
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            {dateRange?.from && dateRange?.to ? (
-              <CalendarRange className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            )}
-          </PopoverTrigger>
-          <PopoverContent className="w-full overflow-hidden p-0" align="start">
-            <Calendar
-              mode="range"
-              defaultMonth={dateRange?.from || new Date()}
-              selected={dateRange}
-              onSelect={setDateRange}
-              numberOfMonths={1}
-              className="rounded-lg border shadow-sm"
-            />
-          </PopoverContent>
-        </Popover>
+        <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
       </div>
     ),
   },
   {
     accessorKey: "categoryName",
-    header: () => (
-      <DropDown
-        options={categories.categories.map((category) => ({
-          label: category.name,
-          value: category.id,
-        }))}
-        selectedOption={categoryFilter}
-        onSelect={(option) => {
-          const selectedCategory = categories.categories.find(
-            (category) => category.id === option
-          );
-          setCategoryFilter(selectedCategory ? selectedCategory.id : "");
-        }}
-      />
-    ),
+    header: "Category",
   },
 
   {
