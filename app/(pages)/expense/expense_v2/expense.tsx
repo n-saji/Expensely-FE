@@ -125,6 +125,7 @@ export default function ExpenseTableComponent() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [open, setOpen] = useState(false);
+  const [calenderOpen, setCalenderOpen] = useState(false);
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((old) =>
@@ -245,8 +246,7 @@ export default function ExpenseTableComponent() {
       id: expenseToEdit?.id || "",
       userId: user.id || "",
       description: expenseToEdit?.description || "",
-      expenseDate:
-        expenseToEdit?.expenseDate || new Date().toISOString().split("T")[0],
+      expenseDate: expenseToEdit?.expenseDate,
       amount: expenseToEdit?.amount || 0,
       currency: user.currency || "USD",
       category: {
@@ -259,6 +259,26 @@ export default function ExpenseTableComponent() {
   async function onSubmitUpdate(data: z.infer<typeof expenseSchema>) {
     try {
       setLoading(true);
+      const oldExpense = expensesList.expenses.find(
+        (item) => item.id === data.id
+      );
+
+      if (
+        oldExpense?.expenseDate.slice(0, 10) !== data.expenseDate.slice(0, 10)
+      ) {
+        const now = new Date();
+        data.expenseDate =
+          data.expenseDate +"T" +
+          now.toLocaleTimeString("en-US", {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+      } else {
+        data.expenseDate =
+          data.expenseDate.slice(0, 10) + oldExpense?.expenseDate.slice(10);
+      }
       const response = await api.put(`/expenses/update/${data.id}`, data);
       if (response.status !== 200) throw new Error("Failed to update expense");
       toast.success("Expense updated successfully");
@@ -360,21 +380,14 @@ export default function ExpenseTableComponent() {
         id: expense.id,
         amount: expense.amount,
         description: expense.description,
-        expenseDate: new Date(expense.expenseDate).toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          // hour: "numeric",
-          // minute: "2-digit",
-          hour12: true,
-        }),
+        expenseDate: expense.expenseDate,
         categoryId: expense.categoryId,
         categoryName: expense.categoryName,
         currency: expense.currency,
       }));
       setDatas(formatedData);
       setTableLoading(false);
-    }, 500); // Adjust the debounce time as needed
+    }, 600); // Adjust the debounce time as needed
 
     return () => clearTimeout(delayDebounceFn);
   }, [query, dateRange, categoryFilter, pageNumber, sorting]);
@@ -416,7 +429,8 @@ export default function ExpenseTableComponent() {
       `&page=${page}` +
       `${limit ? `&limit=${limit}` : ""}` +
       `${sortBy ? `&sort_by=${sortBy}` : ""}` +
-      `${sortOrder ? `&sort_order=${sortOrder}` : ""}`;
+      `${sortOrder ? `&sort_order=${sortOrder}` : ""}` +
+      `&order=${order}`;
 
     const response = await api.get(URL);
 
@@ -563,7 +577,6 @@ export default function ExpenseTableComponent() {
     } finally {
     }
   };
-  console.log(open);
 
   return (
     <div className="block w-full space-y-4">
@@ -713,14 +726,19 @@ export default function ExpenseTableComponent() {
                     <FormItem className="mt-4">
                       <FormLabel>Expense Date</FormLabel>
                       <FormControl>
-                        <Popover open={open} onOpenChange={setOpen}>
+                        <Popover
+                          open={calenderOpen}
+                          onOpenChange={setCalenderOpen}
+                        >
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
                               id="date"
                               className="w-full justify-between text-muted-foreground"
                             >
-                              {field.value ? field.value : "Select date"}
+                              {field.value
+                                ? field.value.slice(0, 10)
+                                : "Select date"}
                               <ChevronDown />
                             </Button>
                           </PopoverTrigger>
@@ -733,23 +751,21 @@ export default function ExpenseTableComponent() {
                               selected={
                                 field.value ? new Date(field.value) : undefined
                               }
+                              defaultMonth={
+                                field.value ? new Date(field.value) : undefined
+                              }
                               captionLayout="dropdown"
                               onSelect={(date) => {
-                                setOpen(false);
-
-                                field.onChange(
-                                  date ? date.toISOString().slice(0, 10) : ""
-                                );
+                                setCalenderOpen(false);
+                                if (date) {
+                                  field.onChange(
+                                    date.toISOString().slice(0, 10)
+                                  );
+                                }
                               }}
                             />
                           </PopoverContent>
                         </Popover>
-                        {/* <Input
-                          type="date"
-                          {...field}
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                        /> */}
                       </FormControl>
                       <FormMessage />
                     </FormItem>

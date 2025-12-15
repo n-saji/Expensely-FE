@@ -1,4 +1,4 @@
-import Expense from "./expense";
+import SwitchComponent from "./switchComponent";
 
 export async function generateMetadata() {
   return {
@@ -7,5 +7,5 @@ export async function generateMetadata() {
 }
 
 export default function ExpensePageWrapper() {
-  return <Expense />;
+  return <SwitchComponent />;
 }

@@ -43,8 +43,6 @@ interface DataTableProps<TData, TValue> {
   onRowSelectionChange: OnChangeFn<RowSelectionState>;
 }
 
-
-
 export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
@@ -133,14 +131,26 @@ export function DataTable<TData extends { id: string }, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      if (cell.column.id == "expenseDate") {
+                        const date = new Date(
+                          cell.getValue() as string
+                        ).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        });
+                        return <TableCell key={cell.id}>{date}</TableCell>;
+                      }
+                      return (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))
               ) : (
