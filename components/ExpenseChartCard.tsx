@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "./ui/label";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -53,7 +54,6 @@ const COLORS = [
 ];
 
 const height = 280;
-const height_small = 220;
 const margin = { left: -15, right: 12 };
 
 // ========== Props Interfaces ==========
@@ -140,28 +140,35 @@ export default function ExpensesChartCard({
         </CardAction>
       </CardHeader>
       <CardContent className="flex justify-center items-center w-full h-full">
-        <ResponsiveContainer width="100%" height={height}>
-          <PieChart >
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              innerRadius={60}
-              label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
-              animationDuration={800}
-              animationEasing="ease-in-out"
-            >
-              {chartData.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            {/* <Legend
+        {chartData.length === 0 ? (
+          <div
+            className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
+          >
+            <Label className="text-muted-foreground">No data available</Label>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={height}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                innerRadius={60}
+                label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
+                animationDuration={800}
+                animationEasing="ease-in-out"
+              >
+                {chartData.map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              {/* <Legend
               // verticalAlign={isDesktop ? "middle" : "bottom"}
               // layout={isDesktop ? "vertical" : "horizontal"}
               // align={isDesktop ? "right" : "center"}
@@ -169,18 +176,22 @@ export default function ExpensesChartCard({
               layout="horizontal"
               align="center"
             /> */}
-            <Tooltip
-              itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
-              contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
-              labelStyle={{ color: "#fff" }}
-              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-              formatter={(value: number, name: string) => [
-                `${currencyMapper(currency)}${value.toFixed(2)}`,
-                name,
-              ]}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+              <Tooltip
+                itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
+                contentStyle={{
+                  backgroundColor: "black",
+                  borderRadius: "8px",
+                }}
+                labelStyle={{ color: "#fff" }}
+                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                formatter={(value: number, name: string) => [
+                  `${currencyMapper(currency)}${value.toFixed(2)}`,
+                  name,
+                ]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );
@@ -247,54 +258,65 @@ export function ExpensesMonthlyBarChartCard({
         </CardAction>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={height_small}>
-          <ComposedChart data={chartData} margin={margin}>
-            <CartesianGrid
-              stroke={darkMode ? "#5f6266" : "#ccc"}
-              vertical={false}
-            />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-              tickFormatter={(name: string) =>
-                name.length > 3 ? `${name.slice(0, 3)}` : name
-              }
-            />
-            <YAxis
-              tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-              tickFormatter={(value: number) =>
-                `${currencyMapper(currency)}${value.toFixed(0)}`
-              }
-            />
-            <Tooltip
-              contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
-              labelStyle={{ color: "#fff" }}
-              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-              formatter={(value: number, name: string) => {
-                if (name === "amount")
-                  return [
-                    `${currencyMapper(currency)}${value.toFixed(2)}`,
-                    "Amount",
-                  ];
-                if (name === "trend") return [];
-              }}
-            />
-            {/* <Bar
+        {chartData.length === 0 ? (
+          <div
+            className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
+          >
+            <Label className="text-muted-foreground">No data available</Label>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={height}>
+            <ComposedChart data={chartData} margin={margin}>
+              <CartesianGrid
+                stroke={darkMode ? "#5f6266" : "#ccc"}
+                vertical={false}
+              />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                tickFormatter={(name: string) =>
+                  name.length > 3 ? `${name.slice(0, 3)}` : name
+                }
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                tickFormatter={(value: number) =>
+                  `${currencyMapper(currency)}${value.toFixed(0)}`
+                }
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "black",
+                  borderRadius: "8px",
+                }}
+                labelStyle={{ color: "#fff" }}
+                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                formatter={(value: number, name: string) => {
+                  if (name === "amount")
+                    return [
+                      `${currencyMapper(currency)}${value.toFixed(2)}`,
+                      "Amount",
+                    ];
+                  if (name === "trend") return [];
+                }}
+              />
+              {/* <Bar
               dataKey="amount"
               fill="#4ade80"
               radius={[4, 4, 0, 0]}
               barSize={50}
             /> */}
-            <Line
-              type="monotone"
-              dataKey="amount"
-              stroke="#4ade80"
-              strokeWidth={2}
-              dot
-              activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+              <Line
+                type="monotone"
+                dataKey="amount"
+                stroke="#4ade80"
+                strokeWidth={2}
+                dot
+                activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );
@@ -361,12 +383,14 @@ export function ExpensesMonthlyLineChartCard({
         </CardAction>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={height_small}>
-          {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No data available</p>
-            </div>
-          ) : (
+        {chartData.length === 0 ? (
+          <div
+            className={`flex items-center content-center justify-center h-[${height.toString()}px] w-full`}
+          >
+            <Label className="text-muted-foreground">No data available</Label>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={height}>
             <ComposedChart data={chartData} margin={margin}>
               <CartesianGrid
                 strokeDasharray="1"
@@ -390,11 +414,12 @@ export function ExpensesMonthlyLineChartCard({
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1f2937",
+                  backgroundColor: "black",
                   borderRadius: "8px",
+                  fontSize: 14,
                 }}
                 labelStyle={{ color: "#fff" }}
-                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                cursor={{ fill: "bg-background" }}
                 formatter={(value: number) =>
                   `${currencyMapper(currency)}${value.toFixed(2)}`
                 }
@@ -413,8 +438,8 @@ export function ExpensesMonthlyLineChartCard({
                 ))}
               {/* <Legend /> */}
             </ComposedChart>
-          )}
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );
@@ -465,7 +490,7 @@ export function ExpensesTop5Monthly({
               }
             />
             <Tooltip
-              contentStyle={{ backgroundColor: "#1f2937", borderRadius: "8px" }}
+              contentStyle={{ backgroundColor: "black", borderRadius: "8px" }}
               labelStyle={{ color: "#fff" }}
               // itemStyle={{ color: "#fff" }}
               cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
@@ -545,9 +570,9 @@ export function ExpensesOverDays({
           />
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-full">
         {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={height_small}>
+          <ResponsiveContainer width="100%" height={height}>
             <LineChart data={chartData} margin={margin}>
               <CartesianGrid
                 stroke={darkMode ? "#5f6266" : "#ccc"}
@@ -574,7 +599,7 @@ export function ExpensesOverDays({
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1f2937",
+                  backgroundColor: "black",
                   borderRadius: "8px",
                 }}
                 labelStyle={{ color: "#fff" }}

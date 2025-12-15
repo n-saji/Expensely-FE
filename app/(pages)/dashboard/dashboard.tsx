@@ -22,6 +22,7 @@ import {
 import api from "@/lib/api";
 import CardComponent from "@/components/CardComponent";
 import Expense from "../expense/expense_old/expense";
+import Link from "next/link";
 
 const SkeletonLoader = ({
   title,
@@ -140,20 +141,42 @@ export default function DashboardPage() {
   }, [currentYearForYearly]);
 
   const mostExp = overview?.thisMonthMostExpensiveItem;
-  const [itemName, itemValue] = mostExp ? Object.entries(mostExp)[0] : [];
+  const [itemName, itemValue] =
+    mostExp && Object.entries(mostExp)[0]
+      ? Object.entries(mostExp)[0]
+      : [null, null];
 
   if (newUser) {
     return (
       <div className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl text-gray-700 p-4 font-bold dark:text-gray-200">
+        <Label className="text-3xl mb-4 font-bold text-green-400">
           Welcome to Expensely!
-        </h1>
-        <p className="text-gray-600 p-2 text-center dark:text-gray-400">
-          {`It looks like you haven't added any expenses yet.`}
+        </Label>
+        <p className="text-lg text-center mb-2">
+          {`It looks like you haven't added any expenses yet. Start tracking your
+          expenses by adding your first expense.`}
         </p>
-        <p className="text-gray-600 p-2 text-center dark:text-gray-400">
-          Start tracking your expenses by adding your first expense.
-        </p>
+        <div>
+          <ul className="list-decimal list-inside p-2 text-left text-muted-foreground">
+            <li>
+              Create a{" "}
+              <Link href="/category/add" className="underline">
+                new category
+              </Link>{" "}
+              .
+            </li>
+            <li>
+              Add a new expense using the {" "}
+              <Link href="/expense/add" className="underline">
+                Add Expense
+              </Link> {" "}
+              from the side bar.
+            </li>
+            <li>Categorize your expenses for better tracking.</li>
+            <li>Set budgets to manage your spending effectively.</li>
+            <li>Explore reports and insights as you add more data.</li>
+          </ul>
+        </div>
       </div>
     );
   }
@@ -386,7 +409,7 @@ export default function DashboardPage() {
         )}
       </div>
       <div className="w-full">
-        <Card >
+        <Card>
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
           </CardHeader>
