@@ -268,7 +268,8 @@ export default function ExpenseTableComponent() {
       ) {
         const now = new Date();
         data.expenseDate =
-          data.expenseDate +"T" +
+          data.expenseDate +
+          "T" +
           now.toLocaleTimeString("en-US", {
             hour12: false,
             hour: "2-digit",
@@ -291,6 +292,7 @@ export default function ExpenseTableComponent() {
       // Refresh expenses list
       try {
         setTableLoading(true);
+
         const updatedExpenses = await fetchExpenses({
           userId: user.id,
           fromDate: dateRange?.from
@@ -317,7 +319,9 @@ export default function ExpenseTableComponent() {
         );
         setDatas(formatedData);
       } catch (error) {
-        console.error("Error refreshing expenses:", error);
+        toast.error("Error refreshing expenses", {
+          description: String(error),
+        });
       } finally {
         setTableLoading(false);
       }
@@ -361,32 +365,38 @@ export default function ExpenseTableComponent() {
     const delayDebounceFn = setTimeout(async () => {
       // Fetch expenses after debounce time
 
-      const data = await fetchExpenses({
-        userId: user.id,
-        fromDate: dateRange?.from
-          ? dateRange.from.toISOString().slice(0, 16)
-          : "",
-        toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
-        category: categoryFilter,
-        order: "desc",
-        page: pageNumber,
-        limit: 10,
-        q: query,
-        ...(sortField ? { sortBy: sortField, sortOrder } : {}),
-      });
+      try {
+        const data = await fetchExpenses({
+          userId: user.id,
+          fromDate: dateRange?.from
+            ? dateRange.from.toISOString().slice(0, 16)
+            : "",
+          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
+          category: categoryFilter,
+          order: "desc",
+          page: pageNumber,
+          limit: 10,
+          q: query,
+          ...(sortField ? { sortBy: sortField, sortOrder } : {}),
+        });
 
-      setExpensesList(data);
-      const formatedData = data.expenses.map((expense: Expense) => ({
-        id: expense.id,
-        amount: expense.amount,
-        description: expense.description,
-        expenseDate: expense.expenseDate,
-        categoryId: expense.categoryId,
-        categoryName: expense.categoryName,
-        currency: expense.currency,
-      }));
-      setDatas(formatedData);
-      setTableLoading(false);
+        setExpensesList(data);
+        const formatedData = data.expenses.map((expense: Expense) => ({
+          id: expense.id,
+          amount: expense.amount,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          categoryId: expense.categoryId,
+          categoryName: expense.categoryName,
+          currency: expense.currency,
+        }));
+        setDatas(formatedData);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        toast.error("Error fetching expenses", { description: String(error) });
+      } finally {
+        setTableLoading(false);
+      }
     }, 600); // Adjust the debounce time as needed
 
     return () => clearTimeout(delayDebounceFn);
@@ -429,8 +439,7 @@ export default function ExpenseTableComponent() {
       `&page=${page}` +
       `${limit ? `&limit=${limit}` : ""}` +
       `${sortBy ? `&sort_by=${sortBy}` : ""}` +
-      `${sortOrder ? `&sort_order=${sortOrder}` : ""}` +
-      `&order=${order}`;
+      `${sortOrder ? `&sort_order=${sortOrder}` : ""}`;
 
     const response = await api.get(URL);
 
@@ -537,18 +546,26 @@ export default function ExpenseTableComponent() {
       console.error("Error deleting expenses:", error);
     } finally {
       setLoading(false);
-      fetchExpenses({
-        userId: user.id,
-        fromDate: dateRange?.from
-          ? dateRange.from.toISOString().slice(0, 16)
-          : "",
-        toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
-        category: categoryFilter,
-        order: "desc",
-        page: pageNumber,
-        limit: 10,
-        q: query,
-      });
+      try {
+        setTableLoading(true);
+        fetchExpenses({
+          userId: user.id,
+          fromDate: dateRange?.from
+            ? dateRange.from.toISOString().slice(0, 16)
+            : "",
+          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
+          category: categoryFilter,
+          order: "desc",
+          page: pageNumber,
+          limit: 10,
+          q: query,
+        });
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        toast.error("Error fetching expenses", { description: String(error) });
+      } finally {
+        setTableLoading(false);
+      }
     }
   };
 
