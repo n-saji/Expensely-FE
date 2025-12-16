@@ -609,7 +609,7 @@ function ExpenseList({
             >
               {!loading && (
                 <tr>
-                  <td colSpan={5} className="text-center py-4">
+                  <td colSpan={isDemo ? 3 : 5} className="text-center py-4">
                     <p className="text-gray-500">
                       {loading ? "Loading..." : "No expenses found"}
                     </p>
@@ -618,15 +618,16 @@ function ExpenseList({
               )}
               {loading && (
                 <>
-                  {[...Array(10)].map((_, index) => (
+                  {[...Array(isDemo ? 5 : 10)].map((_, index) => (
                     <tr
                       key={index}
                       className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
                       transition-colors cursor-pointer"
                     >
-                      <td className={table_data_classname}>
-                        <div className={`h-4 w-4 ${table_data_loading}`}></div>
-                      </td>
+                      {isDemo ? null : (
+                        <td className={table_data_classname}>
+                          <div className={`h-4 w-4 ${table_data_loading}`}></div>
+                        </td>)}
                       <td className={table_data_classname}>
                         <div className={`h-4 w-20 ${table_data_loading}`}></div>
                       </td>
@@ -638,9 +639,10 @@ function ExpenseList({
                           className={`h-4 w-full ${table_data_loading}`}
                         ></div>
                       </td>
-                      <td className={table_data_classname}>
-                        <div className={`h-4 w-24 ${table_data_loading}`}></div>
-                      </td>
+                      {isDemo ? null : (
+                        <td className={table_data_classname}>
+                          <div className={`h-4 w-24 ${table_data_loading}`}></div>
+                        </td>)}
                     </tr>
                   ))}
                 </>

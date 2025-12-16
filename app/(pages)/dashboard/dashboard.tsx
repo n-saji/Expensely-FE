@@ -327,7 +327,7 @@ export default function DashboardPage() {
           ) : (
             <SkeletonLoader
               title="Monthly Spending Trends"
-              className="w-full"
+              className="w-full h-[300px]"
             />
           )}
           {!loadingMonth && overview ? (
@@ -344,7 +344,7 @@ export default function DashboardPage() {
               min_month={min_month}
             />
           ) : (
-            <SkeletonLoader title="Spending Over Days" className="w-full" />
+            <SkeletonLoader title="Spending Over Days" className="w-full h-[300px]" />
           )}
         </div>
       </div>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <SkeletonLoader title="Budgets" className="h-[150px]" />
+          <SkeletonLoader title="Budgets" className="h-[300px]" />
         )}
       </div>
       <div className="w-full">

@@ -1,6 +1,6 @@
 "use client";
 import { currencyMapper } from "@/utils/currencyMapper";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -36,6 +36,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "./ui/label";
+import DropDown from "./drop-down";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -76,6 +79,11 @@ interface ExpensesTop5MonthlyProps {
 interface OverTheDaysProps {
   overTheDaysThisMonth: Record<string, number>; // { "1": 50.25, "2": 75.00, ... }
 }
+
+type ChartRow = {
+  name: string;
+  [category: string]: number | string;
+};
 
 // ========== Pie Chart: Category-wise Spending ==========
 export default function ExpensesChartCard({
@@ -338,21 +346,39 @@ export function ExpensesMonthlyLineChartCard({
   currentYearForYearly?: number;
   min_year?: number;
 }) {
-  const chartData = Object.entries(amountByMonth).map(
-    ([month, categories]) => ({
-      name: month,
-      ...categories,
-    })
+  const [category, setCategory] = useState<{ id: string; name: string } | null>(
+    null
   );
+  const categories = useSelector((state: RootState) => state.categoryExpense);
+  const [chartData, setChartData] = useState<ChartRow[]>([]);
+
+  useEffect(() => {
+    if (category?.name) {
+      amountByMonth = Object.fromEntries(
+        Object.entries(amountByMonth).map(([month, categories]) => [
+          month,
+          {
+            [category.name]: categories[category.name] || 0,
+          },
+        ])
+      );
+    }
+    setChartData(
+      Object.entries(amountByMonth).map(([month, categories]) => ({
+        name: month,
+        ...categories,
+      }))
+    );
+  }, [category, amountByMonth]);
 
   return (
     <Card
       // description="Visual breakdown of expenses by category over the year"
       className="w-full"
     >
-      <CardHeader>
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
         <CardTitle>{title || "Monthly Spending Trends"}</CardTitle>
-        <CardAction>
+        <CardAction className="flex gap-2">
           {setCurrentYearForYearly && currentYearForYearly && min_year && (
             <Select
               value={currentYearForYearly.toString()}
@@ -380,6 +406,22 @@ export function ExpensesMonthlyLineChartCard({
               </SelectContent>
             </Select>
           )}
+          <DropDown
+            options={[
+              { label: "All Categories", value: "all" },
+              ...categories.categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              })),
+            ]}
+            selectedOption={category ? category.id : ""}
+            onSelect={(option) => {
+              const selectedCategory = categories.categories.find(
+                (category) => category.id === option
+              );
+              setCategory(selectedCategory || null);
+            }}
+          />
         </CardAction>
       </CardHeader>
       <CardContent>

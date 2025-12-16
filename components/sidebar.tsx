@@ -243,6 +243,19 @@ export function AppSidebar() {
             </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>General</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathName === "/settings"}>
+                <Link href={"/settings"}>
+                  <Settings />
+                  <span>Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -262,7 +275,7 @@ export function AppSidebar() {
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-64">
+              <DropdownMenuContent side="top" className="w-[240px]">
                 <DropdownMenuItem
                   onClick={() => {
                     router.push("/profile");
@@ -270,15 +283,6 @@ export function AppSidebar() {
                 >
                   <span className="flex items-center gap-2">
                     <User /> Profile
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    router.push("/settings");
-                  }}
-                >
-                  <span className="flex items-center gap-2">
-                    <Settings /> Settings
                   </span>
                 </DropdownMenuItem>
                 {user.isAdmin && (
