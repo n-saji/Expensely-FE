@@ -193,7 +193,13 @@ export default function ExpensesChartCard({
                 labelStyle={{ color: "#fff" }}
                 cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
                 formatter={(value: number, name: string) => [
-                  `${currencyMapper(currency)}${value.toFixed(2)}`,
+                  `${currencyMapper(currency)}${value.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}`,
                   name,
                 ]}
               />
@@ -273,10 +279,10 @@ export function ExpensesMonthlyBarChartCard({
             <Label className="text-muted-foreground">No data available</Label>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={height}>
-            <ComposedChart data={chartData} margin={margin}>
+          <ResponsiveContainer height={220}>
+            <ComposedChart data={chartData}>
               <CartesianGrid
-                stroke={darkMode ? "#5f6266" : "#ccc"}
+                stroke={darkMode ? "#242424" : "#DBDBDB"}
                 vertical={false}
               />
               <XAxis
@@ -285,13 +291,15 @@ export function ExpensesMonthlyBarChartCard({
                 tickFormatter={(name: string) =>
                   name.length > 3 ? `${name.slice(0, 3)}` : name
                 }
+                interval={"preserveStartEnd"}
+                minTickGap={10}
               />
-              <YAxis
+              {/* <YAxis
                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                 tickFormatter={(value: number) =>
                   `${currencyMapper(currency)}${value.toFixed(0)}`
                 }
-              />
+              /> */}
               <Tooltip
                 contentStyle={{
                   backgroundColor: "black",
@@ -302,7 +310,13 @@ export function ExpensesMonthlyBarChartCard({
                 formatter={(value: number, name: string) => {
                   if (name === "amount")
                     return [
-                      `${currencyMapper(currency)}${value.toFixed(2)}`,
+                      `${currencyMapper(currency)}${value.toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )}`,
                       "Amount",
                     ];
                   if (name === "trend") return [];
@@ -463,7 +477,13 @@ export function ExpensesMonthlyLineChartCard({
                 labelStyle={{ color: "#fff" }}
                 cursor={{ fill: "bg-background" }}
                 formatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(2)}`
+                  `${currencyMapper(currency)}${value.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}`
                 }
               />
               {Object.keys(chartData[0])
@@ -647,7 +667,13 @@ export function ExpensesOverDays({
                 labelStyle={{ color: "#fff" }}
                 cursor={{ stroke: "#4ade80", strokeWidth: 2 }}
                 formatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(2)}`
+                  `${currencyMapper(currency)}${value.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}`
                 }
               />
               <Line

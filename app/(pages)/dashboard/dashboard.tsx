@@ -166,10 +166,10 @@ export default function DashboardPage() {
               .
             </li>
             <li>
-              Add a new expense using the {" "}
+              Add a new expense using the{" "}
               <Link href="/expense/add" className="underline">
                 Add Expense
-              </Link> {" "}
+              </Link>{" "}
               from the side bar.
             </li>
             <li>Categorize your expenses for better tracking.</li>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
         )}
       </div>
       {/* right module */}
-      <div className="flex-2/3 gap-4 w-full grid grid-cols-1">
+      <div className="gap-4 w-full grid grid-cols-1">
         {!loadingYear && overview ? (
           <ExpensesMonthlyBarChartCard
             amountByMonth={overview.amountByMonth}
@@ -313,38 +313,66 @@ export default function DashboardPage() {
           <SkeletonLoader title="Expense Summary" className="h-[300px]" />
         )}
 
-        <div className="flex flex-col md:flex-row gap-4">
-          {!loadingYear && overview ? (
-            <ExpensesMonthlyLineChartCard
-              amountByMonth={overview.monthlyCategoryExpense}
-              darkMode={user.theme === "dark"}
-              currency={user.currency}
-              title="Monthly Spending Trends"
-              setCurrentYearForYearly={setCurrentYearForYearly}
-              currentYearForYearly={currentYearForYearly}
-              min_year={min_year}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="col-span-2">
+            {!loadingYear && overview ? (
+              <ExpensesMonthlyLineChartCard
+                amountByMonth={overview.monthlyCategoryExpense}
+                darkMode={user.theme === "dark"}
+                currency={user.currency}
+                title="Monthly Spending Trends"
+                setCurrentYearForYearly={setCurrentYearForYearly}
+                currentYearForYearly={currentYearForYearly}
+                min_year={min_year}
+              />
+            ) : (
+              <SkeletonLoader
+                title="Monthly Spending Trends"
+                className="w-full h-[300px]"
+              />
+            )}
+          </div>
+          {overview && overview.budgetServiceMap ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Budgets</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {Object.values(overview.budgetServiceMap).length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No budgets found.
+                  </p>
+                )}
+                {Object.values(overview.budgetServiceMap).map((budget) => (
+                  <div key={budget.id} className="mb-4">
+                    <div className="flex justify-between mb-1 items-center">
+                      <Label className="text-sm">
+                        {budget.category.name}{" "}
+                        {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                      </Label>
+                      <Label className="text-sm text-muted-foreground">
+                        {currencyMapper(user?.currency || "USD")}
+                        {budget.amountSpent.toFixed(2)} /{" "}
+                        {currencyMapper(user?.currency || "USD")}
+                        {budget.amountLimit.toFixed(2)}
+                      </Label>
+                    </div>
+
+                    <ProgressBar
+                      value={budget.amountSpent}
+                      max={budget.amountLimit}
+                      variant={budgetVariant(
+                        budget.amountSpent,
+                        budget.amountLimit
+                      )}
+                      showAnimation={true}
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           ) : (
-            <SkeletonLoader
-              title="Monthly Spending Trends"
-              className="w-full h-[300px]"
-            />
-          )}
-          {!loadingMonth && overview ? (
-            <ExpensesOverDays
-              overTheDaysThisMonth={overview.overTheDaysThisMonth}
-              darkMode={user.theme === "dark"}
-              currency={user.currency}
-              title="Spending Over Days"
-              setCurrentMonth={setCurrentMonth}
-              setCurrentMonthYear={setCurrentMonthYear}
-              currentMonth={currentMonth}
-              currentMonthYear={currentMonthYear}
-              min_year={min_year}
-              min_month={min_month}
-            />
-          ) : (
-            <SkeletonLoader title="Spending Over Days" className="w-full h-[300px]" />
+            <SkeletonLoader title="Budgets" className="h-[300px]" />
           )}
         </div>
       </div>
@@ -365,47 +393,24 @@ export default function DashboardPage() {
           <SkeletonLoader title="Spending by Category" className="h-[300px]" />
         )}
         {/* Budget */}
-        {overview && overview.budgetServiceMap ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Budgets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {Object.values(overview.budgetServiceMap).length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No budgets found.
-                </p>
-              )}
-              {Object.values(overview.budgetServiceMap).map((budget) => (
-                <div key={budget.id} className="mb-4">
-                  <div className="flex justify-between mb-1 items-center">
-                    <Label className="text-sm">
-                      {budget.category.name}{" "}
-                      {budgetIcon(budget.amountSpent, budget.amountLimit)}
-                    </Label>
-                    <Label className="text-sm text-muted-foreground">
-                      {currencyMapper(user?.currency || "USD")}
-                      {budget.amountSpent.toFixed(2)} /{" "}
-                      {currencyMapper(user?.currency || "USD")}
-                      {budget.amountLimit.toFixed(2)}
-                    </Label>
-                  </div>
-
-                  <ProgressBar
-                    value={budget.amountSpent}
-                    max={budget.amountLimit}
-                    variant={budgetVariant(
-                      budget.amountSpent,
-                      budget.amountLimit
-                    )}
-                    showAnimation={true}
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        {!loadingMonth && overview ? (
+          <ExpensesOverDays
+            overTheDaysThisMonth={overview.overTheDaysThisMonth}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            title="Spending Over Days"
+            setCurrentMonth={setCurrentMonth}
+            setCurrentMonthYear={setCurrentMonthYear}
+            currentMonth={currentMonth}
+            currentMonthYear={currentMonthYear}
+            min_year={min_year}
+            min_month={min_month}
+          />
         ) : (
-          <SkeletonLoader title="Budgets" className="h-[300px]" />
+          <SkeletonLoader
+            title="Spending Over Days"
+            className="w-full h-[300px]"
+          />
         )}
       </div>
       <div className="w-full">

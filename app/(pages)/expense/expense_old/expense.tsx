@@ -450,7 +450,11 @@ function ExpenseList({
   };
 
   return (
-    <div className="flex flex-col w-full h-full flex-grow overflow-hidden min-w-[360px]">
+    <div
+      className={`flex flex-col w-full h-full flex-grow overflow-hidden ${
+        isDemo ? "" : "min-w-[360px]"
+      }`}
+    >
       <div
         className={`flex flex-col sm:flex-row w-full sm:justify-between sm:items-center ${
           !isDemo ? "mb-6" : ""
@@ -599,7 +603,9 @@ function ExpenseList({
               <th className={`${table_data_classname} w-6/13`}>Description</th>
               <th className={`${table_data_classname} w-2/13`}>Amount</th>
               <th className={`${table_data_classname} w-3/13`}>Date</th>
-              <th className={`${table_data_classname} w-1/13`}></th>
+              {!isDemo && (
+                <th className={`${table_data_classname} w-1/13`}></th>
+              )}
             </tr>
           </thead>
           {(!showTable || loading) && (
@@ -626,8 +632,11 @@ function ExpenseList({
                     >
                       {isDemo ? null : (
                         <td className={table_data_classname}>
-                          <div className={`h-4 w-4 ${table_data_loading}`}></div>
-                        </td>)}
+                          <div
+                            className={`h-4 w-4 ${table_data_loading}`}
+                          ></div>
+                        </td>
+                      )}
                       <td className={table_data_classname}>
                         <div className={`h-4 w-20 ${table_data_loading}`}></div>
                       </td>
@@ -641,8 +650,11 @@ function ExpenseList({
                       </td>
                       {isDemo ? null : (
                         <td className={table_data_classname}>
-                          <div className={`h-4 w-24 ${table_data_loading}`}></div>
-                        </td>)}
+                          <div
+                            className={`h-4 w-24 ${table_data_loading}`}
+                          ></div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </>
@@ -697,9 +709,11 @@ function ExpenseList({
                   >
                     <div className="flex justify-start items-center gap-x-2 ">
                       {expense.description}
-                      <Badge className={`ml-0 text-[10px]`}>
-                        {expense.categoryName}
-                      </Badge>
+                      {!isDemo && (
+                        <Badge className={`ml-0 text-[10px]`}>
+                          {expense.categoryName}
+                        </Badge>
+                      )}
                     </div>
                   </td>
                   <td
