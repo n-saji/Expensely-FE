@@ -614,7 +614,7 @@ export default function ExpenseTableComponent() {
   }, [dateRange, categoryFilter, query]);
 
   return (
-    <div className="flex flex-col w-fit lg:w-full space-y-4 overflow-scroll">
+    <div className="flex flex-col w-full space-y-4">
       {expenseToDelete && (
         <AlertDialog
           open={!!expenseToDelete}
