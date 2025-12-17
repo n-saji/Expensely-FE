@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-wrap w-full gap-4 h-full">
-      {/* left module */}
+      {/* cards module */}
       <div className="flex-1/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-4">
         {/* Monthly Summary */}
         {overview ? (
@@ -297,7 +297,7 @@ export default function DashboardPage() {
           />
         )}
       </div>
-      {/* right module */}
+      {/* yearly module */}
       <div className="gap-4 w-full grid grid-cols-1">
         {!loadingYear && overview ? (
           <ExpensesMonthlyBarChartCard
@@ -312,40 +312,45 @@ export default function DashboardPage() {
         ) : (
           <SkeletonLoader title="Expense Summary" className="h-[300px]" />
         )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="col-span-2">
-            {!loadingYear && overview ? (
-              <ExpensesMonthlyLineChartCard
-                amountByMonth={overview.monthlyCategoryExpense}
-                darkMode={user.theme === "dark"}
-                currency={user.currency}
-                title="Monthly Spending Trends"
-                setCurrentYearForYearly={setCurrentYearForYearly}
-                currentYearForYearly={currentYearForYearly}
-                min_year={min_year}
-              />
-            ) : (
-              <SkeletonLoader
-                title="Monthly Spending Trends"
-                className="w-full h-[300px]"
-              />
-            )}
-          </div>
+      </div>
+      {/* yearly + budget module */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-x-4">
+        <div className="col-span-2">
+          {!loadingYear && overview ? (
+            <ExpensesMonthlyLineChartCard
+              amountByMonth={overview.monthlyCategoryExpense}
+              darkMode={user.theme === "dark"}
+              currency={user.currency}
+              title="Monthly Spending Trends"
+              setCurrentYearForYearly={setCurrentYearForYearly}
+              currentYearForYearly={currentYearForYearly}
+              min_year={min_year}
+            />
+          ) : (
+            <SkeletonLoader
+              title="Monthly Spending Trends"
+              className="w-full h-[300px]"
+            />
+          )}
+        </div>
+        <div className="w-full h-full">
           {overview && overview.budgetServiceMap ? (
-            <Card>
+            <Card
+              className="w-full h-full
+            "
+            >
               <CardHeader>
                 <CardTitle>Budgets</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="md:max-h-[280px] overflow-y-auto">
                 {Object.values(overview.budgetServiceMap).length === 0 && (
                   <p className="text-sm text-muted-foreground">
                     No budgets found.
                   </p>
                 )}
                 {Object.values(overview.budgetServiceMap).map((budget) => (
-                  <div key={budget.id} className="mb-4">
-                    <div className="flex justify-between mb-1 items-center">
+                  <div key={budget.id} className="mb-6">
+                    <div className="flex flex-wrap justify-between mb-1 items-center">
                       <Label className="text-sm">
                         {budget.category.name}{" "}
                         {budgetIcon(budget.amountSpent, budget.amountLimit)}
@@ -376,7 +381,8 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
-      {/* down module */}
+
+      {/* category + monthly module */}
       <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
         {/* Spending by Category */}
         {!loadingYear && overview ? (
@@ -413,6 +419,7 @@ export default function DashboardPage() {
           />
         )}
       </div>
+      {/* recent transactions module */}
       <div className="w-full">
         <Card>
           <CardHeader>

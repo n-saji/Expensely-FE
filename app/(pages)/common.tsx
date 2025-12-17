@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from "react";
 
 import { RootState } from "@/redux/store";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
@@ -18,6 +18,8 @@ import { AppSidebar } from "@/components/sidebar";
 import Navbar from "@/components/navbar";
 import api from "@/lib/api";
 
+import AlertComponent from "@/components/AlertComponent";
+
 export default function DashboardPage({
   children,
 }: {
@@ -25,7 +27,7 @@ export default function DashboardPage({
 }) {
   const user = useSelector((state: RootState) => state.user);
   const token = FetchToken();
-
+  const path = usePathname();
   const router = useRouter();
   const loading = useSelector((state: RootState) => state.sidebar.loading);
   const isCategoryMounted = useRef(false);
@@ -128,7 +130,11 @@ export default function DashboardPage({
 
         <div className={`w-full transition-all duration-300 `}>
           <Navbar />
-          <div className="px-8 py-8 flex flex-col space-y-4 w-full items-center overflow-auto min-h-full">
+
+          {/* Alerts/Banners */}
+          {path === "/dashboard" && <AlertComponent />}
+
+          <div className="px-8 py-8 flex flex-col space-y-4 w-full items-center">
             {children}
           </div>
         </div>

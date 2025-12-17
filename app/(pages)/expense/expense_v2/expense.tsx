@@ -544,7 +544,7 @@ export default function ExpenseTableComponent() {
       setLoading(false);
       try {
         setTableLoading(true);
-        fetchExpenses({
+        const expenses = await fetchExpenses({
           userId: user.id,
           fromDate: dateRange?.from
             ? dateRange.from.toISOString().slice(0, 16)
@@ -556,6 +556,17 @@ export default function ExpenseTableComponent() {
           limit: 10,
           q: query,
         });
+        setExpensesList(expenses);
+        const formatedData = expenses.expenses.map((expense: Expense) => ({
+          id: expense.id,
+          amount: expense.amount,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          categoryId: expense.categoryId,
+          categoryName: expense.categoryName,
+          currency: expense.currency,
+        }));
+        setDatas(formatedData);
       } catch (error) {
         console.error("Error fetching expenses:", error);
         toast.error("Error fetching expenses", { description: String(error) });
@@ -603,7 +614,7 @@ export default function ExpenseTableComponent() {
   }, [dateRange, categoryFilter, query]);
 
   return (
-    <div className="block w-full space-y-4">
+    <div className="flex flex-col w-fit lg:w-full space-y-4 overflow-scroll">
       {expenseToDelete && (
         <AlertDialog
           open={!!expenseToDelete}
@@ -855,8 +866,8 @@ const SearchAndFilter = ({
 }) => {
   return (
     <Card>
-      <CardContent className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-between md:items-end">
-        <div className="flex flex-col md:flex-row gap-4">
+      <CardContent className="flex flex-wrap flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 justify-between lg:items-end">
+        <div className="flex flex-col lg:flex-row gap-4">
           <div>
             <Label className=" mb-2 text-sm font-extrabold">
               What are you looking for?

@@ -112,3 +112,8 @@ export interface Budget {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface AlertDto {
+  message: string;
+  type: "INFO" | "WARNING" | "CRITICAL" | "success";
+}
