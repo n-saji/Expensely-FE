@@ -1,9 +1,4 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-} from "./ui/card";
+import { Card, CardContent, CardFooter } from "./ui/card";
 import { Label } from "./ui/label";
 
 export default function CardComponent({
@@ -18,20 +13,31 @@ export default function CardComponent({
   description?: string;
 }) {
   return (
-    <Card className="flex flex-col justify-between">
-      <CardContent>
-        <Label className="text-sm text-muted-foreground mb-2 flex justify-between">
-          {title !== "" ? title : "Default Title"}{" "}
-          <CardAction>{cardAction ? cardAction : null}</CardAction>
-        </Label>
+    <Card className="flex h-full flex-col min-w-0">
+      <CardContent className="space-y-2">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <Label className="text-sm text-muted-foreground truncate">
+            {title || "Default Title"}
+          </Label>
 
-        <p className="text-3xl font-semibold">
-          {numberData ? numberData : "0"}
+          {cardAction && <div className="flex-shrink-0">{cardAction}</div>}
+        </div>
+
+        {/* Main number */}
+        <p className="text-2xl md:text-3xl font-semibold truncate">
+          {numberData || "0"}
         </p>
       </CardContent>
-      <CardFooter className="">
-        <Label className="text-sm text-muted-foreground">{description ? description : ""}</Label>
-      </CardFooter>
+
+      {/* Footer */}
+      {description && (
+        <CardFooter className="mt-auto pt-0 md:min-h-[36px] flex items-start">
+          <p className="text-sm text-muted-foreground line-clamp-2 p-0">
+            {description}
+          </p>
+        </CardFooter>
+      )}
     </Card>
   );
 }

@@ -471,8 +471,8 @@ export function YearlyExpenseLineChart({
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between w-[350px]">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
+        <CardTitle className="flex items-center justify-between w-fit gap-2">
           Yearly Expense Trends
           <Tabs defaultValue="monthly">
             <TabsList>
