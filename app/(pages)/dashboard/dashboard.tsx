@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import ExpensesChartCard, {
-  ExpensesMonthlyBarChartCard,
-  ExpensesMonthlyLineChartCard,
   ExpensesOverDays,
+  YearlyExpenseLineChart,
 } from "@/components/ExpenseChartCard";
 import { ExpenseOverview } from "@/global/dto";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -300,11 +299,11 @@ export default function DashboardPage() {
       {/* yearly module */}
       <div className="gap-4 w-full grid grid-cols-1">
         {!loadingYear && overview ? (
-          <ExpensesMonthlyBarChartCard
+          <YearlyExpenseLineChart
             amountByMonth={overview.amountByMonth}
+            amountByMonthV2={overview.monthlyCategoryExpense}
             darkMode={user.theme === "dark"}
             currency={user.currency}
-            title="Expense Summary"
             setCurrentYearForYearly={setCurrentYearForYearly}
             currentYearForYearly={currentYearForYearly}
             min_year={min_year}
@@ -313,26 +312,59 @@ export default function DashboardPage() {
           <SkeletonLoader title="Expense Summary" className="h-[300px]" />
         )}
       </div>
-      {/* yearly + budget module */}
+
+      {/* category + monthly module */}
+      <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
+        {/* Spending by Category */}
+        {!loadingYear && overview ? (
+          <ExpensesChartCard
+            amountByCategory={overview.amountByCategory}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            title="Spending by Category"
+            setCurrentYearForYearly={setCurrentYearForYearly}
+            currentYearForYearly={currentYearForYearly}
+            min_year={min_year}
+          />
+        ) : (
+          <SkeletonLoader title="Spending by Category" className="h-[300px]" />
+        )}
+        {/* Budget */}
+        {!loadingMonth && overview ? (
+          <ExpensesOverDays
+            overTheDaysThisMonth={overview.overTheDaysThisMonth}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            title="Spending Over Days"
+            setCurrentMonth={setCurrentMonth}
+            setCurrentMonthYear={setCurrentMonthYear}
+            currentMonth={currentMonth}
+            currentMonthYear={currentMonthYear}
+            min_year={min_year}
+            min_month={min_month}
+          />
+        ) : (
+          <SkeletonLoader
+            title="Spending Over Days"
+            className="w-full h-[300px]"
+          />
+        )}
+      </div>
+
+      {/* recent transactions module */}
+      <div className="w-full">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Transactions</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-scroll">
+            <Expense isDemo={true} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/*  budget module */}
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-x-4">
-        <div className="col-span-2">
-          {!loadingYear && overview ? (
-            <ExpensesMonthlyLineChartCard
-              amountByMonth={overview.monthlyCategoryExpense}
-              darkMode={user.theme === "dark"}
-              currency={user.currency}
-              title="Monthly Spending Trends"
-              setCurrentYearForYearly={setCurrentYearForYearly}
-              currentYearForYearly={currentYearForYearly}
-              min_year={min_year}
-            />
-          ) : (
-            <SkeletonLoader
-              title="Monthly Spending Trends"
-              className="w-full h-[300px]"
-            />
-          )}
-        </div>
         <div className="w-full h-full">
           {overview && overview.budgetServiceMap ? (
             <Card
@@ -380,55 +412,6 @@ export default function DashboardPage() {
             <SkeletonLoader title="Budgets" className="h-[300px]" />
           )}
         </div>
-      </div>
-
-      {/* category + monthly module */}
-      <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
-        {/* Spending by Category */}
-        {!loadingYear && overview ? (
-          <ExpensesChartCard
-            amountByCategory={overview.amountByCategory}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            title="Spending by Category"
-            setCurrentYearForYearly={setCurrentYearForYearly}
-            currentYearForYearly={currentYearForYearly}
-            min_year={min_year}
-          />
-        ) : (
-          <SkeletonLoader title="Spending by Category" className="h-[300px]" />
-        )}
-        {/* Budget */}
-        {!loadingMonth && overview ? (
-          <ExpensesOverDays
-            overTheDaysThisMonth={overview.overTheDaysThisMonth}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            title="Spending Over Days"
-            setCurrentMonth={setCurrentMonth}
-            setCurrentMonthYear={setCurrentMonthYear}
-            currentMonth={currentMonth}
-            currentMonthYear={currentMonthYear}
-            min_year={min_year}
-            min_month={min_month}
-          />
-        ) : (
-          <SkeletonLoader
-            title="Spending Over Days"
-            className="w-full h-[300px]"
-          />
-        )}
-      </div>
-      {/* recent transactions module */}
-      <div className="w-full">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-scroll">
-            <Expense isDemo={true} />
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

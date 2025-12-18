@@ -39,6 +39,7 @@ import { Label } from "./ui/label";
 import DropDown from "./drop-down";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -65,7 +66,7 @@ interface ExpensesChartCardProps {
 }
 
 interface ExpensesMonthlyCategoryChartProps {
-  amountByMonth: Record<string, Record<string, number>>;
+  amountByMonthV2: Record<string, Record<string, number>>;
 }
 
 interface ExpensesMonthlyChartProps {
@@ -83,6 +84,7 @@ interface OverTheDaysProps {
 type ChartRow = {
   name: string;
   [category: string]: number | string;
+  amount: number | 0;
 };
 
 // ========== Pie Chart: Category-wise Spending ==========
@@ -110,11 +112,7 @@ export default function ExpensesChartCard({
   // const isDesktop = useMediaQuery("(min-width: 530px)");
 
   return (
-    // ========== Pie Chart: Yearly Spending ==========
-    <Card
-      // description="Your expense distribution across categories"
-      className="w-full"
-    >
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>{title || "Spending by Category"}</CardTitle>
         <CardAction>
@@ -210,303 +208,6 @@ export default function ExpensesChartCard({
     </Card>
   );
 }
-
-// ========== Bar Chart: Yearly Spending ==========
-export function ExpensesMonthlyBarChartCard({
-  amountByMonth,
-  darkMode,
-  currency = "USD",
-  title,
-  setCurrentYearForYearly,
-  currentYearForYearly,
-  min_year,
-}: ExpensesMonthlyChartProps & { darkMode: boolean } & { currency?: string } & {
-  title?: string;
-  setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
-  currentYearForYearly?: number;
-  min_year?: number;
-}) {
-  const chartData = Object.entries(amountByMonth || {}).map(
-    ([month, amount]) => ({
-      name: month,
-      amount: amount,
-      trend: amount,
-    })
-  );
-
-  return (
-    <Card
-      // description="Insights into your spending patterns"
-      className="w-full"
-    >
-      <CardHeader>
-        <CardTitle>{title || "Expense Summary"}</CardTitle>
-        <CardAction>
-          {setCurrentYearForYearly && currentYearForYearly && min_year && (
-            <Select
-              value={currentYearForYearly.toString()}
-              onValueChange={(value) =>
-                setCurrentYearForYearly(parseInt(value, 10))
-              }
-            >
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Select Year</SelectLabel>
-                  {Array.from(
-                    {
-                      length: new Date().getFullYear() - (min_year || 2020) + 1,
-                    },
-                    (_, i) => (min_year || 2020) + i
-                  ).map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        {chartData.length === 0 ? (
-          <div
-            className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
-          >
-            <Label className="text-muted-foreground">No data available</Label>
-          </div>
-        ) : (
-          <ResponsiveContainer height={220}>
-            <ComposedChart data={chartData}>
-              <CartesianGrid
-                stroke={darkMode ? "#242424" : "#DBDBDB"}
-                vertical={false}
-              />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(name: string) =>
-                  name.length > 3 ? `${name.slice(0, 3)}` : name
-                }
-                interval={"preserveStartEnd"}
-                minTickGap={10}
-              />
-              {/* <YAxis
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(0)}`
-                }
-              /> */}
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "black",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#fff" }}
-                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                formatter={(value: number, name: string) => {
-                  if (name === "amount")
-                    return [
-                      `${currencyMapper(currency)}${value.toLocaleString(
-                        undefined,
-                        {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }
-                      )}`,
-                      "Amount",
-                    ];
-                  if (name === "trend") return [];
-                }}
-              />
-              {/* <Bar
-              dataKey="amount"
-              fill="#4ade80"
-              radius={[4, 4, 0, 0]}
-              barSize={50}
-            /> */}
-              <Line
-                type="monotone"
-                dataKey="amount"
-                stroke="#4ade80"
-                strokeWidth={2}
-                dot
-                activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-// ========== Line Chart: Yearly Expense Trend ==========
-export function ExpensesMonthlyLineChartCard({
-  amountByMonth,
-  darkMode,
-  currency = "USD",
-  title,
-  setCurrentYearForYearly,
-  currentYearForYearly,
-  min_year,
-}: ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & {
-  currency?: string;
-} & { title?: string } & {
-  setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
-  currentYearForYearly?: number;
-  min_year?: number;
-}) {
-  const [category, setCategory] = useState<{ id: string; name: string } | null>(
-    null
-  );
-  const categories = useSelector((state: RootState) => state.categoryExpense);
-  const [chartData, setChartData] = useState<ChartRow[]>([]);
-
-  useEffect(() => {
-    if (category?.name) {
-      amountByMonth = Object.fromEntries(
-        Object.entries(amountByMonth).map(([month, categories]) => [
-          month,
-          {
-            [category.name]: categories[category.name] || 0,
-          },
-        ])
-      );
-    }
-    setChartData(
-      Object.entries(amountByMonth).map(([month, categories]) => ({
-        name: month,
-        ...categories,
-      }))
-    );
-  }, [category, amountByMonth]);
-
-  return (
-    <Card
-      // description="Visual breakdown of expenses by category over the year"
-      className="w-full"
-    >
-      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
-        <CardTitle>{title || "Monthly Spending Trends"}</CardTitle>
-        <CardAction className="flex gap-2">
-          {setCurrentYearForYearly && currentYearForYearly && min_year && (
-            <Select
-              value={currentYearForYearly.toString()}
-              onValueChange={(value) =>
-                setCurrentYearForYearly(parseInt(value, 10))
-              }
-            >
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Select Year</SelectLabel>
-                  {Array.from(
-                    {
-                      length: new Date().getFullYear() - (min_year || 2020) + 1,
-                    },
-                    (_, i) => (min_year || 2020) + i
-                  ).map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
-          <DropDown
-            options={[
-              { label: "All Categories", value: "all" },
-              ...categories.categories.map((category) => ({
-                label: category.name,
-                value: category.id,
-              })),
-            ]}
-            selectedOption={category ? category.id : ""}
-            onSelect={(option) => {
-              const selectedCategory = categories.categories.find(
-                (category) => category.id === option
-              );
-              setCategory(selectedCategory || null);
-            }}
-          />
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        {chartData.length === 0 ? (
-          <div
-            className={`flex items-center content-center justify-center h-[${height.toString()}px] w-full`}
-          >
-            <Label className="text-muted-foreground">No data available</Label>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={height}>
-            <ComposedChart data={chartData} margin={margin}>
-              <CartesianGrid
-                strokeDasharray="1"
-                stroke={darkMode ? "#5f6266" : "#ccc"}
-                // strokeLinejoin="round"
-                // horizontal={false}
-                vertical={false}
-                height={1}
-              />
-
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(name: string) => name.slice(0, 1)}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(0)}`
-                }
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "black",
-                  borderRadius: "8px",
-                  fontSize: 14,
-                }}
-                labelStyle={{ color: "#fff" }}
-                cursor={{ fill: "bg-background" }}
-                formatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}`
-                }
-              />
-              {Object.keys(chartData[0])
-                .filter((key) => key !== "name")
-                .map((category, index) => (
-                  <Line
-                    key={category}
-                    type="monotone"
-                    dataKey={category}
-                    stroke={COLORS[index % COLORS.length]}
-                    strokeWidth={2}
-                    dot
-                  />
-                ))}
-              {/* <Legend /> */}
-            </ComposedChart>
-          </ResponsiveContainer>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 // ========== Bar Chart: Top 5 Items This Month ==========
 export function ExpensesTop5Monthly({
   amountByItem,
@@ -577,6 +278,7 @@ export function ExpensesTop5Monthly({
   );
 }
 
+// ========== Line Chart: Expenses Over Days This Month ==========
 export function ExpensesOverDays({
   overTheDaysThisMonth,
   darkMode,
@@ -695,3 +397,598 @@ export function ExpensesOverDays({
     </Card>
   );
 }
+
+// ========== Line Chart: Yearly Expense Category|Total Trend ==========
+export function YearlyExpenseLineChart({
+  amountByMonth,
+  amountByMonthV2,
+  darkMode,
+  currency = "USD",
+  setCurrentYearForYearly,
+  currentYearForYearly,
+  min_year,
+}: ExpensesMonthlyChartProps &
+  ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & {
+    currency?: string;
+  } & {
+    setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
+    currentYearForYearly?: number;
+    min_year?: number;
+  }) {
+  const [toggle, setToggle] = useState(true); // true for monthly, false for category
+  const [chartData, setChartData] = useState<ChartRow[]>([]);
+  const [category, setCategory] = useState<{ id: string; name: string } | null>(
+    null
+  );
+  const categories = useSelector((state: RootState) => state.categoryExpense);
+
+  useEffect(() => {
+    if (category?.name) {
+      amountByMonthV2 = Object.fromEntries(
+        Object.entries(amountByMonthV2).map(([month, categories]) => [
+          month,
+          {
+            [category.name]: categories[category.name] || 0,
+          },
+        ])
+      );
+    }
+    setChartData(
+      toggle
+        ? Object.entries(amountByMonth).map(([category, amount]) => ({
+            name: category,
+            amount: amount,
+          }))
+        : Object.entries(amountByMonthV2).map(([month, categories]) => ({
+            name: month,
+            ...categories,
+            amount: 0,
+          }))
+    );
+  }, [toggle, amountByMonth, amountByMonthV2]);
+
+  useEffect(() => {
+    if (!toggle) {
+      if (category?.name) {
+        amountByMonthV2 = Object.fromEntries(
+          Object.entries(amountByMonthV2).map(([month, categories]) => [
+            month,
+            {
+              [category.name]: categories[category.name] || 0,
+            },
+          ])
+        );
+      }
+      setChartData(
+        Object.entries(amountByMonthV2).map(([month, categories]) => ({
+          name: month,
+          ...categories,
+          amount: 0,
+        }))
+      );
+    }
+  }, [category, amountByMonthV2]);
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between w-[350px]">
+          Yearly Expense Trends
+          <Tabs defaultValue="monthly">
+            <TabsList>
+              <TabsTrigger value="monthly" onClick={() => setToggle(true)}>
+                Monthly
+              </TabsTrigger>
+              <TabsTrigger value="category" onClick={() => setToggle(false)}>
+                Category
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardTitle>
+        {toggle ? (
+          <CardAction>
+            {setCurrentYearForYearly && currentYearForYearly && min_year && (
+              <Select
+                value={currentYearForYearly.toString()}
+                onValueChange={(value) =>
+                  setCurrentYearForYearly(parseInt(value, 10))
+                }
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Select Year</SelectLabel>
+                    {Array.from(
+                      {
+                        length:
+                          new Date().getFullYear() - (min_year || 2020) + 1,
+                      },
+                      (_, i) => (min_year || 2020) + i
+                    ).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </CardAction>
+        ) : (
+          <CardAction className="flex gap-2">
+            <DropDown
+              options={[
+                { label: "All Categories", value: "all" },
+                ...categories.categories.map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                })),
+              ]}
+              selectedOption={category ? category.id : ""}
+              onSelect={(option) => {
+                const selectedCategory = categories.categories.find(
+                  (category) => category.id === option
+                );
+                setCategory(selectedCategory || null);
+              }}
+            />
+            {setCurrentYearForYearly && currentYearForYearly && min_year && (
+              <Select
+                value={currentYearForYearly.toString()}
+                onValueChange={(value) =>
+                  setCurrentYearForYearly(parseInt(value, 10))
+                }
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Select Year</SelectLabel>
+                    {Array.from(
+                      {
+                        length:
+                          new Date().getFullYear() - (min_year || 2020) + 1,
+                      },
+                      (_, i) => (min_year || 2020) + i
+                    ).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </CardAction>
+        )}
+      </CardHeader>
+      {toggle ? (
+        <CardContent>
+          {chartData.length === 0 ? (
+            <div
+              className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
+            >
+              <Label className="text-muted-foreground">No data available</Label>
+            </div>
+          ) : (
+            <ResponsiveContainer height={220}>
+              <ComposedChart data={chartData}>
+                <CartesianGrid
+                  stroke={darkMode ? "#242424" : "#DBDBDB"}
+                  vertical={false}
+                  strokeDasharray="1"
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  tickFormatter={(name: string) =>
+                    name.length > 3 ? `${name.slice(0, 3)}` : name
+                  }
+                  interval={"preserveStartEnd"}
+                  minTickGap={10}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "black",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  formatter={(value: number, name: string) => {
+                    if (name === "amount")
+                      return [
+                        `${currencyMapper(currency)}${value.toLocaleString(
+                          undefined,
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }
+                        )}`,
+                        "Amount",
+                      ];
+                    if (name === "trend") return [];
+                  }}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#4ade80"
+                  strokeWidth={2}
+                  dot
+                  activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      ) : (
+        <CardContent>
+          {chartData.length === 0 ? (
+            <div
+              className={`flex items-center content-center justify-center h-[${height.toString()}px] w-full`}
+            >
+              <Label className="text-muted-foreground">No data available</Label>
+            </div>
+          ) : (
+            <ResponsiveContainer height={220}>
+              <ComposedChart data={chartData}>
+                <CartesianGrid
+                  stroke={darkMode ? "#242424" : "#DBDBDB"}
+                  vertical={false}
+                  strokeDasharray="1"
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  tickFormatter={(name: string) =>
+                    name.length > 3 ? `${name.slice(0, 3)}` : name
+                  }
+                  interval={"preserveStartEnd"}
+                  minTickGap={10}
+                />
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "black",
+                    borderRadius: "8px",
+                    fontSize: 14,
+                  }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{ fill: "bg-background" }}
+                  formatter={(value: number) =>
+                    `${currencyMapper(currency)}${value.toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}`
+                  }
+                />
+                {Object.keys(chartData[0])
+                  .filter((key) => key !== "name")
+                  .map((category, index) => {
+                    if (category === "amount") return null;
+                    return (
+                      <Line
+                        key={category}
+                        type="monotone"
+                        dataKey={category}
+                        stroke={COLORS[index % COLORS.length]}
+                        strokeWidth={2}
+                        dot
+                      />
+                    );
+                  })}
+                {/* <Legend /> */}
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
+// Depricated code
+
+// // ========== Line Chart: Yearly Spending ==========
+// export function ExpensesMonthlyLineChartCard({
+//   amountByMonth,
+//   darkMode,
+//   currency = "USD",
+//   title,
+//   setCurrentYearForYearly,
+//   currentYearForYearly,
+//   min_year,
+// }: ExpensesMonthlyChartProps & { darkMode: boolean } & { currency?: string } & {
+//   title?: string;
+//   setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
+//   currentYearForYearly?: number;
+//   min_year?: number;
+// }) {
+//   const chartData = Object.entries(amountByMonth || {}).map(
+//     ([month, amount]) => ({
+//       name: month,
+//       amount: amount,
+//       trend: amount,
+//     })
+//   );
+
+//   return (
+//     <Card
+//       // description="Insights into your spending patterns"
+//       className="w-full"
+//     >
+//       <CardHeader>
+//         <CardTitle>{title || "Expense Summary"}</CardTitle>
+//         <CardAction>
+//           {setCurrentYearForYearly && currentYearForYearly && min_year && (
+//             <Select
+//               value={currentYearForYearly.toString()}
+//               onValueChange={(value) =>
+//                 setCurrentYearForYearly(parseInt(value, 10))
+//               }
+//             >
+//               <SelectTrigger className="w-[100px]">
+//                 <SelectValue placeholder="Year" />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 <SelectGroup>
+//                   <SelectLabel>Select Year</SelectLabel>
+//                   {Array.from(
+//                     {
+//                       length: new Date().getFullYear() - (min_year || 2020) + 1,
+//                     },
+//                     (_, i) => (min_year || 2020) + i
+//                   ).map((year) => (
+//                     <SelectItem key={year} value={year.toString()}>
+//                       {year}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectGroup>
+//               </SelectContent>
+//             </Select>
+//           )}
+//         </CardAction>
+//       </CardHeader>
+//       <CardContent>
+//         {chartData.length === 0 ? (
+//           <div
+//             className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
+//           >
+//             <Label className="text-muted-foreground">No data available</Label>
+//           </div>
+//         ) : (
+//           <ResponsiveContainer height={220}>
+//             <ComposedChart data={chartData}>
+//               <CartesianGrid
+//                 stroke={darkMode ? "#242424" : "#DBDBDB"}
+//                 vertical={false}
+//               />
+//               <XAxis
+//                 dataKey="name"
+//                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+//                 tickFormatter={(name: string) =>
+//                   name.length > 3 ? `${name.slice(0, 3)}` : name
+//                 }
+//                 interval={"preserveStartEnd"}
+//                 minTickGap={10}
+//               />
+//               {/* <YAxis
+//                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+//                 tickFormatter={(value: number) =>
+//                   `${currencyMapper(currency)}${value.toFixed(0)}`
+//                 }
+//               /> */}
+//               <Tooltip
+//                 contentStyle={{
+//                   backgroundColor: "black",
+//                   borderRadius: "8px",
+//                 }}
+//                 labelStyle={{ color: "#fff" }}
+//                 cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+//                 formatter={(value: number, name: string) => {
+//                   if (name === "amount")
+//                     return [
+//                       `${currencyMapper(currency)}${value.toLocaleString(
+//                         undefined,
+//                         {
+//                           minimumFractionDigits: 2,
+//                           maximumFractionDigits: 2,
+//                         }
+//                       )}`,
+//                       "Amount",
+//                     ];
+//                   if (name === "trend") return [];
+//                 }}
+//               />
+//               {/* <Bar
+//               dataKey="amount"
+//               fill="#4ade80"
+//               radius={[4, 4, 0, 0]}
+//               barSize={50}
+//             /> */}
+//               <Line
+//                 type="monotone"
+//                 dataKey="amount"
+//                 stroke="#4ade80"
+//                 strokeWidth={2}
+//                 dot
+//                 activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+//               />
+//             </ComposedChart>
+//           </ResponsiveContainer>
+//         )}
+//       </CardContent>
+//     </Card>
+//   );
+// }
+
+// // ========== Line Chart: Yearly Expense Category Trend ==========
+// export function ExpensesMonthlyLineCategoryChartCard({
+//   amountByMonthV2,
+//   darkMode,
+//   currency = "USD",
+//   title,
+//   setCurrentYearForYearly,
+//   currentYearForYearly,
+//   min_year,
+// }: ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & {
+//   currency?: string;
+// } & { title?: string } & {
+//   setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
+//   currentYearForYearly?: number;
+//   min_year?: number;
+// }) {
+//   const [category, setCategory] = useState<{ id: string; name: string } | null>(
+//     null
+//   );
+//   const categories = useSelector((state: RootState) => state.categoryExpense);
+//   const [chartData, setChartData] = useState<ChartRow[]>([]);
+
+//   useEffect(() => {
+//     if (category?.name) {
+//       amountByMonthV2 = Object.fromEntries(
+//         Object.entries(amountByMonthV2).map(([month, categories]) => [
+//           month,
+//           {
+//             [category.name]: categories[category.name] || 0,
+//           },
+//         ])
+//       );
+//     }
+//     setChartData(
+//       Object.entries(amountByMonthV2).map(([month, categories]) => ({
+//         name: month,
+//         ...categories,
+//         amount: 0,
+//       }))
+//     );
+//   }, [category, amountByMonthV2]);
+
+//   return (
+//     <Card
+//       // description="Visual breakdown of expenses by category over the year"
+//       className="w-full"
+//     >
+//       <CardHeader className="flex flex-wrap justify-between items-center gap-3">
+//         <CardTitle>{title || "Monthly Spending Trends"}</CardTitle>
+//         <CardAction className="flex gap-2">
+//           {setCurrentYearForYearly && currentYearForYearly && min_year && (
+//             <Select
+//               value={currentYearForYearly.toString()}
+//               onValueChange={(value) =>
+//                 setCurrentYearForYearly(parseInt(value, 10))
+//               }
+//             >
+//               <SelectTrigger className="w-[100px]">
+//                 <SelectValue placeholder="Year" />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 <SelectGroup>
+//                   <SelectLabel>Select Year</SelectLabel>
+//                   {Array.from(
+//                     {
+//                       length: new Date().getFullYear() - (min_year || 2020) + 1,
+//                     },
+//                     (_, i) => (min_year || 2020) + i
+//                   ).map((year) => (
+//                     <SelectItem key={year} value={year.toString()}>
+//                       {year}
+//                     </SelectItem>
+//                   ))}
+//                 </SelectGroup>
+//               </SelectContent>
+//             </Select>
+//           )}
+//           <DropDown
+//             options={[
+//               { label: "All Categories", value: "all" },
+//               ...categories.categories.map((category) => ({
+//                 label: category.name,
+//                 value: category.id,
+//               })),
+//             ]}
+//             selectedOption={category ? category.id : ""}
+//             onSelect={(option) => {
+//               const selectedCategory = categories.categories.find(
+//                 (category) => category.id === option
+//               );
+//               setCategory(selectedCategory || null);
+//             }}
+//           />
+//         </CardAction>
+//       </CardHeader>
+//       <CardContent>
+//         {chartData.length === 0 ? (
+//           <div
+//             className={`flex items-center content-center justify-center h-[${height.toString()}px] w-full`}
+//           >
+//             <Label className="text-muted-foreground">No data available</Label>
+//           </div>
+//         ) : (
+//           <ResponsiveContainer width="100%" height={height}>
+//             <ComposedChart data={chartData} margin={margin}>
+//               <CartesianGrid
+//                 strokeDasharray="1"
+//                 stroke={darkMode ? "#5f6266" : "#ccc"}
+//                 // strokeLinejoin="round"
+//                 // horizontal={false}
+//                 vertical={false}
+//                 height={1}
+//               />
+
+//               <XAxis
+//                 dataKey="name"
+//                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+//                 tickFormatter={(name: string) => name.slice(0, 1)}
+//               />
+//               <YAxis
+//                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+//                 tickFormatter={(value: number) =>
+//                   `${currencyMapper(currency)}${value.toFixed(0)}`
+//                 }
+//               />
+//               <Tooltip
+//                 contentStyle={{
+//                   backgroundColor: "black",
+//                   borderRadius: "8px",
+//                   fontSize: 14,
+//                 }}
+//                 labelStyle={{ color: "#fff" }}
+//                 cursor={{ fill: "bg-background" }}
+//                 formatter={(value: number) =>
+//                   `${currencyMapper(currency)}${value.toLocaleString(
+//                     undefined,
+//                     {
+//                       minimumFractionDigits: 2,
+//                       maximumFractionDigits: 2,
+//                     }
+//                   )}`
+//                 }
+//               />
+//               {Object.keys(chartData[0])
+//                 .filter((key) => key !== "name")
+//                 .map((category, index) => (
+//                   <Line
+//                     key={category}
+//                     type="monotone"
+//                     dataKey={category}
+//                     stroke={COLORS[index % COLORS.length]}
+//                     strokeWidth={2}
+//                     dot
+//                   />
+//                 ))}
+//               {/* <Legend /> */}
+//             </ComposedChart>
+//           </ResponsiveContainer>
+//         )}
+//       </CardContent>
+//     </Card>
+//   );
+// }
