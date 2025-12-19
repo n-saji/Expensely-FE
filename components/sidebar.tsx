@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   DollarSign,
   Logs,
+  Plus,
 } from "lucide-react";
 
 import {
@@ -17,9 +18,11 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -118,20 +121,38 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathName === "/dashboard"}>
-                <Link href={"/dashboard"}>
-                  <LayoutDashboard />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+          <SidebarGroupContent>
+            <SidebarMenu className="mb-1">
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathName === "/dashboard"}>
+                  <Link href={"/dashboard"}>
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathName === "/expense"}>
+                  <Link href={"/expense"}>
+                    <DollarSign />
+                    <span>Expenses</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuAction asChild>
+                  <Link href={"/expense/add"}>
+                    <Plus /> <span className="sr-only">Add Expense</span>
+                  </Link>
+                </SidebarMenuAction>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Manage</SidebarGroupLabel>
-          <SidebarMenu>
+          <SidebarGroupContent>
+            {/* <SidebarMenu>
             <Collapsible className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
@@ -167,81 +188,82 @@ export function AppSidebar() {
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
-          </SidebarMenu>
-          <SidebarMenu>
-            <Collapsible className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton>
-                    <Wallet />
-                    Budget
-                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem key={"Expense-show"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathName === "/budget"}
-                      >
-                        <Link href={"/budget"}>
-                          <span>Active Budgets</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem key={"Expense-add"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathName === "/budget/add"}
-                      >
-                        <Link href={"/budget/add"}>
-                          <span>Add Budget</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          </SidebarMenu>
-          <SidebarMenu>
-            <Collapsible className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton>
-                    <Logs />
-                    Category
-                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem key={"Expense-show"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathName === "/category"}
-                      >
-                        <Link href={"/category"}>
-                          <span>Categories</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem key={"Expense-add"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathName === "/category/add"}
-                      >
-                        <Link href={"/category/add"}>
-                          <span>Add Category</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          </SidebarMenu>
+          </SidebarMenu> */}
+            <SidebarMenu>
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Wallet />
+                      Budget
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem key={"Expense-show"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/budget"}
+                        >
+                          <Link href={"/budget"}>
+                            <span>Active Budgets</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem key={"Expense-add"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/budget/add"}
+                        >
+                          <Link href={"/budget/add"}>
+                            <span>Set Budget</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+            <SidebarMenu>
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Logs />
+                      Category
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem key={"Expense-show"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/category"}
+                        >
+                          <Link href={"/category"}>
+                            <span>Categories</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem key={"Expense-add"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/category/add"}
+                        >
+                          <Link href={"/category/add"}>
+                            <span>Add Category</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>General</SidebarGroupLabel>

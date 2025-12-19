@@ -364,7 +364,7 @@ export default function DashboardPage() {
       </div>
 
       {/*  budget module */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-x-4">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-x-4">
         <div className="w-full h-full">
           {overview && overview.budgetServiceMap ? (
             <Card
