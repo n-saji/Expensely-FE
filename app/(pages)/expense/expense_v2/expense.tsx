@@ -131,6 +131,7 @@ export default function ExpenseTableComponent() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [open, setOpen] = useState(false);
   const [calenderOpen, setCalenderOpen] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((old) =>
@@ -163,7 +164,7 @@ export default function ExpenseTableComponent() {
       category,
       order = "desc",
       page = pageNumber,
-      limit = 10,
+      limit = pageSize,
       q = query,
     }: {
       fromDate: string;
@@ -225,7 +226,7 @@ export default function ExpenseTableComponent() {
         q: query,
         category: categoryFilter,
         order: "desc",
-        limit: 10,
+        limit: pageSize,
       });
     }
   }, []);
@@ -307,7 +308,7 @@ export default function ExpenseTableComponent() {
           category: categoryFilter,
           order: "desc",
           page: pageNumber,
-          limit: 10,
+          limit: pageSize,
           q: query,
         });
         setExpensesList(updatedExpenses);
@@ -339,7 +340,6 @@ export default function ExpenseTableComponent() {
     try {
       setLoading(true);
       const res = await api.delete(`/expenses/${expense.id}`);
-      
 
       if (res.status !== 200) {
         throw new Error(res.data || "Failed to delete budget");
@@ -364,7 +364,7 @@ export default function ExpenseTableComponent() {
           category: categoryFilter,
           order: "desc",
           page: pageNumber,
-          limit: 10,
+          limit: pageSize,
           q: query,
         });
         setExpensesList(expenses);
@@ -404,7 +404,7 @@ export default function ExpenseTableComponent() {
           category: categoryFilter,
           order: "desc",
           page: pageNumber,
-          limit: 10,
+          limit: pageSize,
           q: query,
           ...(sortField ? { sortBy: sortField, sortOrder } : {}),
         });
@@ -429,7 +429,7 @@ export default function ExpenseTableComponent() {
     }, 600); // Adjust the debounce time as needed
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, dateRange, categoryFilter, pageNumber, sorting]);
+  }, [query, dateRange, categoryFilter, pageNumber, sorting, pageSize]);
 
   async function fetchExpenses({
     userId,
@@ -438,7 +438,7 @@ export default function ExpenseTableComponent() {
     category,
     order = "desc",
     page = 1,
-    limit = 10,
+    limit = pageSize,
     q = query,
     sortBy,
     sortOrder,
@@ -577,7 +577,7 @@ export default function ExpenseTableComponent() {
           category: categoryFilter,
           order: "desc",
           page: pageNumber,
-          limit: 10,
+          limit: pageSize,
           q: query,
         });
         setExpensesList(expenses);
@@ -693,6 +693,8 @@ export default function ExpenseTableComponent() {
         onSortingChange={handleSortingChange}
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
       />
 
       {openEditDialog && expenseToEdit && (
