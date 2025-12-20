@@ -24,7 +24,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BulkLoadResponse } from "@/global/dto";
 
-
 export default function AddExpensePage() {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
@@ -292,8 +291,7 @@ export default function AddExpensePage() {
               <div className="mb-8">
                 <Label className="text-bold mb-3">Requirements:</Label>
                 <Label className="mb-3 text-muted-foreground">
-                  Upload an Excel file (.csv or .xlsx) with the following
-                  columns:
+                  Upload an Excel file (.csv only) with the following columns:
                 </Label>
                 <ul className="ml-2 list-disc list-inside text-left mb-3">
                   <Label className="mb-1 text-muted-foreground">
