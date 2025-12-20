@@ -14,7 +14,7 @@ import {
   CartesianGrid,
   Line,
   ComposedChart,
-  LineChart,
+  Brush,
   // Legend,
 } from "recharts";
 import CardTemplate from "@/components/card";
@@ -336,14 +336,16 @@ export function ExpensesOverDays({
       </CardHeader>
       <CardContent className="h-full">
         {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={height}>
-            <LineChart data={chartData} margin={margin}>
+          <ResponsiveContainer height={height}>
+            <BarChart data={chartData}>
               <CartesianGrid
                 stroke={darkMode ? "#5f6266" : "#ccc"}
                 vertical={false}
               />
               <XAxis
                 dataKey="day"
+                interval={"preserveStartEnd"}
+                minTickGap={10}
                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                 tickFormatter={(value: string) =>
                   `${value}${(() => {
@@ -353,13 +355,13 @@ export function ExpensesOverDays({
                     return "th";
                   })()}`
                 }
-                interval={0}
               />
               <YAxis
                 tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                 tickFormatter={(value: number) =>
                   `${currencyMapper(currency)}${value.toFixed(0)}`
                 }
+                width={35}
               />
               <Tooltip
                 contentStyle={{
@@ -367,9 +369,13 @@ export function ExpensesOverDays({
                   borderRadius: "8px",
                 }}
                 labelStyle={{ color: "#fff" }}
-                cursor={{ stroke: "#4ade80", strokeWidth: 2 }}
-                formatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toLocaleString(
+                cursor={{
+                  stroke: darkMode ? "#0D0D0D" : "#DBDBDB",
+                  strokeWidth: 1,
+                  fill: "rgba(255, 255, 255, 0.1)",
+                }}
+                formatter={(spent: number) =>
+                  `${currencyMapper(currency)}${spent.toLocaleString(
                     undefined,
                     {
                       minimumFractionDigits: 2,
@@ -377,16 +383,36 @@ export function ExpensesOverDays({
                     }
                   )}`
                 }
+                labelFormatter={(key) => {
+                  return `${key}${(() => {
+                    if (key === "1") return "st";
+                    if (key === "2") return "nd";
+                    if (key === "3") return "rd";
+                    return "th";
+                  })()}`;
+                }}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="value"
-                stroke="#4ade80"
-                strokeWidth={3}
-                dot={{ r: 4, fill: "#4ade80" }}
-                activeDot={{ r: 6 }}
+                fill="#4ade80"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={30}
               />
-            </LineChart>
+              <Brush
+                dataKey="day"
+                height={20}
+                stroke={darkMode ? "#4ade80" : "#0088FE"}
+                fill={darkMode ? "#222222" : "#F2F2F2"}
+                tickFormatter={(tick) => {
+                  return `${tick}${(() => {
+                    if (tick === "1") return "st";
+                    if (tick === "2") return "nd";
+                    if (tick === "3") return "rd";
+                    return "th";
+                  })()}`;
+                }}
+              />
+            </BarChart>
           </ResponsiveContainer>
         ) : (
           <div className="flex items-center justify-center h-[300px] w-full">
@@ -596,7 +622,9 @@ export function YearlyExpenseLineChart({
                     borderRadius: "8px",
                   }}
                   labelStyle={{ color: "#fff" }}
-                  cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  cursor={{
+                    stroke: darkMode ? "#525252" : "#DBDBDB",
+                  }}
                   formatter={(value: number, name: string) => {
                     if (name === "amount")
                       return [
@@ -658,7 +686,9 @@ export function YearlyExpenseLineChart({
                     fontSize: 14,
                   }}
                   labelStyle={{ color: "#fff" }}
-                  cursor={{ fill: "bg-background" }}
+                  cursor={{
+                    stroke: darkMode ? "#525252" : "#DBDBDB",
+                  }}
                   formatter={(value: number) =>
                     `${currencyMapper(currency)}${value.toLocaleString(
                       undefined,
