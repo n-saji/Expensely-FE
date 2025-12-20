@@ -339,20 +339,13 @@ export default function ExpenseTableComponent() {
     try {
       setLoading(true);
       const res = await api.delete(`/expenses/${expense.id}`);
-      let data;
-      try {
-        const text = await res.data;
-        data = text ? JSON.parse(text) : {};
-      } catch (e) {
-        console.error("Failed to parse response:", e);
-        data = {};
-      }
+      
 
       if (res.status !== 200) {
-        throw new Error(data.error || "Failed to delete budget");
+        throw new Error(res.data || "Failed to delete budget");
       }
-      // Remove deleted budget from state
-      setDatas((prev) => prev.filter((b) => b.id !== expense.id));
+
+      setExpenseToDelete(null);
       toast.success(`Deleted ${expense.description}`, {
         description: "Expense deleted successfully",
       });
@@ -360,6 +353,37 @@ export default function ExpenseTableComponent() {
       toast.error("Failed to delete expense", { description: String(err) });
     } finally {
       setLoading(false);
+      try {
+        setTableLoading(true);
+        const expenses = await fetchExpenses({
+          userId: user.id,
+          fromDate: dateRange?.from
+            ? dateRange.from.toISOString().slice(0, 16)
+            : "",
+          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
+          category: categoryFilter,
+          order: "desc",
+          page: pageNumber,
+          limit: 10,
+          q: query,
+        });
+        setExpensesList(expenses);
+        const formatedData = expenses.expenses.map((expense: Expense) => ({
+          id: expense.id,
+          amount: expense.amount,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          categoryId: expense.categoryId,
+          categoryName: expense.categoryName,
+          currency: expense.currency,
+        }));
+        setDatas(formatedData);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        toast.error("Error fetching expenses", { description: String(error) });
+      } finally {
+        setTableLoading(false);
+      }
     }
   };
 
@@ -635,7 +659,6 @@ export default function ExpenseTableComponent() {
               <AlertDialogAction
                 onClick={async () => {
                   await handleDelete(expenseToDelete);
-                  setExpenseToDelete(null);
                 }}
               >
                 Continue
@@ -965,7 +988,7 @@ const SearchAndFilter = ({
             disabled={!dateRange && !categoryFilter && !query}
             variant={"outline"}
           >
-            <FilterX className="h-6 w-6"/>
+            <FilterX className="h-6 w-6" />
           </Button>
         </div>
       </CardContent>
