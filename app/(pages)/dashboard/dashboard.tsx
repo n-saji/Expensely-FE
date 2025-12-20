@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import CardComponent from "@/components/CardComponent";
-import Expense from "../expense/expense_old/expense";
+import Expense from "../expense/_components/expense_old/expense";
 import Link from "next/link";
 
 const SkeletonLoader = ({

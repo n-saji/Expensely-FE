@@ -1,7 +1,7 @@
 import CardTemplate from "@/components/card";
 import { DashboardPageProps } from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
-import Expense from "../expense/expense_old/expense";
+import Expense from "../expense/_components/expense_old/expense";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";

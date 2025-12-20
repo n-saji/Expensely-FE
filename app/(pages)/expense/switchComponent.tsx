@@ -1,8 +1,8 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import Expense from "./expense_old/expense";
-import ExpenseTableComponent from "./expense_v2/expense";
+import Expense from "./_components/expense_old/expense";
+import ExpenseTableComponent from "./_components/expense_v2/expense";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 export default function SwitchComponent() {
