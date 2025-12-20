@@ -20,6 +20,10 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BulkLoadResponse } from "@/global/dto";
+
 
 export default function AddExpensePage() {
   const router = useRouter();
@@ -38,6 +42,11 @@ export default function AddExpensePage() {
     expenseDate: new Date().toLocaleString().slice(0, 10),
   });
   const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
+  const [bulkLoadValidation, setBulkLoadValidation] = useState<boolean>(false);
+  const [bulkLoadLoading, setBulkLoadLoading] = useState<boolean>(false);
+  const [bulkLoadFile, setBulkLoadFile] = useState<File | null>(null);
+  const [bulkLoadResponse, setBulkLoadResponse] =
+    useState<BulkLoadResponse | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -104,6 +113,73 @@ export default function AddExpensePage() {
     }
   };
 
+  const handleBulkUpload = async () => {
+    if (!bulkLoadFile) {
+      toast.error("Please select a file to upload");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", bulkLoadFile);
+
+      setBulkLoadValidation(true);
+      const validationResponse = await api.post(
+        `/expenses/bulk_upload/validate`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      const data = validationResponse.data;
+      setBulkLoadResponse(data);
+
+      if (
+        validationResponse.status !== 200 ||
+        validationResponse.data.error !== null
+      ) {
+        throw new Error("Validation failed: " + validationResponse.data.error);
+      } else if (data.errors && data.errors.length > 0) {
+        toast.error("Validation errors found in the file", {
+          description: `Found ${data.errors.length} errors. Please review and correct them before uploading.`,
+        });
+        return;
+      }
+      setBulkLoadValidation(false);
+
+      setBulkLoadLoading(true);
+      const response = await api.get(
+        `/expenses/bulk_upload/upload?file_id=${data.validationId}`
+      );
+
+      if (response.status !== 200) {
+        throw new Error(
+          "Failed to upload expenses: " + JSON.stringify(response.data)
+        );
+      }
+
+      toast.success("Expenses uploaded successfully", {
+        action: {
+          label: "View Expenses",
+          onClick: () => router.push("/expense"),
+        },
+      });
+    } catch (error) {
+      console.error("Error uploading expenses:", error);
+      console.log("Bulk Load Response:", bulkLoadResponse);
+
+      toast.error(
+        error instanceof Error ? error.message : "Error uploading expenses",
+        {
+          description: bulkLoadResponse?.error || "Unknown error occurred",
+          // handle popup via state, not JSX directly
+        }
+      );
+    } finally {
+      setBulkLoadLoading(false);
+      setBulkLoadValidation(false);
+    }
+  };
+
   return (
     <div
       className="p-4 md:p-8 w-full
@@ -111,96 +187,176 @@ export default function AddExpensePage() {
     >
       <Card className="w-[95%] sm:w-1/2 text-center">
         <CardHeader>
-          <CardTitle className="text-xl">Add New Expense</CardTitle>
+          <CardTitle className="flex justify-center">
+            <Label className="text-xl">Add New Expense</Label>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form
-            className="flex flex-col space-y-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              handleSubmit(event);
-            }}
-          >
-            <Input
-              type="text"
-              placeholder="Expense Name"
-              value={expense.description}
-              onChange={(e) =>
-                setExpense({
-                  ...expense,
-                  description: e.target.value,
-                })
-              }
-            />
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="Amount"
-              value={expense.amount === 0 ? "" : expense.amount}
-              onChange={(e) =>
-                setExpense({
-                  ...expense,
-                  amount: Number(e.target.value),
-                })
-              }
-            />
-
-            <DropDown
-              options={categories.categories.map((category) => ({
-                label: category.name,
-                value: category.id,
-              }))}
-              selectedOption={expense.category.id}
-              onSelect={(option) => {
-                const selectedCategory = categories.categories.find(
-                  (category) => category.id === option
-                );
-                setExpense({
-                  ...expense,
-                  category: {
-                    id: selectedCategory ? selectedCategory.id : "",
-                  },
-                });
-              }}
-            />
-
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  id="date"
-                  className="w-full justify-between text-muted-foreground"
-                >
-                  {expense ? expense.expenseDate : "Select date"}
-                  <ChevronDownIcon />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-full overflow-hidden p-0"
-                align="start"
+        <CardContent className="w-full">
+          <Tabs defaultValue="single" className="w-full">
+            <TabsList className="mb-4 w-full">
+              <TabsTrigger value="single">Single Entry</TabsTrigger>
+              <TabsTrigger value="bulk">Bulk Entry</TabsTrigger>
+            </TabsList>
+            <TabsContent value="single">
+              <form
+                className="flex flex-col space-y-4"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  handleSubmit(event);
+                }}
               >
-                <Calendar
-                  mode="single"
-                  selected={expense ? new Date(expense.expenseDate) : undefined}
-                  captionLayout="dropdown"
-                  onSelect={(date) => {
-                    setOpen(false);
+                <Input
+                  type="text"
+                  placeholder="Expense Name"
+                  value={expense.description}
+                  onChange={(e) =>
                     setExpense({
                       ...expense,
-                      expenseDate: date
-                        ? date.toLocaleString().slice(0, 10)
-                        : "",
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Amount"
+                  value={expense.amount === 0 ? "" : expense.amount}
+                  onChange={(e) =>
+                    setExpense({
+                      ...expense,
+                      amount: Number(e.target.value),
+                    })
+                  }
+                />
+
+                <DropDown
+                  options={categories.categories.map((category) => ({
+                    label: category.name,
+                    value: category.id,
+                  }))}
+                  selectedOption={expense.category.id}
+                  onSelect={(option) => {
+                    const selectedCategory = categories.categories.find(
+                      (category) => category.id === option
+                    );
+                    setExpense({
+                      ...expense,
+                      category: {
+                        id: selectedCategory ? selectedCategory.id : "",
+                      },
                     });
                   }}
                 />
-              </PopoverContent>
-            </Popover>
 
-            <Button type="submit" disabled={adding_expense_loading}>
-              {adding_expense_loading ? <Spinner /> : "Add Expense"}
-            </Button>
-          </form>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      id="date"
+                      className="w-full justify-between text-muted-foreground"
+                    >
+                      {expense ? expense.expenseDate : "Select date"}
+                      <ChevronDownIcon />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-full overflow-hidden p-0"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={
+                        expense ? new Date(expense.expenseDate) : undefined
+                      }
+                      captionLayout="dropdown"
+                      onSelect={(date) => {
+                        setOpen(false);
+                        setExpense({
+                          ...expense,
+                          expenseDate: date
+                            ? date.toLocaleString().slice(0, 10)
+                            : "",
+                        });
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Button type="submit" disabled={adding_expense_loading}>
+                  {adding_expense_loading ? <Spinner /> : "Add Expense"}
+                </Button>
+              </form>
+            </TabsContent>
+            <TabsContent value="bulk">
+              <div className="mb-8">
+                <Label className="text-bold mb-3">Requirements:</Label>
+                <Label className="mb-3 text-muted-foreground">
+                  Upload an Excel file (.csv or .xlsx) with the following
+                  columns:
+                </Label>
+                <ul className="ml-2 list-disc list-inside text-left mb-3">
+                  <Label className="mb-1 text-muted-foreground">
+                    <li>description </li>
+                  </Label>
+
+                  <Label className="mb-1 text-muted-foreground">
+                    <li>amount</li>
+                  </Label>
+
+                  <Label className="mb-1 text-muted-foreground">
+                    <li>category</li>
+                  </Label>
+
+                  <Label className="mb-1 text-muted-foreground">
+                    <li>expense_date (YYYY-MM-DD format)</li>
+                  </Label>
+                </ul>
+                <Label className="text-bold mb-1">Notes:</Label>
+                <Label className="text-sm ml-2 mb-1 text-muted-foreground">
+                  Ensure that the category corresponds to existing categories
+                  names.
+                </Label>
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-3">
+                <Label htmlFor="excelFile" className="text-bold">
+                  Excel File
+                </Label>
+                <div className="flex gap-4 justify-center items-center">
+                  <Input
+                    type="file"
+                    id="excelFile"
+                    accept=".csv , .xlsx"
+                    disabled={bulkLoadLoading || bulkLoadValidation}
+                    onChange={(e) =>
+                      setBulkLoadFile(e.target.files ? e.target.files[0] : null)
+                    }
+                  />
+                  <Button
+                    className="max-w-[150px]"
+                    disabled={bulkLoadLoading || bulkLoadValidation}
+                    onClick={
+                      bulkLoadFile
+                        ? handleBulkUpload
+                        : () => toast.error("Please select a file to upload")
+                    }
+                  >
+                    {bulkLoadLoading ? (
+                      <>
+                        <Spinner /> Uploading...
+                      </>
+                    ) : bulkLoadValidation ? (
+                      <>
+                        <Spinner /> Validating...
+                      </>
+                    ) : (
+                      "Upload"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

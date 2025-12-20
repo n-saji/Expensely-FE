@@ -117,3 +117,17 @@ export interface AlertDto {
   message: string;
   type: "INFO" | "WARNING" | "CRITICAL" | "success";
 }
+
+export interface BulkLoadResponse {
+  valid: boolean;
+  error: string | null;
+  validationId: string | null;
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  errors: Array<{
+    row: number;
+    field: string;
+    message: string;
+  }>;
+}
