@@ -67,7 +67,7 @@ export default function Notifications({
           </Badge>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-sm">
+      <PopoverContent className="p-0 w-64 md:w-sm ">
         <Label className="px-4 py-2 text-lg font-semibold">Notifications</Label>
         <Separator />
         <ScrollArea className="h-72 w-full">
