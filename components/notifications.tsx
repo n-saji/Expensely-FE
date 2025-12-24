@@ -70,7 +70,7 @@ export default function Notifications({
       <PopoverContent className="p-0 w-sm">
         <Label className="px-4 py-2 text-lg font-semibold">Notifications</Label>
         <Separator />
-        <ScrollArea className="max-h-64 w-full">
+        <ScrollArea className="h-72 w-full">
           {notifications.notifications.length === 0 ? (
             <div className="flex justify-center items-center p-4">
               <Label className="text-muted-foreground">No notifications</Label>
