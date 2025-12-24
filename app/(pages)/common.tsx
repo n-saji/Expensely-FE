@@ -10,7 +10,7 @@ import Loader from "@/components/loader";
 import FetchToken from "@/utils/fetch_token";
 import { Toaster } from "@/components/ui/sonner";
 
-import { addCategory, removeCategory } from "@/redux/slices/category";
+import { addCategory, removeCategory } from "@/redux/slices/categorySlice";
 import { CategoryTypeExpense } from "@/global/constants";
 import { Category } from "@/global/dto";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,6 +19,7 @@ import Navbar from "@/components/navbar";
 import api from "@/lib/api";
 
 import AlertComponent from "@/components/AlertComponent";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 export default function DashboardPage({
   children,
@@ -33,6 +34,8 @@ export default function DashboardPage({
   const isCategoryMounted = useRef(false);
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const dispatch = useDispatch();
+
+  useWebSocket(user.id);
 
   useEffect(() => {
     const fetchData = async () => {

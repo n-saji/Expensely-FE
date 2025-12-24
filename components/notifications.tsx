@@ -1,0 +1,166 @@
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemFooter,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import {
+  BadgeAlert,
+  BadgeCheck,
+  BadgeInfo,
+  BadgeX,
+  Bell,
+  MoreHorizontal,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Badge } from "./ui/badge";
+import { RootState } from "@/redux/store";
+
+export default function Notifications({
+  notifications,
+  markAllAsRead,
+  markIndividualAsRead,
+  deleteNotificationFunc,
+}: {
+  notifications: RootState["notification"];
+  markAllAsRead: () => void;
+  markIndividualAsRead: (id: string) => void;
+  deleteNotificationFunc: (id: string) => void;
+}) {
+  const [messageLength, setMessageLength] = useState(0);
+
+  useEffect(() => {
+    let count = 0;
+    notifications.notifications.forEach((n) => {
+      if (!n.isRead) {
+        count += 1;
+      }
+    });
+    setMessageLength(count);
+  }, [notifications.notifications]);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant={"ghost"} className="relative">
+          <Bell />
+          <Badge className="absolute top-0 right-0 w-6 h-4">
+            {messageLength > 9 ? "9+" : messageLength}
+          </Badge>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-full max-w-sm">
+        <Label className="px-4 py-2 text-lg font-semibold">Notifications</Label>
+        <Separator />
+        <ScrollArea className="max-h-64 w-full">
+          {notifications.notifications.length === 0 ? (
+            <div className="flex justify-center items-center p-4">
+              <Label className="text-muted-foreground">No notifications</Label>
+            </div>
+          ) : (
+            notifications.notifications.map((notification) => {
+              return (
+                <div key={notification.id} className="">
+                  <Item>
+                    <ItemMedia className="p-0">
+                      {notification.type === "INFO" && (
+                        <BadgeInfo className="h-5 w-5" />
+                      )}
+                      {notification.type === "ALERT" && (
+                        <BadgeAlert className="h-5 w-5" />
+                      )}
+                      {notification.type === "ERROR" && (
+                        <BadgeX className="h-5 w-5" />
+                      )}
+                      {notification.type === "SUCCESS" && (
+                        <BadgeCheck className="h-5 w-5" />
+                      )}
+                    </ItemMedia>
+                    <ItemContent className="p-0">
+                      <ItemTitle className="p-0 text-sm">
+                        {notification.message.charAt(0).toUpperCase() +
+                          notification.message.slice(1)}
+                        {!notification.isRead ? (
+                          <Badge className="">New</Badge>
+                        ) : null}
+                      </ItemTitle>
+                      <ItemFooter>
+                        <Label className="text-xs text-muted-foreground">
+                          {/* From: {notification.sender} -{" "} */}
+                          {new Date(notification.time).toLocaleString()}
+                        </Label>
+                      </ItemFooter>
+                    </ItemContent>
+                    <ItemActions>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              markIndividualAsRead(notification.id);
+                            }}
+                          >
+                            Mark as read
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              deleteNotificationFunc(notification.id);
+                            }}
+                            variant="destructive"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </ItemActions>
+                  </Item>
+                  <Separator />
+                  {/* {index !== notifications.notifications.length - 1 && (
+                    <Separator />
+                  )} */}
+                </div>
+              );
+            })
+          )}
+        </ScrollArea>
+        <Separator />
+        {notifications.notifications.length === 0 ? null : (
+          <Button
+            variant="link"
+            className="w-full flex justify-start"
+            disabled={messageLength === 0}
+            onClick={() => {
+              markAllAsRead();
+            }}
+          >
+            Mark all as read
+          </Button>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}

@@ -11,7 +11,7 @@ import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { RootState } from "@/redux/store";
 import fetchProfileUrl from "@/utils/fetchProfileURl";
 import defaulProdilePic from "@/assets/icon/user.png";
-import { clearCategories } from "@/redux/slices/category";
+import { clearCategories } from "@/redux/slices/categorySlice";
 import { LogOut, Settings, ShieldUser, User } from "lucide-react";
 import { SidebarTrigger } from "./ui/sidebar";
 

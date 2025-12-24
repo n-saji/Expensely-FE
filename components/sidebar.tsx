@@ -45,10 +45,11 @@ import fetchProfileUrl from "@/utils/fetchProfileURl";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { clearUser, setUser } from "@/redux/slices/userSlice";
+import { clearNotifications } from "@/redux/slices/notificationSlice";
 import Image from "next/image";
 import logo from "@/assets/icon/logo.png";
 import { setLoading } from "@/redux/slices/sidebarSlice";
-import { clearCategories } from "@/redux/slices/category";
+import { clearCategories } from "@/redux/slices/categorySlice";
 import Logout from "@/app/(auth)/logout/logout";
 
 import {
@@ -86,6 +87,9 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     dispatch(setLoading(true));
+    dispatch(clearCategories());
+    dispatch(clearUser());
+    dispatch(clearNotifications());
 
     try {
       await Logout();

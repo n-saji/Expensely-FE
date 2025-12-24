@@ -14,10 +14,37 @@ import {
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import Slidebar from "./slidebar";
+import Notifications from "./notifications";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import {
+  removeNotification,
+  markAllRead,
+  markOneRead,
+} from "@/redux/slices/notificationSlice";
+import api from "@/lib/api";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const user = useSelector((state: RootState) => state.user);
+  const notifications = useSelector((state: RootState) => state.notification);
+  const dispatch = useDispatch();
   const pathSegments = pathname.split("/").filter((seg) => seg.length > 0);
+
+  const markAllAsRead = async () => {
+    await api.put(`/web_sockets/alerts/mark_all_read/by_user_id/${user.id}`);
+    dispatch(markAllRead());
+  };
+  const markNotificationAsRead = async (id: string) => {
+    await api.put(`/web_sockets/alerts/mark_as_read/by_message_id/${id}`);
+    dispatch(markOneRead(id));
+  };
+
+  const deleteNotificationFunc = async (id: string) => {
+    await api.delete(`/web_sockets/alerts/delete_by_id/${id}`);
+    dispatch(removeNotification({ id }));
+  };
+
   return (
     <div className="flex justify-between items-center px-4 h-12 py-4 bg-background z-10 border-b sticky top-0">
       <div className="w-full flex items-center justify-start">
@@ -48,7 +75,13 @@ export default function Navbar() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      {(pathname === "/dashboard" || pathname === "/expense" ) && <Slidebar />}
+      {(pathname === "/dashboard" || pathname === "/expense") && <Slidebar />}
+      <Notifications
+        notifications={notifications}
+        markAllAsRead={markAllAsRead}
+        markIndividualAsRead={markNotificationAsRead}
+        deleteNotificationFunc={deleteNotificationFunc}
+      />
     </div>
   );
 }

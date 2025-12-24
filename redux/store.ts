@@ -5,18 +5,20 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage
 import sidebarReducer from "./slices/sidebarSlice";
 import userReducer from "./slices/userSlice";
-import categoryReducer from "./slices/category";
+import categoryReducer from "./slices/categorySlice";
+import notificationReducer from "./slices/notificationSlice";
 
 const rootReducer = combineReducers({
   sidebar: sidebarReducer,
   user: userReducer,
   categoryExpense: categoryReducer,
+  notification: notificationReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user", "categoryExpense"], // persist user and categoryExpense slices
+  whitelist: ["user", "categoryExpense", "notification"], // persist user, categoryExpense, and notification slices
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
