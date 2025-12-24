@@ -17,7 +17,7 @@ const notificationSlice = createSlice({
       const exists = state.notifications.find(
         (n) => n.id === action.payload.id
       );
-      if (!exists) state.notifications.push(action.payload);
+      if (!exists) state.notifications.unshift(action.payload);
     },
     removeNotification: (state, action) => {
       state.notifications = state.notifications.filter(

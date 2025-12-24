@@ -33,6 +33,7 @@ import {
 import { useEffect, useState } from "react";
 import { Badge } from "./ui/badge";
 import { RootState } from "@/redux/store";
+import { formatNotificationTime } from "@/utils/time";
 
 export default function Notifications({
   notifications,
@@ -56,6 +57,8 @@ export default function Notifications({
     });
     setMessageLength(count);
   }, [notifications.notifications]);
+
+  useNow();
 
   return (
     <Popover>
@@ -105,7 +108,10 @@ export default function Notifications({
                       <ItemFooter>
                         <Label className="text-xs text-muted-foreground">
                           {/* From: {notification.sender} -{" "} */}
-                          {new Date(notification.time).toLocaleString()}
+
+                          {formatNotificationTime(
+                            new Date(notification.time + "Z")
+                          )}
                         </Label>
                       </ItemFooter>
                     </ItemContent>
@@ -163,4 +169,15 @@ export default function Notifications({
       </PopoverContent>
     </Popover>
   );
+}
+
+function useNow(refreshMs = 60_000) {
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      forceUpdate((v) => v + 1);
+    }, refreshMs);
+    return () => clearInterval(id);
+  }, [refreshMs]);
 }
