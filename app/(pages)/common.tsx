@@ -35,7 +35,7 @@ export default function DashboardPage({
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const dispatch = useDispatch();
 
-  useWebSocket(user.id);
+  useWebSocket(user.notificationsEnabled ? user.id : null);
 
   useEffect(() => {
     const fetchData = async () => {

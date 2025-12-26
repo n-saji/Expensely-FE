@@ -7,5 +7,5 @@ export function formatNotificationTime(date: Date) {
     return formatDistanceToNow(date, { addSuffix: true });
   }
 
-  return format(date, "dd MMM yyyy, hh:mm a");
+  return format(date, "dd MMM, yyyy");
 }

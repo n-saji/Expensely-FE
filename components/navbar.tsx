@@ -76,12 +76,14 @@ export default function Navbar() {
         </Breadcrumb>
       </div>
       {(pathname === "/dashboard" || pathname === "/expense") && <Slidebar />}
-      <Notifications
-        notifications={notifications}
-        markAllAsRead={markAllAsRead}
-        markIndividualAsRead={markNotificationAsRead}
-        deleteNotificationFunc={deleteNotificationFunc}
-      />
+      {user.notificationsEnabled && (
+        <Notifications
+          notifications={notifications}
+          markAllAsRead={markAllAsRead}
+          markIndividualAsRead={markNotificationAsRead}
+          deleteNotificationFunc={deleteNotificationFunc}
+        />
+      )}
     </div>
   );
 }
