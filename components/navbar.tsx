@@ -21,6 +21,7 @@ import {
   removeNotification,
   markAllRead,
   markOneRead,
+  clearNotifications,
 } from "@/redux/slices/notificationSlice";
 import api from "@/lib/api";
 
@@ -44,6 +45,10 @@ export default function Navbar() {
     await api.delete(`/web_sockets/alerts/delete_by_id/${id}`);
     dispatch(removeNotification({ id }));
   };
+
+  if (!user.notificationsEnabled && notifications.notifications.length > 0) {
+    dispatch(clearNotifications());
+  }
 
   return (
     <div className="flex justify-between items-center px-4 h-12 py-4 bg-background z-10 border-b sticky top-0">
