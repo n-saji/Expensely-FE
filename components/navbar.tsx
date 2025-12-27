@@ -1,6 +1,4 @@
 "use client";
-import { Separator } from "@/components/ui/separator";
-
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import {
@@ -24,6 +22,7 @@ import {
   clearNotifications,
 } from "@/redux/slices/notificationSlice";
 import api from "@/lib/api";
+import { Separator } from "./ui/separator";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -51,10 +50,12 @@ export default function Navbar() {
   }
 
   return (
-    <div className="flex justify-between items-center px-4 h-12 py-4 bg-background z-10 border-b sticky top-0">
+    <div className="flex justify-between items-center px-4 h-12 py-4 z-10 border-b sticky top-0">
       <div className="w-full flex items-center justify-start">
         <SidebarTrigger />
-        <Separator orientation="vertical" className="mx-2 my-3" />
+        <div className="h-5">
+          <Separator orientation="vertical" className="mx-3 h-6 w-2" />
+        </div>
         <Breadcrumb>
           <BreadcrumbList>
             {pathSegments.map((segment, index) => {

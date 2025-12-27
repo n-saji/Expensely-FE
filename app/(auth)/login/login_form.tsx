@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { RootState } from "@/redux/store";
 import { Spinner } from "@/components/ui/spinner";
+import { AxiosError } from "axios";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -102,12 +103,12 @@ export default function LoginForm() {
           } else {
             const error = await response.data;
             console.error("Error fetching user data:", error);
-            setError(error.error || "Failed to fetch user data");
+            setError(error.data || "Failed to fetch user data");
             return;
           }
         } else {
           setLoading(false);
-          dispatch(setUser(null));
+          dispatch(clearUser());
           localStorage.removeItem("token");
           sessionStorage.removeItem("token");
           localStorage.removeItem("user_id");
@@ -123,14 +124,22 @@ export default function LoginForm() {
         setError(errorData.error || "Login failed");
       }
     } catch (error) {
+      console.error("Login error:", error);
       setLoading(false);
       dispatch(clearUser());
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       localStorage.removeItem("user_id");
-      setError(
-        `An unexpected error occurred. Please try again. Error: ${error}`
-      );
+      if (error instanceof AxiosError && error.response) {
+        setError(
+          `${error.response.data.error}` ||
+            `An unexpected error occurred. Please try again. Error: ${error}`
+        );
+      } else {
+        setError(
+          `An unexpected error occurred. Please try again. Error: ${error}`
+        );
+      }
     }
   };
 

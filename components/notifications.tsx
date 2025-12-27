@@ -65,9 +65,11 @@ export default function Notifications({
       <PopoverTrigger asChild>
         <Button variant={"ghost"} className="relative">
           <Bell />
-          <Badge className="absolute top-0 right-0 w-6 h-4">
-            {messageLength > 9 ? "9+" : messageLength}
-          </Badge>
+          {messageLength > 0 && (
+            <Badge className="absolute top-0 right-0 w-6 h-4">
+              {messageLength > 9 ? "9+" : messageLength}
+            </Badge>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-64 md:w-sm ">

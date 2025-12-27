@@ -12,11 +12,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AlertComponent() {
-  const [alerts, setAlerts] = useState<Array<AlertDto>>([]); 
+  const [alerts, setAlerts] = useState<Array<AlertDto>>([]);
   useEffect(() => {
     const FetchAlerts = async () => {
       try {
-        const response = await api.get("/users/alerts"); 
+        const response = await api.get("/users/alerts");
         if (response.status === 200) {
           const data = response.data;
           setAlerts(data);
@@ -33,8 +33,7 @@ export default function AlertComponent() {
       }
     };
     FetchAlerts();
-  },[]);
-
+  }, []);
 
   return (
     alerts &&
@@ -42,10 +41,11 @@ export default function AlertComponent() {
     alerts.map((alert, index) => (
       <Alert
         key={index}
-        className={`flex justify-center p-2 rounded-none text-sm 
+        className={`flex justify-center p-2 rounded-none text-sm shadow-none w-full
+          bg-transparent
             ${alert.type === "WARNING" ? "text-yellow-600" : ""}
-            ${alert.type === "INFO" ? "bg-blue-100" : ""}
-            ${alert.type === "success" ? "bg-green-100" : ""}
+            ${alert.type === "INFO" ? "text-blue-100" : ""}
+            ${alert.type === "success" ? "text-green-100" : ""}
             `}
         variant={alert.type === "CRITICAL" ? "destructive" : "default"}
       >

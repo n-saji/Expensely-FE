@@ -164,8 +164,6 @@ export default function AddExpensePage() {
       });
     } catch (error) {
       console.error("Error uploading expenses:", error);
-      console.log("Bulk Load Response:", bulkLoadResponse);
-
       toast.error(
         error instanceof Error ? error.message : "Error uploading expenses",
         {

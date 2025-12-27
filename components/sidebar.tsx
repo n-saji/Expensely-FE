@@ -103,7 +103,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="z-12">
+    <Sidebar collapsible="offcanvas" className="z-12" variant="inset">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
