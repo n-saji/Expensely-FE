@@ -1,6 +1,11 @@
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Label } from "./ui/label";
 import { Spinner } from "./ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function CardComponent({
   title,
@@ -20,7 +25,7 @@ export default function CardComponent({
       className="
     flex h-full flex-col min-w-0
     border border-border
-    transition-[transform,box-shadow,border-color] duration-300 ease-out
+    transition-all duration-300 ease-in-out
     hover:-translate-y-1 hover:scale-[1.01]
     hover:shadow-[0_8px_20px_rgb(0,0,0,0.4)]
     hover:ring-1 hover:ring-primary/40
@@ -34,9 +39,22 @@ export default function CardComponent({
       <CardContent className="space-y-2">
         {/* Header */}
         <div className="flex items-start justify-between gap-2 min-w-0">
-          <Label className="text-sm text-muted-foreground truncate">
-            {title || "Default Title"}
-          </Label>
+          {cardAction ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Label className="text-sm text-muted-foreground truncate">
+                  {title || "Default Title"}
+                </Label>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-center">{title || "Default Title"}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Label className="text-sm text-muted-foreground truncate">
+              {title || "Default Title"}
+            </Label>
+          )}
 
           {cardAction && !loading && (
             <div className="flex-shrink-0">{cardAction}</div>

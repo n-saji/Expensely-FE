@@ -30,6 +30,11 @@ import {
   Bell,
   MoreHorizontal,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
 import { Badge } from "./ui/badge";
 import { RootState } from "@/redux/store";
@@ -63,13 +68,22 @@ export default function Notifications({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={"ghost"} className="relative">
-          <Bell />
-          {messageLength > 0 && (
-            <Badge className="absolute top-0 right-0 w-6 h-4">
-              {messageLength > 9 ? "9+" : messageLength}
-            </Badge>
-          )}
+        <Button variant={"ghost"}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="relative p-0">
+                <Bell />
+                {messageLength > 0 && (
+                  <Badge className="absolute top-0 right-0 w-6 h-4">
+                    {messageLength > 9 ? "9+" : messageLength}
+                  </Badge>
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-center">Notifications</p>
+            </TooltipContent>
+          </Tooltip>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-64 md:w-sm ">

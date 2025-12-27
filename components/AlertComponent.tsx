@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function AlertComponent() {
   const [alerts, setAlerts] = useState<Array<AlertDto>>([]);
@@ -39,22 +40,36 @@ export default function AlertComponent() {
     alerts &&
     alerts.length > 0 &&
     alerts.map((alert, index) => (
-      <Alert
+      <motion.div
         key={index}
-        className={`flex justify-center p-2 rounded-none text-sm shadow-none w-full
-          bg-transparent
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+      >
+        <Alert
+          key={index}
+          className={`flex justify-center p-2 rounded-none text-sm shadow-none w-full
             ${alert.type === "WARNING" ? "text-yellow-600" : ""}
             ${alert.type === "INFO" ? "text-blue-100" : ""}
             ${alert.type === "success" ? "text-green-100" : ""}
             `}
-        variant={alert.type === "CRITICAL" ? "destructive" : "default"}
-      >
-        {alert.type === "CRITICAL" && <AlertCircleIcon />}
-        {alert.type === "WARNING" && <TriangleAlertIcon />}
-        {alert.type === "INFO" && <InfoIcon />}
-        {alert.type === "success" && <CheckCircle2Icon />}
-        <AlertTitle>{alert.message}</AlertTitle>
-      </Alert>
+          variant={alert.type === "CRITICAL" ? "destructive" : "default"}
+        >
+          <div className="flex items-center gap-2">
+            {alert.type === "CRITICAL" && (
+              <AlertCircleIcon className="h-4 w-4" />
+            )}
+            {alert.type === "WARNING" && (
+              <TriangleAlertIcon className="h-4 w-4" />
+            )}
+            {alert.type === "INFO" && <InfoIcon className="h-4 w-4" />}
+            {alert.type === "success" && (
+              <CheckCircle2Icon className="h-4 w-4" />
+            )}
+            <AlertTitle>{alert.message}</AlertTitle>
+          </div>
+        </Alert>
+      </motion.div>
     ))
   );
 }
