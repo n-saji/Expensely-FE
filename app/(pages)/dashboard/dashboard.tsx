@@ -23,16 +23,6 @@ import Expense from "../expense/_components/expense_old/expense";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
 
-const SkeletonLoader = ({ className }: { className?: string }) => {
-  return (
-    <Card className={className}>
-      <CardContent className="w-full h-full flex justify-center items-center">
-        <Spinner className="text-muted-foreground h-8 w-8" />
-      </CardContent>
-    </Card>
-  );
-};
-
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
@@ -340,14 +330,14 @@ export default function DashboardPage() {
       {/*  budget module */}
       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-x-4">
         <div className="w-full h-full">
-          {overview && overview.budgetServiceMap ? (
-            <Card
-              className="w-full h-full
+          <Card
+            className="w-full h-full
             "
-            >
-              <CardHeader>
-                <CardTitle>Budgets</CardTitle>
-              </CardHeader>
+          >
+            <CardHeader>
+              <CardTitle>Budgets</CardTitle>
+            </CardHeader>
+            {overview ? (
               <CardContent className="md:max-h-[280px] overflow-y-auto">
                 {Object.values(overview.budgetServiceMap).length === 0 && (
                   <p className="text-sm text-muted-foreground">
@@ -381,10 +371,14 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </CardContent>
-            </Card>
-          ) : (
-            <SkeletonLoader className="h-full" />
-          )}
+            ) : (
+              <CardContent className="md:max-h-[280px] overflow-y-auto">
+                <div className="flex h-full w-full justify-center items-center">
+                  <Spinner className="text-muted-foreground h-6 w-6" />
+                </div>
+              </CardContent>
+            )}
+          </Card>
         </div>
       </div>
     </div>

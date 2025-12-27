@@ -71,7 +71,6 @@ interface ExpensesTop5MonthlyProps {
   amountByItem: Record<string, number>;
 }
 
-
 type ChartRow = {
   name: string;
   [category: string]: number | string;
@@ -86,11 +85,9 @@ const SpinnerUI = () => {
   );
 };
 
-const NoDataUI = ({ height }: { height: number }) => {
+const NoDataUI = () => {
   return (
-    <div
-      className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
-    >
+    <div className={`flex items-center justify-center h-full w-full`}>
       <Label className="text-muted-foreground">No data available</Label>
     </div>
   );
@@ -137,7 +134,7 @@ export default function ExpensesChartCard({
                 setCurrentYearForYearly(parseInt(value, 10))
               }
             >
-              <SelectTrigger className="w-[100px]">
+              <SelectTrigger >
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -164,7 +161,7 @@ export default function ExpensesChartCard({
           loading ? (
             <SpinnerUI />
           ) : (
-            <NoDataUI height={height} />
+            <NoDataUI />
           )
         ) : (
           <ResponsiveContainer width="100%" height={height}>
@@ -288,7 +285,7 @@ export function ExpensesTop5Monthly({
           </BarChart>
         </ResponsiveContainer>
       ) : (
-        <NoDataUI height={height} />
+        <NoDataUI />
       )}
     </CardTemplate>
   );
@@ -334,25 +331,69 @@ export function ExpensesOverDays({
       // description="Tracks your expenses day by day for the current month"
       className="w-full"
     >
-      <CardHeader>
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
         <CardTitle>{title || "Spending Over Days"}</CardTitle>
         <CardAction>
-          <input
-            type="month"
-            min={`${min_year}-${min_month < 10 ? `0${min_month}` : min_month}`}
-            max={new Date().toISOString().slice(0, 7)} /* YYYY-MM */
-            value={`${currentMonthYear}-${
-              currentMonth < 10 ? `0${currentMonth}` : currentMonth
-            }`} /* YYYY-MM */
-            className="border border-gray-300 rounded-md p-1.5 focus:outline-none w-fit
-      cursor-pointer bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200
-      text-sm"
-            onChange={(e) => {
-              const [year, month] = e.target.value.split("-");
-              setCurrentMonthYear(parseInt(year));
-              setCurrentMonth(parseInt(month));
-            }}
-          />
+          <div className="flex gap-2">
+            {currentMonth && setCurrentMonth && min_month && (
+              <Select
+                value={currentMonth.toString()}
+                onValueChange={(value) => setCurrentMonth(parseInt(value, 10))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Select Month</SelectLabel>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                      (month) => (
+                        <SelectItem
+                          key={month}
+                          value={month.toString()}
+                          disabled={
+                            currentMonthYear === min_year && month < min_month
+                          }
+                        >
+                          {new Date(0, month - 1).toLocaleString("default", {
+                            month: "long",
+                          })}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+            {currentMonthYear && setCurrentMonthYear && min_year && (
+              <Select
+                value={currentMonthYear.toString()}
+                onValueChange={(value) =>
+                  setCurrentMonthYear(parseInt(value, 10))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Select Year</SelectLabel>
+                    {Array.from(
+                      {
+                        length:
+                          new Date().getFullYear() - (min_year || 2020) + 1,
+                      },
+                      (_, i) => (min_year || 2020) + i
+                    ).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </CardAction>
       </CardHeader>
       <CardContent className="h-full">
@@ -442,7 +483,7 @@ export function ExpensesOverDays({
         ) : loading ? (
           <SpinnerUI />
         ) : (
-          <NoDataUI height={height} />
+          <NoDataUI />
         )}
       </CardContent>
     </Card>
@@ -548,7 +589,7 @@ export function YearlyExpenseLineChart({
                   setCurrentYearForYearly(parseInt(value, 10))
                 }
               >
-                <SelectTrigger className="w-[100px]">
+                <SelectTrigger >
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -595,7 +636,7 @@ export function YearlyExpenseLineChart({
                   setCurrentYearForYearly(parseInt(value, 10))
                 }
               >
-                <SelectTrigger className="w-[100px]">
+                <SelectTrigger >
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -625,7 +666,7 @@ export function YearlyExpenseLineChart({
             loading ? (
               <SpinnerUI />
             ) : (
-              <NoDataUI height={height} />
+              <NoDataUI />
             )
           ) : (
             <ResponsiveContainer height={220}>
@@ -691,7 +732,7 @@ export function YearlyExpenseLineChart({
             loading ? (
               <SpinnerUI />
             ) : (
-              <NoDataUI height={height} />
+              <NoDataUI />
             )
           ) : (
             <ResponsiveContainer height={220}>
