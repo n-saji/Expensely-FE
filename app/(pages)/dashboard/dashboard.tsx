@@ -10,7 +10,6 @@ import { ExpenseOverview } from "@/global/dto";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { currencyMapper } from "@/utils/currencyMapper";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ProgressBar } from "@/components/ProgressBar";
 import {
   AlertTriangle,
@@ -22,21 +21,13 @@ import api from "@/lib/api";
 import CardComponent from "@/components/CardComponent";
 import Expense from "../expense/_components/expense_old/expense";
 import Link from "next/link";
+import { Spinner } from "@/components/ui/spinner";
 
-const SkeletonLoader = ({
-  title,
-  className,
-}: {
-  title: string;
-  className?: string;
-}) => {
+const SkeletonLoader = ({ className }: { className?: string }) => {
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
       <CardContent className="w-full h-full flex justify-center items-center">
-        <Skeleton className="w-full h-full rounded-md" />
+        <Spinner className="text-muted-foreground h-8 w-8" />
       </CardContent>
     </Card>
   );
@@ -185,12 +176,12 @@ export default function DashboardPage() {
       {/* cards module */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
         {/* Monthly Summary */}
-        {overview ? (
-          <CardComponent
-            title={`${new Date().toLocaleString("default", {
-              month: "long",
-            })} Expense`}
-            cardAction={
+        <CardComponent
+          title={`${new Date().toLocaleString("default", {
+            month: "long",
+          })} Expense`}
+          cardAction={
+            overview && (
               <div className="flex items-center gap-1 border rounded-md px-2 py-1">
                 {overview!.thisMonthTotalExpense -
                   overview!.lastMonthTotalExpense >
@@ -211,91 +202,83 @@ export default function DashboardPage() {
 `}
                 </p>
               </div>
-            }
-            numberData={`${currencyMapper(
-              user?.currency || "USD"
-            )}${overview?.thisMonthTotalExpense.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
-            description={`You have spent ${currencyMapper(
-              user?.currency || "USD"
-            )}${Math.abs(
-              overview?.thisMonthTotalExpense - overview?.lastMonthTotalExpense
-            ).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })} ${
-              overview?.thisMonthTotalExpense -
-                overview?.lastMonthTotalExpense >
-              0
-                ? "more"
-                : "less"
-            } than last month.`}
-          />
-        ) : (
-          <SkeletonLoader
-            title={`${new Date().toLocaleString("default", {
-              month: "long",
-            })} Expense`}
-            className="h-[150px]"
-          />
-        )}
-
+            )
+          }
+          numberData={
+            overview
+              ? `${currencyMapper(
+                  user?.currency || "USD"
+                )}${overview?.thisMonthTotalExpense.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`
+              : undefined
+          }
+          description={
+            overview
+              ? `You have spent ${currencyMapper(
+                  user?.currency || "USD"
+                )}${Math.abs(
+                  overview?.thisMonthTotalExpense -
+                    overview?.lastMonthTotalExpense
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} ${
+                  overview?.thisMonthTotalExpense -
+                    overview?.lastMonthTotalExpense >
+                  0
+                    ? "more"
+                    : "less"
+                } than last month.`
+              : undefined
+          }
+          loading={overview === null}
+        />
         {/* Yearly Summary */}
-        {overview ? (
-          <CardComponent
-            title="This Year's Expense"
-            numberData={`${currencyMapper(
-              user?.currency || "USD"
-            )}${overview?.totalAmount.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
-            description={`On an average you have spent ${currencyMapper(
-              user?.currency || "USD"
-            )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
-          />
-        ) : (
-          <SkeletonLoader title="This Year's Expense" className="h-[150px]" />
-        )}
-
+        <CardComponent
+          title="This Year's Expense"
+          numberData={`${currencyMapper(
+            user?.currency || "USD"
+          )}${overview?.totalAmount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`}
+          description={`On an average you have spent ${currencyMapper(
+            user?.currency || "USD"
+          )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
+          loading={overview === null}
+        />
         {/* Category */}
-        {overview ? (
-          <CardComponent
-            title="Total Categories"
-            numberData={`${overview?.totalCategories || 0}`}
-            description={`Most used category: ${
-              overview?.mostFrequentCategory || "N/A"
-            }`}
-          />
-        ) : (
-          <SkeletonLoader title="Total Categories" className="h-[150px]" />
-        )}
-        {/* Dummy - 2 */}
 
-        {overview ? (
-          <CardComponent
-            title="This month most expensive item"
-            numberData={itemName && itemValue ? `${itemName}` : "N/A"}
-            description={
-              itemName
-                ? `You have spent ${currencyMapper(user?.currency || "USD")}${(
-                    itemValue as number
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`
-                : ""
-            }
-          />
-        ) : (
-          <SkeletonLoader
-            title="This month most expensive item"
-            className="h-[150px]"
-          />
-        )}
+        <CardComponent
+          title="Total Categories"
+          numberData={`${overview?.totalCategories || 0}`}
+          description={`Most used category: ${
+            overview?.mostFrequentCategory || "N/A"
+          }`}
+          loading={overview === null}
+        />
+
+        {/* Most Expensive Item */}
+
+        <CardComponent
+          title="This month most expensive item"
+          numberData={itemName && itemValue ? `${itemName}` : "N/A"}
+          description={
+            itemName
+              ? `You have spent ${currencyMapper(user?.currency || "USD")}${(
+                  itemValue as number
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`
+              : ""
+          }
+          loading={overview === null}
+        />
       </div>
+
       {/* yearly module */}
       <div className="gap-4 w-full grid grid-cols-1">
         {!loadingYear && overview ? (
@@ -309,7 +292,7 @@ export default function DashboardPage() {
             min_year={min_year}
           />
         ) : (
-          <SkeletonLoader title="Expense Summary" className="h-[300px]" />
+          <SkeletonLoader className="h-[280px]" />
         )}
       </div>
 
@@ -327,7 +310,7 @@ export default function DashboardPage() {
             min_year={min_year}
           />
         ) : (
-          <SkeletonLoader title="Spending by Category" className="h-[300px]" />
+          <SkeletonLoader className="h-full" />
         )}
         {/* Budget */}
         {!loadingMonth && overview ? (
@@ -344,10 +327,7 @@ export default function DashboardPage() {
             min_month={min_month}
           />
         ) : (
-          <SkeletonLoader
-            title="Spending Over Days"
-            className="w-full h-[300px]"
-          />
+          <SkeletonLoader className="w-full h-full" />
         )}
       </div>
 
@@ -409,7 +389,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <SkeletonLoader title="Budgets" className="h-[300px]" />
+            <SkeletonLoader className="h-full" />
           )}
         </div>
       </div>

@@ -7,6 +7,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import { API_URL } from "@/config/config";
 import FetchToken from "@/utils/fetch_token";
 import UserPreferences from "@/utils/userPreferences";
+// import { motion } from "motion/react"
 import { toast } from "sonner";
 import {
   Card,
@@ -206,10 +207,11 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
-            Manage your notification preferences.
+            Enable or disable notifications for important updates.
           </CardDescription>
           <CardAction>
             <Switch
+              
               checked={user.notificationsEnabled}
               onClick={async () => {
                 dispatch(
