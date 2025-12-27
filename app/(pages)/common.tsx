@@ -127,13 +127,12 @@ export default function DashboardPage({
     <>
       {loading && <Loader />}
       <Toaster closeButton />
-      <div className={`w-full flex  min-sm:relative md:m-3`}>
+      <div className={`w-full flex min-sm:relative `}>
         <AppSidebar />
         {/* <Sidebar /> */}
 
         <div
-          className={`w-full transition-all duration-300 rounded-lg overflow-hidden 
-            bg-main-background shadow-lg  no-scrollbar`}
+          className={`w-full transition-all duration-300 `}
         >
           <Navbar />
 
