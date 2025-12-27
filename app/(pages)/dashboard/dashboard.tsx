@@ -281,54 +281,48 @@ export default function DashboardPage() {
 
       {/* yearly module */}
       <div className="gap-4 w-full grid grid-cols-1">
-        {!loadingYear && overview ? (
-          <YearlyExpenseLineChart
-            amountByMonth={overview.amountByMonth}
-            amountByMonthV2={overview.monthlyCategoryExpense}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            setCurrentYearForYearly={setCurrentYearForYearly}
-            currentYearForYearly={currentYearForYearly}
-            min_year={min_year}
-          />
-        ) : (
-          <SkeletonLoader className="h-[280px]" />
-        )}
+        <YearlyExpenseLineChart
+          amountByMonth={overview?.amountByMonth}
+          amountByMonthV2={overview?.monthlyCategoryExpense}
+          darkMode={user.theme === "dark"}
+          currency={user.currency}
+          setCurrentYearForYearly={setCurrentYearForYearly}
+          currentYearForYearly={currentYearForYearly}
+          min_year={min_year}
+          loading={loadingYear || overview === null}
+        />
       </div>
 
       {/* category + monthly module */}
       <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
         {/* Spending by Category */}
-        {!loadingYear && overview ? (
-          <ExpensesChartCard
-            amountByCategory={overview.amountByCategory}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            title="Spending by Category"
-            setCurrentYearForYearly={setCurrentYearForYearly}
-            currentYearForYearly={currentYearForYearly}
-            min_year={min_year}
-          />
-        ) : (
-          <SkeletonLoader className="h-full" />
-        )}
+
+        <ExpensesChartCard
+          amountByCategory={overview?.amountByCategory}
+          darkMode={user.theme === "dark"}
+          currency={user.currency}
+          title="Spending by Category"
+          setCurrentYearForYearly={setCurrentYearForYearly}
+          currentYearForYearly={currentYearForYearly}
+          min_year={min_year}
+          loading={loadingYear || overview === null}
+        />
+
         {/* Budget */}
-        {!loadingMonth && overview ? (
-          <ExpensesOverDays
-            overTheDaysThisMonth={overview.overTheDaysThisMonth}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            title="Spending Over Days"
-            setCurrentMonth={setCurrentMonth}
-            setCurrentMonthYear={setCurrentMonthYear}
-            currentMonth={currentMonth}
-            currentMonthYear={currentMonthYear}
-            min_year={min_year}
-            min_month={min_month}
-          />
-        ) : (
-          <SkeletonLoader className="w-full h-full" />
-        )}
+
+        <ExpensesOverDays
+          overTheDaysThisMonth={overview?.overTheDaysThisMonth}
+          darkMode={user.theme === "dark"}
+          currency={user.currency}
+          title="Spending Over Days"
+          setCurrentMonth={setCurrentMonth}
+          setCurrentMonthYear={setCurrentMonthYear}
+          currentMonth={currentMonth}
+          currentMonthYear={currentMonthYear}
+          min_year={min_year}
+          min_month={min_month}
+          loading={loadingMonth || overview === null}
+        />
       </div>
 
       {/* recent transactions module */}

@@ -40,6 +40,8 @@ import DropDown from "./drop-down";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { ExpenseOverview } from "@/global/dto";
+import { Spinner } from "./ui/spinner";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -57,34 +59,41 @@ const COLORS = [
   "#0088FE",
 ];
 
-const height = 280;
+const height = 280 as number;
 const margin = { left: -15, right: 12 };
 
 // ========== Props Interfaces ==========
-interface ExpensesChartCardProps {
+export interface ExpensesChartCardProps {
   amountByCategory: Record<string, number>;
-}
-
-interface ExpensesMonthlyCategoryChartProps {
-  amountByMonthV2: Record<string, Record<string, number>>;
-}
-
-interface ExpensesMonthlyChartProps {
-  amountByMonth: Record<string, number>;
 }
 
 interface ExpensesTop5MonthlyProps {
   amountByItem: Record<string, number>;
 }
 
-interface OverTheDaysProps {
-  overTheDaysThisMonth: Record<string, number>; // { "1": 50.25, "2": 75.00, ... }
-}
 
 type ChartRow = {
   name: string;
   [category: string]: number | string;
   amount: number | 0;
+};
+
+const SpinnerUI = () => {
+  return (
+    <div className="h-full w-full flex items-center justify-center">
+      <Spinner className="text-muted-foreground h-6 w-6" />
+    </div>
+  );
+};
+
+const NoDataUI = ({ height }: { height: number }) => {
+  return (
+    <div
+      className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
+    >
+      <Label className="text-muted-foreground">No data available</Label>
+    </div>
+  );
 };
 
 // ========== Pie Chart: Category-wise Spending ==========
@@ -96,11 +105,16 @@ export default function ExpensesChartCard({
   setCurrentYearForYearly,
   currentYearForYearly,
   min_year,
-}: ExpensesChartCardProps & { darkMode?: boolean } & { currency?: string } & {
+  loading = false,
+}: {
+  amountByCategory?: ExpenseOverview["amountByCategory"];
+  darkMode?: boolean;
+  currency?: string;
   title?: string;
   setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
   currentYearForYearly?: number;
   min_year?: number;
+  loading?: boolean;
 }) {
   const chartData = Object.entries(amountByCategory || {}).map(
     ([category, amount]) => ({
@@ -147,34 +161,37 @@ export default function ExpensesChartCard({
       </CardHeader>
       <CardContent className="flex justify-center items-center w-full h-full">
         {chartData.length === 0 ? (
-          <div
-            className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
-          >
-            <Label className="text-muted-foreground">No data available</Label>
-          </div>
+          loading ? (
+            <SpinnerUI />
+          ) : (
+            <NoDataUI height={height} />
+          )
         ) : (
           <ResponsiveContainer width="100%" height={height}>
-            <PieChart>
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                innerRadius={60}
-                label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
-                animationDuration={800}
-                animationEasing="ease-in-out"
-              >
-                {chartData.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              {/* <Legend
+            {loading ? (
+              <SpinnerUI />
+            ) : (
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  innerRadius={60}
+                  label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
+                  animationDuration={800}
+                  animationEasing="ease-in-out"
+                >
+                  {chartData.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                {/* <Legend
               // verticalAlign={isDesktop ? "middle" : "bottom"}
               // layout={isDesktop ? "vertical" : "horizontal"}
               // align={isDesktop ? "right" : "center"}
@@ -182,26 +199,27 @@ export default function ExpensesChartCard({
               layout="horizontal"
               align="center"
             /> */}
-              <Tooltip
-                itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
-                contentStyle={{
-                  backgroundColor: "black",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#fff" }}
-                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                formatter={(value: number, name: string) => [
-                  `${currencyMapper(currency)}${value.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}`,
-                  name,
-                ]}
-              />
-            </PieChart>
+                <Tooltip
+                  itemStyle={{ color: darkMode ? "#fff" : "#fff" }}
+                  contentStyle={{
+                    backgroundColor: "black",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  formatter={(value: number, name: string) => [
+                    `${currencyMapper(currency)}${value.toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}`,
+                    name,
+                  ]}
+                />
+              </PieChart>
+            )}
           </ResponsiveContainer>
         )}
       </CardContent>
@@ -270,9 +288,7 @@ export function ExpensesTop5Monthly({
           </BarChart>
         </ResponsiveContainer>
       ) : (
-        <div className="flex items-center justify-center h-full w-full">
-          <p className="text-gray-500">No data available</p>
-        </div>
+        <NoDataUI height={height} />
       )}
     </CardTemplate>
   );
@@ -290,7 +306,11 @@ export function ExpensesOverDays({
   currentMonthYear,
   min_year,
   min_month,
-}: OverTheDaysProps & { darkMode: boolean } & { currency?: string } & {
+  loading = false,
+}: {
+  overTheDaysThisMonth?: ExpenseOverview["overTheDaysThisMonth"];
+  darkMode: boolean;
+  currency?: string;
   title?: string;
   setCurrentMonth: (month: number) => void;
   setCurrentMonthYear: (monthYear: number) => void;
@@ -298,6 +318,7 @@ export function ExpensesOverDays({
   currentMonthYear: number;
   min_year: number;
   min_month: number;
+  loading: boolean;
 }) {
   // Transform to recharts-friendly format
   const chartData = Object.entries(overTheDaysThisMonth || {}).map(
@@ -337,87 +358,91 @@ export function ExpensesOverDays({
       <CardContent className="h-full">
         {chartData.length > 0 ? (
           <ResponsiveContainer height={height}>
-            <BarChart data={chartData}>
-              <CartesianGrid
-                stroke={darkMode ? "#5f6266" : "#ccc"}
-                vertical={false}
-              />
-              <XAxis
-                dataKey="day"
-                interval={"preserveStartEnd"}
-                minTickGap={10}
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(value: string) =>
-                  `${value}${(() => {
-                    if (value === "1") return "st";
-                    if (value === "2") return "nd";
-                    if (value === "3") return "rd";
-                    return "th";
-                  })()}`
-                }
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(0)}`
-                }
-                width={35}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "black",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#fff" }}
-                cursor={{
-                  stroke: darkMode ? "#0D0D0D" : "#DBDBDB",
-                  strokeWidth: 1,
-                  fill: "rgba(255, 255, 255, 0.1)",
-                }}
-                formatter={(spent: number) =>
-                  `${currencyMapper(currency)}${spent.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}`
-                }
-                labelFormatter={(key) => {
-                  return `${key}${(() => {
-                    if (key === "1") return "st";
-                    if (key === "2") return "nd";
-                    if (key === "3") return "rd";
-                    return "th";
-                  })()}`;
-                }}
-              />
-              <Bar
-                dataKey="value"
-                fill="#4ade80"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={30}
-              />
-              <Brush
-                dataKey="day"
-                height={20}
-                stroke={darkMode ? "#4ade80" : "#0088FE"}
-                fill={darkMode ? "#222222" : "#F2F2F2"}
-                tickFormatter={(tick) => {
-                  return `${tick}${(() => {
-                    if (tick === "1") return "st";
-                    if (tick === "2") return "nd";
-                    if (tick === "3") return "rd";
-                    return "th";
-                  })()}`;
-                }}
-              />
-            </BarChart>
+            {loading ? (
+              <SpinnerUI />
+            ) : (
+              <BarChart data={chartData}>
+                <CartesianGrid
+                  stroke={darkMode ? "#5f6266" : "#ccc"}
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="day"
+                  interval={"preserveStartEnd"}
+                  minTickGap={10}
+                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  tickFormatter={(value: string) =>
+                    `${value}${(() => {
+                      if (value === "1") return "st";
+                      if (value === "2") return "nd";
+                      if (value === "3") return "rd";
+                      return "th";
+                    })()}`
+                  }
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  tickFormatter={(value: number) =>
+                    `${currencyMapper(currency)}${value.toFixed(0)}`
+                  }
+                  width={35}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "black",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{
+                    stroke: darkMode ? "#0D0D0D" : "#DBDBDB",
+                    strokeWidth: 1,
+                    fill: "rgba(255, 255, 255, 0.1)",
+                  }}
+                  formatter={(spent: number) =>
+                    `${currencyMapper(currency)}${spent.toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}`
+                  }
+                  labelFormatter={(key) => {
+                    return `${key}${(() => {
+                      if (key === "1") return "st";
+                      if (key === "2") return "nd";
+                      if (key === "3") return "rd";
+                      return "th";
+                    })()}`;
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="#4ade80"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={30}
+                />
+                <Brush
+                  dataKey="day"
+                  height={20}
+                  stroke={darkMode ? "#4ade80" : "#0088FE"}
+                  fill={darkMode ? "#222222" : "#F2F2F2"}
+                  tickFormatter={(tick) => {
+                    return `${tick}${(() => {
+                      if (tick === "1") return "st";
+                      if (tick === "2") return "nd";
+                      if (tick === "3") return "rd";
+                      return "th";
+                    })()}`;
+                  }}
+                />
+              </BarChart>
+            )}
           </ResponsiveContainer>
+        ) : loading ? (
+          <SpinnerUI />
         ) : (
-          <div className="flex items-center justify-center h-[300px] w-full">
-            <p className="text-gray-500">No data available</p>
-          </div>
+          <NoDataUI height={height} />
         )}
       </CardContent>
     </Card>
@@ -433,14 +458,17 @@ export function YearlyExpenseLineChart({
   setCurrentYearForYearly,
   currentYearForYearly,
   min_year,
-}: ExpensesMonthlyChartProps &
-  ExpensesMonthlyCategoryChartProps & { darkMode: boolean } & {
-    currency?: string;
-  } & {
-    setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
-    currentYearForYearly?: number;
-    min_year?: number;
-  }) {
+  loading = false,
+}: {
+  amountByMonth?: ExpenseOverview["amountByMonth"];
+  amountByMonthV2?: ExpenseOverview["monthlyCategoryExpense"];
+  darkMode: boolean;
+  currency?: string;
+  setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
+  currentYearForYearly?: number;
+  min_year?: number;
+  loading: boolean;
+}) {
   const [toggle, setToggle] = useState(true); // true for monthly, false for category
   const [chartData, setChartData] = useState<ChartRow[]>([]);
   const [category, setCategory] = useState<{ id: string; name: string } | null>(
@@ -451,7 +479,7 @@ export function YearlyExpenseLineChart({
   useEffect(() => {
     if (category?.name) {
       amountByMonthV2 = Object.fromEntries(
-        Object.entries(amountByMonthV2).map(([month, categories]) => [
+        Object.entries(amountByMonthV2 || {}).map(([month, categories]) => [
           month,
           {
             [category.name]: categories[category.name] || 0,
@@ -461,11 +489,11 @@ export function YearlyExpenseLineChart({
     }
     setChartData(
       toggle
-        ? Object.entries(amountByMonth).map(([category, amount]) => ({
+        ? Object.entries(amountByMonth || {}).map(([category, amount]) => ({
             name: category,
             amount: amount,
           }))
-        : Object.entries(amountByMonthV2).map(([month, categories]) => ({
+        : Object.entries(amountByMonthV2 || {}).map(([month, categories]) => ({
             name: month,
             ...categories,
             amount: 0,
@@ -477,7 +505,7 @@ export function YearlyExpenseLineChart({
     if (!toggle) {
       if (category?.name) {
         amountByMonthV2 = Object.fromEntries(
-          Object.entries(amountByMonthV2).map(([month, categories]) => [
+          Object.entries(amountByMonthV2 || {}).map(([month, categories]) => [
             month,
             {
               [category.name]: categories[category.name] || 0,
@@ -486,7 +514,7 @@ export function YearlyExpenseLineChart({
         );
       }
       setChartData(
-        Object.entries(amountByMonthV2).map(([month, categories]) => ({
+        Object.entries(amountByMonthV2 || {}).map(([month, categories]) => ({
           name: month,
           ...categories,
           amount: 0,
@@ -594,128 +622,136 @@ export function YearlyExpenseLineChart({
       {toggle ? (
         <CardContent>
           {chartData.length === 0 ? (
-            <div
-              className={`flex items-center justify-center h-[${height.toString()}px] w-full`}
-            >
-              <Label className="text-muted-foreground">No data available</Label>
-            </div>
+            loading ? (
+              <SpinnerUI />
+            ) : (
+              <NoDataUI height={height} />
+            )
           ) : (
             <ResponsiveContainer height={220}>
-              <ComposedChart data={chartData}>
-                <CartesianGrid
-                  stroke={darkMode ? "#242424" : "#DBDBDB"}
-                  vertical={false}
-                  strokeDasharray="1"
-                />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                  tickFormatter={(name: string) =>
-                    name.length > 3 ? `${name.slice(0, 3)}` : name
-                  }
-                  interval={"preserveStartEnd"}
-                  minTickGap={10}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "black",
-                    borderRadius: "8px",
-                  }}
-                  labelStyle={{ color: "#fff" }}
-                  cursor={{
-                    stroke: darkMode ? "#525252" : "#DBDBDB",
-                  }}
-                  formatter={(value: number, name: string) => {
-                    if (name === "amount")
-                      return [
-                        `${currencyMapper(currency)}${value.toLocaleString(
-                          undefined,
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          }
-                        )}`,
-                        "Amount",
-                      ];
-                    if (name === "trend") return [];
-                  }}
-                />
+              {loading ? (
+                <SpinnerUI />
+              ) : (
+                <ComposedChart data={chartData}>
+                  <CartesianGrid
+                    stroke={darkMode ? "#242424" : "#DBDBDB"}
+                    vertical={false}
+                    strokeDasharray="1"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tickFormatter={(name: string) =>
+                      name.length > 3 ? `${name.slice(0, 3)}` : name
+                    }
+                    interval={"preserveStartEnd"}
+                    minTickGap={10}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "black",
+                      borderRadius: "8px",
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                    cursor={{
+                      stroke: darkMode ? "#525252" : "#DBDBDB",
+                    }}
+                    formatter={(value: number, name: string) => {
+                      if (name === "amount")
+                        return [
+                          `${currencyMapper(currency)}${value.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}`,
+                          "Amount",
+                        ];
+                      if (name === "trend") return [];
+                    }}
+                  />
 
-                <Line
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#4ade80"
-                  strokeWidth={2}
-                  dot
-                  activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
-                />
-              </ComposedChart>
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#4ade80"
+                    strokeWidth={2}
+                    dot
+                    activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+                  />
+                </ComposedChart>
+              )}
             </ResponsiveContainer>
           )}
         </CardContent>
       ) : (
         <CardContent>
           {chartData.length === 0 ? (
-            <div
-              className={`flex items-center content-center justify-center h-[${height.toString()}px] w-full`}
-            >
-              <Label className="text-muted-foreground">No data available</Label>
-            </div>
+            loading ? (
+              <SpinnerUI />
+            ) : (
+              <NoDataUI height={height} />
+            )
           ) : (
             <ResponsiveContainer height={220}>
-              <ComposedChart data={chartData}>
-                <CartesianGrid
-                  stroke={darkMode ? "#242424" : "#DBDBDB"}
-                  vertical={false}
-                  strokeDasharray="1"
-                />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                  tickFormatter={(name: string) =>
-                    name.length > 3 ? `${name.slice(0, 3)}` : name
-                  }
-                  interval={"preserveStartEnd"}
-                  minTickGap={10}
-                />
+              {loading ? (
+                <SpinnerUI />
+              ) : (
+                <ComposedChart data={chartData}>
+                  <CartesianGrid
+                    stroke={darkMode ? "#242424" : "#DBDBDB"}
+                    vertical={false}
+                    strokeDasharray="1"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tickFormatter={(name: string) =>
+                      name.length > 3 ? `${name.slice(0, 3)}` : name
+                    }
+                    interval={"preserveStartEnd"}
+                    minTickGap={10}
+                  />
 
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "black",
-                    borderRadius: "8px",
-                    fontSize: 14,
-                  }}
-                  labelStyle={{ color: "#fff" }}
-                  cursor={{
-                    stroke: darkMode ? "#525252" : "#DBDBDB",
-                  }}
-                  formatter={(value: number) =>
-                    `${currencyMapper(currency)}${value.toLocaleString(
-                      undefined,
-                      {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      }
-                    )}`
-                  }
-                />
-                {Object.keys(chartData[0])
-                  .filter((key) => key !== "name")
-                  .map((category, index) => {
-                    if (category === "amount") return null;
-                    return (
-                      <Line
-                        key={category}
-                        type="monotone"
-                        dataKey={category}
-                        stroke={COLORS[index % COLORS.length]}
-                        strokeWidth={2}
-                        dot
-                      />
-                    );
-                  })}
-                {/* <Legend /> */}
-              </ComposedChart>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "black",
+                      borderRadius: "8px",
+                      fontSize: 14,
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                    cursor={{
+                      stroke: darkMode ? "#525252" : "#DBDBDB",
+                    }}
+                    formatter={(value: number) =>
+                      `${currencyMapper(currency)}${value.toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )}`
+                    }
+                  />
+                  {Object.keys(chartData[0])
+                    .filter((key) => key !== "name")
+                    .map((category, index) => {
+                      if (category === "amount") return null;
+                      return (
+                        <Line
+                          key={category}
+                          type="monotone"
+                          dataKey={category}
+                          stroke={COLORS[index % COLORS.length]}
+                          strokeWidth={2}
+                          dot
+                        />
+                      );
+                    })}
+                  {/* <Legend /> */}
+                </ComposedChart>
+              )}
             </ResponsiveContainer>
           )}
         </CardContent>
