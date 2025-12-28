@@ -24,16 +24,10 @@ export default function CardComponent({
     <Card
       className="
     flex h-full flex-col min-w-0
-    border border-border
-    transition-all duration-300 ease-in-out
+    transition-[transform,scale,box-shadow] duration-300 ease-in-out
     hover:-translate-y-1 hover:scale-[1.01]
     hover:shadow-[0_8px_20px_rgb(0,0,0,0.4)]
-    hover:ring-1 hover:ring-primary/40
-    hover:border-primary/60
     hover:cursor-pointer
-    focus-visible:outline-none
-    focus-visible:ring-2 
-    focus-visible:ring-primary/50
   "
     >
       <CardContent className="space-y-2">

@@ -199,9 +199,6 @@ export default function AddBudgetPage() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Enter the amount for the budget
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -260,9 +257,7 @@ export default function AddBudgetPage() {
                         className="w-full min-w-0"
                       />
                     </FormControl>
-                    <FormDescription>
-                      Select the start date for the budget
-                    </FormDescription>
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -282,9 +277,6 @@ export default function AddBudgetPage() {
                         disabled={watchPeriod !== Period.Custom}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Select the end date for the budget
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

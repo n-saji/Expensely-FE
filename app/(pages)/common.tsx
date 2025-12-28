@@ -131,13 +131,11 @@ export default function DashboardPage({
         <AppSidebar />
         {/* <Sidebar /> */}
 
-        <div
-          className={`w-full transition-all duration-300 `}
-        >
+        <div className={`w-full transition-all duration-300 `}>
           <Navbar />
 
           {/* Alerts/Banners */}
-          {path === "/dashboard" && <AlertComponent />}
+          {path.includes("/dashboard") && <AlertComponent />}
 
           <div className="px-8 py-8 flex flex-col space-y-4 w-full items-center">
             {children}

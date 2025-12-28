@@ -71,10 +71,10 @@ export default function Notifications({
         <Button variant={"ghost"}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="relative p-0">
-                <Bell />
+              <div className="relative">
+                <Bell className="w-6 h-6"/>
                 {messageLength > 0 && (
-                  <Badge className="absolute top-0 right-0 w-6 h-4">
+                  <Badge className="absolute -top-2 -right-2 w-4 h-4">
                     {messageLength > 9 ? "9+" : messageLength}
                   </Badge>
                 )}

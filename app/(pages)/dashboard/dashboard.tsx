@@ -109,9 +109,6 @@ export default function DashboardPage() {
     });
   }, [currentMonth, currentMonthYear]);
 
-  const min_year = overview ? overview.earliestStartYear : 2000;
-  const min_month = overview ? overview.earliestStartMonth : 1;
-
   useEffect(() => {
     fetchOverview({
       hasConstraint: true,
@@ -119,6 +116,9 @@ export default function DashboardPage() {
       type: "year",
     });
   }, [currentYearForYearly]);
+
+  const min_year = overview ? overview.earliestStartYear : 2000;
+  const min_month = overview ? overview.earliestStartMonth : 1;
 
   const mostExp = overview?.thisMonthMostExpensiveItem;
   const [itemName, itemValue] =
@@ -166,65 +166,77 @@ export default function DashboardPage() {
       {/* cards module */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
         {/* Monthly Summary */}
-        <CardComponent
-          title={`${new Date().toLocaleString("default", {
-            month: "long",
-          })} Expense`}
-          cardAction={
-            overview && (
-              <div className="flex items-center gap-1 border rounded-md px-2 py-1">
-                {overview!.thisMonthTotalExpense -
-                  overview!.lastMonthTotalExpense >
-                0 ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-                <p className="text-xs font-mono">
-                  {overview!.lastMonthTotalExpense === 0
-                    ? "0%"
-                    : `${(
-                        ((overview!.thisMonthTotalExpense -
-                          overview!.lastMonthTotalExpense) /
-                          overview!.lastMonthTotalExpense) *
-                        100
-                      ).toFixed(2)}%
+        <Link
+          prefetch={true}
+          href={`/dashboard/month/${currentYearForYearly}-${
+            currentMonth < 10 ? `0${currentMonth}` : currentMonth
+          }`}
+          scroll={false}
+        >
+          <CardComponent
+            title={`${new Date().toLocaleString("default", {
+              month: "long",
+            })} Expense`}
+            cardAction={
+              overview && (
+                <div className="flex items-center gap-1 border rounded-md px-2 py-1">
+                  {overview!.thisMonthTotalExpense -
+                    overview!.lastMonthTotalExpense >
+                  0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  <p className="text-xs font-mono">
+                    {overview!.lastMonthTotalExpense === 0
+                      ? "0%"
+                      : `${(
+                          ((overview!.thisMonthTotalExpense -
+                            overview!.lastMonthTotalExpense) /
+                            overview!.lastMonthTotalExpense) *
+                          100
+                        ).toFixed(2)}%
 `}
-                </p>
-              </div>
-            )
-          }
-          numberData={
-            overview
-              ? `${currencyMapper(
-                  user?.currency || "USD"
-                )}${overview?.thisMonthTotalExpense.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : undefined
-          }
-          description={
-            overview
-              ? `You have spent ${currencyMapper(
-                  user?.currency || "USD"
-                )}${Math.abs(
-                  overview?.thisMonthTotalExpense -
-                    overview?.lastMonthTotalExpense
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} ${
-                  overview?.thisMonthTotalExpense -
-                    overview?.lastMonthTotalExpense >
-                  0
-                    ? "more"
-                    : "less"
-                } than last month.`
-              : undefined
-          }
-          loading={overview === null}
-        />
+                  </p>
+                </div>
+              )
+            }
+            numberData={
+              overview
+                ? `${currencyMapper(
+                    user?.currency || "USD"
+                  )}${overview?.thisMonthTotalExpense.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}`
+                : undefined
+            }
+            description={
+              overview
+                ? `You have spent ${currencyMapper(
+                    user?.currency || "USD"
+                  )}${Math.abs(
+                    overview?.thisMonthTotalExpense -
+                      overview?.lastMonthTotalExpense
+                  ).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} ${
+                    overview?.thisMonthTotalExpense -
+                      overview?.lastMonthTotalExpense >
+                    0
+                      ? "more"
+                      : "less"
+                  } than last month.`
+                : undefined
+            }
+            loading={overview === null}
+          />
+        </Link>
+
         {/* Yearly Summary */}
         <CardComponent
           title="This Year's Expense"

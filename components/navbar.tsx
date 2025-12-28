@@ -81,7 +81,7 @@ export default function Navbar() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      {(pathname === "/dashboard" || pathname === "/expense") && <Slidebar />}
+      {(pathname.startsWith("/dashboard") || pathname === "/expense") && <Slidebar />}
       {user.notificationsEnabled && (
         <Notifications
           notifications={notifications}
