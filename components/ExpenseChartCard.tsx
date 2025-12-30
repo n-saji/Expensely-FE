@@ -42,6 +42,7 @@ import { RootState } from "@/redux/store";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { ExpenseOverview } from "@/global/dto";
 import { Spinner } from "./ui/spinner";
+import useMediaQuery from "@/utils/useMediaQuery";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -94,7 +95,7 @@ const NoDataUI = () => {
 };
 
 // ========== Pie Chart: Category-wise Spending ==========
-export default function ExpensesChartCard({
+export default function PieChartComp({
   amountByCategory,
   darkMode = false,
   currency = "USD",
@@ -120,7 +121,7 @@ export default function ExpensesChartCard({
     })
   );
 
-  // const isDesktop = useMediaQuery("(min-width: 530px)");
+  const isDesktop = useMediaQuery("(min-width: 530px)");
 
   return (
     <Card className="w-full">
@@ -134,7 +135,7 @@ export default function ExpensesChartCard({
                 setCurrentYearForYearly(parseInt(value, 10))
               }
             >
-              <SelectTrigger >
+              <SelectTrigger>
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -168,18 +169,25 @@ export default function ExpensesChartCard({
             {loading ? (
               <SpinnerUI />
             ) : (
-              <PieChart>
+              <PieChart
+                margin={{
+                  right: isDesktop ? 0 : 200,
+                  top: isDesktop ? 0 : 10,
+                }}
+              >
                 <Pie
                   data={chartData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
-                  innerRadius={60}
-                  label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
-                  animationDuration={800}
-                  animationEasing="ease-in-out"
+                  outerRadius={isDesktop ? 100 : 90}
+                  innerRadius={isDesktop ? 70 : 0}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(1)}%`
+                  }
+                  startAngle={isDesktop ? 0 : 90}
+                  endAngle={isDesktop ? 360 : -90}
                 >
                   {chartData.map((_, index) => (
                     <Cell
@@ -204,7 +212,7 @@ export default function ExpensesChartCard({
                   }}
                   labelStyle={{ color: "#fff" }}
                   cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                  formatter={(value: number, name: string) => [
+                  formatter={(value: number) => [
                     `${currencyMapper(currency)}${value.toLocaleString(
                       undefined,
                       {
@@ -212,7 +220,6 @@ export default function ExpensesChartCard({
                         maximumFractionDigits: 2,
                       }
                     )}`,
-                    name,
                   ]}
                 />
               </PieChart>
@@ -589,7 +596,7 @@ export function YearlyExpenseLineChart({
                   setCurrentYearForYearly(parseInt(value, 10))
                 }
               >
-                <SelectTrigger >
+                <SelectTrigger>
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -636,7 +643,7 @@ export function YearlyExpenseLineChart({
                   setCurrentYearForYearly(parseInt(value, 10))
                 }
               >
-                <SelectTrigger >
+                <SelectTrigger>
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>

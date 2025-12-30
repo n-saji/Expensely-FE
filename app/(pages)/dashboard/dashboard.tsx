@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import ExpensesChartCard, {
+import PieChartComp, {
   ExpensesOverDays,
   YearlyExpenseLineChart,
 } from "@/components/ExpenseChartCard";
@@ -299,7 +299,7 @@ export default function DashboardPage() {
       <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
         {/* Spending by Category */}
 
-        <ExpensesChartCard
+        <PieChartComp
           amountByCategory={overview?.amountByCategory}
           darkMode={user.theme === "dark"}
           currency={user.currency}
