@@ -93,7 +93,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-
 interface expense {
   id: string;
   user: {
@@ -610,10 +609,10 @@ export default function ExpenseTableComponent() {
   const handleFileDownload = async () => {
     try {
       // const link = `/expenses/user/${user.id}/export`;
-
+      setLoading(true);
       const link =
         `/expenses/user/${user.id}/export` +
-        `${(dateRange?.from || dateRange?.to) && "?"}` +
+        `${dateRange?.from || dateRange?.to ? "?" : ""}` +
         `${
           dateRange?.from
             ? `start_date=${new Date(dateRange.from)
@@ -627,6 +626,7 @@ export default function ExpenseTableComponent() {
             ? `end_date=${new Date(dateRange.to).toISOString().slice(0, 16)}`
             : ""
         }`;
+      console.log("Download link:", link, dateRange?.from, dateRange?.to);
 
       const response = await api.get(link, { responseType: "blob" });
 
@@ -659,6 +659,7 @@ export default function ExpenseTableComponent() {
     } catch (error) {
       console.error("Error downloading file:", error);
     } finally {
+      setLoading(false);
     }
   };
 
@@ -717,6 +718,7 @@ export default function ExpenseTableComponent() {
         setOpen={setOpen}
         dateRange={dateRange}
         setDateRange={setDateRange}
+        loading={loading}
       />
       <DataTable
         columns={tableColumns}
@@ -910,6 +912,7 @@ const SearchAndFilter = ({
   setOpen,
   dateRange,
   setDateRange,
+  loading,
 }: {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -924,6 +927,7 @@ const SearchAndFilter = ({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   dateRange: DateRange | undefined;
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  loading: boolean;
 }) => {
   const isDesktop = useMediaQuery("(min-width: 530px)");
 
@@ -1023,7 +1027,7 @@ const SearchAndFilter = ({
             <TooltipTrigger asChild>
               <Label className="text-sm text-muted-foreground truncate">
                 <Button onClick={handleFileDownload}>
-                  <Download className="h-6 w-6" />
+                  {loading ? <Spinner /> : <Download className="h-6 w-6" />}
                 </Button>
               </Label>
             </TooltipTrigger>
@@ -1140,7 +1144,7 @@ const SearchAndFilter = ({
           )}
 
           <Button onClick={handleFileDownload}>
-            <Download className="h-6 w-6" />
+            {loading ? <Spinner /> : <Download className="h-6 w-6" />}
           </Button>
           <Button
             onClick={() => clearFilters()}
