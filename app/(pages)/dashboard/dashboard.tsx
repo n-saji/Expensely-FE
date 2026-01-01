@@ -80,7 +80,7 @@ export default function DashboardPage() {
       }
 
       const data = (await res.data) as ExpenseOverview;
-      if (data.totalCount === 0) {
+      if (data.earliestStartYear === null) {
         setNewUser(true);
       }
       setOverview(data);
@@ -116,6 +116,13 @@ export default function DashboardPage() {
       type: "year",
     });
   }, [currentYearForYearly]);
+  useEffect(() => {
+    const handler = () => {
+      fetchOverview({ hasConstraint: true, type: "" });
+    };
+    window.addEventListener("expense-added", handler);
+    return () => window.removeEventListener("expense-added", handler);
+  }, []);
 
   const min_year = overview ? overview.earliestStartYear : 2000;
   const min_month = overview ? overview.earliestStartMonth : 1;
@@ -254,7 +261,7 @@ export default function DashboardPage() {
         {/* Category */}
 
         <CardComponent
-          title="Total Categories"
+          title="Active Categories"
           numberData={`${overview?.totalCategories || 0}`}
           description={`Most used category: ${
             overview?.mostFrequentCategory || "N/A"

@@ -31,11 +31,9 @@ import {
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { Label } from "./ui/label";
-import { useRouter } from "next/navigation";
 
 export default function Slidebar() {
   const user = useSelector((state: RootState) => state.user);
-  const router = useRouter();
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const [open, setOpen] = React.useState(false);
   const [expense, setExpense] = useState({
@@ -101,7 +99,9 @@ export default function Slidebar() {
           : new Date().toLocaleString().slice(0, 10),
       });
 
-      router.refresh();
+      // after successful add
+      window.dispatchEvent(new Event("expense-added"));
+
       toast.success("Expense added successfully", {});
     } catch (error) {
       console.error("Error adding expense:", error);

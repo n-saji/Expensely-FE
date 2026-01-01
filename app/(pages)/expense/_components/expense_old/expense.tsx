@@ -174,6 +174,21 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     }
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      fetchExpenses({
+        fromDate: "",
+        toDate: "",
+        category: "",
+        order: "desc",
+        limit: isDemo ? 5 : 10,
+      });
+    };
+
+    window.addEventListener("expense-added", handler);
+    return () => window.removeEventListener("expense-added", handler);
+  }, []);
+
   return (
     <div className={`flex flex-col w-full h-full flex-grow overflow-hidden`}>
       <ExpenseList
