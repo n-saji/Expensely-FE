@@ -61,7 +61,6 @@ import {
 export function AppSidebar() {
   const router = useRouter();
   const pathName = usePathname();
-
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
@@ -103,7 +102,16 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="z-12">
+    <Sidebar
+      collapsible="icon"
+      className="z-12"
+      onMouseEnter={() => {
+        document.body.style.overflow = "hidden";
+      }}
+      onMouseLeave={() => {
+        document.body.style.overflow = "auto";
+      }}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

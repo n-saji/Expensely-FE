@@ -72,7 +72,7 @@ export default function Notifications({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="relative">
-                <Bell className="w-6 h-6"/>
+                <Bell className="w-6 h-6" />
                 {messageLength > 0 && (
                   <Badge className="absolute -top-2 -right-2 w-4 h-4">
                     {messageLength > 9 ? "9+" : messageLength}
@@ -86,10 +86,16 @@ export default function Notifications({
           </Tooltip>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-64 md:w-sm ">
-        <Label className="px-4 py-2 text-lg font-semibold">Notifications</Label>
-        <Separator />
-        <ScrollArea className="h-72 w-full">
+      <PopoverContent className="p-0 w-80 md:w-md overflow-hidden">
+        <ScrollArea
+          className="h-96 w-full"
+          onMouseEnter={() => {
+            document.body.style.overflow = "hidden";
+          }}
+          onMouseLeave={() => {
+            document.body.style.overflow = "auto";
+          }}
+        >
           {notifications.notifications.length === 0 ? (
             <div className="flex justify-center items-center p-4">
               <Label className="text-muted-foreground">No notifications</Label>
@@ -142,6 +148,7 @@ export default function Notifications({
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem
+                            disabled={notification.isRead}
                             onClick={() => {
                               markIndividualAsRead(notification.id);
                             }}

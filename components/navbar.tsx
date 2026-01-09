@@ -50,7 +50,7 @@ export default function Navbar() {
   }
 
   return (
-    <div className="flex justify-between bg-background items-center px-4 h-12 py-4 z-10 border-b sticky top-0">
+    <div className="flex justify-between bg-background items-center px-4 h-12 py-4 border-b ">
       <div className="w-full flex items-center justify-start">
         <SidebarTrigger />
         <div className="h-5">

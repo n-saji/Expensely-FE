@@ -85,15 +85,6 @@ export default function DashboardPage({
     );
   }, []);
 
-  const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
-
-  useEffect(() => {
-    document.body.style.overflow = popUp ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [popUp]);
-
   if (!user.isAuthenticated || !token) {
     return (
       <div className="flex items-center justify-center h-screen text-2xl w-full">
@@ -127,11 +118,11 @@ export default function DashboardPage({
     <>
       {loading && <Loader />}
       <Toaster closeButton />
-      <div className={`w-full flex min-sm:relative `}>
+      <div className={`w-full flex min-sm:relative`}>
         <AppSidebar />
         {/* <Sidebar /> */}
 
-        <div className={`w-full transition-all duration-300 `}>
+        <div className={`w-full transition-all duration-300`} >
           <Navbar />
 
           {/* Alerts/Banners */}
