@@ -27,7 +27,6 @@ export default function CardComponent({
     transition-[transform,scale,box-shadow] duration-300 ease-in-out
     hover:-translate-y-1 hover:scale-[1.01]
     hover:shadow-[0_8px_20px_rgb(0,0,0,0.4)]
-    hover:cursor-pointer
   "
     >
       <CardContent className="space-y-2">
