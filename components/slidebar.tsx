@@ -113,7 +113,7 @@ export default function Slidebar() {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost">
-          <Plus className="h-3 w-3" />{" "}
+          <Plus className="h-3 w-3" />
           <Label className="text-xs">Add Expense</Label>
         </Button>
       </SheetTrigger>
@@ -163,7 +163,7 @@ export default function Slidebar() {
             selectedOption={expense.category.id}
             onSelect={(option) => {
               const selectedCategory = categories.categories.find(
-                (category) => category.id === option
+                (category) => category.id === option,
               );
               setExpense({
                 ...expense,
@@ -206,16 +206,17 @@ export default function Slidebar() {
         </form>
 
         <SheetFooter>
-          <Button
+          <button
             type="submit"
             disabled={adding_expense_loading}
             onClick={async (e) => {
               await handleSubmit(e);
               setOpen(false);
             }}
+
           >
             {adding_expense_loading ? <Spinner /> : "Add Expense"}
-          </Button>
+          </button>
           <SheetClose asChild>
             <Button variant="outline">Cancel</Button>
           </SheetClose>
