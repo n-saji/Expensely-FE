@@ -89,12 +89,6 @@ export default function Notifications({
       <PopoverContent className="p-0 w-80 md:w-md overflow-hidden">
         <ScrollArea
           className="h-96 w-full"
-          onMouseEnter={() => {
-            document.body.style.overflow = "hidden";
-          }}
-          onMouseLeave={() => {
-            document.body.style.overflow = "auto";
-          }}
         >
           {notifications.notifications.length === 0 ? (
             <div className="flex justify-center items-center p-4">

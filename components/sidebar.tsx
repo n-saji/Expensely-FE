@@ -105,12 +105,6 @@ export function AppSidebar() {
     <Sidebar
       collapsible="icon"
       className="z-12"
-      onMouseEnter={() => {
-        document.body.style.overflow = "hidden";
-      }}
-      onMouseLeave={() => {
-        document.body.style.overflow = "auto";
-      }}
     >
       <SidebarHeader>
         <SidebarMenu>
