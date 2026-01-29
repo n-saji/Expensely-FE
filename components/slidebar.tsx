@@ -206,7 +206,7 @@ export default function Slidebar() {
         </form>
 
         <SheetFooter>
-          <button
+          <Button
             type="submit"
             disabled={adding_expense_loading}
             onClick={async (e) => {
@@ -216,7 +216,7 @@ export default function Slidebar() {
 
           >
             {adding_expense_loading ? <Spinner /> : "Add Expense"}
-          </button>
+          </Button>
           <SheetClose asChild>
             <Button variant="outline">Cancel</Button>
           </SheetClose>
