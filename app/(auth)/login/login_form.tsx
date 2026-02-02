@@ -17,6 +17,7 @@ import api from "@/lib/api";
 import { RootState } from "@/redux/store";
 import { Spinner } from "@/components/ui/spinner";
 import { AxiosError } from "axios";
+import { toast, Toaster } from "sonner";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -24,7 +25,6 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState("");
   const user = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
@@ -37,7 +37,7 @@ export default function LoginForm() {
           setUser({
             ...user,
             isAuthenticated: true,
-          })
+          }),
         );
         router.push("/dashboard");
       }
@@ -49,7 +49,7 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      setError("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
     setLoading(true);
@@ -64,7 +64,7 @@ export default function LoginForm() {
         const data = await res.data;
 
         if (data.error === "") {
-          setError("");
+          toast.success("Login successful.");
           if (rememberMe) {
             localStorage.setItem("token", data.token);
             sessionStorage.removeItem("token");
@@ -95,7 +95,7 @@ export default function LoginForm() {
                 profilePicFilePath: data.user.profilePicFilePath,
                 profileComplete: data.user.profileComplete,
                 profilePictureUrl: data.user.profilePictureUrl,
-              })
+              }),
             );
             localStorage.setItem("theme", data.user.theme);
 
@@ -103,7 +103,7 @@ export default function LoginForm() {
           } else {
             const error = await response.data;
             console.error("Error fetching user data:", error);
-            setError(error.data || "Failed to fetch user data");
+            toast.error(error.data || "Failed to fetch user data");
             return;
           }
         } else {
@@ -112,7 +112,7 @@ export default function LoginForm() {
           localStorage.removeItem("token");
           sessionStorage.removeItem("token");
           localStorage.removeItem("user_id");
-          setError(data.message || "Login failed");
+          toast.error(data.message || "Login failed");
         }
       } else {
         const errorData = await res.data;
@@ -121,7 +121,7 @@ export default function LoginForm() {
         localStorage.removeItem("token");
         sessionStorage.removeItem("token");
         localStorage.removeItem("user_id");
-        setError(errorData.error || "Login failed");
+        toast.error(errorData.error || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -131,20 +131,16 @@ export default function LoginForm() {
       sessionStorage.removeItem("token");
       localStorage.removeItem("user_id");
       if (error instanceof AxiosError && error.response) {
-        setError(
-          `${error.response.data.error}` ||
-            `An unexpected error occurred. Please try again. Error: ${error}`
-        );
-      } else {
-        setError(
-          `An unexpected error occurred. Please try again. Error: ${error}`
-        );
+        toast.error("Internal server error. Please try again later.");
       }
     }
   };
 
   const handleGoogleLogin = async () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/dashboard" }).catch((error) => {
+      console.error("Google login error:", error);
+      toast.error("Google login failed. Please try again.");
+    });
   };
 
   return (
@@ -162,13 +158,12 @@ export default function LoginForm() {
             type="text"
             className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md 
             focus:outline-none focus:ring-2 focus:ring-blue-500
-            ${error ? "border-red-500" : ""}`}
+            `}
             placeholder="email or phone number"
             required
             autoComplete="username"
             onChange={(e) => {
               setUsername(e.target.value);
-              setError("");
             }}
             value={username}
           />
@@ -185,13 +180,12 @@ export default function LoginForm() {
             id="password"
             type="password"
             className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
-            ${error ? "border-red-500" : ""}`}
+           `}
             placeholder="••••••••"
             autoComplete="current-password"
             required
             onChange={(e) => {
               setPassword(e.target.value);
-              setError("");
             }}
             value={password}
           />
@@ -265,9 +259,7 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <div className={`text-red-500  ${error ? "block" : "hidden"} text-sm`}>
-        {error.charAt(0).toUpperCase() + error.slice(1)}
-      </div>
+      <Toaster closeButton />
     </form>
   );
 }

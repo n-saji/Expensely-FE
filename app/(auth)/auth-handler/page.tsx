@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
@@ -11,6 +11,7 @@ export default function AuthHandler() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const dispatch = useDispatch();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -28,8 +29,15 @@ export default function AuthHandler() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.idToken}`, //dont remove - token from google
             },
-          }
+          },
         )
+        .catch((error) => {
+          console.error("Error verifying OAuth login:", error);
+          setError(
+            "An error occurred during authentication. Please try again.",
+          );
+          return Promise.reject(error);
+        })
         .then((res) => res.data)
         .then(async (data) => {
           if (data.profileIncomplete) {
@@ -38,7 +46,7 @@ export default function AuthHandler() {
                 isAuthenticated: true,
                 id: data.id,
                 profileComplete: !data.profileIncomplete,
-              })
+              }),
             );
             localStorage.setItem("token", data.token);
             localStorage.setItem("user_id", data.id);
@@ -54,7 +62,7 @@ export default function AuthHandler() {
                 const data = await response.data;
                 if (data.user.profilePicFilePath) {
                   const profilePictureUrl = await fetchProfileUrl(
-                    data.user.profilePicFilePath
+                    data.user.profilePicFilePath,
                   ).catch((error) => {
                     console.error("Error fetching profile picture URL:", error);
                     return "";
@@ -81,7 +89,7 @@ export default function AuthHandler() {
                     profilePictureUrl: data.user.profilePictureUrl,
                     profilePicFilePath: data.user.profilePicFilePath,
                     profileComplete: data.user.profileComplete,
-                  })
+                  }),
                 );
                 localStorage.setItem("theme", data.user.theme);
               } else {
@@ -89,20 +97,22 @@ export default function AuthHandler() {
                 console.error("Error fetching user data:", error);
                 return;
               }
-
               router.push("/dashboard");
             }
           }
         });
+    } else if (status === "unauthenticated") {
+      router.push("/login");
     }
   }, [status]);
 
   return (
     <div
-      className="flex items-center justify-center h-screen 
+      className="flex flex-col items-center justify-center h-screen 
     bg-primary-color"
     >
-      <p> Please wait...</p>
+      {!error && <p> Please wait...</p>}
+      {error ? <p className="text-red-500">{error}</p> : null}
     </div>
   );
 }
