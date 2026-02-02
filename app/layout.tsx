@@ -5,10 +5,10 @@ import ReduxProvider from "@/redux/provider";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const maintenanceMode = process.env.NEXT_MAINTENANCE_MODE === "true";
+const WEBSITE_DOWN = process.env.NEXT_WEBSITE_DOWN === "true";
 
 export const metadata: Metadata = {
-  title: maintenanceMode
+  title: WEBSITE_DOWN
     ? "Under Maintenance | Expensely"
     : "Expensely - Track and Manage Your Expenses",
   description:
@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased`}>
         <ReduxProvider>
-          {maintenanceMode && (
+          {WEBSITE_DOWN && (
             <div className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-4">
               <h1 className="text-3xl font-semibold mb-2">
                 We’ll be back soon!
@@ -36,7 +36,7 @@ export default function RootLayout({
               </p>
             </div>
           )}
-          {!maintenanceMode && children}
+          {!WEBSITE_DOWN && children}
         </ReduxProvider>
         <Analytics />
         <SpeedInsights />

@@ -1,9 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LoginForm from "./login_form";
 import Logo from "@/components/logo";
+const maintenanceMode = process.env.NEXT_MAINTENANCE_MODE === "true";
 export async function generateMetadata() {
   return {
-    title: "Login | Expensely",
+    title: maintenanceMode
+      ? "Under Maintenance | Expensely"
+      : "Login | Expensely",
   };
 }
 export default function LoginPage() {

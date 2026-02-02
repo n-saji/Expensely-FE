@@ -1,10 +1,12 @@
 import Logo from "@/components/logo";
 import SignUpForm from "./signup_form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+const maintenanceMode = process.env.NEXT_MAINTENANCE_MODE === "true";
 export async function generateMetadata() {
   return {
-    title: "Register | Expensely",
+    title: maintenanceMode
+      ? "Under Maintenance | Expensely"
+      : "Register | Expensely",
     description:
       "Create an account to start tracking your expenses effortlessly.",
   };
