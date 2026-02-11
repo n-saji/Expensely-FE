@@ -1053,6 +1053,7 @@ export function YearlyExpenseLineChartV2({
                     strokeWidth={2}
                     dot
                     activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+                    isAnimationActive={true}
                   />
                 </ComposedChart>
               )}
@@ -1117,6 +1118,7 @@ export function YearlyExpenseLineChartV2({
                           stroke={COLORS[index % COLORS.length]}
                           strokeWidth={2}
                           dot
+                          isAnimationActive={true}
                         />
                       );
                     })}
