@@ -15,6 +15,7 @@ import {
   Line,
   ComposedChart,
   Brush,
+  Area,
   // Legend,
 } from "recharts";
 import CardTemplate from "@/components/card";
@@ -1046,7 +1047,7 @@ export function YearlyExpenseLineChartV2({
                     }}
                   />
 
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="amount"
                     stroke="#4ade80"
@@ -1054,6 +1055,8 @@ export function YearlyExpenseLineChartV2({
                     dot
                     activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                     isAnimationActive={true}
+                    fill="#4ade80"
+                    fillOpacity={0.1}
                   />
                 </ComposedChart>
               )}
