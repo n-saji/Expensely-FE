@@ -14,7 +14,6 @@ import {
   CartesianGrid,
   Line,
   ComposedChart,
-  Brush,
   Area,
   // Legend,
 } from "recharts";
@@ -147,7 +146,6 @@ const getRowTotal = (row?: ChartRow) => {
 // ========== Pie Chart: Category-wise Spending ==========
 export default function PieChartComp({
   amountByCategory,
-  darkMode = false,
   currency = "USD",
   title,
   setCurrentYearForYearly,
@@ -156,7 +154,6 @@ export default function PieChartComp({
   loading = false,
 }: {
   amountByCategory?: ExpenseOverview["amountByCategory"];
-  darkMode?: boolean;
   currency?: string;
   title?: string;
   setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;

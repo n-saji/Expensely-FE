@@ -382,7 +382,6 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
             <PieChartComp
               amountByCategory={overview?.amountByCategory}
-              darkMode={user.theme === "dark"}
               currency={user.currency}
               title="Spending by Category"
               setCurrentYearForYearly={setCurrentYearForYearly}
