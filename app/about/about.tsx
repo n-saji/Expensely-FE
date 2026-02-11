@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/dist/client/components/navigation";
+import { useRouter } from "next/navigation";
 import {
   FaLock,
   FaChartPie,
@@ -13,52 +13,63 @@ import {
 export default function AboutPage() {
   const router = useRouter();
   return (
-    <main className="max-w-7xl mx-auto px-6 py-16 space-y-20">
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="text-center"
-      >
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-          <span className="text-green-600">Discover Expensely</span>
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-          Effortless, secure, and beautiful expense tracking to help you stay on
-          top of your finances.
-        </p>
-      </motion.section>
+    <main className="bg-background text-foreground">
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -top-32 right-0 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-0 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="mx-auto max-w-6xl px-6 py-20 text-center"
+        >
+          <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-4 py-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            About Expensely
+          </p>
+          <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+            A modern workspace for confident expense decisions.
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+            Expensely keeps your team aligned on budgets, approvals, and spend
+            visibility with a clean interface and instant insights.
+          </p>
+        </motion.div>
+      </section>
 
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
+        className="mx-auto max-w-6xl px-6 py-16"
       >
-        <h2
-          className="text-2xl md:text-3xl font-semibold text-center mb-8
-        dark:text-gray-200"
-        >
-          Why Use Expensely?
-        </h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-3">
           {[
-            "Effortless expense tracking",
-            "Custom categories & tags",
-            "Beautiful analytics & charts",
-            "Budget planning & reminders",
-            "Export anytime",
-            "Data privacy & encryption",
-          ].map((text, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.05 }}
+            {
+              title: "Effortless tracking",
+              description:
+                "Log expenses, categorize spend, and keep every detail searchable.",
+            },
+            {
+              title: "Clear reporting",
+              description:
+                "Live dashboards surface trends without manual spreadsheet work.",
+            },
+            {
+              title: "Secure by design",
+              description:
+                "Role-based access and encryption keep sensitive data protected.",
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm"
             >
-              <BenefitCard text={text} />
-            </motion.div>
+              <h3 className="text-lg font-semibold">{item.title}</h3>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {item.description}
+              </p>
+            </div>
           ))}
         </div>
       </motion.section>
@@ -68,43 +79,56 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
+        className="bg-muted/40"
       >
-        <h2
-          className="text-2xl md:text-3xl font-semibold text-center mb-8
-        dark:text-gray-200"
-        >
-          Key Features
-        </h2>
-        <div className="grid md:grid-cols-5 gap-6">
-          {[
-            {
-              icon: <FaPlusCircle size={28} color="green" />,
-              title: "Add Expenses & Income",
-            },
-            {
-              icon: <FaChartPie size={28} color="green" />,
-              title: "Visual Dashboards",
-            },
-            {
-              icon: <FaFileExport size={28} color="green" />,
-              title: "Export to CSV",
-            },
-            { icon: <FaBell size={28} color="green" />, title: "Reminders" },
-            {
-              icon: <FaLock size={28} color="green" />,
-              title: "Data Security",
-            },
-          ].map((feature, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.05 }}
-            >
-              <FeatureCard icon={feature.icon} title={feature.title} />
-            </motion.div>
-          ))}
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              Core capabilities
+            </p>
+            <h2 className="text-3xl font-semibold">
+              Everything teams need to manage spend.
+            </h2>
+            <p className="max-w-2xl text-muted-foreground">
+              Track expenses, monitor budgets, and export reports in minutes.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              {
+                icon: <FaPlusCircle size={24} />,
+                title: "Capture spend",
+              },
+              {
+                icon: <FaChartPie size={24} />,
+                title: "Visual dashboards",
+              },
+              {
+                icon: <FaFileExport size={24} />,
+                title: "Export-ready",
+              },
+              {
+                icon: <FaBell size={24} />,
+                title: "Smart reminders",
+              },
+              {
+                icon: <FaLock size={24} />,
+                title: "Secure access",
+              },
+            ].map((feature) => (
+              <div
+                key={feature.title}
+                className="flex flex-col items-center gap-3 rounded-2xl border border-border/70 bg-card p-5 text-center"
+              >
+                <div className="rounded-full border border-border/70 bg-background p-3 text-emerald-600">
+                  {feature.icon}
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  {feature.title}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </motion.section>
 
@@ -113,36 +137,40 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="max-w-3xl mx-auto"
+        className="mx-auto max-w-6xl px-6 py-16"
       >
-        <h2
-          className="text-2xl md:text-3xl font-semibold text-center mb-8
-        dark:text-gray-200"
-        >
-          How It Works
-        </h2>
-        <ol className="space-y-4 text-gray-700 dark:text-gray-300 text-lg">
-          {[
-            "Sign up securely in seconds.",
-            "Add your expenses and income effortlessly.",
-            "Explore dashboards & discover spending trends.",
-            "Plan budgets and receive helpful reminders.",
-          ].map((step, i) => (
-            <motion.li
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, ease: "easeOut", delay: i * 0.1 }}
-              className="flex items-start"
-            >
-              <span className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
-                {i + 1}
-              </span>
-              {step}
-            </motion.li>
-          ))}
-        </ol>
+        <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              How it works
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold">
+              A simple flow from intake to insight.
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Get set up quickly, sync your team, and unlock a clear view of
+              every category without extra overhead.
+            </p>
+          </div>
+          <ol className="space-y-4">
+            {[
+              "Create your workspace and invite stakeholders.",
+              "Log expenses and map spend to categories.",
+              "Review dashboards and approvals in real time.",
+              "Export reports for finance and planning.",
+            ].map((step, i) => (
+              <li
+                key={step}
+                className="flex items-start gap-4 rounded-2xl border border-border/70 bg-card px-5 py-4"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
+                  {i + 1}
+                </span>
+                <p className="text-sm text-foreground">{step}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </motion.section>
 
       <motion.section
@@ -150,69 +178,46 @@ export default function AboutPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-center max-w-2xl mx-auto"
+        className="mx-auto max-w-4xl px-6 pb-16 text-center"
       >
-        <h2
-          className="text-2xl md:text-3xl font-semibold mb-4
-        dark:text-gray-200"
-        >
-          About the Creator
-        </h2>
-        <p
-          className="text-gray-700 text-lg
-        dark:text-gray-300"
-        >
-          Built by{" "}
+        <h2 className="text-3xl font-semibold">Built with care.</h2>
+        <p className="mt-4 text-muted-foreground">
+          Expensely is crafted by{" "}
           <span
-            className="font-semibold dark:text-gray-100 underline cursor-pointer"
+            className="font-semibold text-foreground underline cursor-pointer"
             onClick={() => {
               window.open("https://nikhilsaji.me");
             }}
           >
             Nikhil Saji
           </span>
-          , a passionate developer who believes expense tracking should be
-          simple, intuitive, and stress-free.
+          , focused on making expense management simple and stress-free for
+          every team.
         </p>
       </motion.section>
 
       <motion.section
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.97 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="text-center"
+        className="mx-auto max-w-6xl px-6 pb-20 text-center"
       >
-        <button
-          className="button-green px-8 py-4 rounded-full text-lg font-semibold shadow hover:shadow-lg transition"
-          onClick={() => router.push("/register")}
-        >
-          Get Started for Free
-        </button>
+        <div className="rounded-3xl border border-border/70 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10 px-8 py-12">
+          <h2 className="text-3xl font-semibold">
+            Ready to run smarter budgets?
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            Launch your workspace in minutes and keep every approval on track.
+          </p>
+          <button
+            className="mt-8 rounded-full bg-emerald-500 px-8 py-3 text-base font-semibold text-foreground shadow-sm transition hover:bg-emerald-600"
+            onClick={() => router.push("/register")}
+          >
+            Get Started for Free
+          </button>
+        </div>
       </motion.section>
     </main>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-}: {
-  icon: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <div className="flex flex-col items-center p-4 bg-white border border-gray-100 rounded-2xl shadow hover:shadow-md transition">
-      <div className="text-blue-600 mb-2">{icon}</div>
-      <p className="text-gray-800 text-center text-sm font-medium">{title}</p>
-    </div>
-  );
-}
-
-function BenefitCard({ text }: { text: string }) {
-  return (
-    <div className="p-4 bg-gray-50 rounded-2xl shadow hover:shadow-md transition text-center text-gray-800 font-medium">
-      {text}
-    </div>
   );
 }

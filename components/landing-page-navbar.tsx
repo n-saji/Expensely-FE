@@ -33,26 +33,28 @@ export default function LandingPageNavBar() {
   }, [token, dispatch, router]);
 
   return (
-    <nav className="flex justify-between items-center px-6 py-4 shadow">
-      <Logo
-        className="text-xl sm:text-3xl font-bold"
-        dimension={{ width: 30, height: 30 }}
-      />
-      <div>
-        {loggedIn ? (
-          <Link href="/dashboard" className="text-medium hover:underline">
-            <Button variant={"ghost"}>Dashboard</Button>
-          </Link>
-        ) : (
-          <>
-            <Link href="/login" className="text-medium hover:underline">
-              <Button>Login</Button>
+    <nav className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Logo
+          className="text-xl sm:text-3xl font-bold"
+          dimension={{ width: 30, height: 30 }}
+        />
+        <div className="flex items-center gap-3">
+          {loggedIn ? (
+            <Link href="/dashboard" className="text-medium hover:underline">
+              <Button variant={"ghost"}>Dashboard</Button>
             </Link>
-            <Link href="/register" className="px-4 py-2 rounded-md text-sm">
-              <Button variant={"outline"}>Register</Button>
-            </Link>
-          </>
-        )}
+          ) : (
+            <>
+              <Link href="/login" className="text-medium hover:underline">
+                <Button variant={"ghost"}>Login</Button>
+              </Link>
+              <Link href="/register" className="px-2 py-2 rounded-md text-sm">
+                <Button>Start Free</Button>
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

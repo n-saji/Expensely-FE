@@ -73,16 +73,13 @@ export default function SignUpForm() {
     }
     setLoading(true);
     await api
-      .post(
-        `/users/register`,
-        {
-          name,
-          email,
-          country_code: countryCode,
-          phone,
-          password,
-        }
-      )
+      .post(`/users/register`, {
+        name,
+        email,
+        country_code: countryCode,
+        phone,
+        password,
+      })
       .then((response) => {
         if (response.status !== 200) {
           if (response.data.error) {
@@ -113,13 +110,9 @@ export default function SignUpForm() {
   };
 
   return (
-    <form className="space-y-5 w-full">
-      {/* name */}
+    <form className="space-y-5" onSubmit={handleSubmit}>
       <div>
-        <Label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
+        <Label htmlFor="name" className="text-sm text-muted-foreground">
           Name
         </Label>
         <Input
@@ -127,9 +120,7 @@ export default function SignUpForm() {
           type="text"
           placeholder="Enter your name"
           required
-          className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            name && error === "" ? "border-red-500" : ""
-          }`}
+          className="mt-2 w-full border-border/70 bg-background"
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -137,22 +128,17 @@ export default function SignUpForm() {
           }}
         />
       </div>
-      {/* email */}
+
       <div>
-        <Label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
+        <Label htmlFor="email" className="text-sm text-muted-foreground">
           Email
         </Label>
         <Input
           id="email"
           type="email"
-          placeholder="Enter your email"
+          placeholder="you@example.com"
           required
-          className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            email && error === "" ? "border-red-500" : ""
-          }`}
+          className="mt-2 w-full border-border/70 bg-background"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -161,19 +147,15 @@ export default function SignUpForm() {
         />
       </div>
 
-      {/* phone */}
       <div>
-        <Label
-          htmlFor="phone"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
+        <Label htmlFor="phone" className="text-sm text-muted-foreground">
           Phone
         </Label>
-        <div className="flex space-x-2">
+        <div className="mt-2 flex gap-2">
           <Input
             type="text"
             value={countryCode}
-            className="mt-1 block w-1/5 border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-1/4 border-border/70 bg-background"
             onChange={(e) => {
               setCountryCode(e.target.value);
               setError("");
@@ -184,10 +166,7 @@ export default function SignUpForm() {
             type="tel"
             placeholder="Enter your phone number"
             required
-            className={`mt-1 block w-4/5 border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              phone && error === "" ? "border-red-500" : ""
-            }
-              ${phone.length < 10 && error ? "border-red-500" : ""}`}
+            className="w-3/4 border-border/70 bg-background"
             value={phone}
             onChange={(e) => {
               if (!/^\d*$/.test(e.target.value)) {
@@ -201,34 +180,28 @@ export default function SignUpForm() {
         </div>
       </div>
 
-      {/* password */}
       <div>
-        <Label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-        >
+        <Label htmlFor="password" className="text-sm text-muted-foreground">
           Password
         </Label>
         <Input
           id="password"
           type="password"
-          placeholder="Enter your password"
+          placeholder="Create a password"
           required
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
             setError("");
           }}
-          className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            password && error === "" ? "border-red-500" : ""
-          }`}
+          className="mt-2 w-full border-border/70 bg-background"
         />
       </div>
-      {/* confirm password */}
+
       <div>
         <Label
           htmlFor="confirm-password"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+          className="text-sm text-muted-foreground"
         >
           Confirm Password
         </Label>
@@ -242,30 +215,26 @@ export default function SignUpForm() {
             setConfirmPassword(e.target.value);
             setError("");
           }}
-          className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            confirmPassword && error === "" ? "border-red-500" : ""
-          }`}
+          className="mt-2 w-full border-border/70 bg-background"
         />
       </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        onClick={(e) => {
-          handleSubmit(e);
-          setPassword("");
-          setConfirmPassword("");
-        }}
-      >
+      {error ? (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+          {error.charAt(0).toUpperCase() + error.slice(1)}
+        </div>
+      ) : null}
+
+      <Button type="submit" className="w-full">
         {loading ? "Signing Up..." : "Sign Up"}
       </Button>
 
-      <div className="flex items-center justify-between">
-        <hr className="w-full border-gray-300 dark:border-gray-600" />
-        <span className="px-2 text-sm text-gray-500 dark:text-gray-400">
-          OR
+      <div className="flex items-center gap-3">
+        <hr className="w-full border-border/60" />
+        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          or
         </span>
-        <hr className="w-full border-gray-300 dark:border-gray-600" />
+        <hr className="w-full border-border/60" />
       </div>
 
       <Button
@@ -275,25 +244,16 @@ export default function SignUpForm() {
           handleGoogleLogin();
         }}
       >
-        <Image
-          src={GoogleLogo}
-          alt="Google Logo"
-          width={20}
-          className="inline mr-2"
-        />
+        <Image src={GoogleLogo} alt="Google Logo" width={20} className="mr-2" />
         <span className="sm:inline">Sign Up with Google</span>
       </Button>
 
-      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <a href="/login" className="text-blue-500 hover:underline">
+        <a href="/login" className="text-emerald-600 hover:underline">
           Log in
         </a>
       </p>
-
-      <div className={`text-red-500 absolute ${error ? "block" : "hidden"}`}>
-        {error.charAt(0).toUpperCase() + error.slice(1)}
-      </div>
     </form>
   );
 }

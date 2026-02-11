@@ -144,22 +144,17 @@ export default function LoginForm() {
   };
 
   return (
-    <form className="space-y-5 w-full">
-      <div className="flex flex-col space-y-4">
+    <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="space-y-4">
         <div>
-          <Label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Username
+          <Label htmlFor="username" className="text-sm text-muted-foreground">
+            Email or phone
           </Label>
           <Input
             id="username"
             type="text"
-            className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md 
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-            `}
-            placeholder="email or phone number"
+            className="mt-2 w-full border-border/70 bg-background"
+            placeholder="you@example.com"
             required
             autoComplete="username"
             onChange={(e) => {
@@ -170,17 +165,13 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <Label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <Label htmlFor="password" className="text-sm text-muted-foreground">
             Password
           </Label>
           <Input
             id="password"
             type="password"
-            className={`mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
-           `}
+            className="mt-2 w-full border-border/70 bg-background"
             placeholder="••••••••"
             autoComplete="current-password"
             required
@@ -191,41 +182,47 @@ export default function LoginForm() {
           />
         </div>
 
-        <div className="flex items-center space-x-2 text-sm">
-          <Input
-            type="checkbox"
-            className="w-4 h-4"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            id="rememberMe"
-          />
-          <Label className="" htmlFor="rememberMe">
-            Remember me
-          </Label>
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <Input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              id="rememberMe"
+            />
+            <Label htmlFor="rememberMe" className="text-muted-foreground">
+              Remember me
+            </Label>
+          </div>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-emerald-600 hover:underline"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         <Button
           type="submit"
-          className={`button-green w-full py-2
-            ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-            `}
-          onClick={(event) => handleSubmit(event)}
+          className={`w-full ${loading ? "opacity-70" : ""}`}
           disabled={loading}
         >
           {loading ? <Spinner /> : "Log In"}
         </Button>
 
-        <div className="flex items-center justify-between">
-          <hr className="w-full border-gray-300 dark:border-gray-600" />
-          <span className="px-2 text-sm text-gray-500 dark:text-gray-400">
-            OR
+        <div className="flex items-center gap-3">
+          <hr className="w-full border-border/60" />
+          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            or
           </span>
-          <hr className="w-full border-gray-300 dark:border-gray-600" />
+          <hr className="w-full border-border/60" />
         </div>
 
         <Button
           type="button"
           variant={"outline"}
+          className="w-full"
           onClick={() => {
             handleGoogleLogin();
           }}
@@ -234,29 +231,17 @@ export default function LoginForm() {
             src={GoogleLogo}
             alt="Google Logo"
             width={20}
-            className="inline mr-2"
+            className="mr-2"
           />
           <span className="sm:inline">Log in with Google</span>
         </Button>
+      </div>
 
-        <div
-          className="mt-4 flex flex-col items-center justify-center space-y-4
-      text-center "
-        >
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {`Don't have an account? `}
-            <a href="/register" className="text-blue-500 hover:underline">
-              Register
-            </a>
-          </p>
-
-          <Link
-            href="/forgot-password"
-            className="text-blue-500 hover:underline text-sm"
-          >
-            Forgot your password?
-          </Link>
-        </div>
+      <div className="text-center text-sm text-muted-foreground">
+        {`Don't have an account? `}
+        <Link href="/register" className="text-emerald-600 hover:underline">
+          Register
+        </Link>
       </div>
 
       <Toaster closeButton />
