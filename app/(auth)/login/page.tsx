@@ -30,9 +30,9 @@ export default function LoginPage() {
                 organized.
               </p>
             </div>
-            <Card className="mt-8 border border-border/70 bg-card/90 p-2 shadow-lg">
+            <Card className="mt-8 border border-border/70 bg-card/90 p-2 shadow-lg gap-3">
               <CardHeader>
-                <CardTitle className="text-lg">Sign in</CardTitle>
+                <CardTitle className="text-xl pt-3">Sign in</CardTitle>
               </CardHeader>
               <CardContent>
                 <LoginForm />

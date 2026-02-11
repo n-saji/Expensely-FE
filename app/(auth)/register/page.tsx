@@ -32,9 +32,9 @@ export default function SignUpPage() {
                 Set budgets, track expenses, and stay on top of your money.
               </p>
             </div>
-            <Card className="mt-8 border border-border/70 bg-card/90 p-2 shadow-lg">
+            <Card className="mt-8 border border-border/70 bg-card/90 p-2 shadow-lg gap-3">
               <CardHeader>
-                <CardTitle className="text-lg">Sign up</CardTitle>
+                <CardTitle className="text-xl pt-3">Sign up</CardTitle>
               </CardHeader>
               <CardContent>
                 <SignUpForm />
