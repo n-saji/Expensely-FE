@@ -40,7 +40,7 @@ import DropDown from "./drop-down";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import { ExpenseOverview } from "@/global/dto";
+import { ExpenseOverview, OverviewEnum } from "@/global/dto";
 import { Spinner } from "./ui/spinner";
 import useMediaQuery from "@/utils/useMediaQuery";
 // import useMediaQuery from "@/utils/useMediaQuery";
@@ -118,7 +118,7 @@ export default function PieChartComp({
     ([category, amount]) => ({
       name: category,
       value: amount,
-    })
+    }),
   );
 
   const isDesktop = useMediaQuery("(min-width: 530px)");
@@ -145,7 +145,7 @@ export default function PieChartComp({
                     {
                       length: new Date().getFullYear() - (min_year || 2020) + 1,
                     },
-                    (_, i) => (min_year || 2020) + i
+                    (_, i) => (min_year || 2020) + i,
                   ).map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
@@ -218,7 +218,7 @@ export default function PieChartComp({
                       {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
-                      }
+                      },
                     )}`,
                   ]}
                 />
@@ -243,7 +243,7 @@ export function ExpensesTop5Monthly({
     ([item, amount]) => ({
       name: item,
       value: amount,
-    })
+    }),
   );
 
   return (
@@ -329,7 +329,7 @@ export function ExpensesOverDays({
     ([day, amount]) => ({
       day,
       value: amount,
-    })
+    }),
   );
 
   return (
@@ -366,7 +366,7 @@ export function ExpensesOverDays({
                             month: "long",
                           })}
                         </SelectItem>
-                      )
+                      ),
                     )}
                   </SelectGroup>
                 </SelectContent>
@@ -390,7 +390,7 @@ export function ExpensesOverDays({
                         length:
                           new Date().getFullYear() - (min_year || 2020) + 1,
                       },
-                      (_, i) => (min_year || 2020) + i
+                      (_, i) => (min_year || 2020) + i,
                     ).map((year) => (
                       <SelectItem key={year} value={year.toString()}>
                         {year}
@@ -452,7 +452,7 @@ export function ExpensesOverDays({
                       {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
-                      }
+                      },
                     )}`
                   }
                   labelFormatter={(key) => {
@@ -520,7 +520,7 @@ export function YearlyExpenseLineChart({
   const [toggle, setToggle] = useState(true); // true for monthly, false for category
   const [chartData, setChartData] = useState<ChartRow[]>([]);
   const [category, setCategory] = useState<{ id: string; name: string } | null>(
-    null
+    null,
   );
   const categories = useSelector((state: RootState) => state.categoryExpense);
 
@@ -532,7 +532,7 @@ export function YearlyExpenseLineChart({
           {
             [category.name]: categories[category.name] || 0,
           },
-        ])
+        ]),
       );
     }
     setChartData(
@@ -545,7 +545,7 @@ export function YearlyExpenseLineChart({
             name: month,
             ...categories,
             amount: 0,
-          }))
+          })),
     );
   }, [toggle, amountByMonth, amountByMonthV2]);
 
@@ -558,7 +558,7 @@ export function YearlyExpenseLineChart({
             {
               [category.name]: categories[category.name] || 0,
             },
-          ])
+          ]),
         );
       }
       setChartData(
@@ -566,7 +566,7 @@ export function YearlyExpenseLineChart({
           name: month,
           ...categories,
           amount: 0,
-        }))
+        })),
       );
     }
   }, [category, amountByMonthV2]);
@@ -607,7 +607,7 @@ export function YearlyExpenseLineChart({
                         length:
                           new Date().getFullYear() - (min_year || 2020) + 1,
                       },
-                      (_, i) => (min_year || 2020) + i
+                      (_, i) => (min_year || 2020) + i,
                     ).map((year) => (
                       <SelectItem key={year} value={year.toString()}>
                         {year}
@@ -631,7 +631,7 @@ export function YearlyExpenseLineChart({
               selectedOption={category ? category.id : ""}
               onSelect={(option) => {
                 const selectedCategory = categories.categories.find(
-                  (category) => category.id === option
+                  (category) => category.id === option,
                 );
                 setCategory(selectedCategory || null);
               }}
@@ -654,7 +654,7 @@ export function YearlyExpenseLineChart({
                         length:
                           new Date().getFullYear() - (min_year || 2020) + 1,
                       },
-                      (_, i) => (min_year || 2020) + i
+                      (_, i) => (min_year || 2020) + i,
                     ).map((year) => (
                       <SelectItem key={year} value={year.toString()}>
                         {year}
@@ -712,7 +712,7 @@ export function YearlyExpenseLineChart({
                             {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
-                            }
+                            },
                           )}`,
                           "Amount",
                         ];
@@ -778,7 +778,330 @@ export function YearlyExpenseLineChart({
                         {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
-                        }
+                        },
+                      )}`
+                    }
+                  />
+                  {Object.keys(chartData[0])
+                    .filter((key) => key !== "name")
+                    .map((category, index) => {
+                      if (category === "amount") return null;
+                      return (
+                        <Line
+                          key={category}
+                          type="monotone"
+                          dataKey={category}
+                          stroke={COLORS[index % COLORS.length]}
+                          strokeWidth={2}
+                          dot
+                        />
+                      );
+                    })}
+                  {/* <Legend /> */}
+                </ComposedChart>
+              )}
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
+// ========== Line Chart: Yearly Expense Category|Total Trend ==========
+export function YearlyExpenseLineChartV2({
+  amountByMonth,
+  amountByMonthV2,
+  darkMode,
+  currency = "USD",
+  loading = false,
+  setOverviewParams,
+  overviewParams,
+}: {
+  amountByMonth?: ExpenseOverview["amountByMonth"];
+  amountByMonthV2?: ExpenseOverview["monthlyCategoryExpense"];
+  darkMode: boolean;
+  currency?: string;
+  setOverviewParams: React.Dispatch<
+    React.SetStateAction<{ count?: number; type?: OverviewEnum }>
+  >;
+  overviewParams: { count?: number; type?: OverviewEnum };
+  loading: boolean;
+}) {
+  const [toggle, setToggle] = useState(true); // true for monthly, false for category
+  const [chartData, setChartData] = useState<ChartRow[]>([]);
+  const [category, setCategory] = useState<{ id: string; name: string } | null>(
+    null,
+  );
+  const categories = useSelector((state: RootState) => state.categoryExpense);
+  useEffect(() => {
+    if (category?.name) {
+      amountByMonthV2 = Object.fromEntries(
+        Object.entries(amountByMonthV2 || {}).map(([month, categories]) => [
+          month,
+          {
+            [category.name]: categories[category.name] || 0,
+          },
+        ]),
+      );
+    }
+    setChartData(
+      toggle
+        ? Object.entries(amountByMonth || {}).map(([category, amount]) => ({
+            name: category,
+            amount: amount,
+          }))
+        : Object.entries(amountByMonthV2 || {}).map(([month, categories]) => ({
+            name: month,
+            ...categories,
+            amount: 0,
+          })),
+    );
+  }, [toggle, amountByMonth, amountByMonthV2]);
+
+  useEffect(() => {
+    if (!toggle) {
+      if (category?.name) {
+        amountByMonthV2 = Object.fromEntries(
+          Object.entries(amountByMonthV2 || {}).map(([month, categories]) => [
+            month,
+            {
+              [category.name]: categories[category.name] || 0,
+            },
+          ]),
+        );
+      }
+      setChartData(
+        Object.entries(amountByMonthV2 || {}).map(([month, categories]) => ({
+          name: month,
+          ...categories,
+          amount: 0,
+        })),
+      );
+    }
+  }, [category, amountByMonthV2]);
+  const [selectedTimeframe, setSelectedTimeframe] = useState(0);
+  const typesMapper = {
+    0: "Last 6 Months",
+    1: "Last 12 Months",
+    2: "All Time",
+  };
+  useEffect(() => {
+    if (setOverviewParams) {
+      switch (selectedTimeframe) {
+        case 0:
+          setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
+          break;
+        case 1:
+          setOverviewParams({ count: 1, type: OverviewEnum.YEAR });
+          break;
+        case 2:
+          setOverviewParams({ count: 3, type: OverviewEnum.ALL_TIME });
+          break;
+        default:
+          setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
+      }
+    }
+  }, [selectedTimeframe, setOverviewParams]);
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
+        <CardTitle className="flex items-center justify-between w-fit gap-2">
+          Expense Trends
+          <Tabs defaultValue="monthly">
+            <TabsList>
+              <TabsTrigger value="monthly" onClick={() => setToggle(true)}>
+                Monthly
+              </TabsTrigger>
+              <TabsTrigger value="category" onClick={() => setToggle(false)}>
+                Category
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardTitle>
+        {toggle ? (
+          <CardAction>
+            {overviewParams && (
+              <Select
+                onValueChange={(value) =>
+                  setSelectedTimeframe(parseInt(value, 10))
+                }
+                value={selectedTimeframe.toString()}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Past 6 Months" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Choose Time Period</SelectLabel>
+                    {Array.from({ length: 3 }, (_, i) => i).map((index) => (
+                      <SelectItem
+                        key={index}
+                        value={index.toString()}
+                        onClick={() => setSelectedTimeframe(index)}
+                      >
+                        {typesMapper[index as keyof typeof typesMapper]}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </CardAction>
+        ) : (
+          <CardAction className="flex gap-2">
+            <DropDown
+              options={[
+                { label: "All Categories", value: "all" },
+                ...categories.categories.map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                })),
+              ]}
+              selectedOption={category ? category.id : ""}
+              onSelect={(option) => {
+                const selectedCategory = categories.categories.find(
+                  (category) => category.id === option,
+                );
+                setCategory(selectedCategory || null);
+              }}
+            />
+            {overviewParams && (
+              <Select
+                onValueChange={(value) =>
+                  setSelectedTimeframe(parseInt(value, 10))
+                }
+                value={selectedTimeframe.toString()}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Past 6 Months" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Choose Time Period</SelectLabel>
+                    {Array.from({ length: 3 }, (_, i) => i).map((index) => (
+                      <SelectItem
+                        key={index}
+                        value={index.toString()}
+                        onClick={() => setSelectedTimeframe(index)}
+                      >
+                        {typesMapper[index as keyof typeof typesMapper]}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </CardAction>
+        )}
+      </CardHeader>
+      {toggle ? (
+        <CardContent>
+          {chartData.length === 0 ? (
+            loading ? (
+              <SpinnerUI />
+            ) : (
+              <NoDataUI />
+            )
+          ) : (
+            <ResponsiveContainer height={220}>
+              {loading ? (
+                <SpinnerUI />
+              ) : (
+                <ComposedChart data={chartData}>
+                  <CartesianGrid
+                    stroke={darkMode ? "#242424" : "#DBDBDB"}
+                    vertical={false}
+                    strokeDasharray="1"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    interval={"preserveStartEnd"}
+                    minTickGap={10}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "black",
+                      borderRadius: "8px",
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                    cursor={{
+                      stroke: darkMode ? "#525252" : "#DBDBDB",
+                    }}
+                    formatter={(value: number, name: string) => {
+                      if (name === "amount")
+                        return [
+                          `${currencyMapper(currency)}${value.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            },
+                          )}`,
+                          "Amount",
+                        ];
+                      if (name === "trend") return [];
+                    }}
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#4ade80"
+                    strokeWidth={2}
+                    dot
+                    activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+                  />
+                </ComposedChart>
+              )}
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      ) : (
+        <CardContent>
+          {chartData.length === 0 ? (
+            loading ? (
+              <SpinnerUI />
+            ) : (
+              <NoDataUI />
+            )
+          ) : (
+            <ResponsiveContainer height={220}>
+              {loading ? (
+                <SpinnerUI />
+              ) : (
+                <ComposedChart data={chartData}>
+                  <CartesianGrid
+                    stroke={darkMode ? "#242424" : "#DBDBDB"}
+                    vertical={false}
+                    strokeDasharray="1"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    interval={"preserveStartEnd"}
+                    minTickGap={10}
+                  />
+
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "black",
+                      borderRadius: "8px",
+                      fontSize: 14,
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                    cursor={{
+                      stroke: darkMode ? "#525252" : "#DBDBDB",
+                    }}
+                    formatter={(value: number) =>
+                      `${currencyMapper(currency)}${value.toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
                       )}`
                     }
                   />

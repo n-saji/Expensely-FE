@@ -626,7 +626,6 @@ export default function ExpenseTableComponent() {
             ? `end_date=${new Date(dateRange.to).toISOString().slice(0, 16)}`
             : ""
         }`;
-      console.log("Download link:", link, dateRange?.from, dateRange?.to);
 
       const response = await api.get(link, { responseType: "blob" });
 

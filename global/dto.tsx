@@ -70,6 +70,10 @@ export interface ExpenseOverview {
   thisMonthMostExpensiveItem: Record<string, number>;
   budgetServiceMap: Record<string, Budget>;
 }
+export interface ExpenseOverviewV2 {
+  amountByMonthV2: Record<string, number>;
+  monthlyCategoryExpenseV2: Record<string, Record<string, number>>;
+}
 
 export interface DashboardPageProps {
   userId: string;
@@ -130,4 +134,10 @@ export interface BulkLoadResponse {
     field: string;
     message: string;
   }>;
+}
+
+export enum OverviewEnum {
+  MONTH = "MONTH",
+  YEAR = "YEAR",
+  ALL_TIME = "ALL_TIME",
 }

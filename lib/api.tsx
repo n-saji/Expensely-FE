@@ -21,9 +21,7 @@ api.interceptors.response.use(
 
       try {
         // Try refreshing token
-        await api.get("/users/refresh").then((e) => {
-          console.log("Token refreshed", e);
-        });
+        await api.get("/users/refresh");
 
         // Retry the original request
         return api(originalRequest);

@@ -40,7 +40,6 @@ export default function DashboardPage({
   useEffect(() => {
     const fetchData = async () => {
       if (isCategoryMounted.current) {
-        console.log("Component is already mounted, skipping fetch");
         return;
       }
       isCategoryMounted.current = true;

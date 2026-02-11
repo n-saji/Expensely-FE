@@ -4,9 +4,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import PieChartComp, {
   ExpensesOverDays,
-  YearlyExpenseLineChart,
+  YearlyExpenseLineChartV2,
 } from "@/components/ExpenseChartCard";
-import { ExpenseOverview } from "@/global/dto";
+import { ExpenseOverview, ExpenseOverviewV2, OverviewEnum } from "@/global/dto";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { currencyMapper } from "@/utils/currencyMapper";
@@ -31,11 +31,20 @@ export default function DashboardPage() {
   const [newUser, setNewUser] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentMonthYear, setCurrentMonthYear] = useState(
-    new Date().getFullYear()
+    new Date().getFullYear(),
   );
   const [currentYearForYearly, setCurrentYearForYearly] = useState(
-    new Date().getFullYear()
+    new Date().getFullYear(),
   );
+  const [overviewV2, setOverviewV2] = useState<ExpenseOverviewV2 | null>(null);
+  const [overViewV2Loading, setOverviewV2Loading] = useState<boolean>(true);
+  const [overviewParams, setOverviewParams] = useState<{
+    count?: number;
+    type?: OverviewEnum;
+  }>({
+    count: 6,
+    type: OverviewEnum.MONTH,
+  });
 
   const fetchOverview = async ({
     monthYear = currentMonthYear,
@@ -72,7 +81,7 @@ export default function DashboardPage() {
         setLoadingYear(true);
       }
       const res = await api.get(
-        `/expenses/user/${user.id}/overview?${queryParams.toString()}`
+        `/expenses/user/${user.id}/overview?${queryParams.toString()}`,
       );
 
       if (res.status !== 200) {
@@ -99,6 +108,31 @@ export default function DashboardPage() {
       }
     }
   };
+  
+const fetchMonthlyOverview = async () => {
+  try {
+    setOverviewV2Loading(true);
+
+    const [monthlyRes, categoryRes] = await Promise.all([
+      api.get(`/expenses/monthly?count=${overviewParams.count}&type=${overviewParams.type}`),
+      api.get(`/expenses/monthly/category?count=${overviewParams.count}&type=${overviewParams.type}`)
+    ]);
+
+    if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
+      throw new Error("Network response was not ok");
+    }
+
+    setOverviewV2({
+      amountByMonthV2: monthlyRes.data,
+      monthlyCategoryExpenseV2: categoryRes.data
+    });
+
+  } catch (error) {
+    console.error("There was a problem with the fetch operation:", error);
+  } finally {
+    setOverviewV2Loading(false);
+  }
+};
 
   useEffect(() => {
     fetchOverview({
@@ -116,13 +150,19 @@ export default function DashboardPage() {
       type: "year",
     });
   }, [currentYearForYearly]);
+
   useEffect(() => {
     const handler = () => {
       fetchOverview({ hasConstraint: true, type: "" });
+      fetchMonthlyOverview();
     };
     window.addEventListener("expense-added", handler);
     return () => window.removeEventListener("expense-added", handler);
   }, []);
+
+  useEffect(() => {
+    fetchMonthlyOverview();
+  }, [overviewParams]);
 
   const min_year = overview ? overview.earliestStartYear : 2000;
   const min_month = overview ? overview.earliestStartMonth : 1;
@@ -213,7 +253,7 @@ export default function DashboardPage() {
           numberData={
             overview
               ? `${currencyMapper(
-                  user?.currency || "USD"
+                  user?.currency || "USD",
                 )}${overview?.thisMonthTotalExpense.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -223,10 +263,10 @@ export default function DashboardPage() {
           description={
             overview
               ? `You have spent ${currencyMapper(
-                  user?.currency || "USD"
+                  user?.currency || "USD",
                 )}${Math.abs(
                   overview?.thisMonthTotalExpense -
-                    overview?.lastMonthTotalExpense
+                    overview?.lastMonthTotalExpense,
                 ).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -246,13 +286,13 @@ export default function DashboardPage() {
         <CardComponent
           title="This Year's Expense"
           numberData={`${currencyMapper(
-            user?.currency || "USD"
+            user?.currency || "USD",
           )}${overview?.totalAmount.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`}
           description={`On an average you have spent ${currencyMapper(
-            user?.currency || "USD"
+            user?.currency || "USD",
           )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
           loading={overview === null}
         />
@@ -286,7 +326,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* yearly module */}
+      {/* yearly module
       <div className="gap-4 w-full grid grid-cols-1">
         <YearlyExpenseLineChart
           amountByMonth={overview?.amountByMonth}
@@ -297,6 +337,19 @@ export default function DashboardPage() {
           currentYearForYearly={currentYearForYearly}
           min_year={min_year}
           loading={loadingYear || overview === null}
+        />
+      </div> */}
+
+      {/* yearly module v2*/}
+      <div className="gap-4 w-full grid grid-cols-1">
+        <YearlyExpenseLineChartV2
+          amountByMonth={overviewV2?.amountByMonthV2}
+          amountByMonthV2={overviewV2?.monthlyCategoryExpenseV2}
+          darkMode={user.theme === "dark"}
+          currency={user.currency}
+          setOverviewParams={setOverviewParams}
+          overviewParams={overviewParams}
+          loading={overViewV2Loading || overviewV2 === null}
         />
       </div>
 
@@ -381,7 +434,7 @@ export default function DashboardPage() {
                       max={budget.amountLimit}
                       variant={budgetVariant(
                         budget.amountSpent,
-                        budget.amountLimit
+                        budget.amountLimit,
                       )}
                       showAnimation={true}
                     />
