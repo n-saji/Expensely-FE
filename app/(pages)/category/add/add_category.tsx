@@ -70,7 +70,7 @@ export default function AddCategoryPage() {
         </p>
       </div>
       <Card className="w-full max-w-2xl mx-auto text-center border-border/70 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+        <CardHeader >
           <CardTitle className="text-xl">Add New Category</CardTitle>
         </CardHeader>
         <CardContent>

@@ -191,7 +191,7 @@ export default function AddExpensePage() {
         </p>
       </div>
       <Card className="w-full max-w-2xl mx-auto text-center border-border/70 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+        <CardHeader>
           <CardTitle className="flex justify-center">
             <Label className="text-xl">Add New Expense</Label>
           </CardTitle>

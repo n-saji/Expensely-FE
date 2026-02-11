@@ -148,7 +148,7 @@ export default function CategoryPage() {
       )}
       <div className="overflow-x-auto rounded-2xl border border-border/70 bg-background/80 shadow-sm">
         <table className="w-full text-xs sm:text-sm table-fixed">
-          <thead className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+          <thead>
             <tr className="text-left text-xs uppercase tracking-[0.2em] text-muted-foreground">
               <th className={`${table_data_classname}`}>#</th>
               <th className={`${table_data_classname}`}>Category</th>

@@ -27,6 +27,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
 import {
@@ -106,7 +107,7 @@ export function AppSidebar() {
       collapsible="icon"
       className="z-12 border-r border-border/70 bg-background/80 backdrop-blur"
     >
-      <SidebarHeader className="border-b border-border/70 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+      <SidebarHeader className="border-b border-border/70">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="gap-2">
@@ -116,7 +117,7 @@ export function AppSidebar() {
                   alt="Logo"
                   width={20}
                   height={20}
-                  className="mr-2"
+                  className="mr-1"
                 />
                 <h1 className="font-bold text-xl">Expensely</h1>
               </Link>
@@ -124,7 +125,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="px-2 py-3">
+      <SidebarContent className="py-3">
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             Main
@@ -307,12 +308,12 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-border/70 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+      <SidebarFooter className="border-t border-border/70">
         <SidebarMenu>
           <SidebarMenuItem className="mt-auto w-full">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full rounded-xl bg-background/70 hover:bg-muted/60 transition-colors">
+                <SidebarMenuButton className="w-full bg-background/70 hover:bg-muted/60 transition-colors">
                   <Image
                     src={user.profilePictureUrl || defaulProfilePic}
                     alt="Avatar"

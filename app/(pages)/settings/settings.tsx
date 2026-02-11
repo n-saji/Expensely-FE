@@ -193,7 +193,7 @@ export default function SettingsPage() {
       </div>
 
       <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+        <CardHeader>
           <CardTitle>Dark Mode</CardTitle>
           <CardDescription>
             Toggle dark mode for a better viewing experience.
@@ -218,7 +218,7 @@ export default function SettingsPage() {
       </Card>
 
       <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+        <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
             Enable or disable notifications for important updates.
@@ -243,7 +243,7 @@ export default function SettingsPage() {
       </Card>
 
       <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+        <CardHeader>
           <CardTitle>Update Password</CardTitle>
           <CardDescription>
             Change your password to keep your account secure.
@@ -314,7 +314,7 @@ export default function SettingsPage() {
         </CardHeader>
       </Card>
 
-      <Card className="w-[90%] sm:w-4/5">
+      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
         <CardHeader>
           <CardTitle>Delete Account</CardTitle>
           <CardDescription>

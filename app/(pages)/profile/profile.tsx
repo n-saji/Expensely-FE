@@ -250,14 +250,10 @@ export default function ProfilePage({
   };
   return (
     <div className="relative w-full px-4 md:px-8 py-8">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_45%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),transparent_40%,rgba(14,116,144,0.08))] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_40%,rgba(14,116,144,0.12))]" />
-      </div>
 
       <div className="mx-auto grid w-full max-w-5xl gap-6 md:grid-cols-[320px_minmax(0,1fr)]">
         <Card className="h-fit overflow-hidden border-border/70 shadow-sm">
-          <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+          <CardHeader >
             <CardTitle>Profile</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
@@ -352,7 +348,7 @@ export default function ProfilePage({
         </Card>
 
         <Card className="overflow-hidden border-border/70 shadow-sm">
-          <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+          <CardHeader >
             <CardTitle>Profile Details</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">

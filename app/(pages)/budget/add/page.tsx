@@ -164,7 +164,7 @@ export default function AddBudgetPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card className="w-full max-w-2xl mx-auto mb-8 border-border/70 shadow-sm overflow-hidden">
-            <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+            <CardHeader>
               <CardTitle>Add Budget</CardTitle>
               <CardDescription>
                 Set your budget for a desired category and timeframe

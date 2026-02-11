@@ -119,7 +119,7 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
           category,
           order,
           page: data.totalPages,
-          limit: isDemo ? 5 : 10,
+          limit: isDemo ? 7 : 10,
         });
         setPageNumber(data.totalPages);
         setExpensesList({
@@ -153,7 +153,7 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
         toDate: toDate ? new Date(toDate).toISOString().slice(0, 16) : "",
         category: categoryFilter || "",
         order: "desc",
-        limit: isDemo ? 5 : 10,
+        limit: isDemo ? 7 : 10,
       });
     }, 500);
 
@@ -169,7 +169,7 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
         toDate: "",
         category: "",
         order: "desc",
-        limit: isDemo ? 5 : 10,
+        limit: isDemo ? 7 : 10,
       });
     }
   }, []);
@@ -181,7 +181,7 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
         toDate: "",
         category: "",
         order: "desc",
-        limit: isDemo ? 5 : 10,
+        limit: isDemo ? 7 : 10,
       });
     };
 
@@ -630,7 +630,7 @@ function ExpenseList({
               )}
               {loading && (
                 <>
-                  {[...Array(isDemo ? 5 : 10)].map((_, index) => (
+                  {[...Array(isDemo ? 7 : 10)].map((_, index) => (
                     <tr
                       key={index}
                       className="transition-colors hover:bg-muted/50"

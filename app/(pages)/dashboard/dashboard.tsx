@@ -226,11 +226,6 @@ export default function DashboardPage() {
 
   return (
     <div className="relative flex flex-col flex-wrap w-full gap-6 h-full px-4 md:px-0">
-      {/* <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_45%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),transparent_40%,rgba(14,116,144,0.08))] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_40%,rgba(14,116,144,0.12))]" />
-      </div> */}
-
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -409,7 +404,7 @@ export default function DashboardPage() {
         <div className="md:col-span-2 xl:col-span-12">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
             <Card className="flex min-h-[360px] md:min-h-[420px] h-full flex-col shadow-sm border-border/70 overflow-hidden">
-              <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+              <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -420,9 +415,9 @@ export default function DashboardPage() {
                       {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
                     </p>
                   </div>
-                  <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
+                  {/* <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
                     This month
-                  </div>
+                  </div> */}
                 </div>
               </CardHeader>
               {overview ? (
@@ -436,7 +431,7 @@ export default function DashboardPage() {
                     (budget, index) => (
                       <div
                         key={budget.id}
-                        className="group rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-emerald-500/30 hover:bg-gradient-to-br hover:from-emerald-500/5 hover:to-cyan-500/5 animate-in fade-in slide-in-from-bottom-3"
+                        className="group rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200  hover:shadow-lg hover:border-emerald-500/30 hover:bg-gradient-to-br hover:from-emerald-500/5 hover:to-cyan-500/5 animate-in fade-in slide-in-from-bottom-3"
                         style={{ animationDelay: `${index * 70}ms` }}
                       >
                         <div className="flex flex-wrap justify-between gap-2 items-center">
@@ -444,6 +439,9 @@ export default function DashboardPage() {
                             <Label className="text-sm font-medium text-foreground">
                               {budget.category.name}
                             </Label>
+                            <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
+                              {budget.period}
+                            </div>
                             {budgetIcon(budget.amountSpent, budget.amountLimit)}
                           </div>
                           <Label className="text-xs text-muted-foreground">

@@ -175,7 +175,7 @@ export default function PieChartComp({
 
   return (
     <Card className="w-full h-full min-h-[360px] md:min-h-[420px] flex flex-col overflow-hidden border-border/70 shadow-sm">
-      <CardHeader className="flex flex-wrap justify-between items-center gap-3 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3 ">
         <div>
           <CardTitle>{title || "Spending by Category"}</CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
@@ -508,7 +508,7 @@ export function ExpensesOverDays({
       // description="Tracks your expenses day by day for the current month"
       className="w-full h-full min-h-[360px] md:min-h-[420px] flex flex-col overflow-hidden border-border/70 shadow-sm"
     >
-      <CardHeader className="flex flex-wrap justify-between items-center gap-3 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
         <div>
           <CardTitle>{title || "Spending Over Days"}</CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
@@ -1226,7 +1226,7 @@ export function YearlyExpenseLineChartV2({
   );
   const seriesCountV2 =
     chartData.length > 0
-      ? Object.keys(chartData[0]).filter((key) => key !== "name").length
+      ? Object.keys(chartData[0]).filter((key) => key !== "name").length - 1
       : 0;
   const lastPeriod = chartData[chartData.length - 1];
   const previousPeriod = chartData[chartData.length - 2];
@@ -1260,7 +1260,8 @@ export function YearlyExpenseLineChartV2({
 
   return (
     <Card className="w-full overflow-hidden border-border/70 shadow-sm">
-      <CardHeader className="flex flex-wrap justify-between items-center gap-3 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3 
+      ">
         <CardTitle className="flex items-center justify-between w-fit gap-2">
           Expense Trends
           <Tabs defaultValue="monthly">
@@ -1417,11 +1418,12 @@ export function YearlyExpenseLineChartV2({
                   </ComposedChart>
                 )}
               </ResponsiveContainer>
-              <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
+                <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 
+              text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Total
-                  </p>
+                  </Label>
                   <p className="font-semibold text-foreground">
                     {currencyMapper(currency)}
                     {totalForPeriod.toLocaleString(undefined, {
@@ -1431,9 +1433,9 @@ export function YearlyExpenseLineChartV2({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Avg / Period
-                  </p>
+                  </Label>
                   <p className="font-semibold text-foreground">
                     {currencyMapper(currency)}
                     {avgForPeriod.toLocaleString(undefined, {
@@ -1443,17 +1445,17 @@ export function YearlyExpenseLineChartV2({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Peak
-                  </p>
+                  </Label>
                   <p className="font-semibold text-foreground">
                     {peakPeriod.name}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Last vs Prev
-                  </p>
+                  </Label>
                   <TrendBadge trend={periodTrend} />
                 </div>
               </div>

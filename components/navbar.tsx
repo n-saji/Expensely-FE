@@ -50,7 +50,10 @@ export default function Navbar() {
   }
 
   return (
-    <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border/70 bg-background/80 px-4 py-3 backdrop-blur">
+    <div
+      className="sticky top-0 z-30 flex items-center justify-between border-b border-border/70 bg-background/80 
+    px-4 py-2 backdrop-blur"
+    >
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-6 w-px bg-border/70" />
