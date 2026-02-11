@@ -57,12 +57,20 @@ export default function AddCategoryPage() {
   };
 
   return (
-    <div
-      className="p-4 md:p-8 w-full
-         flex flex-col items-center justify-center  "
-    >
-      <Card className="w-[95%] sm:w-1/2 text-center">
-        <CardHeader>
+    <div className="w-full space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Library
+        </p>
+        <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+          Add Category
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Create a new category to organize expenses.
+        </p>
+      </div>
+      <Card className="w-full max-w-2xl mx-auto text-center border-border/70 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
           <CardTitle className="text-xl">Add New Category</CardTitle>
         </CardHeader>
         <CardContent>
@@ -93,7 +101,7 @@ export default function AddCategoryPage() {
               selectedOption={category.type}
               onSelect={(option) => {
                 const selectedCategory = categoryTypes.find(
-                  (category) => category.value === option
+                  (category) => category.value === option,
                 );
                 setCategory({
                   ...category,

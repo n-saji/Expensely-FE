@@ -149,11 +149,22 @@ export default function AddBudgetPage() {
   }
 
   return (
-    <div className="w-full pb-8">
+    <div className="w-full space-y-6 pb-8">
+      <div>
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Planning
+        </p>
+        <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+          Add Budget
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Set limits and timeframes for your spending goals.
+        </p>
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Card className="w-full max-w-xl mx-auto mb-8">
-            <CardHeader>
+          <Card className="w-full max-w-2xl mx-auto mb-8 border-border/70 shadow-sm overflow-hidden">
+            <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
               <CardTitle>Add Budget</CardTitle>
               <CardDescription>
                 Set your budget for a desired category and timeframe

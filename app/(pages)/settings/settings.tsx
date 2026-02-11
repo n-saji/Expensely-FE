@@ -64,7 +64,7 @@ export default function SettingsPage() {
             isActive: data.user.isActive,
             isAdmin: data.user.isAdmin,
             notificationsEnabled: data.user.notificationsEnabled,
-          })
+          }),
         );
       } else {
         toast.error("Failed to fetch user profile data.");
@@ -177,9 +177,23 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col w-full items-center space-y-6 ">
-      <Card className="w-[90%] sm:w-4/5">
-        <CardHeader>
+    <div className="w-full space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Preferences
+          </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+            Settings
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your account preferences and security.
+          </p>
+        </div>
+      </div>
+
+      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
           <CardTitle>Dark Mode</CardTitle>
           <CardDescription>
             Toggle dark mode for a better viewing experience.
@@ -192,7 +206,7 @@ export default function SettingsPage() {
                   setUser({
                     ...user,
                     theme: user.theme === "dark" ? "light" : "dark",
-                  })
+                  }),
                 );
                 await handleUserUpdation({
                   theme: user.theme === "dark" ? "light" : "dark",
@@ -203,22 +217,21 @@ export default function SettingsPage() {
         </CardHeader>
       </Card>
 
-      <Card className="w-[90%] sm:w-4/5">
-        <CardHeader>
+      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
             Enable or disable notifications for important updates.
           </CardDescription>
           <CardAction>
             <Switch
-              
               checked={user.notificationsEnabled}
               onClick={async () => {
                 dispatch(
                   setUser({
                     ...user,
                     notificationsEnabled: !user.notificationsEnabled,
-                  })
+                  }),
                 );
                 await handleUserUpdation({
                   notification: !user.notificationsEnabled,
@@ -229,8 +242,8 @@ export default function SettingsPage() {
         </CardHeader>
       </Card>
 
-      <Card className="w-[90%] sm:w-4/5">
-        <CardHeader>
+      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
           <CardTitle>Update Password</CardTitle>
           <CardDescription>
             Change your password to keep your account secure.
@@ -312,11 +325,11 @@ export default function SettingsPage() {
               variant="destructive"
               onClick={async () => {
                 alert(
-                  "Are you sure you want to delete your account? This action cannot be undone."
+                  "Are you sure you want to delete your account? This action cannot be undone.",
                 );
                 if (
                   !window.confirm(
-                    "Are you sure you want to delete your account?"
+                    "Are you sure you want to delete your account?",
                   )
                 ) {
                   return;

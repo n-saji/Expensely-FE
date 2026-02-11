@@ -45,7 +45,7 @@ export default function DashboardPage({
       isCategoryMounted.current = true;
       try {
         const response = await api.get(
-          `/categories/user/${user.id}?type=${CategoryTypeExpense}`
+          `/categories/user/${user.id}?type=${CategoryTypeExpense}`,
         );
 
         if (response.status !== 200) {
@@ -57,7 +57,7 @@ export default function DashboardPage({
         }
         data.forEach((category: Category) => {
           const alreadyExists = categories.categories.some(
-            (c) => c.id === category.id
+            (c) => c.id === category.id,
           );
           if (!alreadyExists) {
             dispatch(
@@ -65,7 +65,7 @@ export default function DashboardPage({
                 id: category.id,
                 type: category.type,
                 name: category.name,
-              })
+              }),
             );
           }
         });
@@ -80,7 +80,7 @@ export default function DashboardPage({
         id: "",
         type: CategoryTypeExpense,
         name: "",
-      })
+      }),
     );
   }, []);
 
@@ -117,18 +117,23 @@ export default function DashboardPage({
     <>
       {loading && <Loader />}
       <Toaster closeButton />
-      <div className={`w-full flex min-sm:relative`}>
+      <div className="w-full flex min-sm:relative">
         <AppSidebar />
         {/* <Sidebar /> */}
 
-        <div className={`w-full transition-all duration-300`} >
+        <div className="relative w-full min-h-screen transition-all duration-300">
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_45%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_45%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),transparent_40%,rgba(14,116,144,0.08))] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_40%,rgba(14,116,144,0.12))]" />
+          </div>
+
           <Navbar />
 
           {/* Alerts/Banners */}
           {path.includes("/dashboard") && <AlertComponent />}
 
-          <div className="px-8 py-8 flex flex-col space-y-4 w-full items-center">
-            {children}
+          <div className="px-6 md:px-8 py-8 flex flex-col space-y-6 w-full items-center">
+            <div className="w-full max-w-6xl">{children}</div>
           </div>
         </div>
         <UserPreferences />

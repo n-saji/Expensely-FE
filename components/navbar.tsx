@@ -50,46 +50,56 @@ export default function Navbar() {
   }
 
   return (
-    <div className="flex justify-between bg-background items-center px-4 h-12 py-4 border-b ">
-      <div className="w-full flex items-center justify-start">
+    <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border/70 bg-background/80 px-4 py-3 backdrop-blur">
+      <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger />
-        <div className="h-5">
-          <Separator orientation="vertical" className="mx-3 h-6 w-2" />
-        </div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            {pathSegments.map((segment, index) => {
-              const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
-              const isLast = index === pathSegments.length - 1;
-              return (
-                <Fragment key={href}>
-                  <BreadcrumbItem>
-                    {isLast ? (
-                      <BreadcrumbPage>
-                        {segment.charAt(0).toUpperCase() + segment.slice(1)}
-                      </BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink href={href}>
-                        {segment.charAt(0).toUpperCase() + segment.slice(1)}
-                      </BreadcrumbLink>
+        <Separator orientation="vertical" className="h-6 w-px bg-border/70" />
+        <div className="flex min-w-0 items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1.5 shadow-sm">
+          <Breadcrumb>
+            <BreadcrumbList className="gap-2">
+              {pathSegments.map((segment, index) => {
+                const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
+                const isLast = index === pathSegments.length - 1;
+                return (
+                  <Fragment key={href}>
+                    <BreadcrumbItem className="text-xs text-muted-foreground">
+                      {isLast ? (
+                        <BreadcrumbPage className="text-xs font-medium text-foreground">
+                          {segment.charAt(0).toUpperCase() + segment.slice(1)}
+                        </BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink
+                          href={href}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          {segment.charAt(0).toUpperCase() + segment.slice(1)}
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                    {!isLast && (
+                      <BreadcrumbSeparator className="text-muted-foreground" />
                     )}
-                  </BreadcrumbItem>
-                  {!isLast && <BreadcrumbSeparator />}
-                </Fragment>
-              );
-            })}
-          </BreadcrumbList>
-        </Breadcrumb>
+                  </Fragment>
+                );
+              })}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
       </div>
-      {(pathname.startsWith("/dashboard") || pathname === "/expense") && <Slidebar />}
-      {user.notificationsEnabled && (
-        <Notifications
-          notifications={notifications}
-          markAllAsRead={markAllAsRead}
-          markIndividualAsRead={markNotificationAsRead}
-          deleteNotificationFunc={deleteNotificationFunc}
-        />
-      )}
+
+      <div className="flex items-center gap-2">
+        {(pathname.startsWith("/dashboard") || pathname === "/expense") && (
+          <Slidebar />
+        )}
+        {user.notificationsEnabled && (
+          <Notifications
+            notifications={notifications}
+            markAllAsRead={markAllAsRead}
+            markIndividualAsRead={markNotificationAsRead}
+            deleteNotificationFunc={deleteNotificationFunc}
+          />
+        )}
+      </div>
     </div>
   );
 }

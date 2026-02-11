@@ -175,6 +175,9 @@ export default function DashboardPage() {
     mostExp && Object.entries(mostExp)[0]
       ? Object.entries(mostExp)[0]
       : [null, null];
+  const budgetCount = overview
+    ? Object.values(overview.budgetServiceMap).length
+    : 0;
 
   if (newUser) {
     return (
@@ -211,12 +214,42 @@ export default function DashboardPage() {
     );
   }
 
-  return (
-    <div className="flex flex-col flex-wrap w-full gap-4 h-full">
-      {/* cards module */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
-        {/* Monthly Summary */}
+  const monthLabel = new Date(
+    currentMonthYear,
+    Math.max(currentMonth - 1, 0),
+  ).toLocaleString("default", { month: "long" });
+  const todayLabel = new Date().toLocaleDateString("default", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
+  return (
+    <div className="relative flex flex-col flex-wrap w-full gap-6 h-full px-4 md:px-0">
+      {/* <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_45%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),transparent_40%,rgba(14,116,144,0.08))] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_40%,rgba(14,116,144,0.12))]" />
+      </div> */}
+
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Dashboard
+          </p>
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
+            Your spending snapshot
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Updated {todayLabel} · Tracking {monthLabel} {currentMonthYear}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          Live insights
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-6 items-stretch">
         {/* TODO: in future */}
         {/* <Link
           prefetch={true}
@@ -225,229 +258,245 @@ export default function DashboardPage() {
           }`}
           scroll={false}
         ></Link> */}
-        <CardComponent
-          title={`${new Date().toLocaleString("default", {
-            month: "long",
-          })} Expense`}
-          cardAction={
-            overview && (
-              <div className="flex items-center gap-1 border rounded-md px-2 py-1">
-                {overview!.thisMonthTotalExpense -
-                  overview!.lastMonthTotalExpense >
-                0 ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-                <p className="text-xs font-mono">
-                  {overview!.lastMonthTotalExpense === 0
-                    ? "0%"
-                    : `${(
-                        ((overview!.thisMonthTotalExpense -
-                          overview!.lastMonthTotalExpense) /
-                          overview!.lastMonthTotalExpense) *
-                        100
-                      ).toFixed(2)}%
+        <div className="md:col-span-1 xl:col-span-3">
+          <CardComponent
+            title={`${monthLabel} Expense`}
+            cardAction={
+              overview && (
+                <div className="flex items-center gap-1 border rounded-md px-2 py-1">
+                  {overview!.thisMonthTotalExpense -
+                    overview!.lastMonthTotalExpense >
+                  0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  <p className="text-xs font-mono">
+                    {overview!.lastMonthTotalExpense === 0
+                      ? "0%"
+                      : `${(
+                          ((overview!.thisMonthTotalExpense -
+                            overview!.lastMonthTotalExpense) /
+                            overview!.lastMonthTotalExpense) *
+                          100
+                        ).toFixed(2)}%
 `}
-                </p>
-              </div>
-            )
-          }
-          numberData={
-            overview
-              ? `${currencyMapper(
-                  user?.currency || "USD",
-                )}${overview?.thisMonthTotalExpense.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : undefined
-          }
-          description={
-            overview
-              ? `You have spent ${currencyMapper(
-                  user?.currency || "USD",
-                )}${Math.abs(
-                  overview?.thisMonthTotalExpense -
-                    overview?.lastMonthTotalExpense,
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} ${
-                  overview?.thisMonthTotalExpense -
-                    overview?.lastMonthTotalExpense >
-                  0
-                    ? "more"
-                    : "less"
-                } than last month.`
-              : undefined
-          }
-          loading={overview === null}
-        />
-
-        {/* Yearly Summary */}
-        <CardComponent
-          title="This Year's Expense"
-          numberData={`${currencyMapper(
-            user?.currency || "USD",
-          )}${overview?.totalAmount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`}
-          description={`On an average you have spent ${currencyMapper(
-            user?.currency || "USD",
-          )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
-          loading={overview === null}
-        />
-        {/* Category */}
-
-        <CardComponent
-          title="Active Categories"
-          numberData={`${overview?.totalCategories || 0}`}
-          description={`Most used category: ${
-            overview?.mostFrequentCategory || "N/A"
-          }`}
-          loading={overview === null}
-        />
-
-        {/* Most Expensive Item */}
-
-        <CardComponent
-          title="This month most expensive item"
-          numberData={itemName && itemValue ? `${itemName}` : "N/A"}
-          description={
-            itemName
-              ? `You have spent ${currencyMapper(user?.currency || "USD")}${(
-                  itemValue as number
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : ""
-          }
-          loading={overview === null}
-        />
-      </div>
-
-      {/* yearly module
-      <div className="gap-4 w-full grid grid-cols-1">
-        <YearlyExpenseLineChart
-          amountByMonth={overview?.amountByMonth}
-          amountByMonthV2={overview?.monthlyCategoryExpense}
-          darkMode={user.theme === "dark"}
-          currency={user.currency}
-          setCurrentYearForYearly={setCurrentYearForYearly}
-          currentYearForYearly={currentYearForYearly}
-          min_year={min_year}
-          loading={loadingYear || overview === null}
-        />
-      </div> */}
-
-      {/* yearly module v2*/}
-      <div className="gap-4 w-full grid grid-cols-1">
-        <YearlyExpenseLineChartV2
-          amountByMonth={overviewV2?.amountByMonthV2}
-          amountByMonthV2={overviewV2?.monthlyCategoryExpenseV2}
-          darkMode={user.theme === "dark"}
-          currency={user.currency}
-          setOverviewParams={setOverviewParams}
-          overviewParams={overviewParams}
-          loading={overViewV2Loading || overviewV2 === null}
-        />
-      </div>
-
-      {/* category + monthly module */}
-      <div className="flex-1/4 gap-4 w-full grid grid-cols-1 md:grid-cols-2 ">
-        {/* Spending by Category */}
-
-        <PieChartComp
-          amountByCategory={overview?.amountByCategory}
-          darkMode={user.theme === "dark"}
-          currency={user.currency}
-          title="Spending by Category"
-          setCurrentYearForYearly={setCurrentYearForYearly}
-          currentYearForYearly={currentYearForYearly}
-          min_year={min_year}
-          loading={loadingYear || overview === null}
-        />
-
-        {/* Budget */}
-
-        <ExpensesOverDays
-          overTheDaysThisMonth={overview?.overTheDaysThisMonth}
-          darkMode={user.theme === "dark"}
-          currency={user.currency}
-          title="Spending Over Days"
-          setCurrentMonth={setCurrentMonth}
-          setCurrentMonthYear={setCurrentMonthYear}
-          currentMonth={currentMonth}
-          currentMonthYear={currentMonthYear}
-          min_year={min_year}
-          min_month={min_month}
-          loading={loadingMonth || overview === null}
-        />
-      </div>
-
-      {/*  budget module */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-0 md:gap-x-4">
-        <Card
-          className="w-full h-full
-            "
-        >
-          <CardHeader className="">
-            <CardTitle>Budgets</CardTitle>
-          </CardHeader>
-          {overview ? (
-            <CardContent className="md:max-h-[280px] overflow-y-auto">
-              {Object.values(overview.budgetServiceMap).length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No budgets found.
-                </p>
-              )}
-              {Object.values(overview.budgetServiceMap).map((budget) => (
-                <div key={budget.id} className="mb-6">
-                  <div className="flex flex-wrap justify-between mb-1 items-center">
-                    <Label className="">
-                      {budget.category.name}{" "}
-                      {budgetIcon(budget.amountSpent, budget.amountLimit)}
-                    </Label>
-                    <Label className="text-sm text-muted-foreground">
-                      {currencyMapper(user?.currency || "USD")}
-                      {budget.amountSpent.toFixed(2)} /{" "}
-                      {currencyMapper(user?.currency || "USD")}
-                      {budget.amountLimit.toFixed(2)}
-                    </Label>
-                  </div>
-
-                  <ProgressBar
-                    value={budget.amountSpent}
-                    max={budget.amountLimit}
-                    variant={budgetVariant(
-                      budget.amountSpent,
-                      budget.amountLimit,
-                    )}
-                    showAnimation={true}
-                  />
+                  </p>
                 </div>
-              ))}
-            </CardContent>
-          ) : (
-            <CardContent className="md:max-h-[280px] overflow-y-auto">
-              <div className="flex h-full w-full justify-center items-center">
-                <Spinner className="text-muted-foreground h-6 w-6" />
-              </div>
-            </CardContent>
-          )}
-        </Card>
+              )
+            }
+            numberData={
+              overview
+                ? `${currencyMapper(
+                    user?.currency || "USD",
+                  )}${overview?.thisMonthTotalExpense.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )}`
+                : undefined
+            }
+            description={
+              overview
+                ? `You have spent ${currencyMapper(
+                    user?.currency || "USD",
+                  )}${Math.abs(
+                    overview?.thisMonthTotalExpense -
+                      overview?.lastMonthTotalExpense,
+                  ).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} ${
+                    overview?.thisMonthTotalExpense -
+                      overview?.lastMonthTotalExpense >
+                    0
+                      ? "more"
+                      : "less"
+                  } than last month.`
+                : undefined
+            }
+            loading={overview === null}
+          />
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-scroll">
-            <Expense isDemo={true} />
-          </CardContent>
-        </Card>
+        <div className="md:col-span-1 xl:col-span-3">
+          <CardComponent
+            title="This Year's Expense"
+            numberData={`${currencyMapper(
+              user?.currency || "USD",
+            )}${overview?.totalAmount.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
+            description={`On an average you have spent ${currencyMapper(
+              user?.currency || "USD",
+            )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
+            loading={overview === null}
+          />
+        </div>
+
+        <div className="md:col-span-1 xl:col-span-3">
+          <CardComponent
+            title="Active Categories"
+            numberData={`${overview?.totalCategories || 0}`}
+            description={`Most used category: ${
+              overview?.mostFrequentCategory || "N/A"
+            }`}
+            loading={overview === null}
+          />
+        </div>
+
+        <div className="md:col-span-1 xl:col-span-3">
+          <CardComponent
+            title="This month most expensive item"
+            numberData={itemName && itemValue ? `${itemName}` : "N/A"}
+            description={
+              itemName
+                ? `You have spent ${currencyMapper(user?.currency || "USD")}${(
+                    itemValue as number
+                  ).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : ""
+            }
+            loading={overview === null}
+          />
+        </div>
+
+        <div className="md:col-span-2 xl:col-span-12">
+          <YearlyExpenseLineChartV2
+            amountByMonth={overviewV2?.amountByMonthV2}
+            amountByMonthV2={overviewV2?.monthlyCategoryExpenseV2}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            setOverviewParams={setOverviewParams}
+            overviewParams={overviewParams}
+            loading={overViewV2Loading || overviewV2 === null}
+          />
+        </div>
+
+        <div className="md:col-span-2 xl:col-span-12">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+            <PieChartComp
+              amountByCategory={overview?.amountByCategory}
+              darkMode={user.theme === "dark"}
+              currency={user.currency}
+              title="Spending by Category"
+              setCurrentYearForYearly={setCurrentYearForYearly}
+              currentYearForYearly={currentYearForYearly}
+              min_year={min_year}
+              loading={loadingYear || overview === null}
+            />
+
+            <ExpensesOverDays
+              overTheDaysThisMonth={overview?.overTheDaysThisMonth}
+              darkMode={user.theme === "dark"}
+              currency={user.currency}
+              title="Spending Over Days"
+              setCurrentMonth={setCurrentMonth}
+              setCurrentMonthYear={setCurrentMonthYear}
+              currentMonth={currentMonth}
+              currentMonthYear={currentMonthYear}
+              min_year={min_year}
+              min_month={min_month}
+              loading={loadingMonth || overview === null}
+            />
+          </div>
+        </div>
+
+        <div className="md:col-span-2 xl:col-span-12">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+            <Card className="flex min-h-[360px] md:min-h-[420px] h-full flex-col shadow-sm border-border/70 overflow-hidden">
+              <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Planning
+                    </p>
+                    <CardTitle>Budgets</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
+                    This month
+                  </div>
+                </div>
+              </CardHeader>
+              {overview ? (
+                <CardContent className="flex-1 md:max-h-[320px] overflow-y-auto space-y-4">
+                  {Object.values(overview.budgetServiceMap).length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      No budgets found.
+                    </p>
+                  )}
+                  {Object.values(overview.budgetServiceMap).map(
+                    (budget, index) => (
+                      <div
+                        key={budget.id}
+                        className="group rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-emerald-500/30 hover:bg-gradient-to-br hover:from-emerald-500/5 hover:to-cyan-500/5 animate-in fade-in slide-in-from-bottom-3"
+                        style={{ animationDelay: `${index * 70}ms` }}
+                      >
+                        <div className="flex flex-wrap justify-between gap-2 items-center">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-sm font-medium text-foreground">
+                              {budget.category.name}
+                            </Label>
+                            {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                          </div>
+                          <Label className="text-xs text-muted-foreground">
+                            {currencyMapper(user?.currency || "USD")}
+                            {budget.amountSpent.toFixed(2)} /{" "}
+                            {currencyMapper(user?.currency || "USD")}
+                            {budget.amountLimit.toFixed(2)}
+                          </Label>
+                        </div>
+
+                        <div className="mt-3">
+                          <div className="rounded-full bg-muted/60 p-1">
+                            <ProgressBar
+                              value={budget.amountSpent}
+                              max={budget.amountLimit}
+                              variant={budgetVariant(
+                                budget.amountSpent,
+                                budget.amountLimit,
+                              )}
+                              showAnimation={true}
+                            />
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {Math.round(
+                              (budget.amountSpent / budget.amountLimit) * 100,
+                            )}
+                            % of limit used
+                          </p>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </CardContent>
+              ) : (
+                <CardContent className="flex-1 md:max-h-[320px] overflow-y-auto">
+                  <div className="flex h-full w-full justify-center items-center">
+                    <Spinner className="text-muted-foreground h-6 w-6" />
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
+            <Card className="flex min-h-[360px] md:min-h-[420px] h-full flex-col shadow-sm border-border/70">
+              <CardHeader>
+                <CardTitle>Recent Transactions</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto">
+                <Expense isDemo={true} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

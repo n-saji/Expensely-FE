@@ -43,7 +43,7 @@ export default function ProfilePage({
   const [phone, setPhone] = useState("");
   const [currency, setCurrency] = useState("");
   const togglePopup = useSelector(
-    (state: RootState) => state.sidebar.popUpEnabled
+    (state: RootState) => state.sidebar.popUpEnabled,
   );
 
   const hasFetchedRef = useRef(false);
@@ -76,7 +76,7 @@ export default function ProfilePage({
             country_code: data.user.country_code,
             phone: data.user.phone,
             currency: data.user.currency,
-          })
+          }),
         );
         setName(data.user.name);
         setEmail(data.user.email);
@@ -128,7 +128,7 @@ export default function ProfilePage({
             currency: currency,
             id: userId,
             profileComplete: isProfileComplete,
-          })
+          }),
         );
 
         if (reRouteToDashboard && isProfileComplete) {
@@ -163,7 +163,7 @@ export default function ProfilePage({
 
       const response = await api.patch(
         `/users/${userId}/update-profile-picture?filepath=${""}`,
-        { imageUrl: "" }
+        { imageUrl: "" },
       );
 
       if (response.status !== 200) {
@@ -175,7 +175,7 @@ export default function ProfilePage({
           ...user,
           profilePictureUrl: "",
           profilePicFilePath: "",
-        })
+        }),
       );
     } catch (err) {
       console.error("Error removing profile picture:", err);
@@ -228,7 +228,7 @@ export default function ProfilePage({
       const response = await api.patch(
         `/users/${userId}/update-profile-picture?filepath=${filePath}`,
 
-        { imageUrl: signedUrl }
+        { imageUrl: signedUrl },
       );
 
       if (response.status !== 200) {
@@ -245,181 +245,211 @@ export default function ProfilePage({
         ...user,
         profilePictureUrl: `${signedUrl}`,
         profilePicFilePath: filePath,
-      })
+      }),
     );
   };
   return (
-    <Card className="min-w-1/2 max-md:w-2/3 max-sm:w-96 p-8 max-sm:p-6 flex flex-col items-center relative">
-      <div
-        className="relative w-[200px] h-[200px] rounded-full mb-4  text-center
-      "
-      >
-        <Image
-          alt="Profile Picture"
-          src={user.profilePictureUrl ? user.profilePictureUrl : defaultPNG}
-          fill
-          className="object-cover rounded-full"
-        />
-        <Image
-          alt="Edit Icon"
-          src={user.theme === "light" ? editIcon : editIconWhite}
-          width={30}
-          height={30}
-          className="absolute bottom-0 right-5 p-1 rounded-full 
-          cursor-pointer hover:bg-white/40 dark:hover:bg-gray-800/40 transition-all duration-200
-          "
-          onClick={() => dispatch(togglePopUp())}
-        />
-        {togglePopup && (
-          <PopUp title="Profile Picture">
-            <div className="flex flex-col items-center space-y-4">
-              <p className="text-gray-200 text-sm text-left">
-                A picture helps people recognize you and lets you know when
-                you’re signed in to your account
-              </p>
-              <label
-                className={`button-gray w-full py-2
-                ${imageLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      const file = e.target.files[0];
+    <div className="relative w-full px-4 md:px-8 py-8">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_45%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),transparent_40%,rgba(14,116,144,0.08))] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_40%,rgba(14,116,144,0.12))]" />
+      </div>
 
-                      await handleImageUpload(file);
-                      dispatch(togglePopUp());
-                    }
-                  }}
+      <div className="mx-auto grid w-full max-w-5xl gap-6 md:grid-cols-[320px_minmax(0,1fr)]">
+        <Card className="h-fit overflow-hidden border-border/70 shadow-sm">
+          <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+            <CardTitle>Profile</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <div className="relative w-[180px] h-[180px] rounded-full">
+              <Image
+                alt="Profile Picture"
+                src={
+                  user.profilePictureUrl ? user.profilePictureUrl : defaultPNG
+                }
+                fill
+                className="object-cover rounded-full border border-border/70"
+              />
+              <button
+                type="button"
+                className="absolute -bottom-2 right-3 rounded-full border border-border/70 bg-background/90 p-2 shadow-sm hover:bg-muted/70 transition-colors"
+                onClick={() => dispatch(togglePopUp())}
+              >
+                <Image
+                  alt="Edit Icon"
+                  src={user.theme === "light" ? editIcon : editIconWhite}
+                  width={18}
+                  height={18}
                 />
-                {user.profilePictureUrl
-                  ? "📷 Change Profile Picture"
-                  : "📷 Add Profile Picture"}
-              </label>
-              {user.profilePictureUrl && (
-                <button
-                  className={`button-delete w-full py-2
-                    ${imageLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-                  onClick={async () => {
-                    await removeProfilePicture();
-                    dispatch(togglePopUp());
-                  }}
-                >
-                  Remove Profile Picture
-                </button>
+              </button>
+              {togglePopup && (
+                <PopUp title="Profile Picture">
+                  <div className="flex flex-col items-center space-y-4">
+                    <p className="text-gray-200 text-sm text-left">
+                      A picture helps people recognize you and lets you know
+                      when you’re signed in to your account
+                    </p>
+                    <label
+                      className={`button-gray w-full py-2
+                      ${imageLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+
+                            await handleImageUpload(file);
+                            dispatch(togglePopUp());
+                          }
+                        }}
+                      />
+                      {user.profilePictureUrl
+                        ? "📷 Change Profile Picture"
+                        : "📷 Add Profile Picture"}
+                    </label>
+                    {user.profilePictureUrl && (
+                      <button
+                        className={`button-delete w-full py-2
+                          ${imageLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                        onClick={async () => {
+                          await removeProfilePicture();
+                          dispatch(togglePopUp());
+                        }}
+                      >
+                        Remove Profile Picture
+                      </button>
+                    )}
+                  </div>
+                </PopUp>
               )}
             </div>
-          </PopUp>
-        )}
-      </div>
 
-      <div className="flex flex-col items-center space-y-2">
-        <h2 className="text-2xl font-semibold ">{user.name}</h2>
-        <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
-      </div>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-        </CardHeader>
-        <CardContent
-          className="flex flex-col max-sm:gap-3 min-md:gap-4 w-full
-                "
-        >
-          <div className="grid_input">
-            <Label htmlFor="fullName">Full Name</Label>
-            <p className="text-gray-500 dark:text-gray-400">
-              {edit ? (
-                <input
-                  type="text"
-                  className="edit_input "
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              ) : (
-                name
-              )}
-            </p>
-          </div>
-          <div className="grid_input">
-            <Label htmlFor="emailAddress">Email</Label>
-            <p className="text-gray-500 dark:text-gray-400">
-              {edit ? (
-                <input
-                  type="email"
-                  className="edit_input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              ) : (
-                email
-              )}
-            </p>
-          </div>
-          <div className="grid_input">
-            <Label htmlFor="countryCode">Country Code</Label>
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-foreground">
+                {user.name}
+              </h2>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            </div>
 
-            <p className="text-gray-500 dark:text-gray-400">
-              {edit ? (
-                <input
-                  type="text"
-                  className="edit_input"
-                  value={countryCode || ""}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                />
-              ) : (
-                countryCode
-              )}
-            </p>
-          </div>
-          <div className="grid_input">
-            <Label htmlFor="phoneNumber">Phone</Label>
-            <p className="text-gray-500 dark:text-gray-400">
-              {edit ? (
-                <input
-                  type="text"
-                  className="edit_input"
-                  value={phone || ""}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              ) : (
-                phone
-              )}
-            </p>
-          </div>
-          <div className="grid_input">
-            <Label htmlFor="currency">Currency</Label>
-            <p className="text-gray-500 dark:text-gray-400">
-              {edit ? (
-                <input
-                  type="text"
-                  className="edit_input"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                />
-              ) : (
-                currency
-              )}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      <CardFooter className="w-full flex justify-end">
-        <Button
-          variant={edit ? "default" : loading ? "ghost" : "outline"}
-          onClick={() => {
-            setEdit(!edit);
-            if (edit) {
-              handleProfileUpdate();
-            }
-          }}
-          disabled={loading}
-        >
-          {edit ? "Save" : loading ? <Spinner /> : "Edit"}
-        </Button>
-      </CardFooter>
-      {error && <div className="text-red-500 mt-4 text-sm">{error}</div>}
-    </Card>
+            <div className="grid w-full gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center justify-between rounded-xl border border-border/70 bg-background/80 px-3 py-2">
+                <span>Currency</span>
+                <span className="text-foreground font-medium">
+                  {currency || "-"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border border-border/70 bg-background/80 px-3 py-2">
+                <span>Phone</span>
+                <span className="text-foreground font-medium">
+                  {phone || "-"}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden border-border/70 shadow-sm">
+          <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+            <CardTitle>Profile Details</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="grid_input">
+              <Label htmlFor="fullName">Full Name</Label>
+              <p className="text-gray-500 dark:text-gray-400">
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                ) : (
+                  name
+                )}
+              </p>
+            </div>
+            <div className="grid_input">
+              <Label htmlFor="emailAddress">Email</Label>
+              <p className="text-gray-500 dark:text-gray-400">
+                {edit ? (
+                  <input
+                    type="email"
+                    className="edit_input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                ) : (
+                  email
+                )}
+              </p>
+            </div>
+            <div className="grid_input">
+              <Label htmlFor="countryCode">Country Code</Label>
+
+              <p className="text-gray-500 dark:text-gray-400">
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    value={countryCode || ""}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                  />
+                ) : (
+                  countryCode
+                )}
+              </p>
+            </div>
+            <div className="grid_input">
+              <Label htmlFor="phoneNumber">Phone</Label>
+              <p className="text-gray-500 dark:text-gray-400">
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    value={phone || ""}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                ) : (
+                  phone
+                )}
+              </p>
+            </div>
+            <div className="grid_input">
+              <Label htmlFor="currency">Currency</Label>
+              <p className="text-gray-500 dark:text-gray-400">
+                {edit ? (
+                  <input
+                    type="text"
+                    className="edit_input"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                  />
+                ) : (
+                  currency
+                )}
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3 items-end">
+            <Button
+              variant={edit ? "default" : loading ? "ghost" : "outline"}
+              onClick={() => {
+                setEdit(!edit);
+                if (edit) {
+                  handleProfileUpdate();
+                }
+              }}
+              disabled={loading}
+            >
+              {edit ? "Save" : loading ? <Spinner /> : "Edit"}
+            </Button>
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
   );
 }

@@ -288,7 +288,7 @@ export default function Page() {
             setBudgets(formatted);
           })
           .catch((error) =>
-            toast("Error fetching budgets", { description: String(error) })
+            toast("Error fetching budgets", { description: String(error) }),
           )
           .finally(() => setLoading(false));
       }
@@ -348,7 +348,20 @@ export default function Page() {
   });
 
   return (
-    <div className="block w-full space-y-4">
+    <div className="w-full space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Planning
+          </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+            Budgets
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Track limits and keep spending on target.
+          </p>
+        </div>
+      </div>
       {budgetToDelete && (
         <AlertDialog
           open={!!budgetToDelete}
@@ -378,15 +391,17 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      {loading ? (
-        <div className="w-full space-y-2">
-          {[...Array(10)].map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full rounded-md" />
-          ))}
-        </div>
-      ) : (
-        <DataTable columns={tableColumns} data={budgets} />
-      )}
+      <div className="rounded-2xl border border-border/70 bg-background/80 shadow-sm p-4">
+        {loading ? (
+          <div className="w-full space-y-2">
+            {[...Array(10)].map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full rounded-md" />
+            ))}
+          </div>
+        ) : (
+          <DataTable columns={tableColumns} data={budgets} />
+        )}
+      </div>
       {openEditDialog && budgetToEdit && (
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
           <DialogContent className="max-h-[90vh] sm:max-w-lg overflow-y-auto">

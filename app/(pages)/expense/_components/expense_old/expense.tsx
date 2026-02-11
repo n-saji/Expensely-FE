@@ -337,7 +337,7 @@ function ExpenseList({
       setLoading(true);
       const response = await api.post(
         `/expenses/user/${user.id}/bulk-delete`,
-        ids
+        ids,
       );
 
       if (response.status !== 200) {
@@ -347,7 +347,7 @@ function ExpenseList({
       setExpensesList((prev) => ({
         ...prev,
         expenses: prev.expenses.filter(
-          (expense) => !selectedExpenses.includes(expense)
+          (expense) => !selectedExpenses.includes(expense),
         ),
       }));
       setSelectedExpenses([]);
@@ -387,7 +387,7 @@ function ExpenseList({
     try {
       const response = await api.put(
         `/expenses/update/${expenseToUpdate.id}`,
-        expenseToUpdate
+        expenseToUpdate,
       );
 
       if (response.status !== 200) {
@@ -510,7 +510,7 @@ function ExpenseList({
             selectedOption={categoryFilter}
             onSelect={(option) => {
               const selectedCategory = categories.find(
-                (category) => category.id === option
+                (category) => category.id === option,
               );
               setCategoryFilter(selectedCategory ? selectedCategory.id : "");
               fetchExpenses({
@@ -602,32 +602,23 @@ function ExpenseList({
         </div>
       )}
 
-      <div className="flex-grow">
-        <table
-          className="w-full h-full layout-fixed border 
-          rounded-lg text-xs sm:text-sm divide-y "
-        >
-          <thead
-            className="tracking-wider
-             "
-          >
-            <tr className="text-left first:rounded-tl-lg last:rounded-tr-lg">
+      <div className="flex-grow rounded-2xl border border-border/70 bg-background/80 shadow-sm overflow-hidden">
+        <table className="w-full text-xs sm:text-sm table-fixed">
+          <thead className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+            <tr className="text-left text-xs uppercase tracking-[0.2em] text-muted-foreground">
               {!isDemo && (
-                <th className={`${table_data_classname} w-1/13`}>#</th>
+                <th className={`${table_data_classname} w-1/12`}>#</th>
               )}
-              <th className={`${table_data_classname} w-6/13`}>Description</th>
-              <th className={`${table_data_classname} w-2/13`}>Amount</th>
-              <th className={`${table_data_classname} w-3/13`}>Date</th>
+              <th className={`${table_data_classname} w-6/12`}>Description</th>
+              <th className={`${table_data_classname} w-2/12`}>Amount</th>
+              <th className={`${table_data_classname} w-3/12`}>Date</th>
               {!isDemo && (
-                <th className={`${table_data_classname} w-1/13`}></th>
+                <th className={`${table_data_classname} w-1/12`}></th>
               )}
             </tr>
           </thead>
           {(!showTable || loading) && (
-            <tbody
-              className=" divide-y 
-               "
-            >
+            <tbody className="divide-y">
               {!loading && (
                 <tr>
                   <td colSpan={isDemo ? 3 : 5} className="text-center py-4">
@@ -642,8 +633,7 @@ function ExpenseList({
                   {[...Array(isDemo ? 5 : 10)].map((_, index) => (
                     <tr
                       key={index}
-                      className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
-                      transition-colors cursor-pointer"
+                      className="transition-colors hover:bg-muted/50"
                     >
                       {isDemo ? null : (
                         <td className={table_data_classname}>
@@ -677,14 +667,11 @@ function ExpenseList({
             </tbody>
           )}
           {showTable && !loading && (
-            <tbody
-              className=" divide-y last:rounded-bl-lg last:rounded-br-lg
-                  "
-            >
+            <tbody className="divide-y">
               {expensesList.expenses.map((expense) => (
                 <tr
                   key={expense.id}
-                  className=" relative group  hover:bg-muted/40  "
+                  className="group transition-colors hover:bg-muted/50"
                 >
                   {!isDemo && (
                     <td className={table_data_classname}>
@@ -693,17 +680,17 @@ function ExpenseList({
                         className="cursor-pointer"
                         disabled={loading}
                         checked={selectedExpenses.some(
-                          (e) => e.id === expense.id
+                          (e) => e.id === expense.id,
                         )}
                         onChange={() => {
                           const isSelected = selectedExpenses.some(
-                            (e) => e.id === expense.id
+                            (e) => e.id === expense.id,
                           );
                           if (isSelected) {
                             setSelectedExpenses(
                               selectedExpenses.filter(
-                                (e) => e.id !== expense.id
-                              )
+                                (e) => e.id !== expense.id,
+                              ),
                             );
                           } else {
                             setSelectedExpenses([...selectedExpenses, expense]);
@@ -732,14 +719,16 @@ function ExpenseList({
                     </div>
                   </td>
                   <td
-                    className={`${table_data_classname} font-medium text-green-600`}
+                    className={`${table_data_classname} font-semibold text-emerald-600`}
                   >
                     {`${currencyMapper(
-                      expense?.currency || "USD"
+                      expense?.currency || "USD",
                     )}${expense.amount.toFixed(2)}`}
                   </td>
 
-                  <td className={`${table_data_classname} text-gray-500`}>
+                  <td
+                    className={`${table_data_classname} text-muted-foreground`}
+                  >
                     {new Date(expense.expenseDate).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -833,7 +822,7 @@ function ExpenseList({
                   className="p-2 border border-gray-400 rounded cursor-pointer"
                   value={
                     categories.find(
-                      (cat) => cat.id === selectedExpenses[0]?.categoryId
+                      (cat) => cat.id === selectedExpenses[0]?.categoryId,
                     )?.id || ""
                   }
                   onChange={(e) => {

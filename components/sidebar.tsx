@@ -73,7 +73,7 @@ export function AppSidebar() {
             setUser({
               ...user,
               profilePictureUrl: url,
-            })
+            }),
           );
         } catch (error) {
           console.error("Error fetching profile picture:", error);
@@ -104,12 +104,12 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="z-12"
+      className="z-12 border-r border-border/70 bg-background/80 backdrop-blur"
     >
-      <SidebarHeader>
+      <SidebarHeader className="border-b border-border/70 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild className="gap-2">
               <Link href="/">
                 <Image
                   src={logo}
@@ -124,13 +124,19 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-2 py-3">
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Main
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="mb-1">
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathName === "/dashboard"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/dashboard"}
+                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                >
                   <Link href={"/dashboard"}>
                     <LayoutDashboard />
                     <span>Dashboard</span>
@@ -140,7 +146,11 @@ export function AppSidebar() {
             </SidebarMenu>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathName === "/expense"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/expense"}
+                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                >
                   <Link href={"/expense"}>
                     <DollarSign />
                     <span>Expenses</span>
@@ -156,7 +166,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Manage</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Manage
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             {/* <SidebarMenu>
             <Collapsible className="group/collapsible">
@@ -199,7 +211,7 @@ export function AppSidebar() {
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
+                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600">
                       <Wallet />
                       Budget
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -211,6 +223,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/budget"}
+                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
                         >
                           <Link href={"/budget"}>
                             <span>Active Budgets</span>
@@ -221,6 +234,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/budget/add"}
+                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
                         >
                           <Link href={"/budget/add"}>
                             <span>Set Budget</span>
@@ -236,7 +250,7 @@ export function AppSidebar() {
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
+                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600">
                       <Logs />
                       Category
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -248,6 +262,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/category"}
+                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
                         >
                           <Link href={"/category"}>
                             <span>Categories</span>
@@ -258,6 +273,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/category/add"}
+                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
                         >
                           <Link href={"/category/add"}>
                             <span>Add Category</span>
@@ -272,10 +288,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>General</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            General
+          </SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathName === "/settings"}>
+              <SidebarMenuButton
+                asChild
+                isActive={pathName === "/settings"}
+                className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+              >
                 <Link href={"/settings"}>
                   <Settings />
                   <span>Settings</span>
@@ -285,12 +307,12 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-border/70 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
         <SidebarMenu>
           <SidebarMenuItem className="mt-auto w-full">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full">
+                <SidebarMenuButton className="w-full rounded-xl bg-background/70 hover:bg-muted/60 transition-colors">
                   <Image
                     src={user.profilePictureUrl || defaulProfilePic}
                     alt="Avatar"

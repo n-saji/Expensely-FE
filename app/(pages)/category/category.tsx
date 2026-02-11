@@ -36,7 +36,7 @@ export default function CategoryPage() {
     try {
       setLoading(true);
       const response = await api.get(
-        `/categories/user/${user.id}${type ? `?type=${type}` : ""}`
+        `/categories/user/${user.id}${type ? `?type=${type}` : ""}`,
       );
       if (response.status !== 200) throw new Error("Failed to fetch expenses");
       const data = await response.data;
@@ -80,7 +80,7 @@ export default function CategoryPage() {
       setLoading(true);
       const response = await api.patch(
         `/categories/update/${toUpdate.id}`,
-        toUpdate
+        toUpdate,
       );
 
       if (response.status !== 200) {
@@ -97,28 +97,38 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="block w-full">
-      <div className="flex justify-between items-center mb-6 ">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-500 dark:text-gray-200">
-          All Categories
-        </h1>
+    <div className="w-full space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Library
+          </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+            Categories
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage and organize your spending categories.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm"
+          onClick={() => setFilter(!filter)}
+        >
           <Image
             src={user.theme === "light" ? filterIcon : filterIconWhite}
             alt="Filter"
-            className="inline-block w-6 h-6 cursor-pointer ml-4 relative"
-            onClick={() => setFilter(!filter)}
+            className="w-4 h-4"
           />
-          {/* {filter && <Tooltip content="Filter categories" />} */}
-        </div>
+          Filter
+        </button>
       </div>
       {filter && (
         <div
           className="gap-6 sm:gap-3 md:gap-4 mb-6
           grid sm:grid-cols-3
           md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7
-          bg-card p-4 rounded-lg relative 
-          dark:after:border-b-card"
+          bg-background/80 border border-border/70 p-4 rounded-2xl shadow-sm"
         >
           <DropDown
             options={categoryTypes.map((category) => ({
@@ -128,7 +138,7 @@ export default function CategoryPage() {
             selectedOption={categoryFilter}
             onSelect={(option) => {
               const ctType = categoryTypes.find(
-                (category) => category.value === option
+                (category) => category.value === option,
               );
               setCategoryFilter(ctType ? ctType.value : "");
               fetchCategories(ctType ? ctType.value : null);
@@ -136,28 +146,21 @@ export default function CategoryPage() {
           />
         </div>
       )}
-      <div className="overflow-x-auto">
-        <table
-          className="w-full h-full layout-fixed border border-gray-200 dark:border-gray-700
-          shadow-lg rounded-lg text-xs sm:text-sm border-collapse divide-y
-          divide-gray-200 dark:divide-gray-700"
-        >
-          <thead className=" text-sm uppercase tracking-wider">
-            <tr className="text-left font-semibold">
+      <div className="overflow-x-auto rounded-2xl border border-border/70 bg-background/80 shadow-sm">
+        <table className="w-full text-xs sm:text-sm table-fixed">
+          <thead className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+            <tr className="text-left text-xs uppercase tracking-[0.2em] text-muted-foreground">
               <th className={`${table_data_classname}`}>#</th>
               <th className={`${table_data_classname}`}>Category</th>
               <th className={`${table_data_classname}`}>Amount</th>
             </tr>
           </thead>
           {(!showTable || loading) && (
-            <tbody
-              className="bg-white divide-y 
-              dark:bg-gray-900 dark:text-gray-200 dark:divide-gray-700"
-            >
+            <tbody className="divide-y">
               {!loading && (
                 <tr>
                   <td colSpan={6} className="text-center py-4">
-                    <p className="text-gray-500">No expenses found</p>
+                    <p className="text-muted-foreground">No categories found</p>
                   </td>
                 </tr>
               )}
@@ -166,8 +169,7 @@ export default function CategoryPage() {
                   {[...Array(10)].map((_, index) => (
                     <tr
                       key={index}
-                      className="hover:bg-gray-100 py-3 dark:hover:bg-gray-950 
-                      transition-colors cursor-pointer"
+                      className="transition-colors hover:bg-muted/50"
                     >
                       <td className={table_data_classname}>
                         <div className={`h-4 w-4 ${table_data_loading}`}></div>
@@ -185,14 +187,11 @@ export default function CategoryPage() {
             </tbody>
           )}
           {showTable && !loading && (
-            <tbody
-              className=" divide-y divide-gray-200 text-sm
-              dark:divide-gray-700"
-            >
+            <tbody className="divide-y text-sm">
               {categoriesList.map((category) => (
                 <tr
                   key={category.id}
-                  className=" py-3 group relative transition-colors cursor-pointer"
+                  className="group relative transition-colors hover:bg-muted/50"
                   onClick={() => {
                     if (window.innerWidth < 640) {
                       setSelectedCategory(category);

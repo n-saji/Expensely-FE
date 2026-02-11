@@ -126,7 +126,7 @@ export default function AddExpensePage() {
       const validationResponse = await api.post(
         `/expenses/bulk_upload/validate`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
 
       const data = validationResponse.data;
@@ -147,12 +147,12 @@ export default function AddExpensePage() {
 
       setBulkLoadLoading(true);
       const response = await api.get(
-        `/expenses/bulk_upload/upload?file_id=${data.validationId}`
+        `/expenses/bulk_upload/upload?file_id=${data.validationId}`,
       );
 
       if (response.status !== 200) {
         throw new Error(
-          "Failed to upload expenses: " + JSON.stringify(response.data)
+          "Failed to upload expenses: " + JSON.stringify(response.data),
         );
       }
 
@@ -169,7 +169,7 @@ export default function AddExpensePage() {
         {
           description: bulkLoadResponse?.error || "Unknown error occurred",
           // handle popup via state, not JSX directly
-        }
+        },
       );
     } finally {
       setBulkLoadLoading(false);
@@ -178,12 +178,20 @@ export default function AddExpensePage() {
   };
 
   return (
-    <div
-      className="p-4 md:p-8 w-full
-         flex flex-col items-center justify-center  "
-    >
-      <Card className="w-[95%] sm:w-1/2 text-center">
-        <CardHeader>
+    <div className="w-full space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Ledger
+        </p>
+        <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+          Add Expense
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Log a new expense or bulk upload entries.
+        </p>
+      </div>
+      <Card className="w-full max-w-2xl mx-auto text-center border-border/70 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
           <CardTitle className="flex justify-center">
             <Label className="text-xl">Add New Expense</Label>
           </CardTitle>
@@ -235,7 +243,7 @@ export default function AddExpensePage() {
                   selectedOption={expense.category.id}
                   onSelect={(option) => {
                     const selectedCategory = categories.categories.find(
-                      (category) => category.id === option
+                      (category) => category.id === option,
                     );
                     setExpense({
                       ...expense,

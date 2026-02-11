@@ -68,13 +68,13 @@ export default function Notifications({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={"ghost"}>
+        <Button variant={"ghost"} className="relative">
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="relative">
                 <Bell className="w-6 h-6" />
                 {messageLength > 0 && (
-                  <Badge className="absolute -top-2 -right-2 w-4 h-4">
+                  <Badge className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-emerald-500 text-[10px] text-white">
                     {messageLength > 9 ? "9+" : messageLength}
                   </Badge>
                 )}
@@ -86,47 +86,89 @@ export default function Notifications({
           </Tooltip>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-80 md:w-md overflow-hidden">
-        <ScrollArea
-          className="h-96 w-full"
-        >
+      <PopoverContent className="p-0 w-80 md:w-md overflow-hidden border-border/70 shadow-lg">
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Inbox
+            </p>
+            <p className="text-sm font-semibold text-foreground">
+              Notifications
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge className="rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              {messageLength} new
+            </Badge>
+          </div>
+        </div>
+        <ScrollArea className="h-96 w-full">
           {notifications.notifications.length === 0 ? (
-            <div className="flex justify-center items-center p-4">
-              <Label className="text-muted-foreground">No notifications</Label>
+            <div className="flex flex-col justify-center items-center p-6 text-center">
+              <div className="h-10 w-10 rounded-full bg-muted/60 flex items-center justify-center">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <Label className="text-muted-foreground mt-2">
+                No notifications
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                You are all caught up.
+              </p>
             </div>
           ) : (
             notifications.notifications.map((notification) => {
+              const isUnread = !notification.isRead;
               return (
-                <div key={notification.id} className="">
-                  <Item>
+                <div key={notification.id} className="px-3">
+                  <Item
+                    className={`rounded-2xl border border-transparent px-3 py-3 transition-colors ${
+                      isUnread
+                        ? "bg-emerald-500/10 border-emerald-500/20"
+                        : "bg-background/60 hover:bg-muted/40"
+                    }`}
+                  >
                     <ItemMedia className="p-0">
-                      {notification.type === "INFO" && (
-                        <BadgeInfo className="h-5 w-5" />
-                      )}
-                      {notification.type === "ALERT" && (
-                        <BadgeAlert className="h-5 w-5" />
-                      )}
-                      {notification.type === "ERROR" && (
-                        <BadgeX className="h-5 w-5" />
-                      )}
-                      {notification.type === "SUCCESS" && (
-                        <BadgeCheck className="h-5 w-5" />
-                      )}
+                      <div
+                        className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                          notification.type === "SUCCESS"
+                            ? "bg-emerald-500/15 text-emerald-600"
+                            : notification.type === "ERROR"
+                              ? "bg-rose-500/15 text-rose-500"
+                              : notification.type === "ALERT"
+                                ? "bg-amber-500/15 text-amber-500"
+                                : "bg-sky-500/15 text-sky-500"
+                        }`}
+                      >
+                        {notification.type === "INFO" && (
+                          <BadgeInfo className="h-5 w-5" />
+                        )}
+                        {notification.type === "ALERT" && (
+                          <BadgeAlert className="h-5 w-5" />
+                        )}
+                        {notification.type === "ERROR" && (
+                          <BadgeX className="h-5 w-5" />
+                        )}
+                        {notification.type === "SUCCESS" && (
+                          <BadgeCheck className="h-5 w-5" />
+                        )}
+                      </div>
                     </ItemMedia>
                     <ItemContent className="p-0">
-                      <ItemTitle className="p-0 text-sm">
-                        {notification.message.charAt(0).toUpperCase() +
-                          notification.message.slice(1)}
-                        {!notification.isRead ? (
-                          <Badge className="">New</Badge>
+                      <ItemTitle className="p-0 text-sm flex items-center gap-2">
+                        <span className="text-foreground">
+                          {notification.message.charAt(0).toUpperCase() +
+                            notification.message.slice(1)}
+                        </span>
+                        {isUnread ? (
+                          <Badge className="rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                            New
+                          </Badge>
                         ) : null}
                       </ItemTitle>
                       <ItemFooter>
                         <Label className="text-xs text-muted-foreground">
-                          {/* From: {notification.sender} -{" "} */}
-
                           {formatNotificationTime(
-                            new Date(notification.time + "Z")
+                            new Date(notification.time + "Z"),
                           )}
                         </Label>
                       </ItemFooter>
@@ -134,7 +176,7 @@ export default function Notifications({
                     <ItemActions>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="">
+                          <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
@@ -161,27 +203,25 @@ export default function Notifications({
                       </DropdownMenu>
                     </ItemActions>
                   </Item>
-                  <Separator />
-                  {/* {index !== notifications.notifications.length - 1 && (
-                    <Separator />
-                  )} */}
+                  <Separator className="my-2" />
                 </div>
               );
             })
           )}
         </ScrollArea>
-        <Separator />
         {notifications.notifications.length === 0 ? null : (
-          <Button
-            variant="link"
-            className="w-full flex justify-start"
-            disabled={messageLength === 0}
-            onClick={() => {
-              markAllAsRead();
-            }}
-          >
-            Mark all as read
-          </Button>
+          <div className="p-3">
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={messageLength === 0}
+              onClick={() => {
+                markAllAsRead();
+              }}
+            >
+              Mark all as read
+            </Button>
+          </div>
         )}
       </PopoverContent>
     </Popover>
