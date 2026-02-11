@@ -126,7 +126,7 @@ export default function PieChartComp({
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
         <CardTitle>{title || "Spending by Category"}</CardTitle>
         <CardAction>
           {setCurrentYearForYearly && currentYearForYearly && min_year && (

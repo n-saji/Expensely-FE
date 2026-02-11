@@ -108,31 +108,34 @@ export default function DashboardPage() {
       }
     }
   };
-  
-const fetchMonthlyOverview = async () => {
-  try {
-    setOverviewV2Loading(true);
 
-    const [monthlyRes, categoryRes] = await Promise.all([
-      api.get(`/expenses/monthly?count=${overviewParams.count}&type=${overviewParams.type}`),
-      api.get(`/expenses/monthly/category?count=${overviewParams.count}&type=${overviewParams.type}`)
-    ]);
+  const fetchMonthlyOverview = async () => {
+    try {
+      setOverviewV2Loading(true);
 
-    if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
-      throw new Error("Network response was not ok");
+      const [monthlyRes, categoryRes] = await Promise.all([
+        api.get(
+          `/expenses/monthly?count=${overviewParams.count}&type=${overviewParams.type}`,
+        ),
+        api.get(
+          `/expenses/monthly/category?count=${overviewParams.count}&type=${overviewParams.type}`,
+        ),
+      ]);
+
+      if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
+        throw new Error("Network response was not ok");
+      }
+
+      setOverviewV2({
+        amountByMonthV2: monthlyRes.data,
+        monthlyCategoryExpenseV2: categoryRes.data,
+      });
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      setOverviewV2Loading(false);
     }
-
-    setOverviewV2({
-      amountByMonthV2: monthlyRes.data,
-      monthlyCategoryExpenseV2: categoryRes.data
-    });
-
-  } catch (error) {
-    console.error("There was a problem with the fetch operation:", error);
-  } finally {
-    setOverviewV2Loading(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchOverview({
@@ -385,8 +388,58 @@ const fetchMonthlyOverview = async () => {
         />
       </div>
 
-      {/* recent transactions module */}
-      <div className="w-full">
+      {/*  budget module */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-0 md:gap-x-4">
+        <Card
+          className="w-full h-full
+            "
+        >
+          <CardHeader className="">
+            <CardTitle>Budgets</CardTitle>
+          </CardHeader>
+          {overview ? (
+            <CardContent className="md:max-h-[280px] overflow-y-auto">
+              {Object.values(overview.budgetServiceMap).length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No budgets found.
+                </p>
+              )}
+              {Object.values(overview.budgetServiceMap).map((budget) => (
+                <div key={budget.id} className="mb-6">
+                  <div className="flex flex-wrap justify-between mb-1 items-center">
+                    <Label className="">
+                      {budget.category.name}{" "}
+                      {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                    </Label>
+                    <Label className="text-sm text-muted-foreground">
+                      {currencyMapper(user?.currency || "USD")}
+                      {budget.amountSpent.toFixed(2)} /{" "}
+                      {currencyMapper(user?.currency || "USD")}
+                      {budget.amountLimit.toFixed(2)}
+                    </Label>
+                  </div>
+
+                  <ProgressBar
+                    value={budget.amountSpent}
+                    max={budget.amountLimit}
+                    variant={budgetVariant(
+                      budget.amountSpent,
+                      budget.amountLimit,
+                    )}
+                    showAnimation={true}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          ) : (
+            <CardContent className="md:max-h-[280px] overflow-y-auto">
+              <div className="flex h-full w-full justify-center items-center">
+                <Spinner className="text-muted-foreground h-6 w-6" />
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
@@ -395,61 +448,6 @@ const fetchMonthlyOverview = async () => {
             <Expense isDemo={true} />
           </CardContent>
         </Card>
-      </div>
-
-      {/*  budget module */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-x-4">
-        <div className="w-full h-full">
-          <Card
-            className="w-full h-full
-            "
-          >
-            <CardHeader>
-              <CardTitle>Budgets</CardTitle>
-            </CardHeader>
-            {overview ? (
-              <CardContent className="md:max-h-[280px] overflow-y-auto">
-                {Object.values(overview.budgetServiceMap).length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No budgets found.
-                  </p>
-                )}
-                {Object.values(overview.budgetServiceMap).map((budget) => (
-                  <div key={budget.id} className="mb-6">
-                    <div className="flex flex-wrap justify-between mb-1 items-center">
-                      <Label className="text-sm">
-                        {budget.category.name}{" "}
-                        {budgetIcon(budget.amountSpent, budget.amountLimit)}
-                      </Label>
-                      <Label className="text-sm text-muted-foreground">
-                        {currencyMapper(user?.currency || "USD")}
-                        {budget.amountSpent.toFixed(2)} /{" "}
-                        {currencyMapper(user?.currency || "USD")}
-                        {budget.amountLimit.toFixed(2)}
-                      </Label>
-                    </div>
-
-                    <ProgressBar
-                      value={budget.amountSpent}
-                      max={budget.amountLimit}
-                      variant={budgetVariant(
-                        budget.amountSpent,
-                        budget.amountLimit,
-                      )}
-                      showAnimation={true}
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            ) : (
-              <CardContent className="md:max-h-[280px] overflow-y-auto">
-                <div className="flex h-full w-full justify-center items-center">
-                  <Spinner className="text-muted-foreground h-6 w-6" />
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        </div>
       </div>
     </div>
   );
