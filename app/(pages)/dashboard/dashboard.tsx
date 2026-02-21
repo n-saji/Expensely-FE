@@ -407,17 +407,11 @@ export default function DashboardPage() {
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                      Planning
-                    </p>
                     <CardTitle>Budgets</CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
                       {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
                     </p>
                   </div>
-                  {/* <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
-                    This month
-                  </div> */}
                 </div>
               </CardHeader>
               {overview ? (
@@ -427,53 +421,50 @@ export default function DashboardPage() {
                       No budgets found.
                     </p>
                   )}
-                  {Object.values(overview.budgetServiceMap).map(
-                    (budget, index) => (
-                      <div
-                        key={budget.id}
-                        className="group rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200  hover:shadow-lg hover:border-emerald-500/30 hover:bg-gradient-to-br hover:from-emerald-500/5 hover:to-cyan-500/5 animate-in fade-in slide-in-from-bottom-3"
-                        style={{ animationDelay: `${index * 70}ms` }}
-                      >
-                        <div className="flex flex-wrap justify-between gap-2 items-center">
-                          <div className="flex items-center gap-2">
-                            <Label className="text-sm font-medium text-foreground">
-                              {budget.category.name}
-                            </Label>
-                            <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
-                              {budget.period}
-                            </div>
-                            {budgetIcon(budget.amountSpent, budget.amountLimit)}
-                          </div>
-                          <Label className="text-xs text-muted-foreground">
-                            {currencyMapper(user?.currency || "USD")}
-                            {budget.amountSpent.toFixed(2)} /{" "}
-                            {currencyMapper(user?.currency || "USD")}
-                            {budget.amountLimit.toFixed(2)}
+                  {Object.values(overview.budgetServiceMap).map((budget) => (
+                    <div
+                      key={budget.id}
+                      className="group rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200  hover:shadow-lg hover:border-emerald-500/30 hover:bg-gradient-to-br hover:from-emerald-500/5 hover:to-cyan-500/5 slide-in-from-bottom-3"
+                    >
+                      <div className="flex flex-col md:flex-row flex-wrap justify-between gap-2 items-start md:items-center">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium text-foreground">
+                            {budget.category.name}
                           </Label>
-                        </div>
-
-                        <div className="mt-3">
-                          <div className="rounded-full bg-muted/60 p-1">
-                            <ProgressBar
-                              value={budget.amountSpent}
-                              max={budget.amountLimit}
-                              variant={budgetVariant(
-                                budget.amountSpent,
-                                budget.amountLimit,
-                              )}
-                              showAnimation={true}
-                            />
+                          {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                          <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                            {budget.period}
                           </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            {Math.round(
-                              (budget.amountSpent / budget.amountLimit) * 100,
-                            )}
-                            % of limit used
-                          </p>
                         </div>
+                        <Label className="text-xs text-muted-foreground">
+                          {currencyMapper(user?.currency || "USD")}
+                          {budget.amountSpent.toFixed(2)} /{" "}
+                          {currencyMapper(user?.currency || "USD")}
+                          {budget.amountLimit.toFixed(2)}
+                        </Label>
                       </div>
-                    ),
-                  )}
+
+                      <div className="mt-3">
+                        <div className="rounded-full bg-muted/60 p-1">
+                          <ProgressBar
+                            value={budget.amountSpent}
+                            max={budget.amountLimit}
+                            variant={budgetVariant(
+                              budget.amountSpent,
+                              budget.amountLimit,
+                            )}
+                            showAnimation={true}
+                          />
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {Math.round(
+                            (budget.amountSpent / budget.amountLimit) * 100,
+                          )}
+                          % of limit used
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               ) : (
                 <CardContent className="flex-1 md:max-h-[320px] overflow-y-auto">

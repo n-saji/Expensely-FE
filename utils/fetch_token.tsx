@@ -1,8 +1,25 @@
 export default function FetchToken() {
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.getItem !== "function" ||
+    typeof window.sessionStorage?.getItem !== "function"
+  ) {
+    return null;
+  }
+
+  const token =
+    window.localStorage.getItem("token") ||
+    window.sessionStorage.getItem("token");
   return token;
 }
 export function FetchUserId() {
-  const userId = localStorage.getItem("user_id");
-  return userId
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.getItem !== "function"
+  ) {
+    return null;
+  }
+
+  const userId = window.localStorage.getItem("user_id");
+  return userId;
 }

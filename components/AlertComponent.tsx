@@ -14,26 +14,35 @@ import { motion } from "framer-motion";
 
 export default function AlertComponent() {
   const [alerts, setAlerts] = useState<Array<AlertDto>>([]);
-  useEffect(() => {
-    const FetchAlerts = async () => {
-      try {
-        const response = await api.get("/users/alerts");
-        if (response.status === 200) {
-          const data = response.data;
-          setAlerts(data);
-          // Process the fetched alerts data as needed
-        } else {
-          toast.error("Failed to fetch alerts", {
-            description: `Server responded with status ${response.status}`,
-          });
-        }
-      } catch (error) {
-        toast.error("An error occurred while fetching alerts", {
-          description: (error as Error).message,
+  const FetchAlerts = async () => {
+    try {
+      const response = await api.get("/users/alerts");
+      if (response.status === 200) {
+        const data = response.data;
+        setAlerts(data);
+        // Process the fetched alerts data as needed
+      } else {
+        toast.error("Failed to fetch alerts", {
+          description: `Server responded with status ${response.status}`,
         });
       }
-    };
+    } catch (error) {
+      toast.error("An error occurred while fetching alerts", {
+        description: (error as Error).message,
+      });
+    }
+  };
+
+  useEffect(() => {
     FetchAlerts();
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      FetchAlerts();
+    };
+    window.addEventListener("expense-added", handler);
+    return () => window.removeEventListener("expense-added", handler);
   }, []);
 
   return (

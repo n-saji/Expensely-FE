@@ -1,17 +1,24 @@
 import api from "@/lib/api";
 
-
 export default async function Logout() {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.getItem !== "function" ||
+    typeof window.sessionStorage?.getItem !== "function"
+  ) {
+    return;
+  }
 
   const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+    window.localStorage.getItem("token") ||
+    window.sessionStorage.getItem("token");
 
   if (token) {
     await api.get(`/users/logout`);
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
+    window.localStorage.removeItem("token");
+    window.sessionStorage.removeItem("token");
   }
 
-  localStorage.removeItem("user_id");
-  localStorage.removeItem("theme");
+  window.localStorage.removeItem("user_id");
+  window.localStorage.removeItem("theme");
 }

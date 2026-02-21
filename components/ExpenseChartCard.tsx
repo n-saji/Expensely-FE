@@ -230,8 +230,8 @@ export default function PieChartComp({
                   ) : (
                     <PieChart
                       margin={{
-                        right: isDesktop ? 0 : 200,
-                        top: isDesktop ? 0 : 10,
+                        right: 0,
+                        top: 0,
                       }}
                     >
                       <Pie
@@ -262,14 +262,15 @@ export default function PieChartComp({
                         }}
                         labelStyle={{ color: "#e2e8f0" }}
                         cursor={{ fill: "rgba(255, 255, 255, 0.12)" }}
-                        formatter={(value: number) => [
-                          `${currencyMapper(currency)}${value.toLocaleString(
-                            undefined,
-                            {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            },
-                          )}`,
+                        formatter={(value) => [
+                          `${currencyMapper(currency)}${
+                            value
+                              ? value.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : 0
+                          }`,
                         ]}
                       />
                     </PieChart>
@@ -398,8 +399,15 @@ export function ExpensesTop5Monthly({
                 labelStyle={{ color: "#e2e8f0" }}
                 // itemStyle={{ color: "#fff" }}
                 cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                formatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(2)}`
+                formatter={(value) =>
+                  `${currencyMapper(currency)}${
+                    value
+                      ? value.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : 0
+                  }`
                 }
               />
               <Bar
@@ -639,14 +647,15 @@ export function ExpensesOverDays({
                       strokeWidth: 1,
                       fill: "rgba(255, 255, 255, 0.1)",
                     }}
-                    formatter={(spent: number) =>
-                      `${currencyMapper(currency)}${spent.toLocaleString(
-                        undefined,
-                        {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        },
-                      )}`
+                    formatter={(spent) =>
+                      `${currencyMapper(currency)}${
+                        spent
+                          ? spent.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })
+                          : 0
+                      }`
                     }
                     labelFormatter={(key) => {
                       return `${key}${(() => {
@@ -669,7 +678,7 @@ export function ExpensesOverDays({
                 </ComposedChart>
               )}
             </ResponsiveContainer>
-            <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
+            <div className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm ">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Total
@@ -956,16 +965,17 @@ export function YearlyExpenseLineChart({
                       cursor={{
                         stroke: darkMode ? "#525252" : "#DBDBDB",
                       }}
-                      formatter={(value: number, name: string) => {
+                      formatter={(value, name) => {
                         if (name === "amount")
                           return [
-                            `${currencyMapper(currency)}${value.toLocaleString(
-                              undefined,
-                              {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              },
-                            )}`,
+                            `${currencyMapper(currency)}${
+                              value
+                                ? value.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : 0
+                            }`,
                             "Amount",
                           ];
                         if (name === "trend") return [];
@@ -1068,14 +1078,15 @@ export function YearlyExpenseLineChart({
                       cursor={{
                         stroke: darkMode ? "#525252" : "#DBDBDB",
                       }}
-                      formatter={(value: number) =>
-                        `${currencyMapper(currency)}${value.toLocaleString(
-                          undefined,
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          },
-                        )}`
+                      formatter={(value) =>
+                        `${currencyMapper(currency)}${
+                          value
+                            ? value.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : 0
+                        }`
                       }
                     />
                     {Object.keys(chartData[0])
@@ -1260,8 +1271,10 @@ export function YearlyExpenseLineChartV2({
 
   return (
     <Card className="w-full overflow-hidden border-border/70 shadow-sm">
-      <CardHeader className="flex flex-wrap justify-between items-center gap-3 
-      ">
+      <CardHeader
+        className="flex flex-wrap justify-between items-center gap-3 
+      "
+      >
         <CardTitle className="flex items-center justify-between w-fit gap-2">
           Expense Trends
           <Tabs defaultValue="monthly">
@@ -1388,16 +1401,17 @@ export function YearlyExpenseLineChartV2({
                       cursor={{
                         stroke: darkMode ? "#525252" : "#DBDBDB",
                       }}
-                      formatter={(value: number, name: string) => {
+                      formatter={(value, name) => {
                         if (name === "amount")
                           return [
-                            `${currencyMapper(currency)}${value.toLocaleString(
-                              undefined,
-                              {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              },
-                            )}`,
+                            `${currencyMapper(currency)}${
+                              value
+                                ? value.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : 0
+                            }`,
                             "Amount",
                           ];
                         if (name === "trend") return [];
@@ -1418,8 +1432,10 @@ export function YearlyExpenseLineChartV2({
                   </ComposedChart>
                 )}
               </ResponsiveContainer>
-                <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 
-              text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
+              <div
+                className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 
+              text-sm"
+              >
                 <div>
                   <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Total
@@ -1501,14 +1517,15 @@ export function YearlyExpenseLineChartV2({
                       cursor={{
                         stroke: darkMode ? "#525252" : "#DBDBDB",
                       }}
-                      formatter={(value: number) =>
-                        `${currencyMapper(currency)}${value.toLocaleString(
-                          undefined,
-                          {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          },
-                        )}`
+                      formatter={(value) =>
+                        `${currencyMapper(currency)}${
+                          value
+                            ? value.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : 0
+                        }`
                       }
                     />
                     {Object.keys(chartData[0])

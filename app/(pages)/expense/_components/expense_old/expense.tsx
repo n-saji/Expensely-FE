@@ -528,7 +528,7 @@ function ExpenseList({
           <div className="flex space-x-2">
             <DatePicker
               selected={fromDateFilter ? new Date(fromDateFilter) : null}
-              onChange={(date) => {
+              onChange={(date: Date | null) => {
                 setFromDate(date ? date.toISOString().slice(0, 16) : "");
                 fetchExpenses({
                   fromDate: date ? date.toISOString().slice(0, 16) : "",
@@ -555,7 +555,7 @@ function ExpenseList({
 
             <DatePicker
               selected={toDateFilter ? new Date(toDateFilter) : null}
-              onChange={(date) => {
+              onChange={(date: Date | null) => {
                 setToDate(date ? date.toISOString().slice(0, 16) : "");
                 fetchExpenses({
                   fromDate: fromDateFilter
@@ -609,9 +609,9 @@ function ExpenseList({
               {!isDemo && (
                 <th className={`${table_data_classname} w-1/12`}>#</th>
               )}
-              <th className={`${table_data_classname} w-6/12`}>Description</th>
-              <th className={`${table_data_classname} w-2/12`}>Amount</th>
-              <th className={`${table_data_classname} w-3/12`}>Date</th>
+              <th className={`${table_data_classname} ${isDemo ? 'w-2/4' : 'w-6/12'}`}>Description</th>
+              <th className={`${table_data_classname} ${isDemo ? 'w-1/4' : 'w-2/12'}`}>Amount</th>
+              <th className={`${table_data_classname} ${isDemo ? 'w-1/4' : 'w-3/12'}`}>Date</th>
               {!isDemo && (
                 <th className={`${table_data_classname} w-1/12`}></th>
               )}
