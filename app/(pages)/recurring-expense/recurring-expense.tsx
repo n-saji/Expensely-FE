@@ -47,7 +47,7 @@ export default function RecurringExpensePage() {
   const fetchRecurringExpenses = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/recurring-expenses`);
+      const response = await api.get(`/recurring-expenses/fetch-all`);
       if (response.status !== 200) {
         throw new Error("Failed to fetch recurring expenses");
       }
