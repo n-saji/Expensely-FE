@@ -22,6 +22,13 @@ import CardComponent from "@/components/CardComponent";
 import Expense from "../expense/_components/expense_old/expense";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export default function DashboardPage() {
   const user = useSelector((state: RootState) => state.user);
@@ -333,14 +340,64 @@ export default function DashboardPage() {
         </div>
 
         <div className="md:col-span-1 xl:col-span-3">
-          <CardComponent
-            title="Active Categories"
-            numberData={`${overview?.totalCategories || 0}`}
-            description={`Most used category: ${
-              overview?.mostFrequentCategory || "N/A"
-            }`}
-            loading={overview === null}
-          />
+          <Card className="h-full border-border/70 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm text-muted-foreground font-medium">
+                Upcoming Recurring Expenses
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative">
+              {overview === null ? (
+                <div className="flex h-[90px] items-center justify-center">
+                  <Spinner className="text-muted-foreground h-6 w-6" />
+                </div>
+              ) : (overview.upcomingRecurringExpenses || []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No upcoming recurring expenses.
+                </p>
+              ) : (
+                <div className="w-[95%] mx-auto">
+                  <Carousel className="w-full">
+                    <CarouselContent className="">
+                      {(overview.upcomingRecurringExpenses || []).map(
+                        (expense, index) => (
+                          <CarouselItem
+                            key={`${expense.id || expense.description}-${index}`}
+                            className=""
+                          >
+                            <div className="w-full rounded-lg border border-border/70 px-3 py-3 flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-medium text-foreground truncate">
+                                  {expense.description}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {currencyMapper(user.currency)}
+                                  {expense.amount.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
+                                </p>
+                              </div>
+                              <div className="h-14 w-14 shrink-0 rounded-md border border-border/70 bg-background/80 flex flex-col items-center justify-center">
+                                <p className="text-[10px] leading-none text-muted-foreground">
+                                  {getWeekdayShort(expense.nextOccurrence)}
+                                </p>
+                                <p className="mt-1 text-xs leading-none text-foreground">
+                                  {formatDayNumberMonth(expense.nextOccurrence)}
+                                </p>
+                              </div>
+                            </div>
+                          </CarouselItem>
+                        ),
+                      )}
+                    </CarouselContent>
+                    <CarouselPrevious className="-ml-2" />
+                    <CarouselNext className="-mr-2" />
+                  </Carousel>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <div className="md:col-span-1 xl:col-span-3">
@@ -510,5 +567,48 @@ function budgetIcon(amountSpent: number, amountLimit: number) {
     return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
   } else {
     return <FileWarning className="h-4 w-4 text-red-500" />;
+  }
+}
+
+function parseLocalDate(dateValue: string) {
+  const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (dateOnlyRegex.test(dateValue)) {
+    const [year, month, day] = dateValue.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(dateValue);
+}
+
+function getWeekdayShort(dateValue: string) {
+  const date = parseLocalDate(dateValue);
+  return date.toLocaleDateString("en-US", { weekday: "short" });
+}
+
+function formatDayMonth(dateValue: string) {
+  const date = parseLocalDate(dateValue);
+  const day = date.getDate();
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const suffix = getDaySuffix(day);
+  return `${day}${suffix} ${month}`;
+}
+
+function formatDayNumberMonth(dateValue: string) {
+  const date = parseLocalDate(dateValue);
+  const day = date.getDate();
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  return `${day} ${month}`;
+}
+
+function getDaySuffix(day: number) {
+  if (day >= 11 && day <= 13) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
   }
 }

@@ -11,6 +11,7 @@ import {
   DollarSign,
   Logs,
   Plus,
+  Repeat,
 } from "lucide-react";
 
 import {
@@ -238,6 +239,45 @@ export function AppSidebar() {
                         >
                           <Link href={"/budget/add"}>
                             <span>Set Budget</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+            <SidebarMenu>
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600">
+                      <Repeat />
+                      Recurring Expense
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem key={"Recurring-show"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/recurring-expense"}
+                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                        >
+                          <Link href={"/recurring-expense"}>
+                            <span>Recurring Expenses</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem key={"Recurring-add"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/recurring-expense/add"}
+                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                        >
+                          <Link href={"/recurring-expense/add"}>
+                            <span>Add Recurring Expense</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuSubItem>

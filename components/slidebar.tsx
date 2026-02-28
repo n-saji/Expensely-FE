@@ -5,7 +5,6 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -14,28 +13,32 @@ import {
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import DropDown from "@/components/drop-down";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 import * as React from "react";
-import { ChevronDownIcon, Plus } from "lucide-react";
-
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { Label } from "./ui/label";
+import RecurringExpenseForm from "@/components/recurring-expense-form";
+import { CreateRecurringExpenseReq } from "@/global/dto";
 
 export default function Slidebar() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
-  const [open, setOpen] = React.useState(false);
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
   const [expense, setExpense] = useState({
     user: {
       id: user.id,
@@ -45,7 +48,7 @@ export default function Slidebar() {
     },
     amount: 0,
     description: "",
-    expenseDate: new Date().toLocaleString().slice(0, 10),
+    expenseDate: new Date().toISOString().slice(0, 10),
   });
   const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
 
@@ -70,16 +73,17 @@ export default function Slidebar() {
 
     setAddingExpenseLoading(true);
     try {
-      // convert date to datetime
       const expenseDate = new Date(expense.expenseDate);
+      const payload = {
+        ...expense,
+        expenseDate:
+          expenseDate.toISOString().slice(0, 10) +
+          "T" +
+          new Date().toTimeString().slice(0, 8) +
+          ".000Z",
+      };
 
-      expense.expenseDate =
-        expenseDate.toISOString().slice(0, 10) +
-        "T" +
-        new Date().toTimeString().slice(0, 8) +
-        ".000Z";
-
-      const response = await api.post(`/expenses/create`, expense);
+      const response = await api.post(`/expenses/create`, payload);
 
       if (response.status !== 200) {
         throw new Error("Failed to add expense");
@@ -94,133 +98,161 @@ export default function Slidebar() {
         },
         amount: 0,
         description: "",
-        expenseDate: expense.expenseDate
-          ? expense.expenseDate.slice(0, 10)
-          : new Date().toLocaleString().slice(0, 10),
+        expenseDate: new Date().toISOString().slice(0, 10),
       });
 
-      // after successful add
       window.dispatchEvent(new Event("expense-added"));
-
-      toast.success("Expense added successfully", {});
+      toast.success("Expense added successfully");
+      setSheetOpen(false);
     } catch (error) {
       console.error("Error adding expense:", error);
+      toast.error("Failed to add expense", { description: String(error) });
     } finally {
       setAddingExpenseLoading(false);
     }
   };
+
+  const handleRecurringSubmit = async (data: CreateRecurringExpenseReq) => {
+    const response = await api.post(`/recurring-expenses/create`, data);
+
+    if (response.status !== 200) {
+      throw new Error("Failed to add recurring expense");
+    }
+
+    window.dispatchEvent(new Event("recurring-expense-added"));
+    setSheetOpen(false);
+  };
+
   return (
-    <Sheet>
+    <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost">
           <Plus className="h-3 w-3" />
           <Label className="text-xs">Add Expense</Label>
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="h-full flex flex-col gap-0">
         <SheetHeader>
           <SheetTitle>Add Expense</SheetTitle>
-          <SheetDescription>Add a new expense to your list</SheetDescription>
+          <SheetDescription>
+            Add a new expense to your ledger. You can choose to make it a
+            recurring expense or a one-time transaction.
+          </SheetDescription>
         </SheetHeader>
 
-        <form
-          className="flex flex-col space-y-4 p-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            handleSubmit(event);
-          }}
-        >
-          <Input
-            type="text"
-            placeholder="Expense Name"
-            value={expense.description}
-            onChange={(e) =>
-              setExpense({
-                ...expense,
-                description: e.target.value,
-              })
-            }
-          />
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="Amount"
-            value={expense.amount === 0 ? "" : expense.amount}
-            onChange={(e) =>
-              setExpense({
-                ...expense,
-                amount: Number(e.target.value),
-              })
-            }
-          />
+        <div className="p-4 space-y-4 flex flex-col flex-1 h-full">
+          <div className="flex items-center justify-between rounded-md border border-border/70 p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="recurring-toggle">Recurring expense</Label>
+              <p className="text-xs text-muted-foreground">
+                Toggle to create a recurring expense that repeats on a regular
+                schedule.
+              </p>
+            </div>
+            <Switch
+              id="recurring-toggle"
+              checked={isRecurring}
+              onCheckedChange={setIsRecurring}
+            />
+          </div>
 
-          <DropDown
-            options={categories.categories.map((category) => ({
-              label: category.name,
-              value: category.id,
-            }))}
-            selectedOption={expense.category.id}
-            onSelect={(option) => {
-              const selectedCategory = categories.categories.find(
-                (category) => category.id === option,
-              );
-              setExpense({
-                ...expense,
-                category: {
-                  id: selectedCategory ? selectedCategory.id : "",
-                },
-              });
-            }}
-          />
-
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                id="date"
-                className="w-full justify-between text-muted-foreground"
-              >
-                {expense ? expense.expenseDate : "Select date"}
-                <ChevronDownIcon />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-full overflow-hidden p-0"
-              align="start"
-            >
-              <Calendar
-                mode="single"
-                selected={expense ? new Date(expense.expenseDate) : undefined}
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  setOpen(false);
-                  setExpense({
-                    ...expense,
-                    expenseDate: date ? date.toLocaleString().slice(0, 10) : "",
-                  });
-                }}
+          {isRecurring ? (
+            <>
+              <RecurringExpenseForm
+                submitLabel="Add Recurring Expense"
+                onSubmit={handleRecurringSubmit}
               />
-            </PopoverContent>
-          </Popover>
-        </form>
+              <SheetClose asChild>
+                <Button variant="outline" className="w-full">
+                  Cancel
+                </Button>
+              </SheetClose>
+            </>
+          ) : (
+            <form
+              className="flex flex-col space-y-4 h-full flex-1"
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleSubmit(event);
+              }}
+            >
+              <div className="flex flex-col space-y-4 flex-1">
+                <Label htmlFor="expense-name">Expense Name</Label>
+                <Input
+                  id="expense-name"
+                  type="text"
+                  placeholder="Expense Name"
+                  value={expense.description}
+                  onChange={(e) =>
+                    setExpense({
+                      ...expense,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Amount"
+                  value={expense.amount === 0 ? "" : expense.amount}
+                  onChange={(e) =>
+                    setExpense({
+                      ...expense,
+                      amount: Number(e.target.value),
+                    })
+                  }
+                />
 
-        <SheetFooter>
-          <Button
-            type="submit"
-            disabled={adding_expense_loading}
-            onClick={async (e) => {
-              await handleSubmit(e);
-              setOpen(false);
-            }}
-
-          >
-            {adding_expense_loading ? <Spinner /> : "Add Expense"}
-          </Button>
-          <SheetClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </SheetClose>
-        </SheetFooter>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  onValueChange={(option) =>
+                    setExpense({
+                      ...expense,
+                      category: {
+                        id: option,
+                      },
+                    })
+                  }
+                  value={expense.category.id}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={expense.expenseDate}
+                  onChange={(e) =>
+                    setExpense({
+                      ...expense,
+                      expenseDate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="flex flex-col space-y-4">
+                <Button type="submit" disabled={adding_expense_loading}>
+                  {adding_expense_loading ? <Spinner /> : "Add Expense"}
+                </Button>
+                <SheetClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </SheetClose>
+              </div>
+            </form>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   );

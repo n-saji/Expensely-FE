@@ -69,6 +69,19 @@ export interface ExpenseOverview {
   earliestStartYear: number;
   thisMonthMostExpensiveItem: Record<string, number>;
   budgetServiceMap: Record<string, Budget>;
+  upcomingRecurringExpenses: UpcomingRecurringExpense[];
+}
+
+export interface UpcomingRecurringExpense {
+  id: string | null;
+  userId: string | null;
+  categoryId: string | null;
+  amount: number;
+  description: string;
+  recurrence: Recurrence;
+  date: string;
+  nextOccurrence: string;
+  active: boolean;
 }
 export interface ExpenseOverviewV2 {
   amountByMonthV2: Record<string, number>;
@@ -140,4 +153,39 @@ export enum OverviewEnum {
   MONTH = "MONTH",
   YEAR = "YEAR",
   ALL_TIME = "ALL_TIME",
+}
+
+export enum Recurrence {
+  Daily = "DAILY",
+  Weekly = "WEEKLY",
+  Monthly = "MONTHLY",
+  Yearly = "YEARLY",
+}
+
+export interface RecurringExpense {
+  id: string;
+  userId: string;
+  categoryId: string;
+  amount: number;
+  description: string;
+  recurrence: Recurrence;
+  date: string;
+  nextOccurrence: string;
+  active: boolean;
+}
+
+export interface CreateRecurringExpenseReq {
+  categoryId: string;
+  amount: number;
+  description: string;
+  recurrence: Recurrence;
+  date: string;
+}
+
+export interface UpdateRecurringExpenseReq {
+  id: string;
+  amount: number;
+  description: string;
+  recurrence: Recurrence;
+  date: string;
 }

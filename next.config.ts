@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         destination: process.env.NEXT_PUBLIC_API_URL + "/expenses/:path*",
       },
       {
+        source: "/api/recurring-expenses/:path*",
+        destination:
+          process.env.NEXT_PUBLIC_API_URL + "/recurring-expenses/:path*",
+      },
+      {
         source: "/api/web_sockets/:path*",
         destination: process.env.NEXT_PUBLIC_API_URL + "/web_sockets/:path*",
       },
