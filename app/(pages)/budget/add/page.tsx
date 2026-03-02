@@ -61,7 +61,7 @@ const budgetSchema = z.object({
 export default function AddBudgetPage() {
   const user = useSelector((state: RootState) => state.user);
   const [availableCategories, setAvailableCategories] = useState<Category[]>(
-    []
+    [],
   );
   const [loadingCategories, setLoadingCategories] = useState(true);
   const form = useForm<z.infer<typeof budgetSchema>>({
@@ -165,7 +165,7 @@ export default function AddBudgetPage() {
       });
 
       setAvailableCategories((prev) =>
-        prev.filter((category) => category.id !== data.Category.id)
+        prev.filter((category) => category.id !== data.Category.id),
       );
 
       form.reset();

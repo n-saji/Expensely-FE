@@ -142,7 +142,7 @@ export default function ExpenseTableComponent() {
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((old) =>
-      typeof updater === "function" ? updater(old) : updater
+      typeof updater === "function" ? updater(old) : updater,
     );
   };
 
@@ -158,7 +158,7 @@ export default function ExpenseTableComponent() {
 
   useEffect(() => {
     const selectedRows = expensesList.expenses.filter(
-      (expense) => rowSelection[expense.id]
+      (expense) => rowSelection[expense.id],
     );
     setSelectedExpenses(selectedRows);
   }, [rowSelection, expensesList]);
@@ -273,7 +273,7 @@ export default function ExpenseTableComponent() {
     try {
       setLoading(true);
       const oldExpense = expensesList.expenses.find(
-        (item) => item.id === data.id
+        (item) => item.id === data.id,
       );
 
       if (
@@ -328,7 +328,7 @@ export default function ExpenseTableComponent() {
             categoryId: expense.categoryId,
             categoryName: expense.categoryName,
             currency: expense.currency,
-          })
+          }),
         );
         setDatas(formatedData);
       } catch (error) {
@@ -436,7 +436,15 @@ export default function ExpenseTableComponent() {
     }, 600); // Adjust the debounce time as needed
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, dateRange, categoryFilter, pageNumber, sorting, pageSize, refreshTrigger]);
+  }, [
+    query,
+    dateRange,
+    categoryFilter,
+    pageNumber,
+    sorting,
+    pageSize,
+    refreshTrigger,
+  ]);
 
   async function fetchExpenses({
     userId,
@@ -555,7 +563,7 @@ export default function ExpenseTableComponent() {
       setLoading(true);
       const response = await api.post(
         `/expenses/user/${user.id}/bulk-delete`,
-        ids
+        ids,
       );
 
       if (response.status !== 200) {
@@ -565,7 +573,7 @@ export default function ExpenseTableComponent() {
       setExpensesList((prev) => ({
         ...prev,
         expenses: prev.expenses.filter(
-          (expense) => !selectedExpenses.includes(expense)
+          (expense) => !selectedExpenses.includes(expense),
         ),
       }));
       setSelectedExpenses([]);
@@ -807,12 +815,12 @@ export default function ExpenseTableComponent() {
                           field.onChange(val);
 
                           const selectedCategory = categories.categories.find(
-                            (cat) => cat.id === val
+                            (cat) => cat.id === val,
                           );
                           if (selectedCategory) {
                             form.setValue(
                               "category.name",
-                              selectedCategory.name
+                              selectedCategory.name,
                             );
                           }
                         }}
@@ -878,7 +886,7 @@ export default function ExpenseTableComponent() {
                                 setCalenderOpen(false);
                                 if (date) {
                                   field.onChange(
-                                    date.toISOString().slice(0, 10)
+                                    date.toISOString().slice(0, 10),
                                   );
                                 }
                               }}
@@ -982,7 +990,7 @@ const SearchAndFilter = ({
               selectedOption={categoryFilter}
               onSelect={(option) => {
                 const selectedCategory = categories.categories.find(
-                  (category) => category.id === option
+                  (category) => category.id === option,
                 );
                 setCategoryFilter(selectedCategory ? selectedCategory.id : "");
               }}
@@ -1101,7 +1109,7 @@ const SearchAndFilter = ({
               selectedOption={categoryFilter}
               onSelect={(option) => {
                 const selectedCategory = categories.categories.find(
-                  (category) => category.id === option
+                  (category) => category.id === option,
                 );
                 setCategoryFilter(selectedCategory ? selectedCategory.id : "");
               }}

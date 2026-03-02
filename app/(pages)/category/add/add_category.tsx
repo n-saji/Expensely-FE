@@ -73,7 +73,7 @@ export default function AddCategoryPage() {
         </p>
       </div>
       <Card className="w-full max-w-2xl mx-auto text-center border-border/70 shadow-sm overflow-hidden">
-        <CardHeader >
+        <CardHeader>
           <CardTitle className="text-xl">Add New Category</CardTitle>
         </CardHeader>
         <CardContent>
