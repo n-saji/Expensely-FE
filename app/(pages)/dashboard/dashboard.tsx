@@ -461,7 +461,15 @@ export default function DashboardPage() {
             title={`${monthLabel} Expense`}
             cardAction={
               overview && (
-                <div className="flex items-center gap-1 border rounded-md px-2 py-1">
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense >
+                    0
+                      ? "border-red-500/40 bg-red-500/10 text-red-400"
+                      : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                  }`}
+                >
                   {overview.thisMonthTotalExpense -
                     overview.lastMonthTotalExpense >
                   0 ? (
@@ -519,7 +527,15 @@ export default function DashboardPage() {
             title={`${monthLabel} Income`}
             cardAction={
               incomeOverview && (
-                <div className="flex items-center gap-1 border rounded-md px-2 py-1">
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    incomeOverview.thisMonthTotalIncome -
+                      incomeOverview.lastMonthTotalIncome >
+                    0
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                      : "border-red-500/40 bg-red-500/10 text-red-400"
+                  }`}
+                >
                   {incomeOverview.thisMonthTotalIncome -
                     incomeOverview.lastMonthTotalIncome >
                   0 ? (
