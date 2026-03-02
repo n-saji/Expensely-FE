@@ -27,7 +27,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 
 function getTomorrowDateString() {
   const tomorrow = new Date();
@@ -72,6 +79,7 @@ export default function RecurringExpenseForm({
   successMessage,
 }: RecurringExpenseFormProps) {
   const [loading, setLoading] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const categories = useSelector((state: RootState) => state.categoryExpense);
 
   const tomorrow = useMemo(() => getTomorrowDateString(), []);
@@ -220,7 +228,40 @@ export default function RecurringExpenseForm({
               <FormItem>
                 <FormLabel>Start Date</FormLabel>
                 <FormControl>
-                  <Input type="date" min={tomorrow} {...field} />
+                  <Popover
+                    open={datePickerOpen}
+                    onOpenChange={setDatePickerOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full justify-between text-muted-foreground"
+                      >
+                        {field.value || "Select start date"}
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value
+                            ? new Date(`${field.value}T00:00:00`)
+                            : undefined
+                        }
+                        onSelect={(date) => {
+                          if (!date) return;
+                          field.onChange(date.toISOString().slice(0, 10));
+                          setDatePickerOpen(false);
+                        }}
+                        disabled={(date) =>
+                          date < new Date(`${tomorrow}T00:00:00`)
+                        }
+                        captionLayout="dropdown"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </FormControl>
                 <FormMessage />
               </FormItem>

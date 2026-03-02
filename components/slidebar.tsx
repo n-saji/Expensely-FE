@@ -25,9 +25,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { Label } from "./ui/label";
@@ -39,6 +45,7 @@ export default function Slidebar() {
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [expense, setExpense] = useState({
     user: {
       id: user.id,
@@ -233,17 +240,38 @@ export default function Slidebar() {
                   </SelectContent>
                 </Select>
                 <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={expense.expenseDate}
-                  onChange={(e) =>
-                    setExpense({
-                      ...expense,
-                      expenseDate: e.target.value,
-                    })
-                  }
-                />
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="date"
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-between text-muted-foreground"
+                    >
+                      {expense.expenseDate || "Select date"}
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        expense.expenseDate
+                          ? new Date(`${expense.expenseDate}T00:00:00`)
+                          : undefined
+                      }
+                      onSelect={(date) => {
+                        if (!date) return;
+                        setExpense({
+                          ...expense,
+                          expenseDate: date.toISOString().slice(0, 10),
+                        });
+                        setDatePickerOpen(false);
+                      }}
+                      captionLayout="dropdown"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex flex-col space-y-4">
                 <Button type="submit" disabled={adding_expense_loading}>
