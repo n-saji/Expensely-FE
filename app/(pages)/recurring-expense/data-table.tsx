@@ -4,10 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   getFilteredRowModel,
   getSortedRowModel,
-  PaginationState,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -21,22 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
@@ -62,24 +45,17 @@ export function DataTable<TData extends { id: string }, TValue>({
   loading,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
-      pagination,
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
   });
 
   return (
@@ -104,7 +80,7 @@ export function DataTable<TData extends { id: string }, TValue>({
           </TableHeader>
           {loading ? (
             <TableBody>
-              {[...Array(pagination.pageSize)].map((_, index) => (
+              {[...Array(10)].map((_, index) => (
                 <TableRow key={index}>
                   {[...Array(columns.length)].map((__, i) => (
                     <TableCell key={i}>
@@ -162,72 +138,6 @@ export function DataTable<TData extends { id: string }, TValue>({
             </TableBody>
           )}
         </Table>
-      </div>
-
-      <div className="w-full flex flex-col-reverse md:flex-row items-center justify-between gap-4 py-4">
-        <div className="text-muted-foreground text-sm">
-          Showing {table.getRowModel().rows.length} of {data.length} entries.
-        </div>
-        <div className="flex flex-col-reverse md:flex-row gap-4 items-center">
-          <div className="flex gap-2 items-center justify-between w-fit text-nowrap">
-            <Label className="text-sm">Rows per page:</Label>
-            <Select
-              value={pagination.pageSize.toString()}
-              onValueChange={(value) => table.setPageSize(Number(value))}
-            >
-              <SelectTrigger className="w-[90px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[10, 20, 30, 40, 50, 100].map((size) => (
-                  <SelectItem key={size} value={size.toString()}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center justify-end space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount() || 1}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                table.setPageIndex(Math.max(0, table.getPageCount() - 1))
-              }
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

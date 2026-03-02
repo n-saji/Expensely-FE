@@ -270,6 +270,7 @@ export default function ExpenseTableComponent() {
   });
 
   async function onSubmitUpdate(data: z.infer<typeof expenseSchema>) {
+    let updatedExpenseDate = data.expenseDate;
     try {
       setLoading(true);
       const oldExpense = expensesList.expenses.find(
@@ -280,7 +281,7 @@ export default function ExpenseTableComponent() {
         oldExpense?.expenseDate.slice(0, 10) !== data.expenseDate.slice(0, 10)
       ) {
         const now = new Date();
-        data.expenseDate =
+        updatedExpenseDate =
           data.expenseDate +
           "T" +
           now.toLocaleTimeString("en-US", {
@@ -290,11 +291,48 @@ export default function ExpenseTableComponent() {
             second: "2-digit",
           });
       } else {
-        data.expenseDate =
+        updatedExpenseDate =
           data.expenseDate.slice(0, 10) + oldExpense?.expenseDate.slice(10);
       }
-      const response = await api.put(`/expenses/update/${data.id}`, data);
+      const response = await api.put(`/expenses/update/${data.id}`, {
+        ...data,
+        expenseDate: updatedExpenseDate,
+      });
       if (response.status !== 200) throw new Error("Failed to update expense");
+
+      setExpensesList((prev) => ({
+        ...prev,
+        expenses: prev.expenses.map((expense) =>
+          expense.id === data.id
+            ? {
+                ...expense,
+                description: data.description,
+                amount: data.amount,
+                expenseDate: updatedExpenseDate,
+                categoryId: data.category.id,
+                categoryName: data.category.name,
+                currency: data.currency,
+              }
+            : expense,
+        ),
+      }));
+
+      setDatas((prev) =>
+        prev.map((expense) =>
+          expense.id === data.id
+            ? {
+                ...expense,
+                description: data.description,
+                amount: data.amount,
+                expenseDate: updatedExpenseDate,
+                categoryId: data.category.id,
+                categoryName: data.category.name,
+                currency: data.currency,
+              }
+            : expense,
+        ),
+      );
+
       toast.success("Expense updated successfully");
       form.reset();
     } catch (error) {
@@ -302,42 +340,6 @@ export default function ExpenseTableComponent() {
     } finally {
       setOpenEditDialog(false);
       setLoading(false);
-      // Refresh expenses list
-      try {
-        setTableLoading(true);
-
-        const updatedExpenses = await fetchExpenses({
-          userId: user.id,
-          fromDate: dateRange?.from
-            ? dateRange.from.toISOString().slice(0, 16)
-            : "",
-          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
-          category: categoryFilter,
-          order: "desc",
-          page: pageNumber,
-          limit: pageSize,
-          q: query,
-        });
-        setExpensesList(updatedExpenses);
-        const formatedData = updatedExpenses.expenses.map(
-          (expense: Expense) => ({
-            id: expense.id,
-            amount: expense.amount,
-            description: expense.description,
-            expenseDate: expense.expenseDate,
-            categoryId: expense.categoryId,
-            categoryName: expense.categoryName,
-            currency: expense.currency,
-          }),
-        );
-        setDatas(formatedData);
-      } catch (error) {
-        toast.error("Error refreshing expenses", {
-          description: String(error),
-        });
-      } finally {
-        setTableLoading(false);
-      }
     }
   }
 
@@ -353,6 +355,25 @@ export default function ExpenseTableComponent() {
       }
 
       setExpenseToDelete(null);
+      setExpensesList((prev) => {
+        const filteredExpenses = prev.expenses.filter(
+          (item) => item.id !== expense.id,
+        );
+        const totalElements = Math.max(0, prev.totalElements - 1);
+        const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
+
+        return {
+          ...prev,
+          expenses: filteredExpenses,
+          totalElements,
+          totalPages,
+          pageNumber: Math.min(prev.pageNumber, totalPages),
+        };
+      });
+      setDatas((prev) => prev.filter((item) => item.id !== expense.id));
+      setSelectedExpenses((prev) =>
+        prev.filter((item) => item.id !== expense.id),
+      );
       toast.success(`Deleted ${expense.description}`, {
         description: "Expense deleted successfully",
       });
@@ -360,37 +381,6 @@ export default function ExpenseTableComponent() {
       toast.error("Failed to delete expense", { description: String(err) });
     } finally {
       setLoading(false);
-      try {
-        setTableLoading(true);
-        const expenses = await fetchExpenses({
-          userId: user.id,
-          fromDate: dateRange?.from
-            ? dateRange.from.toISOString().slice(0, 16)
-            : "",
-          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
-          category: categoryFilter,
-          order: "desc",
-          page: pageNumber,
-          limit: pageSize,
-          q: query,
-        });
-        setExpensesList(expenses);
-        const formatedData = expenses.expenses.map((expense: Expense) => ({
-          id: expense.id,
-          amount: expense.amount,
-          description: expense.description,
-          expenseDate: expense.expenseDate,
-          categoryId: expense.categoryId,
-          categoryName: expense.categoryName,
-          currency: expense.currency,
-        }));
-        setDatas(formatedData);
-      } catch (error) {
-        console.error("Error fetching expenses:", error);
-        toast.error("Error fetching expenses", { description: String(error) });
-      } finally {
-        setTableLoading(false);
-      }
     }
   };
 
@@ -558,6 +548,7 @@ export default function ExpenseTableComponent() {
     if (expenseId && !selectedExpenses.find((e) => e.id === expenseId)) {
       ids.push({ id: expenseId });
     }
+    const deletedIds = new Set(ids.map((item) => item.id));
 
     try {
       setLoading(true);
@@ -573,45 +564,22 @@ export default function ExpenseTableComponent() {
       setExpensesList((prev) => ({
         ...prev,
         expenses: prev.expenses.filter(
-          (expense) => !selectedExpenses.includes(expense),
+          (expense) => !deletedIds.has(expense.id),
+        ),
+        totalElements: Math.max(0, prev.totalElements - deletedIds.size),
+        totalPages: Math.max(
+          1,
+          Math.ceil(
+            Math.max(0, prev.totalElements - deletedIds.size) / pageSize,
+          ),
         ),
       }));
+      setDatas((prev) => prev.filter((expense) => !deletedIds.has(expense.id)));
       setSelectedExpenses([]);
     } catch (error) {
       console.error("Error deleting expenses:", error);
     } finally {
       setLoading(false);
-      try {
-        setTableLoading(true);
-        const expenses = await fetchExpenses({
-          userId: user.id,
-          fromDate: dateRange?.from
-            ? dateRange.from.toISOString().slice(0, 16)
-            : "",
-          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
-          category: categoryFilter,
-          order: "desc",
-          page: pageNumber,
-          limit: pageSize,
-          q: query,
-        });
-        setExpensesList(expenses);
-        const formatedData = expenses.expenses.map((expense: Expense) => ({
-          id: expense.id,
-          amount: expense.amount,
-          description: expense.description,
-          expenseDate: expense.expenseDate,
-          categoryId: expense.categoryId,
-          categoryName: expense.categoryName,
-          currency: expense.currency,
-        }));
-        setDatas(formatedData);
-      } catch (error) {
-        console.error("Error fetching expenses:", error);
-        toast.error("Error fetching expenses", { description: String(error) });
-      } finally {
-        setTableLoading(false);
-      }
     }
   };
 

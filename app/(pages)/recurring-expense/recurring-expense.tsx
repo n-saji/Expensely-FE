@@ -11,7 +11,7 @@ import {
 } from "@/global/dto";
 import { toast } from "sonner";
 import RecurringExpenseForm from "@/components/recurring-expense-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "./data-table";
 import { columns, RecurringExpenseRow } from "./columns";
 import {
@@ -44,9 +44,9 @@ export default function RecurringExpensePage() {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
 
-  const fetchRecurringExpenses = useCallback(async () => {
+  const fetchRecurringExpenses = useCallback(async (noLoader?: boolean) => {
     try {
-      setLoading(true);
+      if (!noLoader) setLoading(true);
       const response = await api.get(`/recurring-expenses/fetch-all`);
       if (response.status !== 200) {
         throw new Error("Failed to fetch recurring expenses");
@@ -65,7 +65,7 @@ export default function RecurringExpensePage() {
     fetchRecurringExpenses();
 
     const refreshHandler = () => {
-      fetchRecurringExpenses();
+      fetchRecurringExpenses(true);
     };
 
     window.addEventListener("recurring-expense-added", refreshHandler);
@@ -120,7 +120,7 @@ export default function RecurringExpensePage() {
           ? "Recurring expense deactivated successfully"
           : "Recurring expense activated successfully",
       );
-      await fetchRecurringExpenses();
+      await fetchRecurringExpenses(true);
     } catch (error) {
       toast.error("Failed to update recurring expense status", {
         description: String(error),
@@ -149,7 +149,13 @@ export default function RecurringExpensePage() {
     }
 
     setSelectedUpdate(null);
-    await fetchRecurringExpenses();
+    setRecurringExpenses((prev) =>
+      prev.map((expense) =>
+        expense.id === selectedUpdate.id ? { ...expense, ...payload } : expense,
+      ),
+    );
+
+    await fetchRecurringExpenses(true);
   };
 
   const tableColumns = useMemo(
@@ -178,9 +184,6 @@ export default function RecurringExpensePage() {
       </div>
 
       <Card className="border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Recurring Expense List</CardTitle>
-        </CardHeader>
         <CardContent>
           <DataTable columns={tableColumns} data={rows} loading={loading} />
         </CardContent>

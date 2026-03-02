@@ -9,6 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
@@ -101,13 +102,14 @@ export const columns = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-extralight">Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onEdit(recurringExpense)}>
               Update
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onToggleActive(recurringExpense)}>
               {recurringExpense.active ? "Deactivate" : "Activate"}
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
               onClick={() => onDelete(recurringExpense)}
