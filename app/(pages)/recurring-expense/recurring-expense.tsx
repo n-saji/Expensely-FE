@@ -96,7 +96,9 @@ export default function RecurringExpensePage() {
       }
       toast.success("Recurring expense deleted successfully");
       setSelectedDelete(null);
-      await fetchRecurringExpenses();
+      setRecurringExpenses((prev) =>
+        prev.filter((expense) => expense.id !== selectedDelete.id),
+      );
     } catch (error) {
       toast.error("Failed to delete recurring expense", {
         description: String(error),

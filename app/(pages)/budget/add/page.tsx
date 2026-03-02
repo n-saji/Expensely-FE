@@ -35,7 +35,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { BudgetReq } from "@/global/dto";
+import { BudgetReq, Category } from "@/global/dto";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
@@ -59,8 +59,11 @@ const budgetSchema = z.object({
 });
 
 export default function AddBudgetPage() {
-  const categories = useSelector((state: RootState) => state.categoryExpense);
   const user = useSelector((state: RootState) => state.user);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>(
+    []
+  );
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema) as any,
     defaultValues: {
@@ -79,6 +82,30 @@ export default function AddBudgetPage() {
   const watchPeriod = form.watch("period");
   const [loader, setLoader] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    async function fetchAvailableCategories() {
+      try {
+        setLoadingCategories(true);
+        const res = await api.get("/budgets/available-categories");
+
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch available categories");
+        }
+
+        setAvailableCategories(res.data || []);
+      } catch (error) {
+        console.error("Error fetching available categories:", error);
+        toast("Failed to load categories", {
+          description: "Please refresh and try again.",
+        });
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+
+    fetchAvailableCategories();
+  }, []);
 
   useEffect(() => {
     const start = new Date();
@@ -137,6 +164,10 @@ export default function AddBudgetPage() {
         },
       });
 
+      setAvailableCategories((prev) =>
+        prev.filter((category) => category.id !== data.Category.id)
+      );
+
       form.reset();
     } catch (error) {
       console.error("Error:", error);
@@ -178,14 +209,24 @@ export default function AddBudgetPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={loadingCategories}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue
+                            placeholder={
+                              loadingCategories
+                                ? "Loading categories..."
+                                : "Select a category"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.categories.map((category) => (
+                        {availableCategories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
                           </SelectItem>

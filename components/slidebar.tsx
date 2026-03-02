@@ -46,7 +46,7 @@ export default function Slidebar() {
     category: {
       id: "",
     },
-    amount: 0,
+    amount: "",
     description: "",
     expenseDate: new Date().toISOString().slice(0, 10),
   });
@@ -54,11 +54,13 @@ export default function Slidebar() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const parsedAmount = Number.parseFloat(expense.amount);
+
     if (!expense.category.id) {
       toast.error("Please select a category");
       return;
     }
-    if (expense.amount === null || expense.amount <= 0) {
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
@@ -76,6 +78,7 @@ export default function Slidebar() {
       const expenseDate = new Date(expense.expenseDate);
       const payload = {
         ...expense,
+        amount: parsedAmount,
         expenseDate:
           expenseDate.toISOString().slice(0, 10) +
           "T" +
@@ -96,7 +99,7 @@ export default function Slidebar() {
         category: {
           id: "",
         },
-        amount: 0,
+        amount: "",
         description: "",
         expenseDate: new Date().toISOString().slice(0, 10),
       });
@@ -197,11 +200,11 @@ export default function Slidebar() {
                   step="0.01"
                   min="0"
                   placeholder="Amount"
-                  value={expense.amount === 0 ? "" : expense.amount}
+                  value={expense.amount}
                   onChange={(e) =>
                     setExpense({
                       ...expense,
-                      amount: Number(e.target.value),
+                      amount: e.target.value,
                     })
                   }
                 />

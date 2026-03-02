@@ -167,7 +167,7 @@ export default function Page() {
         data = {};
       }
 
-      if (res.status !== 200) {
+      if (res.status !== 204) {
         throw new Error(data.error || "Failed to delete budget");
       }
       // Remove deleted budget from state

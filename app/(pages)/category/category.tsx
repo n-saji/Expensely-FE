@@ -2,35 +2,50 @@
 import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import editIcon from "@/assets/icon/edit.png";
 import editIconWhite from "@/assets/icon/edit-white.png";
 import Image from "next/image";
-import PopUp from "@/components/pop-up";
-import { togglePopUp } from "@/redux/slices/sidebarSlice";
 import filterIcon from "@/assets/icon/filter.png";
 import filterIconWhite from "@/assets/icon/filter-white.png";
 import DropDown from "@/components/drop-down";
 import { categoryTypes, categorySkeleton } from "@/global/dto";
 import api from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 
 const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
 const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
 
 export default function CategoryPage() {
   const user = useSelector((state: RootState) => state.user);
-  const popUp = useSelector((state: RootState) => state.sidebar.popUpEnabled);
   const [showTable, setShowTable] = useState(false);
-  const dispatch = useDispatch();
   const token = FetchToken();
   const isCategoryMounted = useRef(false);
   const [filter, setFilter] = useState(false);
   const [categoriesList, setCategories] = useState<categorySkeleton[]>([]);
   const [loading, setLoading] = useState(false);
+  const [updatingCategory, setUpdatingCategory] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [selectedCategory, setSelectedCategory] =
     useState<categorySkeleton | null>(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
 
   const fetchCategories = async (type: string | null) => {
     try {
@@ -60,9 +75,8 @@ export default function CategoryPage() {
     }
   }, []);
 
-  const handleUpdateCategory = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (loading) {
+  const handleUpdateCategory = async () => {
+    if (updatingCategory) {
       console.warn("Update already in progress");
       return;
     }
@@ -77,7 +91,7 @@ export default function CategoryPage() {
     const toUpdate = selectedCategory as categorySkeleton;
 
     try {
-      setLoading(true);
+      setUpdatingCategory(true);
       const response = await api.patch(
         `/categories/update/${toUpdate.id}`,
         toUpdate,
@@ -87,11 +101,13 @@ export default function CategoryPage() {
         throw new Error("Failed to update expense");
       }
 
-      fetchCategories(categoryFilter);
+      await fetchCategories(categoryFilter);
+      window.dispatchEvent(new Event("category-added"));
+      setOpenEditDialog(false);
     } catch (error) {
       console.error("Error updating expense:", error);
     } finally {
-      setLoading(false);
+      setUpdatingCategory(false);
       setSelectedCategory(null);
     }
   };
@@ -195,7 +211,7 @@ export default function CategoryPage() {
                   onClick={() => {
                     if (window.innerWidth < 640) {
                       setSelectedCategory(category);
-                      dispatch(togglePopUp());
+                      setOpenEditDialog(true);
                       return;
                     }
                   }}
@@ -217,7 +233,7 @@ export default function CategoryPage() {
                       className="w-4 h-4"
                       onClick={() => {
                         setSelectedCategory(category);
-                        dispatch(togglePopUp());
+                        setOpenEditDialog(true);
                       }}
                     />
                   </td>
@@ -227,22 +243,33 @@ export default function CategoryPage() {
           )}
         </table>
 
-        {popUp && (
-          <PopUp title="Edit Expense" showButton={false}>
-            <div className="p-4">
-              <form
-                className="flex flex-col space-y-4"
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  await handleUpdateCategory(event);
-                  dispatch(togglePopUp());
-                }}
-              >
-                <input
+        <Dialog
+          open={openEditDialog}
+          onOpenChange={(open) => {
+            setOpenEditDialog(open);
+            if (!open) {
+              setSelectedCategory(null);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Category</DialogTitle>
+            </DialogHeader>
+            <form
+              className="flex flex-col space-y-4"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                await handleUpdateCategory();
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="edit-category-name">Category Name</Label>
+                <Input
+                  id="edit-category-name"
                   type="text"
                   placeholder="Category Name"
-                  className="p-2 border border-gray-400 rounded"
-                  value={selectedCategory?.name}
+                  value={selectedCategory?.name || ""}
                   onChange={(e) => {
                     if (!selectedCategory) return;
                     setSelectedCategory({
@@ -251,35 +278,56 @@ export default function CategoryPage() {
                     });
                   }}
                 />
+              </div>
 
-                <select
-                  className="p-2 border border-gray-400 rounded cursor-pointer"
-                  value={selectedCategory?.type}
-                  onChange={(e) => {
+              <div className="space-y-2">
+                <Label htmlFor="edit-category-type">Category Type</Label>
+                <Select
+                  value={selectedCategory?.type || ""}
+                  onValueChange={(value) => {
                     if (!selectedCategory) return;
                     setSelectedCategory({
                       ...selectedCategory,
-                      type: e.target.value,
+                      type: value,
                     });
                   }}
                 >
-                  <option value="" disabled className="text-gray-400">
-                    Select Type
-                  </option>
-                  {categoryTypes.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="edit-category-type" className="w-full">
+                    <SelectValue placeholder="Select Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryTypes.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <button type="submit" className="button-green">
-                  {loading ? "Updating..." : "Update Category"}
-                </button>
-              </form>
-            </div>
-          </PopUp>
-        )}
+              <div className="flex gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setOpenEditDialog(false);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={updatingCategory}
+                >
+                  {updatingCategory ? <Spinner /> : "Update Category"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

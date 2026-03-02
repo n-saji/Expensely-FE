@@ -41,6 +41,9 @@ export default function AddCategoryPage() {
         throw new Error("Failed to add category");
       }
 
+      window.dispatchEvent(new Event("category-added"));
+      toast.success("Category added successfully");
+
       setCategory({
         user: {
           id: user.id,

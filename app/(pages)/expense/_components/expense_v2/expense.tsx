@@ -138,6 +138,7 @@ export default function ExpenseTableComponent() {
   const [open, setOpen] = useState(false);
   const [calenderOpen, setCalenderOpen] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((old) =>
@@ -435,7 +436,7 @@ export default function ExpenseTableComponent() {
     }, 600); // Adjust the debounce time as needed
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, dateRange, categoryFilter, pageNumber, sorting, pageSize]);
+  }, [query, dateRange, categoryFilter, pageNumber, sorting, pageSize, refreshTrigger]);
 
   async function fetchExpenses({
     userId,
@@ -672,6 +673,19 @@ export default function ExpenseTableComponent() {
   useEffect(() => {
     setPageNumber(1);
   }, [dateRange, categoryFilter, query]);
+
+  useEffect(() => {
+    const handleExpenseAdded = () => {
+      setPageNumber(1);
+      setRefreshTrigger((prev) => prev + 1);
+    };
+
+    window.addEventListener("expense-added", handleExpenseAdded);
+
+    return () => {
+      window.removeEventListener("expense-added", handleExpenseAdded);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col w-full space-y-4">

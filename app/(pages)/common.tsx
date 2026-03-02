@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 
 import { RootState } from "@/redux/store";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import Loader from "@/components/loader";
 import FetchToken from "@/utils/fetch_token";
 import { Toaster } from "@/components/ui/sonner";
 
-import { addCategory, removeCategory } from "@/redux/slices/categorySlice";
+import { setCategories } from "@/redux/slices/categorySlice";
 import { CategoryTypeExpense } from "@/global/constants";
 import { Category } from "@/global/dto";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,18 +31,12 @@ export default function DashboardPage({
   const path = usePathname();
   const router = useRouter();
   const loading = useSelector((state: RootState) => state.sidebar.loading);
-  const isCategoryMounted = useRef(false);
-  const categories = useSelector((state: RootState) => state.categoryExpense);
   const dispatch = useDispatch();
 
   useWebSocket(user.notificationsEnabled ? user.id : null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (isCategoryMounted.current) {
-        return;
-      }
-      isCategoryMounted.current = true;
+    const fetchExpenseCategories = async () => {
       try {
         const response = await api.get(
           `/categories/user/${user.id}?type=${CategoryTypeExpense}`,
@@ -55,34 +49,33 @@ export default function DashboardPage({
         if (!data || !Array.isArray(data)) {
           throw new Error("Invalid categories data");
         }
-        data.forEach((category: Category) => {
-          const alreadyExists = categories.categories.some(
-            (c) => c.id === category.id,
-          );
-          if (!alreadyExists) {
-            dispatch(
-              addCategory({
-                id: category.id,
-                type: category.type,
-                name: category.name,
-              }),
-            );
-          }
-        });
+
+        dispatch(
+          setCategories(
+            data.map((category: Category) => ({
+              id: category.id,
+              type: category.type,
+              name: category.name,
+            })),
+          ),
+        );
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-    fetchData();
 
-    dispatch(
-      removeCategory({
-        id: "",
-        type: CategoryTypeExpense,
-        name: "",
-      }),
-    );
-  }, []);
+    fetchExpenseCategories();
+
+    const handleCategoryAdded = () => {
+      fetchExpenseCategories();
+    };
+
+    window.addEventListener("category-added", handleCategoryAdded);
+
+    return () => {
+      window.removeEventListener("category-added", handleCategoryAdded);
+    };
+  }, [dispatch, user.id]);
 
   if (!user.isAuthenticated || !token) {
     return (
