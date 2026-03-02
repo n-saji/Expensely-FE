@@ -209,6 +209,9 @@ export interface CreateIncomeReq {
 }
 
 export interface UpdateIncomeReq {
+  category: {
+    id: string;
+  };
   amount: number;
   description: string;
   incomeDate: string;

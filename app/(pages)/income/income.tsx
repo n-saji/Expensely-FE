@@ -12,6 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -115,6 +122,7 @@ export default function IncomePage() {
     amount: "",
     description: "",
     incomeDate: new Date().toISOString().slice(0, 10),
+    categoryId: "",
   });
 
   const [query, setQuery] = useState("");
@@ -308,6 +316,7 @@ export default function IncomePage() {
             amount: String(row.amount),
             description: row.description,
             incomeDate: toDateOnly(row.incomeDate),
+            categoryId: row.categoryId,
           });
         },
         onDelete: (row) => setSelectedDelete(row),
@@ -328,10 +337,17 @@ export default function IncomePage() {
       toast.error("Please enter a description");
       return;
     }
+    if (!editForm.categoryId) {
+      toast.error("Please select a category");
+      return;
+    }
 
     try {
       setSaving(true);
       const payload: UpdateIncomeReq = {
+        category: {
+          id: editForm.categoryId,
+        },
         amount,
         description: editForm.description,
         incomeDate: formatDateForApi(editForm.incomeDate),
@@ -351,6 +367,11 @@ export default function IncomePage() {
           income.id === selectedUpdate.id
             ? {
                 ...income,
+                categoryId: payload.category.id,
+                categoryName:
+                  categories.find(
+                    (category) => category.id === payload.category.id,
+                  )?.name || income.categoryName,
                 amount: payload.amount,
                 description: payload.description,
                 incomeDate: payload.incomeDate,
@@ -363,6 +384,11 @@ export default function IncomePage() {
           income.id === selectedUpdate.id
             ? {
                 ...income,
+                categoryId: payload.category.id,
+                categoryName:
+                  categories.find(
+                    (category) => category.id === payload.category.id,
+                  )?.name || income.categoryName,
                 amount: payload.amount,
                 description: payload.description,
                 incomeDate: payload.incomeDate,
@@ -450,13 +476,13 @@ export default function IncomePage() {
       setDatas((prev) => prev.filter((income) => !deletedIds.has(income.id)));
       setSelectedIncomes([]);
       setRowSelection({});
-      toast.success("Bulk delete incomes successfully!");
+      toast.success("Deleted successfully!");
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.error ||
         error?.response?.data?.message ||
         String(error);
-      toast.error("Bulk delete incomes failed!", {
+      toast.error("Failed to delete incomes!", {
         description: errorMessage,
       });
     } finally {
@@ -624,12 +650,12 @@ export default function IncomePage() {
           open={!!selectedUpdate}
           onOpenChange={() => setSelectedUpdate(null)}
         >
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-h-[90vh] overflow-y-auto w-full">
             <DialogHeader>
               <DialogTitle>Update Income</DialogTitle>
             </DialogHeader>
 
-            <form onSubmit={handleUpdateIncome} className="space-y-4">
+            <form onSubmit={handleUpdateIncome} className="space-y-4 w-full">
               <Input
                 placeholder="Description"
                 value={editForm.description}
@@ -654,6 +680,24 @@ export default function IncomePage() {
                   }))
                 }
               />
+
+              <Select
+                value={editForm.categoryId}
+                onValueChange={(value) =>
+                  setEditForm((prev) => ({ ...prev, categoryId: value }))
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <Popover
                 open={editDatePickerOpen}
