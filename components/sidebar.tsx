@@ -12,6 +12,7 @@ import {
   Logs,
   Plus,
   Repeat,
+  HandCoins,
 } from "lucide-react";
 
 import {
@@ -160,6 +161,25 @@ export function AppSidebar() {
                 <SidebarMenuAction asChild>
                   <Link href={"/expense/add"}>
                     <Plus /> <span className="sr-only">Add Expense</span>
+                  </Link>
+                </SidebarMenuAction>
+              </SidebarMenuItem>
+            </SidebarMenu>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/income"}
+                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                >
+                  <Link href={"/income"}>
+                    <HandCoins />
+                    <span>Income</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuAction asChild>
+                  <Link href={"/income/add"}>
+                    <Plus /> <span className="sr-only">Add Income</span>
                   </Link>
                 </SidebarMenuAction>
               </SidebarMenuItem>

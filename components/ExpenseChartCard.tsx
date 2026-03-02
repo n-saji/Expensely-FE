@@ -22,6 +22,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "./ui/card";
@@ -168,6 +169,16 @@ export default function PieChartComp({
     }),
   );
   const sortedData = [...chartData].sort((a, b) => b.value - a.value);
+  const pieData =
+    sortedData.length === 1
+      ? [
+          ...sortedData,
+          {
+            name: "__placeholder__",
+            value: 0.000001,
+          },
+        ]
+      : sortedData;
   const totalAmount = sortedData.reduce((sum, item) => sum + item.value, 0);
   const topItems = sortedData.slice(0, 5);
 
@@ -235,7 +246,7 @@ export default function PieChartComp({
                       }}
                     >
                       <Pie
-                        data={sortedData}
+                        data={pieData}
                         dataKey="value"
                         nameKey="name"
                         cx="50%"
@@ -245,10 +256,14 @@ export default function PieChartComp({
                         startAngle={90}
                         endAngle={-270}
                       >
-                        {sortedData.map((_, index) => (
+                        {pieData.map((item, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
+                            fill={
+                              item.name === "__placeholder__"
+                                ? "transparent"
+                                : COLORS[index % COLORS.length]
+                            }
                           />
                         ))}
                       </Pie>
@@ -353,114 +368,112 @@ export function ExpensesTop5Monthly({
   const topVsAvgTrend = getTrend(topItem?.value ?? 0, avgItem);
 
   return (
-    <CardTemplate
-      title={title || "Top Contributors"}
-      // description="Highlights your biggest spending items for the current period"
-      className="w-full border-border/70 shadow-sm overflow-hidden"
-    >
-      <div className="mb-4 rounded-2xl border border-border/60 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10 px-4 py-3">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          This month
-        </p>
-        <p className="text-sm text-foreground">
-          Biggest contributors by amount
-        </p>
-      </div>
-      {chartData.length > 0 ? (
-        <>
-          <ResponsiveContainer width="100%" height={height}>
-            <BarChart data={chartData} layout="horizontal" margin={margin}>
-              <CartesianGrid
-                // strokeDasharray="3 3"
-                // stroke={darkMode ? "#999999" : "#ccc"}
-                stroke={darkMode ? "#5f6266" : "#ccc"}
-              />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(value: string) =>
-                  value.length > 10 ? `${value.slice(0, 10)}...` : value
-                }
-                interval={0}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                tickFormatter={(value: number) =>
-                  `${currencyMapper(currency)}${value.toFixed(0)}`
-                }
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#0f172a",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(148,163,184,0.2)",
-                  boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                }}
-                labelStyle={{ color: "#e2e8f0" }}
-                // itemStyle={{ color: "#fff" }}
-                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                formatter={(value) =>
-                  `${currencyMapper(currency)}${
-                    value
-                      ? value.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })
-                      : 0
-                  }`
-                }
-              />
-              <Bar
-                dataKey="value"
-                fill="#4ade80"
-                radius={[4, 4, 0, 0]}
-                barSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Total
-              </p>
-              <p className="font-semibold text-foreground">
-                {currencyMapper(currency)}
-                {totalAmount.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
+    <Card className="">
+      <CardHeader>
+        <div>
+          <CardTitle>{title || "Top Contributors"}</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Biggest contributors by amount
+          </p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {chartData.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height={height}>
+              <BarChart data={chartData} layout="horizontal" margin={margin}>
+                <CartesianGrid
+                  // strokeDasharray="3 3"
+                  // stroke={darkMode ? "#999999" : "#ccc"}
+                  stroke={darkMode ? "#5f6266" : "#ccc"}
+                />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  tickFormatter={(value: string) =>
+                    value.length > 10 ? `${value.slice(0, 10)}...` : value
+                  }
+                  interval={0}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  tickFormatter={(value: number) =>
+                    `${currencyMapper(currency)}${value.toFixed(0)}`
+                  }
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(148,163,184,0.2)",
+                    boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                  }}
+                  labelStyle={{ color: "#e2e8f0" }}
+                  // itemStyle={{ color: "#fff" }}
+                  cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  formatter={(value) =>
+                    `${currencyMapper(currency)}${
+                      value
+                        ? value.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : 0
+                    }`
+                  }
+                />
+                <Bar
+                  dataKey="value"
+                  fill="#4ade80"
+                  radius={[4, 4, 0, 0]}
+                  barSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Total
+                </p>
+                <p className="font-semibold text-foreground">
+                  {currencyMapper(currency)}
+                  {totalAmount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Top Item
+                </p>
+                <p className="font-semibold text-foreground">
+                  {topItem ? topItem.name : "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Share
+                </p>
+                <p className="font-semibold text-foreground">
+                  {topItem && totalAmount > 0
+                    ? `${Math.round((topItem.value / totalAmount) * 100)}%`
+                    : "0%"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Top vs Avg
+                </p>
+                <TrendBadge trend={topVsAvgTrend} />
+              </div>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Top Item
-              </p>
-              <p className="font-semibold text-foreground">
-                {topItem ? topItem.name : "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Share
-              </p>
-              <p className="font-semibold text-foreground">
-                {topItem && totalAmount > 0
-                  ? `${Math.round((topItem.value / totalAmount) * 100)}%`
-                  : "0%"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Top vs Avg
-              </p>
-              <TrendBadge trend={topVsAvgTrend} />
-            </div>
-          </div>
-        </>
-      ) : (
-        <NoDataUI />
-      )}
-    </CardTemplate>
+          </>
+        ) : (
+          <NoDataUI />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -1151,6 +1164,7 @@ export function YearlyExpenseLineChartV2({
   amountByMonth,
   amountByMonthV2,
   darkMode,
+  title,
   currency = "USD",
   loading = false,
   setOverviewParams,
@@ -1159,6 +1173,7 @@ export function YearlyExpenseLineChartV2({
   amountByMonth?: ExpenseOverview["amountByMonth"];
   amountByMonthV2?: ExpenseOverview["monthlyCategoryExpense"];
   darkMode: boolean;
+  title?: string;
   currency?: string;
   setOverviewParams: React.Dispatch<
     React.SetStateAction<{ count?: number; type?: OverviewEnum }>
@@ -1171,7 +1186,19 @@ export function YearlyExpenseLineChartV2({
   const [category, setCategory] = useState<{ id: string; name: string } | null>(
     null,
   );
-  const categories = useSelector((state: RootState) => state.categoryExpense);
+  const availableCategoryNames = Array.from(
+    new Set(
+      Object.values(amountByMonthV2 || {}).flatMap((categories) =>
+        Object.keys(categories || {}),
+      ),
+    ),
+  ).filter(Boolean);
+
+  useEffect(() => {
+    if (category?.name && !availableCategoryNames.includes(category.name)) {
+      setCategory(null);
+    }
+  }, [availableCategoryNames, category]);
   useEffect(() => {
     if (category?.name) {
       amountByMonthV2 = Object.fromEntries(
@@ -1276,7 +1303,7 @@ export function YearlyExpenseLineChartV2({
       "
       >
         <CardTitle className="flex items-center justify-between w-fit gap-2">
-          Expense Trends
+          {title || "Expense Trends"}
           <Tabs defaultValue="monthly">
             <TabsList>
               <TabsTrigger value="monthly" onClick={() => setToggle(true)}>
@@ -1322,17 +1349,19 @@ export function YearlyExpenseLineChartV2({
             <DropDown
               options={[
                 { label: "All Categories", value: "all" },
-                ...categories.categories.map((category) => ({
-                  label: category.name,
-                  value: category.id,
+                ...availableCategoryNames.map((categoryName) => ({
+                  label: categoryName,
+                  value: categoryName,
                 })),
               ]}
               selectedOption={category ? category.id : ""}
               onSelect={(option) => {
-                const selectedCategory = categories.categories.find(
-                  (category) => category.id === option,
-                );
-                setCategory(selectedCategory || null);
+                if (option === "all") {
+                  setCategory(null);
+                  return;
+                }
+
+                setCategory({ id: option, name: option });
               }}
             />
             {overviewParams && (
@@ -1584,6 +1613,201 @@ export function YearlyExpenseLineChartV2({
           )}
         </CardContent>
       )}
+    </Card>
+  );
+}
+
+export function IncomeExpenseComparisonChart({
+  expenseByMonth,
+  incomeByMonth,
+  darkMode,
+  currency = "USD",
+  loading,
+  setOverviewParams,
+}: {
+  expenseByMonth?: Record<string, number>;
+  incomeByMonth?: Record<string, number>;
+  darkMode: boolean;
+  currency?: string;
+  loading: boolean;
+  setOverviewParams: React.Dispatch<
+    React.SetStateAction<{ count?: number; type?: OverviewEnum }>
+  >;
+}) {
+  const [selectedTimeframe, setSelectedTimeframe] = useState(0);
+
+  useEffect(() => {
+    switch (selectedTimeframe) {
+      case 0:
+        setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
+        break;
+      case 1:
+        setOverviewParams({ count: 12, type: OverviewEnum.MONTH });
+        break;
+      case 2:
+        setOverviewParams({ type: OverviewEnum.ALL_TIME });
+        break;
+      default:
+        setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
+    }
+  }, [selectedTimeframe, setOverviewParams]);
+
+  const allMonths = [
+    ...new Set([
+      ...Object.keys(expenseByMonth || {}),
+      ...Object.keys(incomeByMonth || {}),
+    ]),
+  ];
+
+  const chartData = allMonths.map((month) => ({
+    name: month,
+    expense: expenseByMonth?.[month] || 0,
+    income: incomeByMonth?.[month] || 0,
+  }));
+
+  const totalExpense = chartData.reduce((sum, row) => sum + row.expense, 0);
+  const totalIncome = chartData.reduce((sum, row) => sum + row.income, 0);
+  const net = totalIncome - totalExpense;
+  const latest = chartData[chartData.length - 1];
+  const previous = chartData[chartData.length - 2];
+  const trend = getTrend(latest?.income ?? 0, previous?.income ?? 0);
+
+  return (
+    <Card className="w-full overflow-hidden border-border/70 shadow-sm">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
+        <CardTitle>Income vs Expense</CardTitle>
+        <CardAction>
+          <Select
+            value={selectedTimeframe.toString()}
+            onValueChange={(value) => setSelectedTimeframe(parseInt(value, 10))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Last 6 Months" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Choose Time Period</SelectLabel>
+                <SelectItem value="0">Last 6 Months</SelectItem>
+                <SelectItem value="1">Last 12 Months</SelectItem>
+                <SelectItem value="2">All Years</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        {chartData.length === 0 ? (
+          loading ? (
+            <SpinnerUI />
+          ) : (
+            <NoDataUI />
+          )
+        ) : (
+          <>
+            <ResponsiveContainer height={220}>
+              {loading ? (
+                <SpinnerUI />
+              ) : (
+                <ComposedChart data={chartData}>
+                  <CartesianGrid
+                    stroke={darkMode ? "#242424" : "#DBDBDB"}
+                    vertical={false}
+                    strokeDasharray="1"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    interval={"preserveStartEnd"}
+                    minTickGap={10}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0f172a",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(148,163,184,0.2)",
+                      boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                    }}
+                    labelStyle={{ color: "#e2e8f0" }}
+                    cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
+                    formatter={(value, name) => [
+                      `${currencyMapper(currency)}${Number(
+                        value,
+                      ).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`,
+                      name === "income" ? "Income" : "Expense",
+                    ]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="income"
+                    name="income"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    dot
+                    isAnimationActive
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="expense"
+                    name="expense"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot
+                    isAnimationActive
+                  />
+                </ComposedChart>
+              )}
+            </ResponsiveContainer>
+
+            <div className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Income
+                </p>
+                <p className="font-semibold text-foreground">
+                  {currencyMapper(currency)}
+                  {totalIncome.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Expense
+                </p>
+                <p className="font-semibold text-foreground">
+                  {currencyMapper(currency)}
+                  {totalExpense.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Net
+                </p>
+                <p className="font-semibold text-foreground">
+                  {currencyMapper(currency)}
+                  {net.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Income Trend
+                </p>
+                <TrendBadge trend={trend} />
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
     </Card>
   );
 }

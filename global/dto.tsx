@@ -189,3 +189,48 @@ export interface UpdateRecurringExpenseReq {
   recurrence: Recurrence;
   date: string;
 }
+
+export interface Income {
+  id: string;
+  user: UserSkeleton | null;
+  category: Category;
+  amount: number;
+  description: string;
+  incomeDate: string;
+}
+
+export interface CreateIncomeReq {
+  category: {
+    id: string;
+  };
+  amount: number;
+  description: string;
+  incomeDate: string;
+}
+
+export interface UpdateIncomeReq {
+  amount: number;
+  description: string;
+  incomeDate: string;
+}
+
+export interface IncomeOverview {
+  userId: string;
+  monthlyCategoryIncome: Record<string, Record<string, number>>;
+  lastMonthTotalIncome: number;
+  totalAmount: number;
+  amountByCategory: Record<string, number>;
+  amountByMonth: Record<string, number>;
+  totalCount: number;
+  mostFrequentCategory: string;
+  totalCategories: number;
+  mostFrequentCategoryCount: number;
+  thisMonthTotalIncome: number;
+  categoryCount: Record<string, number>;
+  averageMonthlyIncome: number;
+  topFiveMostIncomeItemThisMonth: Record<string, number>;
+  overTheDaysThisMonth: Record<string, number>;
+  earliestStartMonth: number;
+  earliestStartYear: number;
+  thisMonthMostIncomeItem: Record<string, number>;
+}
