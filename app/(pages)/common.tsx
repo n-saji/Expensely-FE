@@ -90,7 +90,7 @@ export default function DashboardPage({
 
   if (user.profileComplete === false) {
     return (
-      <div className="flex items-center justify-center h-screen text-2xl">
+      <div className="flex items-center justify-center h-screen text-2xl w-full">
         <h1 className="text-gray-700">
           Please complete your profile to continue.&nbsp;
         </h1>

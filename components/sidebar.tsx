@@ -131,8 +131,8 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             Main
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="mb-1">
+          <SidebarGroupContent className="space-y-1">
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild

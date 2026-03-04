@@ -456,197 +456,194 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <div>
-          <CardComponent
-            title={`${monthLabel} Expense`}
-            cardAction={
-              overview && (
-                <div
-                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                    overview.thisMonthTotalExpense -
-                      overview.lastMonthTotalExpense >
-                    0
-                      ? "border-red-500/40 bg-red-500/10 text-red-400"
-                      : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  }`}
-                >
-                  {overview.thisMonthTotalExpense -
+        <CardComponent
+          title={`${monthLabel} Expense`}
+          cardAction={
+            overview && (
+              <div
+                className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                  overview.thisMonthTotalExpense -
                     overview.lastMonthTotalExpense >
-                  0 ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
-                  <p className="text-xs font-mono">
-                    {overview.lastMonthTotalExpense === 0
-                      ? "0%"
-                      : `${(
-                          ((overview.thisMonthTotalExpense -
-                            overview.lastMonthTotalExpense) /
-                            overview.lastMonthTotalExpense) *
-                          100
-                        ).toFixed(2)}%`}
-                  </p>
-                </div>
-              )
-            }
-            numberData={
-              overview
-                ? `${currencyMapper(user?.currency || "USD")}${overview.thisMonthTotalExpense.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    },
-                  )}`
-                : undefined
-            }
-            description={
-              overview
-                ? `You have spent ${currencyMapper(user?.currency || "USD")}${Math.abs(
-                    overview.thisMonthTotalExpense -
-                      overview.lastMonthTotalExpense,
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })} ${
-                    overview.thisMonthTotalExpense -
-                      overview.lastMonthTotalExpense >
-                    0
-                      ? "more"
-                      : "less"
-                  } than last month.`
-                : undefined
-            }
-            loading={overview === null}
-          />
-        </div>
-
-        <div>
-          <CardComponent
-            title={`${monthLabel} Income`}
-            cardAction={
-              incomeOverview && (
-                <div
-                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                    incomeOverview.thisMonthTotalIncome -
-                      incomeOverview.lastMonthTotalIncome >
-                    0
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                      : "border-red-500/40 bg-red-500/10 text-red-400"
-                  }`}
-                >
-                  {incomeOverview.thisMonthTotalIncome -
-                    incomeOverview.lastMonthTotalIncome >
-                  0 ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
-                  <p className="text-xs font-mono">
-                    {incomeOverview.lastMonthTotalIncome === 0
-                      ? "0%"
-                      : `${(
-                          ((incomeOverview.thisMonthTotalIncome -
-                            incomeOverview.lastMonthTotalIncome) /
-                            incomeOverview.lastMonthTotalIncome) *
-                          100
-                        ).toFixed(2)}%`}
-                  </p>
-                </div>
-              )
-            }
-            numberData={
-              incomeOverview
-                ? `${currencyMapper(user?.currency || "USD")}${incomeOverview.thisMonthTotalIncome.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    },
-                  )}`
-                : undefined
-            }
-            description={
-              incomeOverview
-                ? `You earned ${currencyMapper(user?.currency || "USD")}${Math.abs(
-                    incomeOverview.thisMonthTotalIncome -
-                      incomeOverview.lastMonthTotalIncome,
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })} ${
-                    incomeOverview.thisMonthTotalIncome -
-                      incomeOverview.lastMonthTotalIncome >
-                    0
-                      ? "more"
-                      : "less"
-                  } than last month.`
-                : undefined
-            }
-            loading={incomeOverview === null}
-          />
-        </div>
-
-        <div>
-          <Card className="h-full border-border/70 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-sm text-muted-foreground font-medium">
-                Upcoming Recurring Expenses
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative">
-              {overview === null ? (
-                <div className="flex h-[90px] items-center justify-center">
-                  <Spinner className="text-muted-foreground h-6 w-6" />
-                </div>
-              ) : (overview.upcomingRecurringExpenses || []).length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No upcoming recurring expenses.
+                  0
+                    ? "border-red-500/40 bg-red-500/10 text-red-400"
+                    : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                }`}
+              >
+                {overview.thisMonthTotalExpense -
+                  overview.lastMonthTotalExpense >
+                0 ? (
+                  <TrendingUp className="h-4 w-4" />
+                ) : (
+                  <TrendingDown className="h-4 w-4" />
+                )}
+                <p className="text-xs font-mono">
+                  {(overview.lastMonthTotalExpense === 0 || overview.lastMonthTotalExpense === null)
+                    ? "100%"
+                    : `${(
+                        ((overview.thisMonthTotalExpense -
+                          overview.lastMonthTotalExpense) /
+                          overview.lastMonthTotalExpense) *
+                        100
+                      ).toFixed(2)}%`}
                 </p>
-              ) : (
-                <div className="w-[95%] mx-auto">
-                  <Carousel className="w-full">
-                    <CarouselContent>
-                      {(overview.upcomingRecurringExpenses || []).map(
-                        (expense, index) => (
-                          <CarouselItem
-                            key={`${expense.id || expense.description}-${index}`}
-                          >
-                            <div className="w-full rounded-lg border border-border/70 px-3 py-3 flex items-center justify-between gap-3">
-                              <div>
-                                <p className="text-sm font-medium text-foreground truncate">
-                                  {expense.description}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {currencyMapper(user.currency)}
-                                  {expense.amount.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                                </p>
-                              </div>
-                              <div className="h-14 w-14 shrink-0 rounded-md border border-border/70 bg-background/80 flex flex-col items-center justify-center">
-                                <p className="text-[10px] leading-none text-muted-foreground">
-                                  {getWeekdayShort(expense.nextOccurrence)}
-                                </p>
-                                <p className="mt-1 text-xs leading-none text-foreground">
-                                  {formatDayNumberMonth(expense.nextOccurrence)}
-                                </p>
-                              </div>
+              </div>
+            )
+          }
+          numberData={
+            overview
+              ? `${currencyMapper(user?.currency || "USD")}${overview.thisMonthTotalExpense.toLocaleString(
+                  undefined,
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  },
+                )}`
+              : undefined
+          }
+          description={
+            overview
+              ? `You have spent ${currencyMapper(user?.currency || "USD")}${Math.abs(
+                  overview.thisMonthTotalExpense -
+                    overview.lastMonthTotalExpense,
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} ${
+                  overview.thisMonthTotalExpense -
+                    overview.lastMonthTotalExpense >
+                  0
+                    ? "more"
+                    : "less"
+                } than last month.`
+              : undefined
+          }
+          loading={overview === null}
+        />
+
+        <CardComponent
+          title={`${monthLabel} Income`}
+          cardAction={
+            incomeOverview && (
+              <div
+                className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                  incomeOverview.thisMonthTotalIncome -
+                    incomeOverview.lastMonthTotalIncome >
+                  0
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                    : "border-red-500/40 bg-red-500/10 text-red-400"
+                }`}
+              >
+                {incomeOverview.thisMonthTotalIncome -
+                  incomeOverview.lastMonthTotalIncome >
+                0 ? (
+                  <TrendingUp className="h-4 w-4" />
+                ) : (
+                  <TrendingDown className="h-4 w-4" />
+                )}
+                <p className="text-xs font-mono">
+                  {incomeOverview.lastMonthTotalIncome === 0
+                    ? "0%"
+                    : `${(
+                        ((incomeOverview.thisMonthTotalIncome -
+                          incomeOverview.lastMonthTotalIncome) /
+                          incomeOverview.lastMonthTotalIncome) *
+                        100
+                      ).toFixed(2)}%`}
+                </p>
+              </div>
+            )
+          }
+          numberData={
+            incomeOverview
+              ? `${currencyMapper(user?.currency || "USD")}${incomeOverview.thisMonthTotalIncome.toLocaleString(
+                  undefined,
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  },
+                )}`
+              : undefined
+          }
+          description={
+            incomeOverview
+              ? `You earned ${currencyMapper(user?.currency || "USD")}${Math.abs(
+                  incomeOverview.thisMonthTotalIncome -
+                    incomeOverview.lastMonthTotalIncome,
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} ${
+                  incomeOverview.thisMonthTotalIncome -
+                    incomeOverview.lastMonthTotalIncome >
+                  0
+                    ? "more"
+                    : "less"
+                } than last month.`
+              : undefined
+          }
+          loading={incomeOverview === null}
+        />
+
+        <Card
+          className="flex h-full flex-col min-w-0 transition-[transform,scale,box-shadow] duration-300 ease-in-out
+            hover:shadow-[0_8px_20px_rgb(0,0,0,0.4)]"
+        >
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground font-medium">
+              Upcoming Recurring Expenses
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative">
+            {overview === null ? (
+              <div className="flex h-[90px] items-center justify-center">
+                <Spinner className="text-muted-foreground h-6 w-6" />
+              </div>
+            ) : (overview.upcomingRecurringExpenses || []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No upcoming recurring expenses.
+              </p>
+            ) : (
+              <div className="w-[95%] mx-auto">
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {(overview.upcomingRecurringExpenses || []).map(
+                      (expense, index) => (
+                        <CarouselItem
+                          key={`${expense.id || expense.description}-${index}`}
+                        >
+                          <div className="w-full rounded-lg border border-border/70 px-3 py-3 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-medium text-foreground truncate">
+                                {expense.description}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {currencyMapper(user.currency)}
+                                {expense.amount.toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </p>
                             </div>
-                          </CarouselItem>
-                        ),
-                      )}
-                    </CarouselContent>
-                    <CarouselPrevious className="-ml-2" />
-                    <CarouselNext className="-mr-2" />
-                  </Carousel>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                            <div className="h-14 w-14 shrink-0 rounded-md border border-border/70 bg-background/80 flex flex-col items-center justify-center">
+                              <p className="text-[10px] leading-none text-muted-foreground">
+                                {getWeekdayShort(expense.nextOccurrence)}
+                              </p>
+                              <p className="mt-1 text-xs leading-none text-foreground">
+                                {formatDayNumberMonth(expense.nextOccurrence)}
+                              </p>
+                            </div>
+                          </div>
+                        </CarouselItem>
+                      ),
+                    )}
+                  </CarouselContent>
+                  <CarouselPrevious className="-ml-2" />
+                  <CarouselNext className="-mr-2" />
+                </Carousel>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-6 items-stretch">
