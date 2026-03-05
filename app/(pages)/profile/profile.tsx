@@ -101,7 +101,7 @@ export default function ProfilePage({
     hasFetchedRef.current = true;
 
     const fetchData = async () => {
-      const response = await api.get(`/users`);
+      const response = await api.get(`/users/me`);
       if (response.status === 200) {
         const data = await response.data;
         dispatch(

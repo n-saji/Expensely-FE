@@ -56,7 +56,7 @@ export default function AuthHandler() {
 
               localStorage.setItem("user_id", data.id);
 
-              const response = await api.get(`/users`);
+              const response = await api.get(`/users/me`);
               if (response.status === 200) {
                 const data = await response.data;
                 if (data.user.profilePicFilePath) {
