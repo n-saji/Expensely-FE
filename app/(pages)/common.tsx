@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { RootState } from "@/redux/store";
 import { usePathname, useRouter } from "next/navigation";
@@ -7,13 +7,13 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
 import Loader from "@/components/loader";
-import FetchToken from "@/utils/fetch_token";
 import { Toaster } from "@/components/ui/sonner";
 
 import { setCategories } from "@/redux/slices/categorySlice";
 import { CategoryTypeExpense } from "@/global/constants";
 import { Category } from "@/global/dto";
 import { useDispatch, useSelector } from "react-redux";
+import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { AppSidebar } from "@/components/sidebar";
 import Navbar from "@/components/navbar";
 import api from "@/lib/api";
@@ -27,15 +27,91 @@ export default function DashboardPage({
   children: React.ReactNode;
 }) {
   const user = useSelector((state: RootState) => state.user);
-  const token = FetchToken();
   const path = usePathname();
   const router = useRouter();
   const loading = useSelector((state: RootState) => state.sidebar.loading);
   const dispatch = useDispatch();
+  const [authResolved, setAuthResolved] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useWebSocket(user.notificationsEnabled ? user.id : null);
+  useWebSocket(
+    authResolved && isAuthenticated && user.notificationsEnabled
+      ? user.id
+      : null,
+  );
 
   useEffect(() => {
+    let active = true;
+
+    const hydrateUser = async () => {
+      // Redux is not persisted; on direct URL visits hydrate from cookie-backed API.
+      if (user?.id) {
+        if (active) {
+          setIsAuthenticated(true);
+          setAuthResolved(true);
+        }
+        return;
+      }
+
+      try {
+        const response = await api.get(`/users/me`);
+
+        if (!active) {
+          return;
+        }
+
+        if (response.status !== 200 || !response.data?.user?.id) {
+          setIsAuthenticated(false);
+          dispatch(clearUser());
+          return;
+        }
+
+        const profile = response.data.user;
+        dispatch(
+          setUser({
+            email: profile.email,
+            id: profile.id,
+            name: profile.name,
+            country_code: profile.country_code,
+            phone: profile.phone,
+            currency: profile.currency,
+            theme: profile.theme,
+            language: profile.language,
+            isActive: profile.isActive,
+            isAdmin: profile.isAdmin,
+            notificationsEnabled: profile.notificationsEnabled,
+            profilePicFilePath: profile.profilePicFilePath,
+            profileComplete: profile.profileComplete,
+            profilePictureUrl: profile.profilePictureUrl,
+          }),
+        );
+
+        setIsAuthenticated(true);
+      } catch {
+        if (!active) {
+          return;
+        }
+        setIsAuthenticated(false);
+        dispatch(clearUser());
+      } finally {
+        if (active) {
+          setAuthResolved(true);
+        }
+      }
+    };
+
+    hydrateUser();
+
+    return () => {
+      active = false;
+    };
+  }, [dispatch, user?.id]);
+
+  useEffect(() => {
+    if (!authResolved || !isAuthenticated || !user?.id) {
+      return;
+    }
+
     const fetchExpenseCategories = async () => {
       try {
         const response = await api.get(
@@ -75,9 +151,17 @@ export default function DashboardPage({
     return () => {
       window.removeEventListener("category-added", handleCategoryAdded);
     };
-  }, [dispatch, user.id]);
+  }, [authResolved, isAuthenticated, dispatch, user?.id]);
 
-  if (!token) {
+  if (!authResolved) {
+    return (
+      <div className="flex items-center justify-center h-screen w-full">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen text-2xl w-full">
         <h1 className="text-gray-700">Please log in to continue. </h1>

@@ -1,30 +1,34 @@
 "use client";
-import { useRouter } from "next/navigation";
 import Logo from "./logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import FetchToken from "@/utils/fetch_token";
 import validateToken from "@/utils/validate_token";
-import { useDispatch } from "react-redux";
 import { Button } from "./ui/button";
 
 export default function LandingPageNavBar() {
-  const router = useRouter();
   const [loggedIn, setLoggedIn] = useState(false);
-  const token = FetchToken();
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (token) {
-      validateToken().then((isValid) => {
-        if (isValid) {
-          setLoggedIn(true);
-        } else {
-          setLoggedIn(false);
+    let active = true;
+
+    validateToken()
+      .then((isValid) => {
+        if (!active) {
+          return;
         }
+        setLoggedIn(isValid);
+      })
+      .catch(() => {
+        if (!active) {
+          return;
+        }
+        setLoggedIn(false);
       });
-    }
-  }, [token, dispatch, router]);
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
