@@ -126,6 +126,7 @@ export default function ExpenseTableComponent() {
   const [tableLoading, setTableLoading] = useState(true);
   const [datas, setDatas] = useState<Expense[]>([]);
   const isExpenseMountedV2 = useRef(false);
+  const skipInitialDebouncedFetchRef = useRef(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -385,6 +386,13 @@ export default function ExpenseTableComponent() {
   };
 
   useEffect(() => {
+    // Initial data is fetched by the mount-only effect above.
+    // Skip the first run here to avoid duplicate API calls on first render.
+    if (skipInitialDebouncedFetchRef.current) {
+      skipInitialDebouncedFetchRef.current = false;
+      return;
+    }
+
     const sortField = sorting[0]?.id;
     const sortOrder = sorting[0]?.desc ? "desc" : "asc";
     setTableLoading(true);

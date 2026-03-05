@@ -3,18 +3,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
+  try {
+    const res = await api.get(`/users/logout`);
 
-  if (token) {
-    try {
-      const res = await api.get(`/users/logout`);
-
-      if (res.status !== 200) {
-        console.error("Logout API call failed:", await res.data);
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
+    if (res.status !== 200) {
+      console.error("Logout API call failed:", await res.data);
     }
+  } catch (error) {
+    console.error("Error during logout:", error);
   }
 
   // Optional: clear token cookie if you set it on login

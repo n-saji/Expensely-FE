@@ -47,13 +47,10 @@ export default function AuthHandler() {
                 profileComplete: !data.profileIncomplete,
               }),
             );
-            localStorage.setItem("token", data.token);
             localStorage.setItem("user_id", data.id);
             router.push("/complete-profile");
           } else {
             if (data.error === "") {
-              localStorage.setItem("token", data.token);
-
               localStorage.setItem("user_id", data.id);
 
               const response = await api.get(`/users/me`);

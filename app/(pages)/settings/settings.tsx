@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/userSlice";
 import { API_URL } from "@/config/config";
-import FetchToken from "@/utils/fetch_token";
 import UserPreferences from "@/utils/userPreferences";
 // import { motion } from "motion/react"
 import { toast } from "sonner";
@@ -39,7 +38,6 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
-  const token = FetchToken();
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -72,16 +70,6 @@ export default function SettingsPage() {
     };
     fetchData();
   }, []);
-
-  if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold">
-          Please log in to access settings.
-        </h1>
-      </div>
-    );
-  }
 
   const handlePasswordChange = async () => {
     if (!password) {
@@ -161,9 +149,6 @@ export default function SettingsPage() {
         if (data.error === null) {
           dispatch(setUser({ ...user, isActive: false }));
           toast.success("Account deleted successfully!");
-
-          localStorage.removeItem("token");
-          sessionStorage.removeItem("token");
           localStorage.removeItem("user_id");
           localStorage.removeItem("theme");
         } else {

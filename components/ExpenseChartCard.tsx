@@ -1246,6 +1246,22 @@ export function YearlyExpenseLineChartV2({
     }
   }, [category, amountByMonthV2]);
   const [selectedTimeframe, setSelectedTimeframe] = useState(0);
+  const setOverviewParamsIfChanged = (nextParams: {
+    count?: number;
+    type?: OverviewEnum;
+  }) => {
+    if (!setOverviewParams) {
+      return;
+    }
+
+    setOverviewParams((prev) => {
+      const sameCount =
+        (prev.count ?? undefined) === (nextParams.count ?? undefined);
+      const sameType =
+        (prev.type ?? undefined) === (nextParams.type ?? undefined);
+      return sameCount && sameType ? prev : nextParams;
+    });
+  };
   const typesMapper = {
     0: "Last 6 Months",
     1: "Last 12 Months",
@@ -1279,20 +1295,18 @@ export function YearlyExpenseLineChartV2({
     getRowTotal(previousCategoryRowV2),
   );
   useEffect(() => {
-    if (setOverviewParams) {
-      switch (selectedTimeframe) {
-        case 0:
-          setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
-          break;
-        case 1:
-          setOverviewParams({ count: 1, type: OverviewEnum.YEAR });
-          break;
-        case 2:
-          setOverviewParams({ count: 3, type: OverviewEnum.ALL_TIME });
-          break;
-        default:
-          setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
-      }
+    switch (selectedTimeframe) {
+      case 0:
+        setOverviewParamsIfChanged({ count: 6, type: OverviewEnum.MONTH });
+        break;
+      case 1:
+        setOverviewParamsIfChanged({ count: 1, type: OverviewEnum.YEAR });
+        break;
+      case 2:
+        setOverviewParamsIfChanged({ count: 3, type: OverviewEnum.ALL_TIME });
+        break;
+      default:
+        setOverviewParamsIfChanged({ count: 6, type: OverviewEnum.MONTH });
     }
   }, [selectedTimeframe, setOverviewParams]);
 
@@ -1636,19 +1650,32 @@ export function IncomeExpenseComparisonChart({
 }) {
   const [selectedTimeframe, setSelectedTimeframe] = useState(0);
 
+  const setOverviewParamsIfChanged = (nextParams: {
+    count?: number;
+    type?: OverviewEnum;
+  }) => {
+    setOverviewParams((prev) => {
+      const sameCount =
+        (prev.count ?? undefined) === (nextParams.count ?? undefined);
+      const sameType =
+        (prev.type ?? undefined) === (nextParams.type ?? undefined);
+      return sameCount && sameType ? prev : nextParams;
+    });
+  };
+
   useEffect(() => {
     switch (selectedTimeframe) {
       case 0:
-        setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
+        setOverviewParamsIfChanged({ count: 6, type: OverviewEnum.MONTH });
         break;
       case 1:
-        setOverviewParams({ count: 12, type: OverviewEnum.MONTH });
+        setOverviewParamsIfChanged({ count: 12, type: OverviewEnum.MONTH });
         break;
       case 2:
-        setOverviewParams({ type: OverviewEnum.ALL_TIME });
+        setOverviewParamsIfChanged({ type: OverviewEnum.ALL_TIME });
         break;
       default:
-        setOverviewParams({ count: 6, type: OverviewEnum.MONTH });
+        setOverviewParamsIfChanged({ count: 6, type: OverviewEnum.MONTH });
     }
   }, [selectedTimeframe, setOverviewParams]);
 

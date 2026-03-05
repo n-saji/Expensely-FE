@@ -1,6 +1,5 @@
 "use client";
 import { RootState } from "@/redux/store";
-import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -63,7 +62,6 @@ const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
 export default function Expense({ isDemo }: { isDemo?: boolean }) {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
-  const token = FetchToken();
   const isExpenseMounted = useRef(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
@@ -200,7 +198,6 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
         setPageNumber={setPageNumber}
         pageNumber={pageNumber}
         user={user}
-        token={token}
         setSelectedExpenses={setSelectedExpenses}
         selectedExpenses={selectedExpenses}
         setFilter={setFilter}
@@ -235,7 +232,6 @@ function ExpenseList({
     name: "",
     theme: "light",
   },
-  token = "",
   setSelectedExpenses,
   selectedExpenses = [],
   setFilter,
@@ -286,7 +282,6 @@ function ExpenseList({
     name: string;
     theme: string;
   };
-  token: string | null;
   setSelectedExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   selectedExpenses: Expense[];
   setFilter: React.Dispatch<React.SetStateAction<boolean>>;
@@ -327,10 +322,6 @@ function ExpenseList({
     const ids = selectedExpenses.map((id) => ({ id: id.id }));
     if (expenseId && !selectedExpenses.find((e) => e.id === expenseId)) {
       ids.push({ id: expenseId });
-    }
-    if (!token) {
-      console.error("No token found for authentication");
-      return;
     }
 
     try {
@@ -378,11 +369,6 @@ function ExpenseList({
     if (!selectedExpenses.length) return alert("Select one expense to edit.");
 
     const expenseToUpdate = selectedExpenses[0];
-
-    if (!token) {
-      console.error("No token found for authentication");
-      return;
-    }
 
     try {
       const response = await api.put(
@@ -609,9 +595,21 @@ function ExpenseList({
               {!isDemo && (
                 <th className={`${table_data_classname} w-1/12`}>#</th>
               )}
-              <th className={`${table_data_classname} ${isDemo ? 'w-2/4' : 'w-6/12'}`}>Description</th>
-              <th className={`${table_data_classname} ${isDemo ? 'w-1/4' : 'w-2/12'}`}>Amount</th>
-              <th className={`${table_data_classname} ${isDemo ? 'w-1/4' : 'w-3/12'}`}>Date</th>
+              <th
+                className={`${table_data_classname} ${isDemo ? "w-2/4" : "w-6/12"}`}
+              >
+                Description
+              </th>
+              <th
+                className={`${table_data_classname} ${isDemo ? "w-1/4" : "w-2/12"}`}
+              >
+                Amount
+              </th>
+              <th
+                className={`${table_data_classname} ${isDemo ? "w-1/4" : "w-3/12"}`}
+              >
+                Date
+              </th>
               {!isDemo && (
                 <th className={`${table_data_classname} w-1/12`}></th>
               )}

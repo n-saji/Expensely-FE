@@ -98,6 +98,7 @@ function formatDateForApi(date: string) {
 export default function IncomePage() {
   const user = useSelector((state: RootState) => state.user);
   const isMountedRef = useRef(false);
+  const skipInitialDebouncedFetchRef = useRef(true);
 
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
@@ -237,6 +238,13 @@ export default function IncomePage() {
   }, [fetchIncomes, categoryFilter, dateRange, pageNumber, pageSize, query]);
 
   useEffect(() => {
+    // Initial load is handled by the mount-only effect above.
+    // Skip first run to avoid duplicate requests on first render.
+    if (skipInitialDebouncedFetchRef.current) {
+      skipInitialDebouncedFetchRef.current = false;
+      return;
+    }
+
     const sortField = sorting[0]?.id;
     const sortOrder = sorting[0]?.desc ? "desc" : "asc";
 

@@ -119,11 +119,15 @@ export default function DashboardPage() {
     try {
       const queryParams = new URLSearchParams();
       if (hasConstraint) {
-        if (month !== undefined && monthYear !== undefined) {
+        const includeMonth = type === "month" || type === "";
+        const includeYear = type === "year" || type === "";
+
+        if (includeMonth && month !== undefined && monthYear !== undefined) {
           queryParams.append("req_month", month.toString());
           queryParams.append("req_month_year", monthYear.toString());
         }
-        if (yearly !== undefined) {
+
+        if (includeYear && yearly !== undefined) {
           queryParams.append("req_year", yearly.toString());
         }
       }
@@ -207,11 +211,15 @@ export default function DashboardPage() {
       if (endDate) queryParams.append("end_date", endDate);
 
       if (hasConstraint) {
-        if (month !== undefined && monthYear !== undefined) {
+        const includeMonth = type === "month" || type === "";
+        const includeYear = type === "year" || type === "";
+
+        if (includeMonth && month !== undefined && monthYear !== undefined) {
           queryParams.append("req_month", month.toString());
           queryParams.append("req_month_year", monthYear.toString());
         }
-        if (yearly !== undefined)
+
+        if (includeYear && yearly !== undefined)
           queryParams.append("req_year", yearly.toString());
       }
 
@@ -477,7 +485,8 @@ export default function DashboardPage() {
                   <TrendingDown className="h-4 w-4" />
                 )}
                 <p className="text-xs font-mono">
-                  {(overview.lastMonthTotalExpense === 0 || overview.lastMonthTotalExpense === null)
+                  {overview.lastMonthTotalExpense === 0 ||
+                  overview.lastMonthTotalExpense === null
                     ? "100%"
                     : `${(
                         ((overview.thisMonthTotalExpense -

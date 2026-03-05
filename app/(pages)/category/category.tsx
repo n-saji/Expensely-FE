@@ -1,6 +1,5 @@
 "use client";
 import { RootState } from "@/redux/store";
-import FetchToken from "@/utils/fetch_token";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -36,7 +35,6 @@ const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
 export default function CategoryPage() {
   const user = useSelector((state: RootState) => state.user);
   const [showTable, setShowTable] = useState(false);
-  const token = FetchToken();
   const isCategoryMounted = useRef(false);
   const [filter, setFilter] = useState(false);
   const [categoriesList, setCategories] = useState<categorySkeleton[]>([]);
@@ -82,11 +80,6 @@ export default function CategoryPage() {
     }
 
     if (!selectedCategory) return alert("Select one category to edit.");
-
-    if (!token) {
-      console.error("No token found for authentication");
-      return;
-    }
 
     const toUpdate = selectedCategory as categorySkeleton;
 

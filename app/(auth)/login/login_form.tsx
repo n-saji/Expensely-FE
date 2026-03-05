@@ -89,13 +89,6 @@ export default function LoginForm() {
 
         if (data.error === "") {
           toast.success("Login successful.");
-          if (rememberMe) {
-            localStorage.setItem("token", data.token);
-            sessionStorage.removeItem("token");
-          } else {
-            sessionStorage.setItem("token", data.token);
-            localStorage.removeItem("token");
-          }
           localStorage.setItem("user_id", data.id);
 
           const response = await api.get(`/users/me`);
@@ -132,8 +125,6 @@ export default function LoginForm() {
         } else {
           setLoading(false);
           dispatch(clearUser());
-          localStorage.removeItem("token");
-          sessionStorage.removeItem("token");
           localStorage.removeItem("user_id");
           toast.error(data.message || "Login failed");
         }
@@ -141,8 +132,6 @@ export default function LoginForm() {
         const errorData = await res.data;
         setLoading(false);
         dispatch(clearUser());
-        localStorage.removeItem("token");
-        sessionStorage.removeItem("token");
         localStorage.removeItem("user_id");
         toast.error(errorData.error || "Login failed");
       }
@@ -150,8 +139,6 @@ export default function LoginForm() {
       console.error("Login error:", error);
       setLoading(false);
       dispatch(clearUser());
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
       localStorage.removeItem("user_id");
       if (error instanceof AxiosError && error.response) {
         toast.error("Internal server error. Please try again later.");

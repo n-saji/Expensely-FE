@@ -89,7 +89,6 @@ export interface ExpenseOverviewV2 {
 
 export interface DashboardPageProps {
   userId: string;
-  token: string | null;
   user: UserSkeleton;
   overview: ExpenseOverview | null;
 }

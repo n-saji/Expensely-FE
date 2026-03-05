@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import FetchToken, { FetchUserId } from "@/utils/fetch_token";
+import { FetchUserId } from "@/utils/fetch_token";
 import { columns, Budget } from "./columns";
 import { DataTable } from "./data-table";
 import { toast } from "sonner";
@@ -107,9 +107,8 @@ export default function Page() {
 
   useEffect(() => {
     const userId = FetchUserId();
-    const token = FetchToken();
 
-    if (!userId || !token) {
+    if (!userId) {
       toast("User not found", { description: "Please log in again." });
       setLoading(false);
       return;
