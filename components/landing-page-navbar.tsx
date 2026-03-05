@@ -3,17 +3,13 @@ import { useRouter } from "next/navigation";
 import Logo from "./logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import FetchToken from "@/utils/fetch_token";
 import validateToken from "@/utils/validate_token";
-import { setUser } from "@/redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { Button } from "./ui/button";
 
 export default function LandingPageNavBar() {
   const router = useRouter();
-  const user = useSelector((state: RootState) => state.user);
   const [loggedIn, setLoggedIn] = useState(false);
   const token = FetchToken();
   const dispatch = useDispatch();
@@ -23,10 +19,8 @@ export default function LandingPageNavBar() {
       validateToken().then((isValid) => {
         if (isValid) {
           setLoggedIn(true);
-          dispatch(setUser({ ...user, isAuthenticated: true }));
         } else {
           setLoggedIn(false);
-          dispatch(setUser({ ...user, isAuthenticated: false }));
         }
       });
     }

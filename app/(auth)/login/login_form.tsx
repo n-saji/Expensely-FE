@@ -31,14 +31,38 @@ export default function LoginForm() {
 
   useEffect(() => {
     setLoading(true);
-    validateToken().then((isValid) => {
+    validateToken().then(async (isValid) => {
       if (isValid) {
-        dispatch(
-          setUser({
-            ...user,
-            isAuthenticated: true,
-          }),
-        );
+        const response = await api.get(`/users/${user.id}`);
+        if (response.status === 200) {
+          const data = await response.data;
+
+          dispatch(
+            setUser({
+              email: data.user.email,
+              id: data.user.id,
+              name: data.user.name,
+              country_code: data.user.country_code,
+              phone: data.user.phone,
+              currency: data.user.currency,
+              theme: data.user.theme,
+              language: data.user.language,
+              isActive: data.user.isActive,
+              isAdmin: data.user.isAdmin,
+              notificationsEnabled: data.user.notificationsEnabled,
+              profilePicFilePath: data.user.profilePicFilePath,
+              profileComplete: data.user.profileComplete,
+              profilePictureUrl: data.user.profilePictureUrl,
+            }),
+          );
+          localStorage.setItem("theme", data.user.theme);
+        } else {
+          const error = await response.data;
+          console.error("Error fetching user data:", error);
+          toast.error(error.data || "Failed to fetch user data");
+          return;
+        }
+
         router.push("/dashboard");
       }
 
@@ -81,7 +105,6 @@ export default function LoginForm() {
             dispatch(
               setUser({
                 email: data.user.email,
-                isAuthenticated: true,
                 id: data.user.id,
                 name: data.user.name,
                 country_code: data.user.country_code,

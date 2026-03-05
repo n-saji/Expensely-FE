@@ -43,7 +43,6 @@ export default function AuthHandler() {
           if (data.profileIncomplete) {
             dispatch(
               setUser({
-                isAuthenticated: true,
                 id: data.id,
                 profileComplete: !data.profileIncomplete,
               }),
@@ -75,7 +74,6 @@ export default function AuthHandler() {
                 dispatch(
                   setUser({
                     email: data.user.email,
-                    isAuthenticated: true,
                     id: data.user.id,
                     name: data.user.name,
                     country_code: data.user.country_code,

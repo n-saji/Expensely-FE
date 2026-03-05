@@ -3,7 +3,6 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     email: "",
-    isAuthenticated: false,
     id: "",
     name: "",
     country_code: "",
@@ -21,10 +20,6 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.email = action.payload.email;
-      state.isAuthenticated =
-        action.payload.isAuthenticated !== undefined
-          ? action.payload.isAuthenticated
-          : false;
       state.id = action.payload.id;
       state.name = action.payload.name;
       state.country_code = action.payload.country_code;
@@ -49,7 +44,6 @@ const userSlice = createSlice({
     },
     clearUser: (state) => {
       state.email = "";
-      state.isAuthenticated = false;
       state.id = "";
       state.name = "";
       state.country_code = "";

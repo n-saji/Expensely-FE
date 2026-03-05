@@ -39,7 +39,7 @@ export default function DashboardPage({
     const fetchExpenseCategories = async () => {
       try {
         const response = await api.get(
-          `/categories/user/${user.id}?type=${CategoryTypeExpense}`,
+          `/categories?type=${CategoryTypeExpense}`,
         );
 
         if (response.status !== 200) {
@@ -77,7 +77,7 @@ export default function DashboardPage({
     };
   }, [dispatch, user.id]);
 
-  if (!user.isAuthenticated || !token) {
+  if (!token) {
     return (
       <div className="flex items-center justify-center h-screen text-2xl w-full">
         <h1 className="text-gray-700">Please log in to continue. </h1>

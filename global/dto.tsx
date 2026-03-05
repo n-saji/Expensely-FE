@@ -36,7 +36,6 @@ export interface categorySkeleton {
 
 export interface UserSkeleton {
   email?: string;
-  isAuthenticated?: boolean;
   id: string;
   name?: string;
   country_code?: string;
