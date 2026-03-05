@@ -33,7 +33,7 @@ export default function LoginForm() {
     setLoading(true);
     validateToken().then(async (isValid) => {
       if (isValid) {
-        const response = await api.get(`/users/${user.id}`);
+        const response = await api.get(`/users`);
         if (response.status === 200) {
           const data = await response.data;
 
@@ -98,7 +98,7 @@ export default function LoginForm() {
           }
           localStorage.setItem("user_id", data.id);
 
-          const response = await api.get(`/users/${data.id}`);
+          const response = await api.get(`/users`);
           if (response.status === 200) {
             const data = await response.data;
 

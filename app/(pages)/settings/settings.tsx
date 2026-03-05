@@ -47,7 +47,7 @@ export default function SettingsPage() {
     hasFetchedRef.current = true;
 
     const fetchData = async () => {
-      const response = await api.get(`/users/${user.id}`);
+      const response = await api.get(`/users`);
       if (response.status === 200) {
         const data = await response.data;
         dispatch(
