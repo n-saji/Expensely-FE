@@ -51,7 +51,7 @@ export default function CategoryPage() {
     try {
       setLoading(true);
       const response = await api.get(
-        `/categories${type ? `?type=${type}` : ""}`,
+        `/categories/user${type ? `?type=${type}` : ""}`,
       );
       if (response.status !== 200) throw new Error("Failed to fetch expenses");
       const data = await response.data;

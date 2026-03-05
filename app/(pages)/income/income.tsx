@@ -143,7 +143,7 @@ export default function IncomePage() {
   const fetchCategories = useCallback(async () => {
     try {
       setCategoriesLoading(true);
-      const res = await api.get(`/categories?type=income`);
+      const res = await api.get(`/categories/user?type=income`);
       if (res.status !== 200) {
         throw new Error("Failed to fetch income categories");
       }
