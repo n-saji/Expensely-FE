@@ -108,25 +108,24 @@ export function AppSidebar() {
       collapsible="icon"
       className="z-12 border-r border-border/70 bg-background/80 backdrop-blur"
     >
-      <SidebarHeader className="border-b border-border/70">
+      <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="gap-2">
+            <SidebarMenuButton className="w-fit">
               <Link href="/">
                 <Image
                   src={logo}
                   alt="Logo"
-                  width={20}
-                  height={20}
-                  className="mr-1"
+                  width={22}
+                  height={22}
+                  className="rounded"
                 />
-                <h1 className="font-bold text-xl">Expensely</h1>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="py-3">
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             Main
