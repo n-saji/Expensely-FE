@@ -57,6 +57,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface IncomeListProps {
   incomes: IncomeRow[];
@@ -64,6 +65,23 @@ interface IncomeListProps {
   totalElements: number;
   pageNumber: number;
 }
+
+const parsePositiveInt = (value: string | null, fallback: number) => {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) || parsed < 1 ? fallback : parsed;
+};
+
+const parseDateParam = (value: string | null) => {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+const formatDateParam = (date?: Date) => {
+  if (!date) return "";
+  return date.toISOString().slice(0, 10);
+};
 
 function formatDateTimeParam(date: Date, endOfDay = false) {
   const target = new Date(date);
@@ -96,6 +114,9 @@ function formatDateForApi(date: string) {
 }
 
 export default function IncomePage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const user = useSelector((state: RootState) => state.user);
   const isMountedRef = useRef(false);
   const skipInitialDebouncedFetchRef = useRef(true);
@@ -126,12 +147,31 @@ export default function IncomePage() {
     categoryId: "",
   });
 
-  const [query, setQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  const [categoryFilter, setCategoryFilter] = useState(
+    () => searchParams.get("category") ?? "all",
+  );
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const from = parseDateParam(searchParams.get("start_date"));
+    const to = parseDateParam(searchParams.get("end_date"));
+
+    if (!from && !to) return undefined;
+
+    const normalizedFrom = from ?? to;
+    if (!normalizedFrom) return undefined;
+
+    return {
+      from: normalizedFrom,
+      ...(to ? { to } : {}),
+    };
+  });
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageNumber, setPageNumber] = useState(() =>
+    parsePositiveInt(searchParams.get("page"), 1),
+  );
+  const [pageSize, setPageSize] = useState(() =>
+    parsePositiveInt(searchParams.get("limit"), 10),
+  );
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -300,6 +340,55 @@ export default function IncomePage() {
     window.addEventListener("income-added", handleIncomeAdded);
     return () => window.removeEventListener("income-added", handleIncomeAdded);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (query.trim()) {
+      params.set("q", query.trim());
+    }
+
+    if (categoryFilter !== "all") {
+      params.set("category", categoryFilter);
+    }
+
+    const startDate = formatDateParam(dateRange?.from);
+    const endDate = formatDateParam(dateRange?.to);
+
+    if (startDate) {
+      params.set("start_date", startDate);
+    }
+
+    if (endDate) {
+      params.set("end_date", endDate);
+    }
+
+    if (pageNumber > 1) {
+      params.set("page", String(pageNumber));
+    }
+
+    if (pageSize !== 10) {
+      params.set("limit", String(pageSize));
+    }
+
+    const nextQuery = params.toString();
+    const currentQuery = searchParams.toString();
+
+    if (nextQuery === currentQuery) return;
+
+    router.push(`${pathname}${nextQuery ? `?${nextQuery}` : ""}`, {
+      scroll: false,
+    });
+  }, [
+    router,
+    pathname,
+    searchParams,
+    query,
+    categoryFilter,
+    dateRange,
+    pageNumber,
+    pageSize,
+  ]);
 
   useEffect(() => {
     setPageNumber(1);
@@ -585,46 +674,38 @@ export default function IncomePage() {
         </p>
       </div>
 
-      <Card className="border-border/70 shadow-sm overflow-hidden">
-        <CardContent className="pt-6">
-          <SearchAndFilter
-            query={query}
-            setQuery={setQuery}
-            selectedIncomes={selectedIncomes}
-            handleBulkDelete={handleBulkDelete}
-            categories={categories}
-            categoriesLoading={categoriesLoading}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            clearFilters={clearFilters}
-            open={open}
-            setOpen={setOpen}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            handleFileDownload={handleFileDownload}
-            loading={loading}
-          />
-        </CardContent>
-      </Card>
+      <SearchAndFilter
+        query={query}
+        setQuery={setQuery}
+        selectedIncomes={selectedIncomes}
+        handleBulkDelete={handleBulkDelete}
+        categories={categories}
+        categoriesLoading={categoriesLoading}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        clearFilters={clearFilters}
+        open={open}
+        setOpen={setOpen}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        handleFileDownload={handleFileDownload}
+        loading={loading}
+      />
 
-      <Card className="border-border/70 shadow-sm overflow-hidden">
-        <CardContent className="pt-6">
-          <DataTable
-            columns={tableColumns}
-            data={datas}
-            totalPages={incomesList.totalPages}
-            pageIndex={pageNumber - 1}
-            onPageChange={(page) => setPageNumber(page + 1)}
-            loading={tableLoading || loading}
-            sorting={sorting}
-            onSortingChange={handleSortingChange}
-            rowSelection={rowSelection}
-            onRowSelectionChange={setRowSelection}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-          />
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={tableColumns}
+        data={datas}
+        totalPages={incomesList.totalPages}
+        pageIndex={pageNumber - 1}
+        onPageChange={(page) => setPageNumber(page + 1)}
+        loading={tableLoading || loading}
+        sorting={sorting}
+        onSortingChange={handleSortingChange}
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+      />
 
       {selectedDelete && (
         <AlertDialog
@@ -838,11 +919,6 @@ const SearchAndFilter = ({
               selectedOption={categoryFilter}
               onSelect={setCategoryFilter}
             />
-            {categoriesLoading && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Loading categories...
-              </p>
-            )}
           </div>
 
           <div className="w-[200px]">

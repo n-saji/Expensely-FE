@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import { columns, Expense } from "./columns";
 import { DataTable } from "./data-table";
@@ -120,25 +121,65 @@ interface ExpenseListProps {
   pageNumber: number;
 }
 
+const parsePositiveInt = (value: string | null, fallback: number) => {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) || parsed < 1 ? fallback : parsed;
+};
+
+const parseDateParam = (value: string | null) => {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+const formatDateParam = (date?: Date) => {
+  if (!date) return "";
+  return date.toISOString().slice(0, 10);
+};
+
 export default function ExpenseTableComponent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const user = useSelector((state: RootState) => state.user);
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
   const [datas, setDatas] = useState<Expense[]>([]);
   const isExpenseMountedV2 = useRef(false);
   const skipInitialDebouncedFetchRef = useRef(true);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(() =>
+    parsePositiveInt(searchParams.get("page"), 1),
+  );
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(
+    () => searchParams.get("category") ?? "",
+  );
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const from = parseDateParam(searchParams.get("start_date"));
+    const to = parseDateParam(searchParams.get("end_date"));
+
+    if (!from && !to) return undefined;
+
+    // `DateRange` requires `from` to always exist.
+    const normalizedFrom = from ?? to;
+    if (!normalizedFrom) return undefined;
+
+    return {
+      from: normalizedFrom,
+      ...(to ? { to } : {}),
+    };
+  });
   const [open, setOpen] = useState(false);
   const [calenderOpen, setCalenderOpen] = useState(false);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(() =>
+    parsePositiveInt(searchParams.get("limit"), 10),
+  );
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
@@ -147,7 +188,7 @@ export default function ExpenseTableComponent() {
     );
   };
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const [expensesList, setExpensesList] = useState<ExpenseListProps>({
@@ -653,6 +694,55 @@ export default function ExpenseTableComponent() {
     setQuery("");
     setPageNumber(1);
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (query.trim()) {
+      params.set("q", query.trim());
+    }
+
+    if (categoryFilter) {
+      params.set("category", categoryFilter);
+    }
+
+    const startDate = formatDateParam(dateRange?.from);
+    const endDate = formatDateParam(dateRange?.to);
+
+    if (startDate) {
+      params.set("start_date", startDate);
+    }
+
+    if (endDate) {
+      params.set("end_date", endDate);
+    }
+
+    if (pageNumber > 1) {
+      params.set("page", String(pageNumber));
+    }
+
+    if (pageSize !== 10) {
+      params.set("limit", String(pageSize));
+    }
+
+    const nextQuery = params.toString();
+    const currentQuery = searchParams.toString();
+
+    if (nextQuery === currentQuery) return;
+
+    router.push(`${pathname}${nextQuery ? `?${nextQuery}` : ""}`, {
+      scroll: false,
+    });
+  }, [
+    router,
+    pathname,
+    searchParams,
+    query,
+    categoryFilter,
+    dateRange,
+    pageNumber,
+    pageSize,
+  ]);
 
   useEffect(() => {
     setPageNumber(1);

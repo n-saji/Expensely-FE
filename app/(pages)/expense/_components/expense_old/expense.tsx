@@ -2,6 +2,7 @@
 import { RootState } from "@/redux/store";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { currencyMapper } from "@/utils/currencyMapper";
 import deleteIcon from "@/assets/icon/delete.png";
@@ -60,15 +61,33 @@ const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
 const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
 
 export default function Expense({ isDemo }: { isDemo?: boolean }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const isExpenseMounted = useRef(false);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(() => {
+    const page = Number.parseInt(searchParams.get("page") ?? "1", 10);
+    return Number.isNaN(page) || page < 1 ? 1 : page;
+  });
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const [filter, setFilter] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(
+    () => searchParams.get("category") ?? "",
+  );
+  const [fromDate, setFromDate] = useState(() => {
+    const value = searchParams.get("start_date");
+    if (!value) return "";
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+  });
+  const [toDate, setToDate] = useState(() => {
+    const value = searchParams.get("end_date");
+    if (!value) return "";
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+  });
   const [loading, setLoading] = useState(false);
   const [expensesList, setExpensesList] = useState<ExpenseListProps>({
     expenses: [],
@@ -76,7 +95,37 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     totalElements: 0,
     pageNumber: 1,
   });
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (query.trim()) params.set("q", query.trim());
+    if (categoryFilter) params.set("category", categoryFilter);
+    if (fromDate)
+      params.set("start_date", new Date(fromDate).toISOString().slice(0, 10));
+    if (toDate)
+      params.set("end_date", new Date(toDate).toISOString().slice(0, 10));
+    if (pageNumber > 1) params.set("page", String(pageNumber));
+
+    const nextQuery = params.toString();
+    const currentQuery = searchParams.toString();
+
+    if (nextQuery === currentQuery) return;
+
+    router.push(`${pathname}${nextQuery ? `?${nextQuery}` : ""}`, {
+      scroll: false,
+    });
+  }, [
+    router,
+    pathname,
+    searchParams,
+    query,
+    categoryFilter,
+    fromDate,
+    toDate,
+    pageNumber,
+  ]);
 
   const fetchExpenses = async ({
     fromDate,
@@ -163,10 +212,12 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     if (!isExpenseMounted.current) {
       isExpenseMounted.current = true;
       fetchExpenses({
-        fromDate: "",
-        toDate: "",
-        category: "",
+        fromDate: fromDate ? new Date(fromDate).toISOString().slice(0, 16) : "",
+        toDate: toDate ? new Date(toDate).toISOString().slice(0, 16) : "",
+        category: categoryFilter || "",
+        q: query,
         order: "desc",
+        page: pageNumber,
         limit: isDemo ? 7 : 10,
       });
     }
