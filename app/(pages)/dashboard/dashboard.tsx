@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   FileWarning,
@@ -38,6 +39,7 @@ import ExpenseInsightsSection from "./_components/expense-insights";
 import IncomeInsightsSection from "./_components/income-insights";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [loadingYear, setLoadingYear] = useState<boolean>(true);
@@ -437,6 +439,18 @@ export default function DashboardPage() {
     currentMonthYear,
     Math.max(currentMonth - 1, 0),
   ).toLocaleString("default", { month: "long" });
+  const selectedMonthStartDate = formatDateOnly(
+    new Date(currentMonthYear, currentMonth - 1, 1),
+  );
+  const selectedMonthEndDate = formatDateOnly(
+    new Date(currentMonthYear, currentMonth, 0),
+  );
+  const selectedIncomeMonthStartDate = formatDateOnly(
+    new Date(incomeCurrentMonthYear, incomeCurrentMonth - 1, 1),
+  );
+  const selectedIncomeMonthEndDate = formatDateOnly(
+    new Date(incomeCurrentMonthYear, incomeCurrentMonth, 0),
+  );
   const todayLabel = new Date().toLocaleDateString("default", {
     month: "short",
     day: "numeric",
@@ -464,134 +478,172 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <CardComponent
-          title={`${monthLabel} Expense`}
-          cardAction={
-            overview && (
-              <div
-                className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                  overview.thisMonthTotalExpense -
-                    overview.lastMonthTotalExpense >
-                  0
-                    ? "border-red-500/40 bg-red-500/10 text-red-400"
-                    : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                }`}
-              >
-                {overview.thisMonthTotalExpense -
-                  overview.lastMonthTotalExpense >
-                0 ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-                <p className="text-xs font-mono">
-                  {overview.lastMonthTotalExpense === 0 ||
-                  overview.lastMonthTotalExpense === null
-                    ? "100%"
-                    : `${(
-                        ((overview.thisMonthTotalExpense -
-                          overview.lastMonthTotalExpense) /
-                          overview.lastMonthTotalExpense) *
-                        100
-                      ).toFixed(2)}%`}
-                </p>
-              </div>
+        <div
+          role="button"
+          tabIndex={0}
+          className="cursor-pointer"
+          onClick={() =>
+            router.push(
+              `/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`,
             )
           }
-          numberData={
-            overview
-              ? `${currencyMapper(user?.currency || "USD")}${overview.thisMonthTotalExpense.toLocaleString(
-                  undefined,
-                  {
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              router.push(
+                `/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`,
+              );
+            }
+          }}
+        >
+          <CardComponent
+            title={`${monthLabel} Expense`}
+            cardAction={
+              overview && (
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense >
+                    0
+                      ? "border-red-500/40 bg-red-500/10 text-red-400"
+                      : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                  }`}
+                >
+                  {overview.thisMonthTotalExpense -
+                    overview.lastMonthTotalExpense >
+                  0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  <p className="text-xs font-mono">
+                    {overview.lastMonthTotalExpense === 0 ||
+                    overview.lastMonthTotalExpense === null
+                      ? "100%"
+                      : `${(
+                          ((overview.thisMonthTotalExpense -
+                            overview.lastMonthTotalExpense) /
+                            overview.lastMonthTotalExpense) *
+                          100
+                        ).toFixed(2)}%`}
+                  </p>
+                </div>
+              )
+            }
+            numberData={
+              overview
+                ? `${currencyMapper(user?.currency || "USD")}${overview.thisMonthTotalExpense.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )}`
+                : undefined
+            }
+            description={
+              overview
+                ? `You have spent ${currencyMapper(user?.currency || "USD")}${Math.abs(
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense,
+                  ).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  },
-                )}`
-              : undefined
-          }
-          description={
-            overview
-              ? `You have spent ${currencyMapper(user?.currency || "USD")}${Math.abs(
-                  overview.thisMonthTotalExpense -
-                    overview.lastMonthTotalExpense,
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} ${
-                  overview.thisMonthTotalExpense -
-                    overview.lastMonthTotalExpense >
-                  0
-                    ? "more"
-                    : "less"
-                } than last month.`
-              : undefined
-          }
-          loading={overview === null}
-        />
+                  })} ${
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense >
+                    0
+                      ? "more"
+                      : "less"
+                  } than last month.`
+                : undefined
+            }
+            loading={overview === null}
+          />
+        </div>
 
-        <CardComponent
-          title={`${monthLabel} Income`}
-          cardAction={
-            incomeOverview && (
-              <div
-                className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                  incomeOverview.thisMonthTotalIncome -
-                    incomeOverview.lastMonthTotalIncome >
-                  0
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                    : "border-red-500/40 bg-red-500/10 text-red-400"
-                }`}
-              >
-                {incomeOverview.thisMonthTotalIncome -
-                  incomeOverview.lastMonthTotalIncome >
-                0 ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-                <p className="text-xs font-mono">
-                  {incomeOverview.lastMonthTotalIncome === 0
-                    ? "0%"
-                    : `${(
-                        ((incomeOverview.thisMonthTotalIncome -
-                          incomeOverview.lastMonthTotalIncome) /
-                          incomeOverview.lastMonthTotalIncome) *
-                        100
-                      ).toFixed(2)}%`}
-                </p>
-              </div>
+        <div
+          role="button"
+          tabIndex={0}
+          className="cursor-pointer"
+          onClick={() =>
+            router.push(
+              `/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`,
             )
           }
-          numberData={
-            incomeOverview
-              ? `${currencyMapper(user?.currency || "USD")}${incomeOverview.thisMonthTotalIncome.toLocaleString(
-                  undefined,
-                  {
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              router.push(
+                `/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`,
+              );
+            }
+          }}
+        >
+          <CardComponent
+            title={`${monthLabel} Income`}
+            cardAction={
+              incomeOverview && (
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    incomeOverview.thisMonthTotalIncome -
+                      incomeOverview.lastMonthTotalIncome >
+                    0
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                      : "border-red-500/40 bg-red-500/10 text-red-400"
+                  }`}
+                >
+                  {incomeOverview.thisMonthTotalIncome -
+                    incomeOverview.lastMonthTotalIncome >
+                  0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  <p className="text-xs font-mono">
+                    {incomeOverview.lastMonthTotalIncome === 0
+                      ? "0%"
+                      : `${(
+                          ((incomeOverview.thisMonthTotalIncome -
+                            incomeOverview.lastMonthTotalIncome) /
+                            incomeOverview.lastMonthTotalIncome) *
+                          100
+                        ).toFixed(2)}%`}
+                  </p>
+                </div>
+              )
+            }
+            numberData={
+              incomeOverview
+                ? `${currencyMapper(user?.currency || "USD")}${incomeOverview.thisMonthTotalIncome.toLocaleString(
+                    undefined,
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )}`
+                : undefined
+            }
+            description={
+              incomeOverview
+                ? `You earned ${currencyMapper(user?.currency || "USD")}${Math.abs(
+                    incomeOverview.thisMonthTotalIncome -
+                      incomeOverview.lastMonthTotalIncome,
+                  ).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  },
-                )}`
-              : undefined
-          }
-          description={
-            incomeOverview
-              ? `You earned ${currencyMapper(user?.currency || "USD")}${Math.abs(
-                  incomeOverview.thisMonthTotalIncome -
-                    incomeOverview.lastMonthTotalIncome,
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} ${
-                  incomeOverview.thisMonthTotalIncome -
-                    incomeOverview.lastMonthTotalIncome >
-                  0
-                    ? "more"
-                    : "less"
-                } than last month.`
-              : undefined
-          }
-          loading={incomeOverview === null}
-        />
+                  })} ${
+                    incomeOverview.thisMonthTotalIncome -
+                      incomeOverview.lastMonthTotalIncome >
+                    0
+                      ? "more"
+                      : "less"
+                  } than last month.`
+                : undefined
+            }
+            loading={incomeOverview === null}
+          />
+        </div>
 
         <Card
           className="flex h-full flex-col min-w-0 transition-[transform,scale,box-shadow] duration-300 ease-in-out
@@ -834,4 +886,11 @@ function formatDayNumberMonth(dateValue: string) {
   const day = date.getDate();
   const month = date.toLocaleDateString("en-US", { month: "short" });
   return `${day} ${month}`;
+}
+
+function formatDateOnly(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
