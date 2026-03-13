@@ -520,7 +520,7 @@ export default function DashboardPage() {
                     {overview.lastMonthTotalExpense === 0 ||
                     overview.lastMonthTotalExpense === null
                       ? "100%"
-                      : `${(
+                      : `${Math.abs(
                           ((overview.thisMonthTotalExpense -
                             overview.lastMonthTotalExpense) /
                             overview.lastMonthTotalExpense) *
@@ -603,7 +603,7 @@ export default function DashboardPage() {
                   <p className="text-xs font-mono">
                     {incomeOverview.lastMonthTotalIncome === 0
                       ? "0%"
-                      : `${(
+                      : `${Math.abs(
                           ((incomeOverview.thisMonthTotalIncome -
                             incomeOverview.lastMonthTotalIncome) /
                             incomeOverview.lastMonthTotalIncome) *
