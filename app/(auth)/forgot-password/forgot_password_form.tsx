@@ -15,7 +15,6 @@ const EMAIL_REGEX = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
   const resolveApiErrorMessage = (error: unknown) => {
     if (!(error instanceof AxiosError)) {
@@ -52,7 +51,6 @@ export default function ForgotPasswordForm() {
     }
 
     setLoading(true);
-    setSuccessMessage("");
 
     try {
       const response = await api.post(`/users/request-password-reset`, {
@@ -67,7 +65,6 @@ export default function ForgotPasswordForm() {
 
       const message =
         data?.message || "If the account exists, a reset link has been sent.";
-      setSuccessMessage(message);
       toast.success(message);
     } catch (error) {
       toast.error(resolveApiErrorMessage(error));
@@ -91,19 +88,10 @@ export default function ForgotPasswordForm() {
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
-            if (successMessage) {
-              setSuccessMessage("");
-            }
           }}
           required
         />
       </div>
-
-      {successMessage && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {successMessage}
-        </div>
-      )}
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? <Spinner /> : "Send reset link"}
