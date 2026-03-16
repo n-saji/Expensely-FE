@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
+import { AxiosError } from "axios";
 
 export default function SignUpForm() {
   const [name, setName] = useState("");
@@ -98,11 +99,41 @@ export default function SignUpForm() {
         setPassword("");
         setConfirmPassword("");
         setError("");
-        router.push("/login");
+        const pendingUserId =
+          response.data?.id || response.data?.userId || response.data?.user?.id;
+        localStorage.removeItem("pending_verify_user_id");
+        if (!pendingUserId) {
+          setError(
+            "Verification session could not be created. Please try registering again.",
+          );
+          return;
+        }
+
+        localStorage.setItem("pending_verify_user_id", pendingUserId);
+        localStorage.setItem("pending_verify_email", email);
+        localStorage.setItem("otp_auto_resend", "0");
+        router.push("/verify-otp");
       })
       .catch((err) => {
         console.error("Error during signup:", err);
-        setError("An error occurred during signup. Please try again.");
+        if (err instanceof AxiosError && err.response) {
+          const statusCode = err.response.status;
+          if (statusCode >= 500) {
+            setError("Internal server error. Please try again later.");
+            return;
+          }
+
+          const backendMessage =
+            err.response.data?.error || err.response.data?.message;
+          setError(
+            typeof backendMessage === "string" && backendMessage
+              ? backendMessage
+              : "Request failed. Please try again.",
+          );
+          return;
+        }
+
+        setError("Request failed. Please try again.");
       })
       .finally(() => {
         setLoading(false);

@@ -83,6 +83,7 @@ export default function DashboardPage({
             profilePicFilePath: profile.profilePicFilePath,
             profileComplete: profile.profileComplete,
             profilePictureUrl: profile.profilePictureUrl,
+            emailVerified: profile.emailVerified,
           }),
         );
 
@@ -109,6 +110,30 @@ export default function DashboardPage({
 
   useEffect(() => {
     if (!authResolved || !isAuthenticated || !user?.id) {
+      return;
+    }
+
+    if (user.emailVerified === false) {
+      localStorage.setItem("pending_verify_user_id", user.id);
+      localStorage.setItem("pending_verify_email", user.email || "");
+      localStorage.setItem("otp_auto_resend", "1");
+      router.push("/verify-otp");
+    }
+  }, [
+    authResolved,
+    isAuthenticated,
+    router,
+    user?.email,
+    user?.emailVerified,
+    user?.id,
+  ]);
+
+  useEffect(() => {
+    if (!authResolved || !isAuthenticated || !user?.id) {
+      return;
+    }
+
+    if (user.emailVerified === false) {
       return;
     }
 
@@ -151,7 +176,7 @@ export default function DashboardPage({
     return () => {
       window.removeEventListener("category-added", handleCategoryAdded);
     };
-  }, [authResolved, isAuthenticated, dispatch, user?.id]);
+  }, [authResolved, isAuthenticated, dispatch, user?.emailVerified, user?.id]);
 
   if (!authResolved) {
     return (
@@ -168,6 +193,14 @@ export default function DashboardPage({
         <Link href="/login" className="text-blue-600 hover:underline">
           Log In
         </Link>
+      </div>
+    );
+  }
+
+  if (user.emailVerified === false) {
+    return (
+      <div className="flex items-center justify-center h-screen w-full">
+        <Loader />
       </div>
     );
   }

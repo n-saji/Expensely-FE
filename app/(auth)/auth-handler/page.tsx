@@ -40,61 +40,74 @@ export default function AuthHandler() {
         })
         .then((res) => res.data)
         .then(async (data) => {
-          if (data.profileIncomplete) {
-            dispatch(
-              setUser({
-                id: data.id,
-                profileComplete: !data.profileIncomplete,
-              }),
+          if (data.error !== "") {
+            setError(
+              data.message || "Authentication failed. Please try again.",
             );
-            localStorage.setItem("user_id", data.id);
-            router.push("/complete-profile");
-          } else {
-            if (data.error === "") {
-              localStorage.setItem("user_id", data.id);
-
-              const response = await api.get(`/users/me`);
-              if (response.status === 200) {
-                const data = await response.data;
-                if (data.user.profilePicFilePath) {
-                  const profilePictureUrl = await fetchProfileUrl(
-                    data.user.profilePicFilePath,
-                  ).catch((error) => {
-                    console.error("Error fetching profile picture URL:", error);
-                    return "";
-                  });
-                  data.user.profilePictureUrl = profilePictureUrl;
-                } else {
-                  data.user.profilePictureUrl = "";
-                }
-
-                dispatch(
-                  setUser({
-                    email: data.user.email,
-                    id: data.user.id,
-                    name: data.user.name,
-                    country_code: data.user.country_code,
-                    phone: data.user.phone,
-                    currency: data.user.currency,
-                    theme: data.user.theme,
-                    language: data.user.language,
-                    isActive: data.user.isActive,
-                    isAdmin: data.user.isAdmin,
-                    notificationsEnabled: data.user.notificationsEnabled,
-                    profilePictureUrl: data.user.profilePictureUrl,
-                    profilePicFilePath: data.user.profilePicFilePath,
-                    profileComplete: data.user.profileComplete,
-                  }),
-                );
-                localStorage.setItem("theme", data.user.theme);
-              } else {
-                const error = await response.data;
-                console.error("Error fetching user data:", error);
-                return;
-              }
-              router.push("/dashboard");
-            }
+            return;
           }
+
+          localStorage.setItem("user_id", data.id);
+
+          const response = await api.get(`/users/me`);
+          if (response.status !== 200) {
+            const responseError = await response.data;
+            console.error("Error fetching user data:", responseError);
+            setError("Failed to load user profile. Please try again.");
+            return;
+          }
+
+          const profileData = await response.data;
+          if (profileData.user.profilePicFilePath) {
+            const profilePictureUrl = await fetchProfileUrl(
+              profileData.user.profilePicFilePath,
+            ).catch((error) => {
+              console.error("Error fetching profile picture URL:", error);
+              return "";
+            });
+            profileData.user.profilePictureUrl = profilePictureUrl;
+          } else {
+            profileData.user.profilePictureUrl = "";
+          }
+
+          dispatch(
+            setUser({
+              email: profileData.user.email,
+              id: profileData.user.id,
+              name: profileData.user.name,
+              country_code: profileData.user.country_code,
+              phone: profileData.user.phone,
+              currency: profileData.user.currency,
+              theme: profileData.user.theme,
+              language: profileData.user.language,
+              isActive: profileData.user.isActive,
+              isAdmin: profileData.user.isAdmin,
+              notificationsEnabled: profileData.user.notificationsEnabled,
+              profilePictureUrl: profileData.user.profilePictureUrl,
+              profilePicFilePath: profileData.user.profilePicFilePath,
+              profileComplete: profileData.user.profileComplete,
+              emailVerified: profileData.user.emailVerified,
+            }),
+          );
+          localStorage.setItem("theme", profileData.user.theme);
+
+          if (profileData.user.emailVerified === false) {
+            localStorage.setItem("pending_verify_user_id", profileData.user.id);
+            localStorage.setItem(
+              "pending_verify_email",
+              profileData.user.email || "",
+            );
+            localStorage.setItem("otp_auto_resend", "1");
+            router.push("/verify-otp");
+            return;
+          }
+
+          if (profileData.user.profileComplete === false) {
+            router.push("/complete-profile");
+            return;
+          }
+
+          router.push("/dashboard");
         });
     } else if (status === "unauthenticated") {
       router.push("/login");

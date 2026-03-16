@@ -29,6 +29,15 @@ export default function LoginForm() {
 
   const dispatch = useDispatch();
 
+  const redirectToOtpVerification = (id: string, email: string) => {
+    if (id) {
+      localStorage.setItem("pending_verify_user_id", id);
+    }
+    localStorage.setItem("pending_verify_email", email || "");
+    localStorage.setItem("otp_auto_resend", "1");
+    router.push("/verify-otp");
+  };
+
   useEffect(() => {
     setLoading(true);
     validateToken().then(async (isValid) => {
@@ -53,9 +62,15 @@ export default function LoginForm() {
               profilePicFilePath: data.user.profilePicFilePath,
               profileComplete: data.user.profileComplete,
               profilePictureUrl: data.user.profilePictureUrl,
+              emailVerified: data.user.emailVerified,
             }),
           );
           localStorage.setItem("theme", data.user.theme);
+
+          if (data.user.emailVerified === false) {
+            redirectToOtpVerification(data.user.id, data.user.email);
+            return;
+          }
         } else {
           const error = await response.data;
           console.error("Error fetching user data:", error);
@@ -111,9 +126,16 @@ export default function LoginForm() {
                 profilePicFilePath: data.user.profilePicFilePath,
                 profileComplete: data.user.profileComplete,
                 profilePictureUrl: data.user.profilePictureUrl,
+                emailVerified: data.user.emailVerified,
               }),
             );
             localStorage.setItem("theme", data.user.theme);
+
+            if (data.user.emailVerified === false) {
+              redirectToOtpVerification(data.user.id, data.user.email);
+              setLoading(false);
+              return;
+            }
 
             router.push("/dashboard");
           } else {
@@ -138,11 +160,57 @@ export default function LoginForm() {
     } catch (error) {
       console.error("Login error:", error);
       setLoading(false);
+
+      if (error instanceof AxiosError && error.response) {
+        const statusCode = error.response.status;
+        const backendMessage =
+          error.response.data?.error || error.response.data?.message || "";
+
+        if (
+          error.response.status === 403 &&
+          typeof backendMessage === "string" &&
+          backendMessage.toLowerCase().includes("email not verified")
+        ) {
+          const unresolvedUserId =
+            error.response.data?.id ||
+            error.response.data?.userId ||
+            error.response.data?.user?.id ||
+            localStorage.getItem("pending_verify_user_id") ||
+            localStorage.getItem("user_id") ||
+            "";
+          const unresolvedEmail =
+            error.response.data?.email ||
+            (username.includes("@") ? username : "");
+
+          if (!unresolvedUserId) {
+            toast.error(
+              "Email not verified, but verification session is missing. Please contact support.",
+            );
+            return;
+          }
+
+          toast.error("Email not verified. Please verify your OTP.");
+          redirectToOtpVerification(unresolvedUserId, unresolvedEmail);
+          return;
+        }
+
+        dispatch(clearUser());
+        localStorage.removeItem("user_id");
+
+        toast.error(
+          statusCode >= 500
+            ? "Internal server error. Please try again later."
+            : typeof backendMessage === "string" && backendMessage
+              ? backendMessage
+              : "Request failed. Please try again.",
+        );
+        return;
+      }
+
       dispatch(clearUser());
       localStorage.removeItem("user_id");
-      if (error instanceof AxiosError && error.response) {
-        toast.error("Internal server error. Please try again later.");
-      }
+
+      toast.error("Request failed. Please try again.");
     }
   };
 

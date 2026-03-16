@@ -1,22 +1,44 @@
 import { createSlice } from "@reduxjs/toolkit";
+
+interface UserState {
+  email: string;
+  id: string;
+  name: string;
+  country_code: string;
+  phone: string;
+  currency: string;
+  theme: string;
+  language: string;
+  isActive: boolean;
+  isAdmin: boolean;
+  notificationsEnabled: boolean;
+  profilePicFilePath: string;
+  profilePictureUrl: string;
+  profileComplete: boolean;
+  emailVerified: boolean;
+}
+
+const initialState: UserState = {
+  email: "",
+  id: "",
+  name: "",
+  country_code: "",
+  phone: "",
+  currency: "",
+  theme: "",
+  language: "en",
+  isActive: true,
+  isAdmin: false,
+  notificationsEnabled: true,
+  profilePicFilePath: "",
+  profilePictureUrl: "",
+  profileComplete: false,
+  emailVerified: true,
+};
+
 const userSlice = createSlice({
   name: "user",
-  initialState: {
-    email: "",
-    id: "",
-    name: "",
-    country_code: "",
-    phone: "",
-    currency: "",
-    theme: "",
-    language: "en",
-    isActive: true,
-    isAdmin: false,
-    notificationsEnabled: true,
-    profilePicFilePath: "",
-    profilePictureUrl: "",
-    profileComplete: false,
-  },
+  initialState,
   reducers: {
     setUser: (state, action) => {
       state.email = action.payload.email;
@@ -41,6 +63,10 @@ const userSlice = createSlice({
         action.payload.profileComplete !== undefined
           ? action.payload.profileComplete
           : false;
+      state.emailVerified =
+        action.payload.emailVerified !== undefined
+          ? action.payload.emailVerified
+          : state.emailVerified;
     },
     clearUser: (state) => {
       state.email = "";
@@ -57,6 +83,7 @@ const userSlice = createSlice({
       state.profilePictureUrl = "";
       state.profileComplete = false;
       state.profilePicFilePath = "";
+      state.emailVerified = true;
     },
   },
 });
