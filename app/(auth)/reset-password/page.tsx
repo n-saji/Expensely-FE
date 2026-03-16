@@ -1,6 +1,6 @@
 import Logo from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ForgotPasswordForm from "./forgot_password_form";
+import ResetPasswordForm from "./reset_password_form";
 
 const maintenanceMode = process.env.NEXT_MAINTENANCE_MODE === "true";
 
@@ -8,13 +8,12 @@ export async function generateMetadata() {
   return {
     title: maintenanceMode
       ? "Under Maintenance | Expensely"
-      : "Forgot Password | Expensely",
-    description:
-      "Request a secure password reset link to recover access to your Expensely account.",
+      : "Reset Password | Expensely",
+    description: "Choose a new secure password for your Expensely account.",
   };
 }
 
-export default function ForgotPasswordPage() {
+export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative overflow-hidden">
@@ -25,22 +24,22 @@ export default function ForgotPasswordPage() {
             <div className="flex flex-col items-center text-center">
               <Logo className="text-4xl p-4 text-primary" />
               <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
-                Account recovery
+                Secure your account
               </p>
               <h1 className="mt-4 text-3xl font-semibold">
-                Reset your password
+                Set a new password
               </h1>
               <p className="mt-3 text-sm text-muted-foreground">
-                Enter your account email and we&apos;ll send you a reset link.
+                Create a strong password to continue using Expensely safely.
               </p>
             </div>
 
             <Card className="mt-8 border border-border/70 bg-card/90 p-2 shadow-lg gap-3">
               <CardHeader>
-                <CardTitle className="text-xl pt-3">Forgot password</CardTitle>
+                <CardTitle className="text-xl pt-3">Reset password</CardTitle>
               </CardHeader>
               <CardContent>
-                <ForgotPasswordForm />
+                <ResetPasswordForm />
               </CardContent>
             </Card>
           </div>
