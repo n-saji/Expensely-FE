@@ -18,11 +18,13 @@ import { RootState } from "@/redux/store";
 import { Spinner } from "@/components/ui/spinner";
 import { AxiosError } from "axios";
 import { toast, Toaster } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const user = useSelector((state: RootState) => state.user);
@@ -157,7 +159,6 @@ export default function LoginForm() {
         toast.error(errorData.error || "Login failed");
       }
     } catch (error) {
-      console.error("Login error:", error);
       setLoading(false);
 
       if (error instanceof AxiosError && error.response) {
@@ -245,18 +246,29 @@ export default function LoginForm() {
           <Label htmlFor="password" className="text-sm text-muted-foreground">
             Password
           </Label>
-          <Input
-            id="password"
-            type="password"
-            className="mt-2 w-full border-border/70 bg-background"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-            value={password}
-          />
+          <div className="relative mt-2">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              className="w-full border-border/70 bg-background pr-10"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              value={password}
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between text-sm">

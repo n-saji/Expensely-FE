@@ -88,19 +88,18 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     dispatch(setLoading(true));
-    dispatch(clearCategories());
-    dispatch(clearUser());
-    dispatch(clearNotifications());
 
     try {
       await Logout();
       router.push("/");
       dispatch(clearUser());
       dispatch(clearCategories());
+      dispatch(clearNotifications());
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      dispatch(setLoading(false));
     }
-    dispatch(setLoading(false));
   };
 
   return (

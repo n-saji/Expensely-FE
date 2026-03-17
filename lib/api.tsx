@@ -52,7 +52,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (originalRequest.url?.includes("/users/refresh")) {
+    if (originalRequest.url?.includes("/users/refresh") || originalRequest.url?.includes("/users/login")) {
       return Promise.reject(error);
     }
 
