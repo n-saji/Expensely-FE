@@ -103,7 +103,6 @@ export default function LoginForm() {
         const data = await res.data;
 
         if (data.error === "") {
-          toast.success("Login successful.");
           localStorage.setItem("user_id", data.id);
 
           const response = await api.get(`/users/me`);
