@@ -5,7 +5,7 @@ import {
   Settings,
   User,
   Wallet,
-  ShieldUser,
+  Shield,
   ChevronDown,
   LayoutDashboard,
   DollarSign,
@@ -365,6 +365,28 @@ export function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
+        {user.isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Admin
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/admin"}
+                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                >
+                  <Link href={"/admin"}>
+                    <Shield />
+                    <span>Admin</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="border-t border-border/70">
         <SidebarMenu>
@@ -394,21 +416,6 @@ export function AppSidebar() {
                     <User /> Profile
                   </span>
                 </DropdownMenuItem>
-                {user.isAdmin && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => {
-                        router.push("/admin");
-                      }}
-                    >
-                      <span className="flex items-center gap-2">
-                        <ShieldUser className="w-4 h-4" />
-                        Admin
-                      </span>
-                    </DropdownMenuItem>
-                  </>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={async () => {

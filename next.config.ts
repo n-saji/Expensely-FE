@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
         source: "/api/web_sockets/:path*",
         destination: process.env.NEXT_PUBLIC_API_URL + "/web_sockets/:path*",
       },
+      {
+        source: "/api/admins/:path*",
+        destination: process.env.NEXT_PUBLIC_API_URL + "/admins/:path*",
+      },
     ];
   },
 };
