@@ -397,25 +397,6 @@ export default function ExpenseTableComponent() {
       }
 
       setExpenseToDelete(null);
-      setExpensesList((prev) => {
-        const filteredExpenses = prev.expenses.filter(
-          (item) => item.id !== expense.id,
-        );
-        const totalElements = Math.max(0, prev.totalElements - 1);
-        const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
-
-        return {
-          ...prev,
-          expenses: filteredExpenses,
-          totalElements,
-          totalPages,
-          pageNumber: Math.min(prev.pageNumber, totalPages),
-        };
-      });
-      setDatas((prev) => prev.filter((item) => item.id !== expense.id));
-      setSelectedExpenses((prev) =>
-        prev.filter((item) => item.id !== expense.id),
-      );
       toast.success(`Deleted ${expense.description}`, {
         description: "Expense deleted successfully",
       });
@@ -423,6 +404,37 @@ export default function ExpenseTableComponent() {
       toast.error("Failed to delete expense", { description: String(err) });
     } finally {
       setLoading(false);
+      try {
+        setTableLoading(true);
+        const expenses = await fetchExpenses({
+          userId: user.id,
+          fromDate: dateRange?.from
+            ? dateRange.from.toISOString().slice(0, 16)
+            : "",
+          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
+          category: categoryFilter,
+          order: "desc",
+          page: pageNumber,
+          limit: pageSize,
+          q: query,
+        });
+        setExpensesList(expenses);
+        const formatedData = expenses.expenses.map((expense: Expense) => ({
+          id: expense.id,
+          amount: expense.amount,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          categoryId: expense.categoryId,
+          categoryName: expense.categoryName,
+          currency: expense.currency,
+        }));
+        setDatas(formatedData);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        toast.error("Error fetching expenses", { description: String(error) });
+      } finally {
+        setTableLoading(false);
+      }
     }
   };
 
@@ -610,25 +622,42 @@ export default function ExpenseTableComponent() {
         throw new Error("Failed to delete expenses");
       }
 
-      setExpensesList((prev) => ({
-        ...prev,
-        expenses: prev.expenses.filter(
-          (expense) => !deletedIds.has(expense.id),
-        ),
-        totalElements: Math.max(0, prev.totalElements - deletedIds.size),
-        totalPages: Math.max(
-          1,
-          Math.ceil(
-            Math.max(0, prev.totalElements - deletedIds.size) / pageSize,
-          ),
-        ),
-      }));
-      setDatas((prev) => prev.filter((expense) => !deletedIds.has(expense.id)));
       setSelectedExpenses([]);
     } catch (error) {
       console.error("Error deleting expenses:", error);
     } finally {
       setLoading(false);
+      try {
+        setTableLoading(true);
+        const expenses = await fetchExpenses({
+          userId: user.id,
+          fromDate: dateRange?.from
+            ? dateRange.from.toISOString().slice(0, 16)
+            : "",
+          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 16) : "",
+          category: categoryFilter,
+          order: "desc",
+          page: pageNumber,
+          limit: pageSize,
+          q: query,
+        });
+        setExpensesList(expenses);
+        const formatedData = expenses.expenses.map((expense: Expense) => ({
+          id: expense.id,
+          amount: expense.amount,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          categoryId: expense.categoryId,
+          categoryName: expense.categoryName,
+          currency: expense.currency,
+        }));
+        setDatas(formatedData);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        toast.error("Error fetching expenses", { description: String(error) });
+      } finally {
+        setTableLoading(false);
+      }
     }
   };
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -37,6 +36,7 @@ import {
 
 import ExpenseInsightsSection from "./_components/expense-insights";
 import IncomeInsightsSection from "./_components/income-insights";
+import NewUserOnboarding from "./_components/new-user-onboarding";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -148,7 +148,7 @@ export default function DashboardPage() {
       if (res.status !== 200) throw new Error("Network response was not ok");
 
       const data = res.data as ExpenseOverview;
-      if (data.earliestStartYear === null) setNewUser(true);
+      setNewUser(data.earliestStartYear === null);
       setOverview(data);
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
@@ -375,6 +375,25 @@ export default function DashboardPage() {
     fetchIncomeExpenseCompareOverview();
   }, [compareOverviewParams]);
 
+  const refreshDashboardData = async () => {
+    await Promise.all([
+      fetchOverview({ hasConstraint: true, type: "" }),
+      fetchMonthlyOverview(),
+      fetchIncomeOverview({ hasConstraint: true, type: "" }),
+      fetchIncomeMonthlyOverview(),
+      fetchIncomeExpenseCompareOverview(),
+    ]);
+  };
+
+  const handleFirstExpenseCreated = async () => {
+    setNewUser(false);
+    await refreshDashboardData();
+  };
+
+  const handleBudgetCreated = async () => {
+    await fetchOverview({ hasConstraint: true, type: "" });
+  };
+
   const min_year = overview ? overview.earliestStartYear : 2000;
   const min_month = overview ? overview.earliestStartMonth : 1;
   const min_income_year = incomeOverview
@@ -402,36 +421,11 @@ export default function DashboardPage() {
 
   if (newUser) {
     return (
-      <div className="flex flex-col items-center justify-center">
-        <Label className="text-3xl mb-4 font-bold text-green-400">
-          Welcome to Expensely!
-        </Label>
-        <p className="text-lg text-center mb-2">
-          {`It looks like you haven't added any expenses yet. Start tracking your
-          expenses by adding your first expense.`}
-        </p>
-        <div>
-          <ul className="list-decimal list-inside p-2 text-left text-muted-foreground">
-            <li>
-              Create a{" "}
-              <Link href="/category/add" className="underline">
-                new category
-              </Link>{" "}
-              .
-            </li>
-            <li>
-              Add a new expense using the{" "}
-              <Link href="/expense/add" className="underline">
-                Add Expense
-              </Link>{" "}
-              from the side bar.
-            </li>
-            <li>Categorize your expenses for better tracking.</li>
-            <li>Set budgets to manage your spending effectively.</li>
-            <li>Explore reports and insights as you add more data.</li>
-          </ul>
-        </div>
-      </div>
+      <NewUserOnboarding
+        userId={user.id}
+        onFirstExpenseCreated={handleFirstExpenseCreated}
+        onBudgetCreated={handleBudgetCreated}
+      />
     );
   }
 
@@ -524,7 +518,7 @@ export default function DashboardPage() {
                           ((overview.thisMonthTotalExpense -
                             overview.lastMonthTotalExpense) /
                             overview.lastMonthTotalExpense) *
-                          100
+                            100,
                         ).toFixed(2)}%`}
                   </p>
                 </div>
@@ -607,7 +601,7 @@ export default function DashboardPage() {
                           ((incomeOverview.thisMonthTotalIncome -
                             incomeOverview.lastMonthTotalIncome) /
                             incomeOverview.lastMonthTotalIncome) *
-                          100
+                            100,
                         ).toFixed(2)}%`}
                   </p>
                 </div>

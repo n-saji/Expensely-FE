@@ -419,6 +419,41 @@ export default function IncomePage() {
     [user.currency],
   );
 
+  const refreshIncomeTable = useCallback(async () => {
+    const sortField = sorting[0]?.id;
+    const sortOrder = sorting[0]?.desc ? "desc" : "asc";
+
+    const sortByMap: Record<string, string> = {
+      amount: "amount",
+      incomeDate: "incomeDate",
+      description: "description",
+      categoryName: "category",
+    };
+
+    const data = await fetchIncomes({
+      startDate: dateRange?.from ? formatDateTimeParam(dateRange.from) : "",
+      endDate: dateRange?.to ? formatDateTimeParam(dateRange.to, true) : "",
+      category: categoryFilter,
+      order: "desc",
+      page: pageNumber,
+      limit: pageSize,
+      q: query,
+      sortBy: sortField ? sortByMap[sortField] : undefined,
+      sortOrder: sortField ? (sortOrder as "asc" | "desc") : undefined,
+    });
+
+    setIncomesList(data);
+    setDatas(data.incomes || []);
+  }, [
+    sorting,
+    fetchIncomes,
+    dateRange,
+    categoryFilter,
+    pageNumber,
+    pageSize,
+    query,
+  ]);
+
   const handleUpdateIncome = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!selectedUpdate) return;
@@ -512,25 +547,9 @@ export default function IncomePage() {
         throw new Error("Failed to delete income");
       }
 
-      setIncomesList((prev) => {
-        const updated = prev.incomes.filter(
-          (income) => income.id !== selectedDelete.id,
-        );
-        const totalElements = Math.max(0, prev.totalElements - 1);
-        const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
-        return {
-          ...prev,
-          incomes: updated,
-          totalElements,
-          totalPages,
-          pageNumber: Math.min(prev.pageNumber, totalPages),
-        };
-      });
-      setDatas((prev) =>
-        prev.filter((income) => income.id !== selectedDelete.id),
-      );
+      await refreshIncomeTable();
       setSelectedDelete(null);
-      window.dispatchEvent(new Event("income-added"));
+      setRowSelection({});
       toast.success("Income deleted successfully");
     } catch (error) {
       toast.error("Failed to delete income", { description: String(error) });
@@ -545,8 +564,6 @@ export default function IncomePage() {
       return;
     }
 
-    const deletedIds = new Set(ids.map((item) => item.id));
-
     try {
       setLoading(true);
       const response = await api.post(`/incomes/bulk-delete`, ids);
@@ -557,18 +574,7 @@ export default function IncomePage() {
         );
       }
 
-      setIncomesList((prev) => ({
-        ...prev,
-        incomes: prev.incomes.filter((income) => !deletedIds.has(income.id)),
-        totalElements: Math.max(0, prev.totalElements - deletedIds.size),
-        totalPages: Math.max(
-          1,
-          Math.ceil(
-            Math.max(0, prev.totalElements - deletedIds.size) / pageSize,
-          ),
-        ),
-      }));
-      setDatas((prev) => prev.filter((income) => !deletedIds.has(income.id)));
+      await refreshIncomeTable();
       setSelectedIncomes([]);
       setRowSelection({});
       toast.success("Deleted successfully!");
