@@ -8,6 +8,7 @@ import { DataTable } from "./data-table";
 import { RootState } from "@/redux/store";
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "@/lib/api";
+import { ExpenseOverview, ExpenseOverviewV2, OverviewEnum } from "@/global/dto";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -93,6 +94,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  ExpenseInsightCards,
+  ExpenseInsightCharts,
+} from "../../../dashboard/_components/expense-insights";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface expense {
   id: string;
@@ -197,6 +203,25 @@ export default function ExpenseTableComponent() {
     totalElements: 0,
     pageNumber: pageNumber,
   });
+  const [overview, setOverview] = useState<ExpenseOverview | null>(null);
+  const [overviewV2, setOverviewV2] = useState<ExpenseOverviewV2 | null>(null);
+  const [overviewV2Loading, setOverviewV2Loading] = useState<boolean>(true);
+  const [loadingYear, setLoadingYear] = useState<boolean>(true);
+  const [loadingMonth, setLoadingMonth] = useState<boolean>(true);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const [currentMonthYear, setCurrentMonthYear] = useState(
+    new Date().getFullYear(),
+  );
+  const [currentYearForYearly, setCurrentYearForYearly] = useState(
+    new Date().getFullYear(),
+  );
+  const [overviewParams, setOverviewParams] = useState<{
+    count?: number;
+    type?: OverviewEnum;
+  }>({
+    count: 6,
+    type: OverviewEnum.MONTH,
+  });
 
   useEffect(() => {
     const selectedRows = expensesList.expenses.filter(
@@ -204,6 +229,113 @@ export default function ExpenseTableComponent() {
     );
     setSelectedExpenses(selectedRows);
   }, [rowSelection, expensesList]);
+
+  const fetchOverview = async ({
+    monthYear = currentMonthYear,
+    month = currentMonth,
+    yearly = currentYearForYearly,
+    hasConstraint = false,
+    type = "",
+  }: {
+    monthYear?: number;
+    month?: number;
+    yearly?: number;
+    hasConstraint: boolean;
+    type?: string;
+  }) => {
+    if (!user.id) return;
+
+    try {
+      const queryParams = new URLSearchParams();
+      if (hasConstraint) {
+        const includeMonth = type === "month" || type === "";
+        const includeYear = type === "year" || type === "";
+
+        if (includeMonth && month !== undefined && monthYear !== undefined) {
+          queryParams.append("req_month", month.toString());
+          queryParams.append("req_month_year", monthYear.toString());
+        }
+
+        if (includeYear && yearly !== undefined) {
+          queryParams.append("req_year", yearly.toString());
+        }
+      }
+
+      if (type === "") {
+        setLoadingMonth(true);
+        setLoadingYear(true);
+      }
+      if (type === "month") setLoadingMonth(true);
+      if (type === "year") setLoadingYear(true);
+
+      const res = await api.get(
+        `/expenses/user/${user.id}/overview?${queryParams.toString()}`,
+      );
+
+      if (res.status !== 200) throw new Error("Network response was not ok");
+
+      const data = res.data as ExpenseOverview;
+      setOverview(data);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      if (type === "") {
+        setLoadingMonth(false);
+        setLoadingYear(false);
+      }
+      if (type === "month") setLoadingMonth(false);
+      if (type === "year") setLoadingYear(false);
+    }
+  };
+
+  const fetchMonthlyOverview = async () => {
+    try {
+      setOverviewV2Loading(true);
+
+      const [monthlyRes, categoryRes] = await Promise.all([
+        api.get(
+          `/expenses/monthly?count=${overviewParams.count}&type=${overviewParams.type}`,
+        ),
+        api.get(
+          `/expenses/monthly/category?count=${overviewParams.count}&type=${overviewParams.type}`,
+        ),
+      ]);
+
+      if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
+        throw new Error("Network response was not ok");
+      }
+
+      setOverviewV2({
+        amountByMonthV2: monthlyRes.data,
+        monthlyCategoryExpenseV2: categoryRes.data,
+      });
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      setOverviewV2Loading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOverview({
+      hasConstraint: true,
+      month: currentMonth,
+      monthYear: currentMonthYear,
+      type: "month",
+    });
+  }, [currentMonth, currentMonthYear]);
+
+  useEffect(() => {
+    fetchOverview({
+      hasConstraint: true,
+      yearly: currentYearForYearly,
+      type: "year",
+    });
+  }, [currentYearForYearly]);
+
+  useEffect(() => {
+    fetchMonthlyOverview();
+  }, [overviewParams]);
 
   // initial fetch for expenses
   useEffect(() => {
@@ -781,6 +913,8 @@ export default function ExpenseTableComponent() {
     const handleExpenseAdded = () => {
       setPageNumber(1);
       setRefreshTrigger((prev) => prev + 1);
+      fetchOverview({ hasConstraint: true, type: "" });
+      fetchMonthlyOverview();
     };
 
     window.addEventListener("expense-added", handleExpenseAdded);
@@ -789,6 +923,14 @@ export default function ExpenseTableComponent() {
       window.removeEventListener("expense-added", handleExpenseAdded);
     };
   }, []);
+
+  const minYear = overview ? overview.earliestStartYear : 2000;
+  const minMonth = overview ? overview.earliestStartMonth : 1;
+  const mostExp = overview?.thisMonthMostExpensiveItem;
+  const [itemName, itemValue] =
+    mostExp && Object.entries(mostExp)[0]
+      ? Object.entries(mostExp)[0]
+      : [null, null];
 
   return (
     <div className="flex flex-col w-full space-y-4">
@@ -820,36 +962,73 @@ export default function ExpenseTableComponent() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <SearchAndFilter
-        query={query}
-        setQuery={setQuery}
-        selectedExpenses={selectedExpenses}
-        handleBulkDelete={handleBulkDelete}
-        handleFileDownload={handleFileDownload}
-        categories={categories}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
-        clearFilters={ClearFilters}
-        open={open}
-        setOpen={setOpen}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        loading={loading}
+      <ExpenseInsightCards
+        userCurrency={user.currency}
+        overview={overview}
+        itemName={itemName as string | null}
+        itemValue={itemValue as number | null}
       />
-      <DataTable
-        columns={tableColumns}
-        data={datas}
-        totalPages={expensesList.totalPages}
-        pageIndex={pageNumber - 1}
-        onPageChange={(page) => setPageNumber(page + 1)}
-        loading={tableLoading}
-        sorting={sorting}
-        onSortingChange={handleSortingChange}
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-      />
+      <Tabs defaultValue="graphs" className="w-full space-y-4">
+        <TabsList className="w-full">
+          <TabsTrigger value="graphs">Analytics</TabsTrigger>
+          <TabsTrigger value="table">Transactions</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="graphs" className="mt-0 space-y-4">
+          <ExpenseInsightCharts
+            userCurrency={user.currency}
+            userTheme={user.theme}
+            overview={overview}
+            overviewV2={overviewV2}
+            overviewV2Loading={overviewV2Loading}
+            minYear={minYear}
+            minMonth={minMonth}
+            loadingYear={loadingYear}
+            loadingMonth={loadingMonth}
+            currentYearForYearly={currentYearForYearly}
+            setCurrentYearForYearly={setCurrentYearForYearly}
+            currentMonth={currentMonth}
+            currentMonthYear={currentMonthYear}
+            setCurrentMonth={setCurrentMonth}
+            setCurrentMonthYear={setCurrentMonthYear}
+            overviewParams={overviewParams}
+            setOverviewParams={setOverviewParams}
+          />
+        </TabsContent>
+
+        <TabsContent value="table" className="mt-0 space-y-4">
+          <SearchAndFilter
+            query={query}
+            setQuery={setQuery}
+            selectedExpenses={selectedExpenses}
+            handleBulkDelete={handleBulkDelete}
+            handleFileDownload={handleFileDownload}
+            categories={categories}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            clearFilters={ClearFilters}
+            open={open}
+            setOpen={setOpen}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            loading={loading}
+          />
+          <DataTable
+            columns={tableColumns}
+            data={datas}
+            totalPages={expensesList.totalPages}
+            pageIndex={pageNumber - 1}
+            onPageChange={(page) => setPageNumber(page + 1)}
+            loading={tableLoading}
+            sorting={sorting}
+            onSortingChange={handleSortingChange}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+          />
+        </TabsContent>
+      </Tabs>
 
       {openEditDialog && expenseToEdit && (
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>

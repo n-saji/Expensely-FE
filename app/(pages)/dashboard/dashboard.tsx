@@ -23,7 +23,6 @@ import { IncomeExpenseComparisonChart } from "@/components/ExpenseChartCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProgressBar } from "@/components/ProgressBar";
 import { currencyMapper } from "@/utils/currencyMapper";
 import {
@@ -34,8 +33,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-import ExpenseInsightsSection from "./_components/expense-insights";
-import IncomeInsightsSection from "./_components/income-insights";
 import NewUserOnboarding from "./_components/new-user-onboarding";
 
 export default function DashboardPage() {
@@ -53,16 +50,9 @@ export default function DashboardPage() {
     new Date().getFullYear(),
   );
 
-  const [overviewV2, setOverviewV2] = useState<ExpenseOverviewV2 | null>(null);
-  const [overViewV2Loading, setOverviewV2Loading] = useState<boolean>(true);
-
   const [incomeOverview, setIncomeOverview] = useState<IncomeOverview | null>(
     null,
   );
-  const [incomeOverviewV2, setIncomeOverviewV2] =
-    useState<ExpenseOverviewV2 | null>(null);
-  const [incomeOverviewV2Loading, setIncomeOverviewV2Loading] =
-    useState<boolean>(true);
   const [loadingIncomeYear, setLoadingIncomeYear] = useState<boolean>(true);
   const [loadingIncomeMonth, setLoadingIncomeMonth] = useState<boolean>(true);
   const [incomeCurrentMonth, setIncomeCurrentMonth] = useState(
@@ -75,20 +65,6 @@ export default function DashboardPage() {
     new Date().getFullYear(),
   );
 
-  const [overviewParams, setOverviewParams] = useState<{
-    count?: number;
-    type?: OverviewEnum;
-  }>({
-    count: 6,
-    type: OverviewEnum.MONTH,
-  });
-  const [incomeOverviewParams, setIncomeOverviewParams] = useState<{
-    count?: number;
-    type?: OverviewEnum;
-  }>({
-    count: 6,
-    type: OverviewEnum.MONTH,
-  });
   const [compareOverviewParams, setCompareOverviewParams] = useState<{
     count?: number;
     type?: OverviewEnum;
@@ -162,34 +138,6 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchMonthlyOverview = async () => {
-    try {
-      setOverviewV2Loading(true);
-
-      const [monthlyRes, categoryRes] = await Promise.all([
-        api.get(
-          `/expenses/monthly?count=${overviewParams.count}&type=${overviewParams.type}`,
-        ),
-        api.get(
-          `/expenses/monthly/category?count=${overviewParams.count}&type=${overviewParams.type}`,
-        ),
-      ]);
-
-      if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
-        throw new Error("Network response was not ok");
-      }
-
-      setOverviewV2({
-        amountByMonthV2: monthlyRes.data,
-        monthlyCategoryExpenseV2: categoryRes.data,
-      });
-    } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
-    } finally {
-      setOverviewV2Loading(false);
-    }
-  };
-
   const fetchIncomeOverview = async ({
     startDate,
     endDate,
@@ -245,34 +193,6 @@ export default function DashboardPage() {
       }
       if (type === "month") setLoadingIncomeMonth(false);
       if (type === "year") setLoadingIncomeYear(false);
-    }
-  };
-
-  const fetchIncomeMonthlyOverview = async () => {
-    try {
-      setIncomeOverviewV2Loading(true);
-
-      const [monthlyRes, categoryRes] = await Promise.all([
-        api.get(
-          `/incomes/monthly?count=${incomeOverviewParams.count ?? 6}&type=${incomeOverviewParams.type ?? OverviewEnum.MONTH}`,
-        ),
-        api.get(
-          `/incomes/monthly/category?count=${incomeOverviewParams.count ?? 6}&type=${incomeOverviewParams.type ?? OverviewEnum.MONTH}`,
-        ),
-      ]);
-
-      if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
-        throw new Error("Network response was not ok");
-      }
-
-      setIncomeOverviewV2({
-        amountByMonthV2: monthlyRes.data,
-        monthlyCategoryExpenseV2: categoryRes.data,
-      });
-    } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
-    } finally {
-      setIncomeOverviewV2Loading(false);
     }
   };
 
@@ -348,7 +268,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const handler = () => {
       fetchOverview({ hasConstraint: true, type: "" });
-      fetchMonthlyOverview();
     };
     window.addEventListener("expense-added", handler);
     return () => window.removeEventListener("expense-added", handler);
@@ -357,19 +276,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const handler = () => {
       fetchIncomeOverview({ hasConstraint: true, type: "" });
-      fetchIncomeMonthlyOverview();
     };
     window.addEventListener("income-added", handler);
     return () => window.removeEventListener("income-added", handler);
   }, []);
-
-  useEffect(() => {
-    fetchMonthlyOverview();
-  }, [overviewParams]);
-
-  useEffect(() => {
-    fetchIncomeMonthlyOverview();
-  }, [incomeOverviewParams]);
 
   useEffect(() => {
     fetchIncomeExpenseCompareOverview();
@@ -378,9 +288,7 @@ export default function DashboardPage() {
   const refreshDashboardData = async () => {
     await Promise.all([
       fetchOverview({ hasConstraint: true, type: "" }),
-      fetchMonthlyOverview(),
       fetchIncomeOverview({ hasConstraint: true, type: "" }),
-      fetchIncomeMonthlyOverview(),
       fetchIncomeExpenseCompareOverview(),
     ]);
   };
@@ -394,30 +302,9 @@ export default function DashboardPage() {
     await fetchOverview({ hasConstraint: true, type: "" });
   };
 
-  const min_year = overview ? overview.earliestStartYear : 2000;
-  const min_month = overview ? overview.earliestStartMonth : 1;
-  const min_income_year = incomeOverview
-    ? incomeOverview.earliestStartYear
-    : 2000;
-  const min_income_month = incomeOverview
-    ? incomeOverview.earliestStartMonth
-    : 1;
-
-  const mostExp = overview?.thisMonthMostExpensiveItem;
-  const [itemName, itemValue] =
-    mostExp && Object.entries(mostExp)[0]
-      ? Object.entries(mostExp)[0]
-      : [null, null];
-
   const budgetCount = overview
     ? Object.values(overview.budgetServiceMap).length
     : 0;
-
-  const mostIncome = incomeOverview?.thisMonthMostIncomeItem;
-  const [incomeItemName, incomeItemValue] =
-    mostIncome && Object.entries(mostIncome)[0]
-      ? Object.entries(mostIncome)[0]
-      : [null, null];
 
   if (newUser) {
     return (
@@ -783,57 +670,6 @@ export default function DashboardPage() {
           </CardContent>
         )}
       </Card>
-
-      <Tabs defaultValue="expense" className="w-full space-y-6">
-        <TabsList className="w-full">
-          <TabsTrigger value="expense">Expense Insights</TabsTrigger>
-          <TabsTrigger value="income">Income Insights</TabsTrigger>
-        </TabsList>
-
-        <ExpenseInsightsSection
-          userCurrency={user.currency}
-          userTheme={user.theme}
-          overview={overview}
-          overviewV2={overviewV2}
-          overviewV2Loading={overViewV2Loading}
-          itemName={itemName as string | null}
-          itemValue={itemValue as number | null}
-          minYear={min_year}
-          minMonth={min_month}
-          loadingYear={loadingYear}
-          loadingMonth={loadingMonth}
-          currentYearForYearly={currentYearForYearly}
-          setCurrentYearForYearly={setCurrentYearForYearly}
-          currentMonth={currentMonth}
-          currentMonthYear={currentMonthYear}
-          setCurrentMonth={setCurrentMonth}
-          setCurrentMonthYear={setCurrentMonthYear}
-          overviewParams={overviewParams}
-          setOverviewParams={setOverviewParams}
-        />
-
-        <IncomeInsightsSection
-          userCurrency={user.currency}
-          userTheme={user.theme}
-          incomeOverview={incomeOverview}
-          incomeOverviewV2={incomeOverviewV2}
-          incomeOverviewV2Loading={incomeOverviewV2Loading}
-          incomeItemName={incomeItemName as string | null}
-          incomeItemValue={incomeItemValue as number | null}
-          minIncomeYear={min_income_year}
-          minIncomeMonth={min_income_month}
-          loadingIncomeYear={loadingIncomeYear}
-          loadingIncomeMonth={loadingIncomeMonth}
-          incomeCurrentYearForYearly={incomeCurrentYearForYearly}
-          setIncomeCurrentYearForYearly={setIncomeCurrentYearForYearly}
-          incomeCurrentMonth={incomeCurrentMonth}
-          incomeCurrentMonthYear={incomeCurrentMonthYear}
-          setIncomeCurrentMonth={setIncomeCurrentMonth}
-          setIncomeCurrentMonthYear={setIncomeCurrentMonthYear}
-          incomeOverviewParams={incomeOverviewParams}
-          setIncomeOverviewParams={setIncomeOverviewParams}
-        />
-      </Tabs>
     </div>
   );
 }

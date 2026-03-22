@@ -5,7 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import api from "@/lib/api";
-import { Category, UpdateIncomeReq } from "@/global/dto";
+import {
+  Category,
+  ExpenseOverviewV2,
+  IncomeOverview,
+  OverviewEnum,
+  UpdateIncomeReq,
+} from "@/global/dto";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -58,6 +64,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  IncomeInsightCards,
+  IncomeInsightCharts,
+} from "../dashboard/_components/income-insights";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface IncomeListProps {
   incomes: IncomeRow[];
@@ -135,6 +146,31 @@ export default function IncomePage() {
     totalPages: 0,
     totalElements: 0,
     pageNumber: 1,
+  });
+  const [incomeOverview, setIncomeOverview] = useState<IncomeOverview | null>(
+    null,
+  );
+  const [incomeOverviewV2, setIncomeOverviewV2] =
+    useState<ExpenseOverviewV2 | null>(null);
+  const [incomeOverviewV2Loading, setIncomeOverviewV2Loading] =
+    useState<boolean>(true);
+  const [loadingIncomeYear, setLoadingIncomeYear] = useState<boolean>(true);
+  const [loadingIncomeMonth, setLoadingIncomeMonth] = useState<boolean>(true);
+  const [incomeCurrentMonth, setIncomeCurrentMonth] = useState(
+    new Date().getMonth() + 1,
+  );
+  const [incomeCurrentMonthYear, setIncomeCurrentMonthYear] = useState(
+    new Date().getFullYear(),
+  );
+  const [incomeCurrentYearForYearly, setIncomeCurrentYearForYearly] = useState(
+    new Date().getFullYear(),
+  );
+  const [incomeOverviewParams, setIncomeOverviewParams] = useState<{
+    count?: number;
+    type?: OverviewEnum;
+  }>({
+    count: 6,
+    type: OverviewEnum.MONTH,
   });
 
   const [selectedDelete, setSelectedDelete] = useState<IncomeRow | null>(null);
@@ -240,6 +276,92 @@ export default function IncomePage() {
     [pageNumber, pageSize, query],
   );
 
+  const fetchIncomeOverview = async ({
+    startDate,
+    endDate,
+    yearly = incomeCurrentYearForYearly,
+    monthYear = incomeCurrentMonthYear,
+    month = incomeCurrentMonth,
+    hasConstraint = false,
+    type = "",
+  }: {
+    startDate?: string;
+    endDate?: string;
+    yearly?: number;
+    monthYear?: number;
+    month?: number;
+    hasConstraint: boolean;
+    type?: string;
+  }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (startDate) queryParams.append("start_date", startDate);
+      if (endDate) queryParams.append("end_date", endDate);
+
+      if (hasConstraint) {
+        const includeMonth = type === "month" || type === "";
+        const includeYear = type === "year" || type === "";
+
+        if (includeMonth && month !== undefined && monthYear !== undefined) {
+          queryParams.append("req_month", month.toString());
+          queryParams.append("req_month_year", monthYear.toString());
+        }
+
+        if (includeYear && yearly !== undefined)
+          queryParams.append("req_year", yearly.toString());
+      }
+
+      if (type === "") {
+        setLoadingIncomeMonth(true);
+        setLoadingIncomeYear(true);
+      }
+      if (type === "month") setLoadingIncomeMonth(true);
+      if (type === "year") setLoadingIncomeYear(true);
+
+      const res = await api.get(`/incomes/overview?${queryParams.toString()}`);
+      if (res.status !== 200) throw new Error("Network response was not ok");
+
+      setIncomeOverview(res.data as IncomeOverview);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      if (type === "") {
+        setLoadingIncomeMonth(false);
+        setLoadingIncomeYear(false);
+      }
+      if (type === "month") setLoadingIncomeMonth(false);
+      if (type === "year") setLoadingIncomeYear(false);
+    }
+  };
+
+  const fetchIncomeMonthlyOverview = async () => {
+    try {
+      setIncomeOverviewV2Loading(true);
+
+      const [monthlyRes, categoryRes] = await Promise.all([
+        api.get(
+          `/incomes/monthly?count=${incomeOverviewParams.count ?? 6}&type=${incomeOverviewParams.type ?? OverviewEnum.MONTH}`,
+        ),
+        api.get(
+          `/incomes/monthly/category?count=${incomeOverviewParams.count ?? 6}&type=${incomeOverviewParams.type ?? OverviewEnum.MONTH}`,
+        ),
+      ]);
+
+      if (monthlyRes.status !== 200 || categoryRes.status !== 200) {
+        throw new Error("Network response was not ok");
+      }
+
+      setIncomeOverviewV2({
+        amountByMonthV2: monthlyRes.data,
+        monthlyCategoryExpenseV2: categoryRes.data,
+      });
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      setIncomeOverviewV2Loading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
     const categoryAddedHandler = () => fetchCategories();
@@ -247,6 +369,27 @@ export default function IncomePage() {
     return () =>
       window.removeEventListener("category-added", categoryAddedHandler);
   }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchIncomeOverview({
+      hasConstraint: true,
+      month: incomeCurrentMonth,
+      monthYear: incomeCurrentMonthYear,
+      type: "month",
+    });
+  }, [incomeCurrentMonth, incomeCurrentMonthYear]);
+
+  useEffect(() => {
+    fetchIncomeOverview({
+      hasConstraint: true,
+      yearly: incomeCurrentYearForYearly,
+      type: "year",
+    });
+  }, [incomeCurrentYearForYearly]);
+
+  useEffect(() => {
+    fetchIncomeMonthlyOverview();
+  }, [incomeOverviewParams]);
 
   useEffect(() => {
     const loadInitial = async () => {
@@ -335,6 +478,8 @@ export default function IncomePage() {
     const handleIncomeAdded = () => {
       setPageNumber(1);
       setRefreshTrigger((prev) => prev + 1);
+      fetchIncomeOverview({ hasConstraint: true, type: "" });
+      fetchIncomeMonthlyOverview();
     };
 
     window.addEventListener("income-added", handleIncomeAdded);
@@ -666,6 +811,16 @@ export default function IncomePage() {
     setPageNumber(1);
   };
 
+  const minIncomeYear = incomeOverview
+    ? incomeOverview.earliestStartYear
+    : 2000;
+  const minIncomeMonth = incomeOverview ? incomeOverview.earliestStartMonth : 1;
+  const mostIncome = incomeOverview?.thisMonthMostIncomeItem;
+  const [incomeItemName, incomeItemValue] =
+    mostIncome && Object.entries(mostIncome)[0]
+      ? Object.entries(mostIncome)[0]
+      : [null, null];
+
   return (
     <div className="w-full space-y-6 pb-8">
       <div>
@@ -680,38 +835,75 @@ export default function IncomePage() {
         </p>
       </div>
 
-      <SearchAndFilter
-        query={query}
-        setQuery={setQuery}
-        selectedIncomes={selectedIncomes}
-        handleBulkDelete={handleBulkDelete}
-        categories={categories}
-        categoriesLoading={categoriesLoading}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
-        clearFilters={clearFilters}
-        open={open}
-        setOpen={setOpen}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        handleFileDownload={handleFileDownload}
-        loading={loading}
+      <IncomeInsightCards
+        userCurrency={user.currency}
+        incomeOverview={incomeOverview}
+        incomeItemName={incomeItemName as string | null}
+        incomeItemValue={incomeItemValue as number | null}
       />
+      <Tabs defaultValue="graphs" className="w-full space-y-4">
+        <TabsList className="w-full">
+          <TabsTrigger value="graphs">Analytics</TabsTrigger>
+          <TabsTrigger value="table">Transactions</TabsTrigger>
+        </TabsList>
 
-      <DataTable
-        columns={tableColumns}
-        data={datas}
-        totalPages={incomesList.totalPages}
-        pageIndex={pageNumber - 1}
-        onPageChange={(page) => setPageNumber(page + 1)}
-        loading={tableLoading || loading}
-        sorting={sorting}
-        onSortingChange={handleSortingChange}
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-      />
+        <TabsContent value="graphs" className="mt-0 space-y-4">
+          <IncomeInsightCharts
+            userCurrency={user.currency}
+            userTheme={user.theme}
+            incomeOverview={incomeOverview}
+            incomeOverviewV2={incomeOverviewV2}
+            incomeOverviewV2Loading={incomeOverviewV2Loading}
+            minIncomeYear={minIncomeYear}
+            minIncomeMonth={minIncomeMonth}
+            loadingIncomeYear={loadingIncomeYear}
+            loadingIncomeMonth={loadingIncomeMonth}
+            incomeCurrentYearForYearly={incomeCurrentYearForYearly}
+            setIncomeCurrentYearForYearly={setIncomeCurrentYearForYearly}
+            incomeCurrentMonth={incomeCurrentMonth}
+            incomeCurrentMonthYear={incomeCurrentMonthYear}
+            setIncomeCurrentMonth={setIncomeCurrentMonth}
+            setIncomeCurrentMonthYear={setIncomeCurrentMonthYear}
+            incomeOverviewParams={incomeOverviewParams}
+            setIncomeOverviewParams={setIncomeOverviewParams}
+          />
+        </TabsContent>
+
+        <TabsContent value="table" className="mt-0 space-y-4">
+          <SearchAndFilter
+            query={query}
+            setQuery={setQuery}
+            selectedIncomes={selectedIncomes}
+            handleBulkDelete={handleBulkDelete}
+            categories={categories}
+            categoriesLoading={categoriesLoading}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            clearFilters={clearFilters}
+            open={open}
+            setOpen={setOpen}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            handleFileDownload={handleFileDownload}
+            loading={loading}
+          />
+
+          <DataTable
+            columns={tableColumns}
+            data={datas}
+            totalPages={incomesList.totalPages}
+            pageIndex={pageNumber - 1}
+            onPageChange={(page) => setPageNumber(page + 1)}
+            loading={tableLoading || loading}
+            sorting={sorting}
+            onSortingChange={handleSortingChange}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+          />
+        </TabsContent>
+      </Tabs>
 
       {selectedDelete && (
         <AlertDialog

@@ -8,7 +8,6 @@ import PieChartComp, {
 } from "@/components/ExpenseChartCard";
 import { OverviewEnum, IncomeOverview, ExpenseOverviewV2 } from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
-import { TabsContent } from "@/components/ui/tabs";
 
 interface IncomeInsightsProps {
   userCurrency?: string;
@@ -34,14 +33,59 @@ interface IncomeInsightsProps {
   >;
 }
 
-export default function IncomeInsightsSection({
+export function IncomeInsightCards({
+  userCurrency,
+  incomeOverview,
+  incomeItemName,
+  incomeItemValue,
+}: Pick<
+  IncomeInsightsProps,
+  "userCurrency" | "incomeOverview" | "incomeItemName" | "incomeItemValue"
+>) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <CardComponent
+        title="This Year's Income"
+        numberData={`${currencyMapper(userCurrency || "USD")}${incomeOverview?.totalAmount.toLocaleString(
+          undefined,
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          },
+        )}`}
+        description={`On an average you earned ${currencyMapper(
+          userCurrency || "USD",
+        )}${incomeOverview?.averageMonthlyIncome.toFixed(2)} per month.`}
+        loading={incomeOverview === null}
+      />
+
+      <CardComponent
+        title="This month top income item"
+        numberData={
+          incomeItemName && incomeItemValue ? `${incomeItemName}` : "N/A"
+        }
+        description={
+          incomeItemName
+            ? `Highest amount ${currencyMapper(userCurrency || "USD")}${(
+                incomeItemValue as number
+              ).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`
+            : ""
+        }
+        loading={incomeOverview === null}
+      />
+    </div>
+  );
+}
+
+export function IncomeInsightCharts({
   userCurrency,
   userTheme,
   incomeOverview,
   incomeOverviewV2,
   incomeOverviewV2Loading,
-  incomeItemName,
-  incomeItemValue,
   minIncomeYear,
   minIncomeMonth,
   loadingIncomeYear,
@@ -54,44 +98,9 @@ export default function IncomeInsightsSection({
   setIncomeCurrentMonthYear,
   incomeOverviewParams,
   setIncomeOverviewParams,
-}: IncomeInsightsProps) {
+}: Omit<IncomeInsightsProps, "incomeItemName" | "incomeItemValue">) {
   return (
-    <TabsContent value="income" className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <CardComponent
-          title="This Year's Income"
-          numberData={`${currencyMapper(userCurrency || "USD")}${incomeOverview?.totalAmount.toLocaleString(
-            undefined,
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            },
-          )}`}
-          description={`On an average you earned ${currencyMapper(
-            userCurrency || "USD",
-          )}${incomeOverview?.averageMonthlyIncome.toFixed(2)} per month.`}
-          loading={incomeOverview === null}
-        />
-
-        <CardComponent
-          title="This month top income item"
-          numberData={
-            incomeItemName && incomeItemValue ? `${incomeItemName}` : "N/A"
-          }
-          description={
-            incomeItemName
-              ? `Highest amount ${currencyMapper(userCurrency || "USD")}${(
-                  incomeItemValue as number
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : ""
-          }
-          loading={incomeOverview === null}
-        />
-      </div>
-
+    <section className="space-y-6">
       <YearlyExpenseLineChartV2
         amountByMonth={incomeOverviewV2?.amountByMonthV2}
         amountByMonthV2={incomeOverviewV2?.monthlyCategoryExpenseV2}
@@ -135,6 +144,38 @@ export default function IncomeInsightsSection({
         currency={userCurrency}
         title="Top Income Contributors"
       />
-    </TabsContent>
+    </section>
+  );
+}
+
+export default function IncomeInsightsSection(props: IncomeInsightsProps) {
+  return (
+    <section className="space-y-6">
+      <IncomeInsightCards
+        userCurrency={props.userCurrency}
+        incomeOverview={props.incomeOverview}
+        incomeItemName={props.incomeItemName}
+        incomeItemValue={props.incomeItemValue}
+      />
+      <IncomeInsightCharts
+        userCurrency={props.userCurrency}
+        userTheme={props.userTheme}
+        incomeOverview={props.incomeOverview}
+        incomeOverviewV2={props.incomeOverviewV2}
+        incomeOverviewV2Loading={props.incomeOverviewV2Loading}
+        minIncomeYear={props.minIncomeYear}
+        minIncomeMonth={props.minIncomeMonth}
+        loadingIncomeYear={props.loadingIncomeYear}
+        loadingIncomeMonth={props.loadingIncomeMonth}
+        incomeCurrentYearForYearly={props.incomeCurrentYearForYearly}
+        setIncomeCurrentYearForYearly={props.setIncomeCurrentYearForYearly}
+        incomeCurrentMonth={props.incomeCurrentMonth}
+        incomeCurrentMonthYear={props.incomeCurrentMonthYear}
+        setIncomeCurrentMonth={props.setIncomeCurrentMonth}
+        setIncomeCurrentMonthYear={props.setIncomeCurrentMonthYear}
+        incomeOverviewParams={props.incomeOverviewParams}
+        setIncomeOverviewParams={props.setIncomeOverviewParams}
+      />
+    </section>
   );
 }

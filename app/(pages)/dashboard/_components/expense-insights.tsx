@@ -8,7 +8,6 @@ import PieChartComp, {
 } from "@/components/ExpenseChartCard";
 import { OverviewEnum, ExpenseOverview, ExpenseOverviewV2 } from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
-import { TabsContent } from "@/components/ui/tabs";
 
 interface ExpenseInsightsProps {
   userCurrency?: string;
@@ -34,14 +33,57 @@ interface ExpenseInsightsProps {
   >;
 }
 
-export default function ExpenseInsightsSection({
+export function ExpenseInsightCards({
+  userCurrency,
+  overview,
+  itemName,
+  itemValue,
+}: Pick<
+  ExpenseInsightsProps,
+  "userCurrency" | "overview" | "itemName" | "itemValue"
+>) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <CardComponent
+        title="This Year's Expense"
+        numberData={`${currencyMapper(userCurrency || "USD")}${overview?.totalAmount.toLocaleString(
+          undefined,
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          },
+        )}`}
+        description={`On an average you have spent ${currencyMapper(
+          userCurrency || "USD",
+        )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
+        loading={overview === null}
+      />
+
+      <CardComponent
+        title="This month most expensive item"
+        numberData={itemName && itemValue ? `${itemName}` : "N/A"}
+        description={
+          itemName
+            ? `You have spent ${currencyMapper(userCurrency || "USD")}${(
+                itemValue as number
+              ).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`
+            : ""
+        }
+        loading={overview === null}
+      />
+    </div>
+  );
+}
+
+export function ExpenseInsightCharts({
   userCurrency,
   userTheme,
   overview,
   overviewV2,
   overviewV2Loading,
-  itemName,
-  itemValue,
   minYear,
   minMonth,
   loadingYear,
@@ -54,42 +96,9 @@ export default function ExpenseInsightsSection({
   setCurrentMonthYear,
   overviewParams,
   setOverviewParams,
-}: ExpenseInsightsProps) {
+}: Omit<ExpenseInsightsProps, "itemName" | "itemValue">) {
   return (
-    <TabsContent value="expense" className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <CardComponent
-          title="This Year's Expense"
-          numberData={`${currencyMapper(userCurrency || "USD")}${overview?.totalAmount.toLocaleString(
-            undefined,
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            },
-          )}`}
-          description={`On an average you have spent ${currencyMapper(
-            userCurrency || "USD",
-          )}${overview?.averageMonthlyExpense.toFixed(2)} every month.`}
-          loading={overview === null}
-        />
-
-        <CardComponent
-          title="This month most expensive item"
-          numberData={itemName && itemValue ? `${itemName}` : "N/A"}
-          description={
-            itemName
-              ? `You have spent ${currencyMapper(userCurrency || "USD")}${(
-                  itemValue as number
-                ).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : ""
-          }
-          loading={overview === null}
-        />
-      </div>
-
+    <section className="space-y-6">
       <YearlyExpenseLineChartV2
         amountByMonth={overviewV2?.amountByMonthV2}
         amountByMonthV2={overviewV2?.monthlyCategoryExpenseV2}
@@ -133,6 +142,38 @@ export default function ExpenseInsightsSection({
         currency={userCurrency}
         title="Top Expense Contributors"
       />
-    </TabsContent>
+    </section>
+  );
+}
+
+export default function ExpenseInsightsSection(props: ExpenseInsightsProps) {
+  return (
+    <section className="space-y-6">
+      <ExpenseInsightCards
+        userCurrency={props.userCurrency}
+        overview={props.overview}
+        itemName={props.itemName}
+        itemValue={props.itemValue}
+      />
+      <ExpenseInsightCharts
+        userCurrency={props.userCurrency}
+        userTheme={props.userTheme}
+        overview={props.overview}
+        overviewV2={props.overviewV2}
+        overviewV2Loading={props.overviewV2Loading}
+        minYear={props.minYear}
+        minMonth={props.minMonth}
+        loadingYear={props.loadingYear}
+        loadingMonth={props.loadingMonth}
+        currentYearForYearly={props.currentYearForYearly}
+        setCurrentYearForYearly={props.setCurrentYearForYearly}
+        currentMonth={props.currentMonth}
+        currentMonthYear={props.currentMonthYear}
+        setCurrentMonth={props.setCurrentMonth}
+        setCurrentMonthYear={props.setCurrentMonthYear}
+        overviewParams={props.overviewParams}
+        setOverviewParams={props.setOverviewParams}
+      />
+    </section>
   );
 }
