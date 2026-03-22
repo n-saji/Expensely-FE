@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { columns, Expense } from "./columns";
 import { DataTable } from "./data-table";
 import { RootState } from "@/redux/store";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import api from "@/lib/api";
 import { ExpenseOverview, ExpenseOverviewV2, OverviewEnum } from "@/global/dto";
 import z from "zod";
@@ -59,7 +59,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   ChevronDown,
-  Download,
   FilterX,
   MoreHorizontal,
   Search,
@@ -89,11 +88,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import DropDown from "@/components/drop-down";
 import { Label } from "@/components/ui/label";
 import useMediaQuery from "@/utils/useMediaQuery";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   ExpenseInsightCards,
   ExpenseInsightCharts,
@@ -144,7 +138,13 @@ const formatDateParam = (date?: Date) => {
   return date.toISOString().slice(0, 10);
 };
 
-export default function ExpenseTableComponent() {
+interface ExpenseTableComponentProps {
+  onRegisterDownloadHandler?: (handler: (() => void) | null) => void;
+}
+
+export default function ExpenseTableComponent({
+  onRegisterDownloadHandler,
+}: ExpenseTableComponentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -793,9 +793,8 @@ export default function ExpenseTableComponent() {
     }
   };
 
-  const handleFileDownload = async () => {
+  const handleFileDownload = useCallback(async () => {
     try {
-      // const link = `/expenses/user/${user.id}/export`;
       setLoading(true);
       const link =
         `/expenses/user/${user.id}/export` +
@@ -847,7 +846,12 @@ export default function ExpenseTableComponent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.id, dateRange]);
+
+  useEffect(() => {
+    onRegisterDownloadHandler?.(handleFileDownload);
+    return () => onRegisterDownloadHandler?.(null);
+  }, [onRegisterDownloadHandler, handleFileDownload]);
 
   const ClearFilters = () => {
     setDateRange(undefined);
@@ -1002,7 +1006,6 @@ export default function ExpenseTableComponent() {
             setQuery={setQuery}
             selectedExpenses={selectedExpenses}
             handleBulkDelete={handleBulkDelete}
-            handleFileDownload={handleFileDownload}
             categories={categories}
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
@@ -1011,7 +1014,6 @@ export default function ExpenseTableComponent() {
             setOpen={setOpen}
             dateRange={dateRange}
             setDateRange={setDateRange}
-            loading={loading}
           />
           <DataTable
             columns={tableColumns}
@@ -1198,7 +1200,6 @@ const SearchAndFilter = ({
   setQuery,
   selectedExpenses,
   handleBulkDelete,
-  handleFileDownload,
   categories,
   categoryFilter,
   setCategoryFilter,
@@ -1207,13 +1208,11 @@ const SearchAndFilter = ({
   setOpen,
   dateRange,
   setDateRange,
-  loading,
 }: {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   selectedExpenses: Expense[];
   handleBulkDelete: () => void;
-  handleFileDownload: () => void;
   categories: RootState["categoryExpense"];
   categoryFilter: string;
   setCategoryFilter: (category: string) => void;
@@ -1222,7 +1221,6 @@ const SearchAndFilter = ({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   dateRange: DateRange | undefined;
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
-  loading: boolean;
 }) => {
   const isDesktop = useMediaQuery("(min-width: 530px)");
 
@@ -1318,16 +1316,6 @@ const SearchAndFilter = ({
               <Trash />
             </Button>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Label className="text-sm text-muted-foreground truncate">
-                <Button onClick={handleFileDownload}>
-                  {loading ? <Spinner /> : <Download className="h-6 w-6" />}
-                </Button>
-              </Label>
-            </TooltipTrigger>
-            <TooltipContent>Download Expenses</TooltipContent>
-          </Tooltip>
 
           <Button
             onClick={() => clearFilters()}
@@ -1437,10 +1425,6 @@ const SearchAndFilter = ({
               <Trash />
             </Button>
           )}
-
-          <Button onClick={handleFileDownload}>
-            {loading ? <Spinner /> : <Download className="h-6 w-6" />}
-          </Button>
           <Button
             onClick={() => clearFilters()}
             disabled={!dateRange && !categoryFilter && !query}

@@ -54,21 +54,30 @@ import {
   RowSelectionState,
   SortingState,
 } from "@tanstack/react-table";
-import { ChevronDown, Download, FilterX, Search, Trash, X } from "lucide-react";
+import {
+  ChevronDown,
+  Download,
+  FilterX,
+  Plus,
+  Search,
+  Trash,
+  X,
+} from "lucide-react";
 import DropDown from "@/components/drop-down";
 import { Label } from "@/components/ui/label";
 import useMediaQuery from "@/utils/useMediaQuery";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   IncomeInsightCards,
   IncomeInsightCharts,
 } from "../dashboard/_components/income-insights";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface IncomeListProps {
   incomes: IncomeRow[];
@@ -135,9 +144,12 @@ export default function IncomePage() {
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [addIncomeSaving, setAddIncomeSaving] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [editDatePickerOpen, setEditDatePickerOpen] = useState(false);
+  const [addDatePickerOpen, setAddDatePickerOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [addIncomeSheetOpen, setAddIncomeSheetOpen] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [datas, setDatas] = useState<IncomeRow[]>([]);
@@ -177,6 +189,12 @@ export default function IncomePage() {
   const [selectedUpdate, setSelectedUpdate] = useState<IncomeRow | null>(null);
   const [selectedIncomes, setSelectedIncomes] = useState<IncomeRow[]>([]);
   const [editForm, setEditForm] = useState({
+    amount: "",
+    description: "",
+    incomeDate: new Date().toISOString().slice(0, 10),
+    categoryId: "",
+  });
+  const [addForm, setAddForm] = useState({
     amount: "",
     description: "",
     incomeDate: new Date().toISOString().slice(0, 10),
@@ -804,6 +822,57 @@ export default function IncomePage() {
     }
   };
 
+  const handleCreateIncome = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const amount = Number.parseFloat(addForm.amount);
+
+    if (!addForm.categoryId) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    if (!addForm.description.trim()) {
+      toast.error("Please enter a description");
+      return;
+    }
+
+    try {
+      setAddIncomeSaving(true);
+
+      const payload = {
+        category: { id: addForm.categoryId },
+        amount,
+        description: addForm.description,
+        incomeDate: formatDateForApi(addForm.incomeDate),
+      };
+
+      const res = await api.post("/incomes/create", payload);
+      if (res.status !== 200) {
+        throw new Error("Failed to create income");
+      }
+
+      setAddForm({
+        categoryId: "",
+        amount: "",
+        description: "",
+        incomeDate: new Date().toISOString().slice(0, 10),
+      });
+
+      setAddIncomeSheetOpen(false);
+      window.dispatchEvent(new Event("income-added"));
+      toast.success("Income created successfully");
+    } catch (error) {
+      toast.error("Failed to create income", {
+        description: String(error),
+      });
+    } finally {
+      setAddIncomeSaving(false);
+    }
+  };
+
   const clearFilters = () => {
     setDateRange(undefined);
     setCategoryFilter("all");
@@ -823,17 +892,144 @@ export default function IncomePage() {
 
   return (
     <div className="w-full space-y-6 pb-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Ledger
-        </p>
-        <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-          Income
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Review and manage your income entries.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Ledger
+          </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+            Income
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Review and manage your income entries.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={handleFileDownload}>
+            <Download className="h-4 w-4" />
+            Download CSV
+          </Button>
+          <Button onClick={() => setAddIncomeSheetOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add Income
+          </Button>
+        </div>
       </div>
+
+      <Sheet open={addIncomeSheetOpen} onOpenChange={setAddIncomeSheetOpen}>
+        <SheetContent className="h-full overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Add Income</SheetTitle>
+          </SheetHeader>
+
+          <form
+            onSubmit={handleCreateIncome}
+            className="p-4 space-y-4 flex flex-col flex-1 h-full"
+          >
+            <div className="flex flex-col flex-1 h-full space-y-4">
+              <Input
+                placeholder="Description"
+                value={addForm.description}
+                onChange={(event) =>
+                  setAddForm((prev) => ({
+                    ...prev,
+                    description: event.target.value,
+                  }))
+                }
+              />
+
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Amount"
+                value={addForm.amount}
+                onChange={(event) =>
+                  setAddForm((prev) => ({
+                    ...prev,
+                    amount: event.target.value,
+                  }))
+                }
+              />
+
+              <Select
+                onValueChange={(value) =>
+                  setAddForm((prev) => ({ ...prev, categoryId: value }))
+                }
+                value={addForm.categoryId}
+                disabled={categoriesLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      categoriesLoading
+                        ? "Loading categories..."
+                        : "Select category"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Popover
+                open={addDatePickerOpen}
+                onOpenChange={setAddDatePickerOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-between text-muted-foreground"
+                  >
+                    {addForm.incomeDate || "Select date"}
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      addForm.incomeDate
+                        ? new Date(`${addForm.incomeDate}T00:00:00`)
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      if (!date) return;
+                      setAddForm((prev) => ({
+                        ...prev,
+                        incomeDate: date.toISOString().slice(0, 10),
+                      }));
+                      setAddDatePickerOpen(false);
+                    }}
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAddIncomeSheetOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={addIncomeSaving}>
+                  {addIncomeSaving ? <Spinner /> : "Add Income"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </SheetContent>
+      </Sheet>
 
       <IncomeInsightCards
         userCurrency={user.currency}
@@ -884,8 +1080,6 @@ export default function IncomePage() {
             setOpen={setOpen}
             dateRange={dateRange}
             setDateRange={setDateRange}
-            handleFileDownload={handleFileDownload}
-            loading={loading}
           />
 
           <DataTable
@@ -1053,8 +1247,6 @@ const SearchAndFilter = ({
   setOpen,
   dateRange,
   setDateRange,
-  handleFileDownload,
-  loading,
 }: {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
@@ -1069,8 +1261,6 @@ const SearchAndFilter = ({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   dateRange: DateRange | undefined;
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
-  handleFileDownload: () => void;
-  loading: boolean;
 }) => {
   const isDesktop = useMediaQuery("(min-width: 530px)");
 
@@ -1161,16 +1351,6 @@ const SearchAndFilter = ({
               <Trash />
             </Button>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Label className="text-sm text-muted-foreground truncate">
-                <Button onClick={handleFileDownload}>
-                  {loading ? <Spinner /> : <Download className="h-6 w-6" />}
-                </Button>
-              </Label>
-            </TooltipTrigger>
-            <TooltipContent>Download Incomes</TooltipContent>
-          </Tooltip>
 
           <Button
             onClick={() => clearFilters()}
@@ -1272,9 +1452,6 @@ const SearchAndFilter = ({
               <Trash />
             </Button>
           )}
-          <Button onClick={handleFileDownload}>
-            {loading ? <Spinner /> : <Download className="h-6 w-6" />}
-          </Button>
           <Button
             onClick={() => clearFilters()}
             disabled={!dateRange && categoryFilter === "all" && !query}

@@ -5,8 +5,17 @@ import Expense from "./_components/expense_old/expense";
 import ExpenseTableComponent from "./_components/expense_v2/expense";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Download, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 export default function SwitchComponent() {
+  const router = useRouter();
   const [oldVersion, setOldVersion] = useState(false);
+  const [downloadHandler, setDownloadHandler] = useState<(() => void) | null>(
+    null,
+  );
+
   return (
     <div className="space-y-6 w-full h-full">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -21,18 +30,38 @@ export default function SwitchComponent() {
             Review and manage your recent transactions.
           </p>
         </div>
-        <div className="flex items-center space-x-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs text-muted-foreground shadow-sm">
-          <Label htmlFor="oldVersion" className="text-muted-foreground text-xs">
-            Use Old Version
-          </Label>
-          <Switch
-            checked={oldVersion}
-            id="oldVersion"
-            onCheckedChange={(checked) => setOldVersion(checked)}
-          />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {!oldVersion && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => downloadHandler?.()}
+                disabled={!downloadHandler}
+              >
+                <Download className="h-4 w-4" />
+                Download CSV
+              </Button>
+              <Button onClick={() => router.push("/expense/add")}>
+                <Plus className="h-4 w-4" />
+                Add Expense
+              </Button>
+            </>
+          )}
         </div>
       </div>
-      {oldVersion ? <Expense /> : <ExpenseTableComponent />}
+      {oldVersion ? (
+        <Expense />
+      ) : (
+        <ExpenseTableComponent
+          onRegisterDownloadHandler={(handler) => {
+            if (!handler) {
+              setDownloadHandler(null);
+              return;
+            }
+            setDownloadHandler(() => handler);
+          }}
+        />
+      )}
     </div>
   );
 }
