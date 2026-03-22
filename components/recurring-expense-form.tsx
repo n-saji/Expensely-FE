@@ -83,7 +83,6 @@ export default function RecurringExpenseForm({
   const categories = useSelector((state: RootState) => state.categoryExpense);
 
   const tomorrow = useMemo(() => getTomorrowDateString(), []);
-
   const form = useForm<RecurringFormValues>({
     resolver: zodResolver(recurringSchema) as any,
     defaultValues: {
@@ -133,6 +132,20 @@ export default function RecurringExpenseForm({
         className="flex flex-col space-y-4 flex-1"
       >
         <div className="flex flex-col flex-1 space-y-4">
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input placeholder="Rent, subscription, etc." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {showCategory && (
             <FormField
               control={form.control}
@@ -162,59 +175,12 @@ export default function RecurringExpenseForm({
 
           <FormField
             control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Input placeholder="Rent, subscription, etc." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" min="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="recurrence"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Occurrence</FormLabel>
-                <FormControl>
-                  <Tabs
-                    value={field.value}
-                    onValueChange={(value) =>
-                      field.onChange(value as Recurrence)
-                    }
-                    className="w-full"
-                  >
-                    <TabsList className="grid w-full grid-cols-4">
-                      <TabsTrigger value={Recurrence.Daily}>Daily</TabsTrigger>
-                      <TabsTrigger value={Recurrence.Weekly}>
-                        Weekly
-                      </TabsTrigger>
-                      <TabsTrigger value={Recurrence.Monthly}>
-                        Monthly
-                      </TabsTrigger>
-                      <TabsTrigger value={Recurrence.Yearly}>
-                        Yearly
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -262,6 +228,39 @@ export default function RecurringExpenseForm({
                       />
                     </PopoverContent>
                   </Popover>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="recurrence"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Occurrence</FormLabel>
+                <FormControl>
+                  <Tabs
+                    value={field.value}
+                    onValueChange={(value) =>
+                      field.onChange(value as Recurrence)
+                    }
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value={Recurrence.Daily}>Daily</TabsTrigger>
+                      <TabsTrigger value={Recurrence.Weekly}>
+                        Weekly
+                      </TabsTrigger>
+                      <TabsTrigger value={Recurrence.Monthly}>
+                        Monthly
+                      </TabsTrigger>
+                      <TabsTrigger value={Recurrence.Yearly}>
+                        Yearly
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </FormControl>
                 <FormMessage />
               </FormItem>
