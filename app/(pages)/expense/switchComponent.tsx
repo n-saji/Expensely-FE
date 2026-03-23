@@ -7,10 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Slidebar from "@/components/slidebar";
 
 export default function SwitchComponent() {
-  const router = useRouter();
   const [oldVersion, setOldVersion] = useState(false);
   const [downloadHandler, setDownloadHandler] = useState<(() => void) | null>(
     null,
@@ -39,12 +38,9 @@ export default function SwitchComponent() {
                 disabled={!downloadHandler}
               >
                 <Download className="h-4 w-4" />
-                Download CSV
+                <span className="text-xs">Download CSV</span>
               </Button>
-              <Button onClick={() => router.push("/expense/add")}>
-                <Plus className="h-4 w-4" />
-                Add Expense
-              </Button>
+              <Slidebar variant="default"/>
             </>
           )}
         </div>

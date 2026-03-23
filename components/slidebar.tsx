@@ -59,7 +59,11 @@ type NormalExpenseErrors = Partial<
   Record<keyof z.infer<typeof normalExpenseSchema>, string>
 >;
 
-export default function Slidebar() {
+export default function Slidebar({
+  variant,
+}: {
+  variant?: "default" | "outline" | "ghost";
+}) {
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const [sheetOpen, setSheetOpen] = React.useState(false);
@@ -227,7 +231,7 @@ export default function Slidebar() {
   return (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost">
+        <Button variant={variant || "ghost"}>
           <Plus className="h-3 w-3" />
           <Label className="text-xs">Add Expense</Label>
         </Button>

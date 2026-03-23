@@ -908,11 +908,11 @@ export default function IncomePage() {
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" onClick={handleFileDownload}>
             <Download className="h-4 w-4" />
-            Download CSV
+            <span className="text-xs">Download CSV</span>
           </Button>
           <Button onClick={() => setAddIncomeSheetOpen(true)}>
             <Plus className="h-4 w-4" />
-            Add Income
+            <span className="text-xs">Add Income</span>
           </Button>
         </div>
       </div>

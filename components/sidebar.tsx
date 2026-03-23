@@ -156,11 +156,6 @@ export function AppSidebar() {
                     <span>Expenses</span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuAction asChild>
-                  <Link href={"/expense/add"}>
-                    <Plus /> <span className="sr-only">Add Expense</span>
-                  </Link>
-                </SidebarMenuAction>
               </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
@@ -175,11 +170,6 @@ export function AppSidebar() {
                     <span>Income</span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuAction asChild>
-                  <Link href={"/income/add"}>
-                    <Plus /> <span className="sr-only">Add Income</span>
-                  </Link>
-                </SidebarMenuAction>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -214,9 +204,9 @@ export function AppSidebar() {
                     <SidebarMenuSubItem key={"Expense-add"}>
                       <SidebarMenuButton
                         asChild
-                        isActive={pathName === "/expense/add"}
+                        isActive={pathName === "/expense"}
                       >
-                        <Link href={"/expense/add"}>
+                        <Link href={"/expense"}>
                           <span>Add Expense</span>
                         </Link>
                       </SidebarMenuButton>
