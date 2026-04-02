@@ -1,20 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { FetchUserId } from "@/utils/fetch_token";
-import { columns, Budget } from "./columns";
-import { DataTable } from "./data-table";
+import { Budget } from "./columns";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -63,6 +54,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import api from "@/lib/api";
+import BudgetCard from "./budget-card";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 const budgetSchema = z.object({
   Category: z.object({
@@ -104,6 +98,21 @@ export default function Page() {
   const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
   const [loader, setLoader] = useState(false);
   const categories = useSelector((state: RootState) => state.categoryExpense);
+
+  const isActiveBudget = (budget: Budget) => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const start = new Date(budget.startDate);
+    const end = new Date(budget.endDate);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return true;
+    }
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    return start <= now && end >= now;
+  };
 
   useEffect(() => {
     const userId = FetchUserId();
@@ -294,61 +303,27 @@ export default function Page() {
     }
   }
 
-  const tableColumns = columns(user?.currency).map((col) => {
-    if (col.id === "actions") {
-      return {
-        ...col,
-        cell: ({ row }: any) => {
-          const budget: Budget = row.original;
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => {
-                    // handleEdit(budget);
-                    setBudgetToEdit(budget);
-                    setOpenEditDialog(true);
-                    form.reset({
-                      Category: {
-                        id: budget.category.id,
-                        name: budget.category.name,
-                      },
-                      User: { id: user.id },
-                      amountLimit: budget.amountLimit,
-                      period: budget.period,
-                      startDate: budget.startDate,
-                      endDate: budget.endDate,
-                    });
-                  }}
-                >
-                  Edit
-                </DropdownMenuItem>
+  const handleEdit = (budget: Budget) => {
+    setBudgetToEdit(budget);
+    setOpenEditDialog(true);
+    form.reset({
+      Category: {
+        id: budget.category.id,
+        name: budget.category.name,
+      },
+      User: { id: user.id },
+      amountLimit: budget.amountLimit,
+      period: budget.period,
+      startDate: budget.startDate,
+      endDate: budget.endDate,
+    });
+  };
 
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setBudgetToDelete(budget)}
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-      };
-    }
-    return col;
-  });
+  const activeBudgets = budgets.filter(isActiveBudget);
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Planning
@@ -359,6 +334,13 @@ export default function Page() {
           <p className="text-sm text-muted-foreground">
             Track limits and keep spending on target.
           </p>
+        </div>
+        <div>
+          <Link href="/budget/add">
+            <Button>
+              <Plus /> <span className="text-sm">Add Budget</span>
+            </Button>
+          </Link>
         </div>
       </div>
       {budgetToDelete && (
@@ -390,15 +372,37 @@ export default function Page() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <div className="rounded-2xl border border-border/70 bg-background/80 shadow-sm p-4">
+      <div className="p-4">
         {loading ? (
-          <div className="w-full space-y-2">
-            {[...Array(10)].map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full rounded-md" />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-[230px] w-full rounded-xl" />
             ))}
           </div>
+        ) : activeBudgets.length === 0 ? (
+          <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
+            <div className="space-y-1">
+              <p className="text-base font-medium text-foreground">
+                No active budgets right now
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Create a budget or adjust dates to track spending in this
+                period.
+              </p>
+            </div>
+          </div>
         ) : (
-          <DataTable columns={tableColumns} data={budgets} />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] xlg:grid-cols-3">
+            {activeBudgets.map((budget) => (
+              <BudgetCard
+                key={budget.id}
+                budget={budget}
+                currency={user?.currency}
+                onEdit={handleEdit}
+                onDelete={setBudgetToDelete}
+              />
+            ))}
+          </div>
         )}
       </div>
       {openEditDialog && budgetToEdit && (

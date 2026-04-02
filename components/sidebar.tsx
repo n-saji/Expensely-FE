@@ -24,7 +24,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -178,83 +177,22 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             Manage
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            {/* <SidebarMenu>
-            <Collapsible className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton>
-                    <DollarSign />
-                    Expense
-                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem key={"Expense-show"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathName === "/expense"}
-                      >
-                        <Link href={"/expense"}>
-                          <span>Recent Transactions</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem key={"Expense-add"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathName === "/expense"}
-                      >
-                        <Link href={"/expense"}>
-                          <span>Add Expense</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          </SidebarMenu> */}
+          <SidebarGroupContent className="space-y-1">
             <SidebarMenu>
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600">
-                      <Wallet />
-                      Budget
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem key={"Expense-show"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/budget"}
-                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
-                        >
-                          <Link href={"/budget"}>
-                            <span>Active Budgets</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem key={"Expense-add"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/budget/add"}
-                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
-                        >
-                          <Link href={"/budget/add"}>
-                            <span>Set Budget</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/budget"}
+                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                >
+                  <Link href={"/budget"}>
+                    <Wallet />
+                    Budget
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
+
             <SidebarMenu>
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
