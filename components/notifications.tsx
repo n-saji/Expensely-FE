@@ -35,7 +35,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "./ui/badge";
 import { RootState } from "@/redux/store";
 import { formatNotificationTime } from "@/utils/time";
@@ -51,17 +51,10 @@ export default function Notifications({
   markIndividualAsRead: (id: string) => void;
   deleteNotificationFunc: (id: string) => void;
 }) {
-  const [messageLength, setMessageLength] = useState(0);
-
-  useEffect(() => {
-    let count = 0;
-    notifications.notifications.forEach((n) => {
-      if (!n.isRead) {
-        count += 1;
-      }
-    });
-    setMessageLength(count);
-  }, [notifications.notifications]);
+  const messageLength = useMemo(
+    () => notifications.notifications.filter((n) => !n.isRead).length,
+    [notifications.notifications],
+  );
 
   useNow();
 
@@ -72,11 +65,12 @@ export default function Notifications({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="relative">
-                <Bell className="w-6 h-6" />
+                <Bell className="w-6 h-6 " />
                 {messageLength > 0 && (
-                  <Badge className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-emerald-500 text-[10px] text-white">
-                    {messageLength > 9 ? "9+" : messageLength}
-                  </Badge>
+                  <span
+                    className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-background"
+                    aria-label="Unread notifications"
+                  />
                 )}
               </div>
             </TooltipTrigger>
