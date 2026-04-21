@@ -32,6 +32,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Edit2 } from "lucide-react";
 import api from "@/lib/api";
+import {
+  DEFAULT_THEME_COLOR,
+  THEME_COLOR_IDS,
+  THEME_COLOR_OPTIONS,
+  ThemeColorId,
+} from "@/global/constants";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
@@ -58,6 +64,7 @@ export default function SettingsPage() {
             phone: data.user.phone,
             currency: data.user.currency,
             theme: data.user.theme,
+            themeColor: data.user.themeColor || user.themeColor,
             language: data.user.language,
             isActive: data.user.isActive,
             isAdmin: data.user.isAdmin,
@@ -116,12 +123,13 @@ export default function SettingsPage() {
     theme?: string | null;
     notification?: boolean | null;
   }) => {
+    const { themeColor: _themeColor, ...userWithoutThemeColor } = user;
+
     await api
       .patch(`/users/update-settings`, {
-        ...user,
-        theme: theme || user.theme,
-        notificationsEnabled:
-          notification !== null ? notification : user.notificationsEnabled,
+        ...userWithoutThemeColor,
+        theme: theme ?? user.theme,
+        notificationsEnabled: notification ?? user.notificationsEnabled,
       })
       .then((res) => res.data)
       .then((data) => {
@@ -151,6 +159,7 @@ export default function SettingsPage() {
           toast.success("Account deleted successfully!");
           localStorage.removeItem("user_id");
           localStorage.removeItem("theme");
+          localStorage.removeItem("themeColor");
         } else {
           toast.error(data.message || "Failed to delete account.");
         }
@@ -198,6 +207,52 @@ export default function SettingsPage() {
                 });
               }}
             />
+          </CardAction>
+        </CardHeader>
+      </Card>
+
+      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+        <CardHeader>
+          <CardTitle>Theme Color</CardTitle>
+          <CardDescription>
+            Pick a color preset for highlights across the app.
+          </CardDescription>
+          <CardAction>
+            <div className="flex flex-col items-end gap-3">
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {THEME_COLOR_OPTIONS.map((option) => {
+                  const isSelected =
+                    (user.themeColor || DEFAULT_THEME_COLOR) === option.id;
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      aria-label={`Select ${option.label} theme color`}
+                      title={option.label}
+                      onClick={() => {
+                        const nextColor = THEME_COLOR_IDS.includes(option.id)
+                          ? option.id
+                          : DEFAULT_THEME_COLOR;
+
+                        dispatch(
+                          setUser({
+                            ...user,
+                            themeColor: nextColor as ThemeColorId,
+                          }),
+                        );
+                      }}
+                      className={`h-8 w-8 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                        isSelected
+                          ? "border-foreground scale-110"
+                          : "border-border/70 hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: option.swatch }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </CardAction>
         </CardHeader>
       </Card>

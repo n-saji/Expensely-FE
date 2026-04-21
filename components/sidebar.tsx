@@ -134,7 +134,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathName === "/dashboard"}
-                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                 >
                   <Link href={"/dashboard"}>
                     <LayoutDashboard />
@@ -148,7 +148,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathName === "/expense"}
-                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                 >
                   <Link href={"/expense"}>
                     <DollarSign />
@@ -162,7 +162,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathName === "/income"}
-                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                 >
                   <Link href={"/income"}>
                     <HandCoins />
@@ -183,7 +183,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathName === "/budget"}
-                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                 >
                   <Link href={"/budget"}>
                     <Wallet />
@@ -197,7 +197,7 @@ export function AppSidebar() {
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600">
+                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary">
                       <Repeat />
                       Recurring Expense
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -209,7 +209,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/recurring-expense"}
-                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                         >
                           <Link href={"/recurring-expense"}>
                             <span>Recurring Expenses</span>
@@ -220,7 +220,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/recurring-expense/add"}
-                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                         >
                           <Link href={"/recurring-expense/add"}>
                             <span>Add Recurring Expense</span>
@@ -236,7 +236,7 @@ export function AppSidebar() {
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600">
+                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary">
                       <Logs />
                       Category
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
@@ -248,7 +248,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/category"}
-                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                         >
                           <Link href={"/category"}>
                             <span>Categories</span>
@@ -259,7 +259,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={pathName === "/category/add"}
-                          className="rounded-lg transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                         >
                           <Link href={"/category/add"}>
                             <span>Add Category</span>
@@ -282,7 +282,7 @@ export function AppSidebar() {
               <SidebarMenuButton
                 asChild
                 isActive={pathName === "/settings"}
-                className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
               >
                 <Link href={"/settings"}>
                   <Settings />
@@ -303,7 +303,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathName === "/admin"}
-                  className="rounded-xl transition-colors hover:bg-emerald-500/10 data-[active=true]:bg-emerald-500/15 data-[active=true]:text-emerald-600"
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                 >
                   <Link href={"/admin"}>
                     <Shield />

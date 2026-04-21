@@ -232,10 +232,10 @@ export default function DashboardPage({
         {/* <Sidebar /> */}
 
         <div className="relative w-full min-h-screen transition-all duration-300">
-          <div className="pointer-events-none absolute inset-0 -z-10">
+          {/* <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_45%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_45%)]" />
             <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.08),transparent_40%,rgba(14,116,144,0.08))] dark:bg-[linear-gradient(120deg,rgba(16,185,129,0.12),transparent_40%,rgba(14,116,144,0.12))]" />
-          </div>
+          </div> */}
 
           <Navbar />
 

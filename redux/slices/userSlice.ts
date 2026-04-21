@@ -1,4 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
+import {
+  DEFAULT_THEME_COLOR,
+  THEME_COLOR_IDS,
+  ThemeColorId,
+} from "@/global/constants";
+
+const normalizeThemeColor = (themeColor?: string): ThemeColorId => {
+  if (themeColor && THEME_COLOR_IDS.includes(themeColor as ThemeColorId)) {
+    return themeColor as ThemeColorId;
+  }
+  return DEFAULT_THEME_COLOR;
+};
 
 interface UserState {
   email: string;
@@ -8,6 +20,7 @@ interface UserState {
   phone: string;
   currency: string;
   theme: string;
+  themeColor: ThemeColorId;
   language: string;
   isActive: boolean;
   isAdmin: boolean;
@@ -26,6 +39,7 @@ const initialState: UserState = {
   phone: "",
   currency: "",
   theme: "",
+  themeColor: DEFAULT_THEME_COLOR,
   language: "en",
   isActive: true,
   isAdmin: false,
@@ -48,6 +62,9 @@ const userSlice = createSlice({
       state.phone = action.payload.phone;
       state.currency = action.payload.currency;
       state.theme = action.payload.theme;
+      state.themeColor = normalizeThemeColor(
+        action.payload.themeColor || state.themeColor,
+      );
       state.language = action.payload.language || "en";
       state.isActive =
         action.payload.isActive !== undefined ? action.payload.isActive : true;
@@ -76,6 +93,7 @@ const userSlice = createSlice({
       state.phone = "";
       state.currency = "";
       state.theme = "";
+      state.themeColor = DEFAULT_THEME_COLOR;
       state.language = "en";
       state.isActive = false;
       state.isAdmin = false;

@@ -1,3 +1,5 @@
+import type { ThemeColorId } from "./constants";
+
 export const categoryTypes = [
   {
     label: "Expense",
@@ -42,6 +44,7 @@ export interface UserSkeleton {
   phone?: string;
   currency?: string;
   theme?: string;
+  themeColor?: ThemeColorId;
   language?: string;
   isActive?: boolean;
   isAdmin?: boolean;
