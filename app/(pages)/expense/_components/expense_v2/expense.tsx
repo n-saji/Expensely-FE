@@ -92,7 +92,6 @@ import {
   ExpenseInsightCards,
   ExpenseInsightCharts,
 } from "../../../dashboard/_components/expense-insights";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface expense {
   id: string;
@@ -172,6 +171,7 @@ export default function ExpenseTableComponent({
 
     if (!from && !to) return undefined;
 
+    // `DateRange` requires `from` to always exist.
     const normalizedFrom = from ?? to;
     if (!normalizedFrom) return undefined;
 
@@ -336,6 +336,7 @@ export default function ExpenseTableComponent({
     fetchMonthlyOverview();
   }, [overviewParams]);
 
+  // initial fetch for expenses
   useEffect(() => {
     const fetchExpenses = async ({
       fromDate,
@@ -935,7 +936,7 @@ export default function ExpenseTableComponent({
       : [null, null];
 
   return (
-    <div className="flex flex-col w-full space-y-4">
+    <div className="flex flex-col w-full space-y-8">
       {expenseToDelete && (
         <AlertDialog
           open={!!expenseToDelete}
@@ -964,71 +965,77 @@ export default function ExpenseTableComponent({
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      {/* ── Section 1: Summary Cards ── */}
       <ExpenseInsightCards
         userCurrency={user.currency}
         overview={overview}
         itemName={itemName as string | null}
         itemValue={itemValue as number | null}
       />
-      <Tabs defaultValue="graphs" className="w-full space-y-4">
-        <TabsList className="w-full">
-          <TabsTrigger value="graphs">Analytics</TabsTrigger>
-          <TabsTrigger value="table">Transactions</TabsTrigger>
-        </TabsList>
 
-        <TabsContent value="graphs" className="mt-0 space-y-4">
-          <ExpenseInsightCharts
-            userCurrency={user.currency}
-            userTheme={user.theme}
-            overview={overview}
-            overviewV2={overviewV2}
-            overviewV2Loading={overviewV2Loading}
-            minYear={minYear}
-            minMonth={minMonth}
-            loadingYear={loadingYear}
-            loadingMonth={loadingMonth}
-            currentYearForYearly={currentYearForYearly}
-            setCurrentYearForYearly={setCurrentYearForYearly}
-            currentMonth={currentMonth}
-            currentMonthYear={currentMonthYear}
-            setCurrentMonth={setCurrentMonth}
-            setCurrentMonthYear={setCurrentMonthYear}
-            overviewParams={overviewParams}
-            setOverviewParams={setOverviewParams}
-          />
-        </TabsContent>
+      {/* ── Section 2: Analytics / Charts ── */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Analytics</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <ExpenseInsightCharts
+          userCurrency={user.currency}
+          userTheme={user.theme}
+          overview={overview}
+          overviewV2={overviewV2}
+          overviewV2Loading={overviewV2Loading}
+          minYear={minYear}
+          minMonth={minMonth}
+          loadingYear={loadingYear}
+          loadingMonth={loadingMonth}
+          currentYearForYearly={currentYearForYearly}
+          setCurrentYearForYearly={setCurrentYearForYearly}
+          currentMonth={currentMonth}
+          currentMonthYear={currentMonthYear}
+          setCurrentMonth={setCurrentMonth}
+          setCurrentMonthYear={setCurrentMonthYear}
+          overviewParams={overviewParams}
+          setOverviewParams={setOverviewParams}
+        />
+      </div>
 
-        <TabsContent value="table" className="mt-0 space-y-4">
-          <SearchAndFilter
-            query={query}
-            setQuery={setQuery}
-            selectedExpenses={selectedExpenses}
-            handleBulkDelete={handleBulkDelete}
-            categories={categories}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            clearFilters={ClearFilters}
-            open={open}
-            setOpen={setOpen}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-          />
-          <DataTable
-            columns={tableColumns}
-            data={datas}
-            totalPages={expensesList.totalPages}
-            pageIndex={pageNumber - 1}
-            onPageChange={(page) => setPageNumber(page + 1)}
-            loading={tableLoading}
-            sorting={sorting}
-            onSortingChange={handleSortingChange}
-            rowSelection={rowSelection}
-            onRowSelectionChange={setRowSelection}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* ── Section 3: Transactions Table ── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Transactions</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <SearchAndFilter
+          query={query}
+          setQuery={setQuery}
+          selectedExpenses={selectedExpenses}
+          handleBulkDelete={handleBulkDelete}
+          categories={categories}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          clearFilters={ClearFilters}
+          open={open}
+          setOpen={setOpen}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+        />
+        <DataTable
+          columns={tableColumns}
+          data={datas}
+          totalPages={expensesList.totalPages}
+          pageIndex={pageNumber - 1}
+          onPageChange={(page) => setPageNumber(page + 1)}
+          loading={tableLoading}
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+        />
+      </div>
 
       {openEditDialog && expenseToEdit && (
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
