@@ -55,7 +55,15 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import api from "@/lib/api";
 import BudgetCard from "./budget-card";
-import { Plus } from "lucide-react";
+import { currencyMapper } from "@/utils/currencyMapper";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  PiggyBank,
+  Plus,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 
 const budgetSchema = z.object({
@@ -131,10 +139,6 @@ export default function Page() {
           throw new Error("Failed to fetch budgets");
         }
 
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch budgets");
-        }
-
         const data = res.data;
         const formatted: Budget[] = data.map((b: any) => ({
           id: b.id,
@@ -178,7 +182,6 @@ export default function Page() {
       if (res.status !== 204) {
         throw new Error(data.error || "Failed to delete budget");
       }
-      // Remove deleted budget from state
       setBudgets((prev) => prev.filter((b) => b.id !== budget.id));
       toast(`Deleted ${budget.category.name}`, {
         description: "Budget deleted successfully",
@@ -203,6 +206,7 @@ export default function Page() {
       endDate: budgetToEdit?.endDate || new Date().toISOString().split("T")[0],
     },
   });
+
   const watchPeriod = form.watch("period");
   useEffect(() => {
     const start = new Date();
@@ -211,9 +215,9 @@ export default function Page() {
 
     if (watchPeriod === Period.Weekly) {
       const day = start.getDay();
-      newStart.setDate(start.getDate() - day); // Sunday
+      newStart.setDate(start.getDate() - day);
       newEnd = new Date(newStart);
-      newEnd.setDate(newStart.getDate() + 6); // Saturday
+      newEnd.setDate(newStart.getDate() + 6);
     } else if (watchPeriod === Period.Monthly) {
       newStart = new Date(start.getFullYear(), start.getMonth(), 1);
       newEnd = new Date(start.getFullYear(), start.getMonth() + 1, 0);
@@ -275,7 +279,6 @@ export default function Page() {
       setLoader(false);
       setOpenEditDialog(false);
 
-      // Refresh budgets list
       if (user_id) {
         setLoading(true);
         fetchBudgets({ userId: user_id })
@@ -321,28 +324,118 @@ export default function Page() {
 
   const activeBudgets = budgets.filter(isActiveBudget);
 
+  const symbol = user?.currency ? currencyMapper(user.currency) : "$";
+  const totalLimit = activeBudgets.reduce(
+    (sum, b) => sum + Number(b.amountLimit || 0),
+    0,
+  );
+  const totalSpent = activeBudgets.reduce(
+    (sum, b) => sum + Number(b.spent || 0),
+    0,
+  );
+  const overBudgetCount = activeBudgets.filter(
+    (b) =>
+      Number(b.amountLimit) > 0 &&
+      Number(b.spent) / Number(b.amountLimit) >= 1,
+  ).length;
+  const healthyCount = activeBudgets.filter(
+    (b) =>
+      Number(b.amountLimit) > 0 &&
+      Number(b.spent) / Number(b.amountLimit) < 0.75,
+  ).length;
+  const fmt = (n: number) =>
+    n.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="w-full space-y-8">
+      {/* ── Page Header ── */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">
             Planning
           </p>
           <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
             Budgets
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Track limits and keep spending on target.
+          <p className="text-sm text-muted-foreground mt-1">
+            Set limits, track spending, stay in control.
           </p>
         </div>
-        <div>
-          <Link href="/budget/add">
-            <Button>
-              <Plus /> <span className="text-sm">Add Budget</span>
-            </Button>
-          </Link>
-        </div>
+        <Link href="/budget/add">
+          <Button className="gap-2 shadow-sm">
+            <Plus className="h-4 w-4" />
+            <span className="text-sm">Add Budget</span>
+          </Button>
+        </Link>
       </div>
+
+      {/* ── Summary Stats Bar ── */}
+      {!loading && activeBudgets.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            {
+              label: "Active Budgets",
+              value: activeBudgets.length.toString(),
+              icon: Wallet,
+              accent: "var(--primary)",
+              bg: "rgba(var(--primary-rgb, 34,197,94), 0.08)",
+            },
+            {
+              label: "Total Budget",
+              value: `${symbol}${fmt(totalLimit)}`,
+              icon: PiggyBank,
+              accent: "#6366f1",
+              bg: "rgba(99,102,241,0.08)",
+            },
+            {
+              label: "Total Spent",
+              value: `${symbol}${fmt(totalSpent)}`,
+              icon: TrendingUp,
+              accent: "#f59e0b",
+              bg: "rgba(245,158,11,0.08)",
+            },
+            {
+              label: overBudgetCount > 0 ? "Over Budget" : "Healthy",
+              value:
+                overBudgetCount > 0
+                  ? `${overBudgetCount} budget${overBudgetCount > 1 ? "s" : ""}`
+                  : `${healthyCount} budget${healthyCount !== 1 ? "s" : ""}`,
+              icon: overBudgetCount > 0 ? AlertTriangle : CheckCircle2,
+              accent: overBudgetCount > 0 ? "#ef4444" : "#22c55e",
+              bg:
+                overBudgetCount > 0
+                  ? "rgba(239,68,68,0.08)"
+                  : "rgba(34,197,94,0.08)",
+            },
+          ].map(({ label, value, icon: Icon, accent, bg }) => (
+            <div
+              key={label}
+              className="rounded-2xl border border-border/60 bg-card p-4 flex items-center gap-3
+                transition-all duration-200 hover:shadow-md hover:border-border"
+            >
+              <div
+                className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{ backgroundColor: bg }}
+              >
+                <Icon className="h-4 w-4" style={{ color: accent }} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide truncate">
+                  {label}
+                </p>
+                <p className="text-base font-bold text-foreground tabular-nums truncate">
+                  {value}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Dialog ── */}
       {budgetToDelete && (
         <AlertDialog
           open={!!budgetToDelete}
@@ -350,10 +443,11 @@ export default function Page() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>Delete this budget?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                budget <strong>{budgetToDelete.category.name}</strong>.
+                This action cannot be undone. The budget for{" "}
+                <strong>{budgetToDelete.category.name}</strong> will be
+                permanently removed.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -366,33 +460,49 @@ export default function Page() {
                   setBudgetToDelete(null);
                 }}
               >
-                Continue
+                Delete
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       )}
-      <div className="p-4">
+
+      {/* ── Budget Cards Grid ── */}
+      <div>
         {loading ? (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-[230px] w-full rounded-xl" />
+              <Skeleton key={i} className="h-[260px] w-full rounded-2xl" />
             ))}
           </div>
         ) : activeBudgets.length === 0 ? (
-          <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/20 px-6 text-center">
-            <div className="space-y-1">
-              <p className="text-base font-medium text-foreground">
-                No active budgets right now
+          <div
+            className="flex min-h-[280px] flex-col items-center justify-center gap-4
+              rounded-2xl border border-dashed border-border/70 bg-muted/10 px-6 text-center"
+          >
+            <div
+              className="h-16 w-16 rounded-2xl flex items-center justify-center"
+              style={{ background: "rgba(34,197,94,0.08)" }}
+            >
+              <PiggyBank className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-base font-semibold text-foreground">
+                No active budgets
               </p>
-              <p className="text-sm text-muted-foreground">
-                Create a budget or adjust dates to track spending in this
-                period.
+              <p className="text-sm text-muted-foreground max-w-xs">
+                Create a budget to start tracking your spending limits.
               </p>
             </div>
+            <Link href="/budget/add">
+              <Button variant="outline" size="sm" className="gap-2 mt-1">
+                <Plus className="h-4 w-4" />
+                Create your first budget
+              </Button>
+            </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] xlg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {activeBudgets.map((budget) => (
               <BudgetCard
                 key={budget.id}
@@ -405,18 +515,21 @@ export default function Page() {
           </div>
         )}
       </div>
+
+      {/* ── Edit Budget Dialog ── */}
       {openEditDialog && budgetToEdit && (
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
           <DialogContent className="max-h-[90vh] sm:max-w-lg overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Budget</DialogTitle>
               <DialogDescription>
-                Make changes to your budget.
+                Update the limit and period for{" "}
+                <strong>{budgetToEdit.category.name}</strong>.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
-                {/* Category */}
+                {/* Category (read-only) */}
                 <FormField
                   control={form.control}
                   name="Category.id"
@@ -445,6 +558,7 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
+
                 {/* Amount */}
                 <FormField
                   control={form.control}
@@ -452,7 +566,7 @@ export default function Page() {
                   defaultValue={form.getValues("amountLimit")}
                   render={({ field }) => (
                     <FormItem className="mt-4">
-                      <FormLabel>Amount</FormLabel>
+                      <FormLabel>Amount Limit</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -503,6 +617,7 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
+
                 {/* Start Date */}
                 <FormField
                   control={form.control}
@@ -534,18 +649,16 @@ export default function Page() {
                           type="date"
                           {...field}
                           disabled={watchPeriod !== Period.Custom}
-                          className=""
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <DialogFooter className="mt-4 max-sm:flex-row w-full justify-end">
+
+                <DialogFooter className="mt-6 max-sm:flex-row w-full justify-end">
                   <DialogClose asChild>
-                    <Button variant="outline" className="">
-                      Cancel
-                    </Button>
+                    <Button variant="outline">Cancel</Button>
                   </DialogClose>
                   <Button className="ml-2" type="submit" disabled={loader}>
                     {loader && <Spinner />}

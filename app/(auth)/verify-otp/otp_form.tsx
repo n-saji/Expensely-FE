@@ -146,7 +146,6 @@ export default function OtpForm() {
     const storedEmail = localStorage.getItem("pending_verify_email") || "";
     const fallbackUserId = localStorage.getItem("user_id") || "";
 
-    // Prefer pending verification keys to avoid stale persisted auth ids.
     const userId = storedUserId || user?.id || fallbackUserId;
     const email = storedEmail || user?.email || "";
 
@@ -211,7 +210,6 @@ export default function OtpForm() {
 
       dispatch(clearUser());
 
-      // Ensure user re-authenticates after verification.
       await api.get(`/users/logout`).catch(() => {
         return null;
       });

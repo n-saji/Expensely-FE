@@ -44,7 +44,6 @@ export default function DashboardPage({
     let active = true;
 
     const hydrateUser = async () => {
-      // Redux is not persisted; on direct URL visits hydrate from cookie-backed API.
       if (user?.id) {
         if (active) {
           setIsAuthenticated(true);

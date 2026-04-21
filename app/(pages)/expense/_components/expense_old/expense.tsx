@@ -207,7 +207,6 @@ export default function Expense({ isDemo }: { isDemo?: boolean }) {
     return () => clearTimeout(timeoutId);
   }, [query, fromDate, toDate, categoryFilter]);
 
-  // initial fetch for expenses
   useEffect(() => {
     if (!isExpenseMounted.current) {
       isExpenseMounted.current = true;

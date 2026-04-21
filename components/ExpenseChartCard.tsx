@@ -1421,7 +1421,15 @@ export function YearlyExpenseLineChartV2({
                 {loading ? (
                   <SpinnerUI />
                 ) : (
-                  <ComposedChart data={chartData}>
+                  <ComposedChart data={
+                    chartData.length === 1
+                      ? [
+                          { name: "", amount: chartData[0].amount, __ghost: true },
+                          ...chartData,
+                          { name: " ", amount: chartData[0].amount, __ghost: true },
+                        ]
+                      : chartData
+                  }>
                     <CartesianGrid
                       stroke={darkMode ? "#242424" : "#DBDBDB"}
                       vertical={false}
@@ -1434,30 +1442,25 @@ export function YearlyExpenseLineChartV2({
                       minTickGap={10}
                     />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0f172a",
-                        borderRadius: "12px",
-                        border: "1px solid rgba(148,163,184,0.2)",
-                        boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                      }}
-                      labelStyle={{ color: "#e2e8f0" }}
-                      cursor={{
-                        stroke: darkMode ? "#525252" : "#DBDBDB",
-                      }}
-                      formatter={(value, name) => {
-                        if (name === "amount")
-                          return [
-                            `${currencyMapper(currency)}${
-                              value
-                                ? value.toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                : 0
-                            }`,
-                            "Amount",
-                          ];
-                        if (name === "trend") return [];
+                      cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
+                      content={(props) => {
+                        if (!props.active || !props.payload?.length) return null;
+                        if (props.payload[0]?.payload?.__ghost) return null;
+                        const val = props.payload[0]?.value;
+                        return (
+                          <div style={{
+                            backgroundColor: "#0f172a",
+                            borderRadius: "12px",
+                            border: "1px solid rgba(148,163,184,0.2)",
+                            boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                            padding: "8px 12px",
+                          }}>
+                            <p style={{ color: "#e2e8f0", marginBottom: 4, fontSize: 12 }}>{props.label}</p>
+                            <p style={{ color: "#4ade80", fontWeight: 600, fontSize: 14 }}>
+                              {currencyMapper(currency)}{val ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                            </p>
+                          </div>
+                        );
                       }}
                     />
 
@@ -1466,7 +1469,20 @@ export function YearlyExpenseLineChartV2({
                       dataKey="amount"
                       stroke="#4ade80"
                       strokeWidth={2}
-                      dot
+                      dot={(props) => {
+                        if (props?.payload?.__ghost) return <g key={props.key} />;
+                        return (
+                          <circle
+                            key={props.key}
+                            cx={props.cx}
+                            cy={props.cy}
+                            r={4}
+                            fill="#4ade80"
+                            stroke="#fff"
+                            strokeWidth={1.5}
+                          />
+                        );
+                      }}
                       activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                       isAnimationActive={true}
                       fill="#4ade80"
@@ -1535,7 +1551,15 @@ export function YearlyExpenseLineChartV2({
                 {loading ? (
                   <SpinnerUI />
                 ) : (
-                  <ComposedChart data={chartData}>
+                  <ComposedChart data={
+                    chartData.length === 1
+                      ? [
+                          { name: "", amount: chartData[0].amount, __ghost: true, ...Object.fromEntries(Object.keys(chartData[0]).filter(k => k !== "name" && k !== "amount").map(k => [k, (chartData[0] as any)[k]])) },
+                          ...chartData,
+                          { name: " ", amount: chartData[0].amount, __ghost: true, ...Object.fromEntries(Object.keys(chartData[0]).filter(k => k !== "name" && k !== "amount").map(k => [k, (chartData[0] as any)[k]])) },
+                        ]
+                      : chartData
+                  }>
                     <CartesianGrid
                       stroke={darkMode ? "#242424" : "#DBDBDB"}
                       vertical={false}
@@ -1549,27 +1573,28 @@ export function YearlyExpenseLineChartV2({
                     />
 
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0f172a",
-                        borderRadius: "12px",
-                        border: "1px solid rgba(148,163,184,0.2)",
-                        boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                        fontSize: 14,
+                      cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
+                      content={(props) => {
+                        if (!props.active || !props.payload?.length) return null;
+                        if (props.payload[0]?.payload?.__ghost) return null;
+                        return (
+                          <div style={{
+                            backgroundColor: "#0f172a",
+                            borderRadius: "12px",
+                            border: "1px solid rgba(148,163,184,0.2)",
+                            boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                            padding: "8px 12px",
+                            fontSize: 14,
+                          }}>
+                            <p style={{ color: "#e2e8f0", marginBottom: 4, fontSize: 12 }}>{props.label}</p>
+                            {props.payload.filter(p => !p.payload?.__ghost).map((p, i) => (
+                              <p key={i} style={{ color: p.color ?? "#fff", fontWeight: 600 }}>
+                                {p.name}: {currencyMapper(currency)}{p.value ? Number(p.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                              </p>
+                            ))}
+                          </div>
+                        );
                       }}
-                      labelStyle={{ color: "#e2e8f0" }}
-                      cursor={{
-                        stroke: darkMode ? "#525252" : "#DBDBDB",
-                      }}
-                      formatter={(value) =>
-                        `${currencyMapper(currency)}${
-                          value
-                            ? value.toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })
-                            : 0
-                        }`
-                      }
                     />
                     {Object.keys(chartData[0])
                       .filter((key) => key !== "name")
@@ -1582,7 +1607,20 @@ export function YearlyExpenseLineChartV2({
                             dataKey={category}
                             stroke={COLORS[index % COLORS.length]}
                             strokeWidth={2}
-                            dot
+                            dot={(props: any) => {
+                              if (props?.payload?.__ghost) return <g key={props.key} />;
+                              return (
+                                <circle
+                                  key={props.key}
+                                  cx={props.cx}
+                                  cy={props.cy}
+                                  r={4}
+                                  fill={COLORS[index % COLORS.length]}
+                                  stroke="#fff"
+                                  strokeWidth={1.5}
+                                />
+                              );
+                            }}
                             isAnimationActive={true}
                           />
                         );
@@ -1699,6 +1737,31 @@ export function IncomeExpenseComparisonChart({
   const previous = chartData[chartData.length - 2];
   const trend = getTrend(latest?.income ?? 0, previous?.income ?? 0);
 
+
+  const isSinglePoint = chartData.length === 1;
+  const displayData = isSinglePoint
+    ? [
+        { name: "", income: chartData[0].income, expense: chartData[0].expense, __ghost: true },
+        { ...chartData[0], __ghost: false },
+        { name: "", income: chartData[0].income, expense: chartData[0].expense, __ghost: true },
+      ]
+    : chartData;
+
+  const makeDot = (color: string) => (props: any) => {
+    if (props.payload.__ghost) return null;
+    return (
+      <circle
+        key={`dot-${props.cx}-${props.cy}`}
+        cx={props.cx}
+        cy={props.cy}
+        r={5}
+        fill={color}
+        stroke="#fff"
+        strokeWidth={2}
+      />
+    );
+  };
+
   return (
     <Card className="w-full overflow-hidden border-border/70 shadow-sm">
       <CardHeader className="flex flex-wrap justify-between items-center gap-3">
@@ -1735,7 +1798,7 @@ export function IncomeExpenseComparisonChart({
               {loading ? (
                 <SpinnerUI />
               ) : (
-                <ComposedChart data={chartData}>
+                <ComposedChart data={displayData}>
                   <CartesianGrid
                     stroke={darkMode ? "#242424" : "#DBDBDB"}
                     vertical={false}
@@ -1756,15 +1819,41 @@ export function IncomeExpenseComparisonChart({
                     }}
                     labelStyle={{ color: "#e2e8f0" }}
                     cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
-                    formatter={(value, name) => [
-                      `${currencyMapper(currency)}${Number(
-                        value,
-                      ).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}`,
-                      name === "income" ? "Income" : "Expense",
-                    ]}
+                    // Suppress tooltip on ghost padding entries
+                    filterNull
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      // Ghost entries have an empty label — don't show tooltip
+                      if (!label) return null;
+                      return (
+                        <div
+                          style={{
+                            backgroundColor: "#0f172a",
+                            borderRadius: "12px",
+                            border: "1px solid rgba(148,163,184,0.2)",
+                            boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                            padding: "10px 14px",
+                          }}
+                        >
+                          <p style={{ color: "#e2e8f0", marginBottom: 6, fontSize: 13 }}>
+                            {label}
+                          </p>
+                          {payload.map((entry) => (
+                            <p
+                              key={entry.name}
+                              style={{ color: entry.color, fontSize: 13, margin: "2px 0" }}
+                            >
+                              {entry.name === "income" ? "Income" : "Expense"}:{" "}
+                              {currencyMapper(currency)}
+                              {Number(entry.value).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </p>
+                          ))}
+                        </div>
+                      );
+                    }}
                   />
                   <Line
                     type="monotone"
@@ -1772,7 +1861,7 @@ export function IncomeExpenseComparisonChart({
                     name="income"
                     stroke="#22c55e"
                     strokeWidth={2}
-                    dot
+                    dot={isSinglePoint ? makeDot("#22c55e") : true}
                     isAnimationActive
                   />
                   <Line
@@ -1781,7 +1870,7 @@ export function IncomeExpenseComparisonChart({
                     name="expense"
                     stroke="#ef4444"
                     strokeWidth={2}
-                    dot
+                    dot={isSinglePoint ? makeDot("#ef4444") : true}
                     isAnimationActive
                   />
                 </ComposedChart>

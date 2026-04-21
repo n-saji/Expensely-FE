@@ -172,7 +172,6 @@ export default function ExpenseTableComponent({
 
     if (!from && !to) return undefined;
 
-    // `DateRange` requires `from` to always exist.
     const normalizedFrom = from ?? to;
     if (!normalizedFrom) return undefined;
 
@@ -337,7 +336,6 @@ export default function ExpenseTableComponent({
     fetchMonthlyOverview();
   }, [overviewParams]);
 
-  // initial fetch for expenses
   useEffect(() => {
     const fetchExpenses = async ({
       fromDate,

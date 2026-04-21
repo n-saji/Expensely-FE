@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     console.error("Error during logout:", error);
   }
 
-  // Optional: clear token cookie if you set it on login
   const response = NextResponse.redirect(new URL("/", request.url));
   response.cookies.set("refreshToken", "", { maxAge: 0 }); // remove cookie
   response.cookies.set("accessToken", "", { maxAge: 0 }); // remove cookie
