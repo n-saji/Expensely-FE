@@ -365,9 +365,10 @@ export default function DashboardPage() {
       maximumFractionDigits: 2,
     });
 
-  const thisMonthIncome = incomeOverview?.thisMonthTotalIncome ?? 0;
-  const thisMonthExpense = overview?.thisMonthTotalExpense ?? 0;
-  const netSavings = thisMonthIncome - thisMonthExpense;
+  const netSavings =
+    incomeOverview?.total_balance ??
+    (incomeOverview?.thisMonthTotalIncome ?? 0) -
+      (overview?.thisMonthTotalExpense ?? 0);
 
   const topCategoryEntry = overview
     ? Object.entries(overview.amountByCategory).sort(([, a], [, b]) => b - a)[0]
@@ -529,7 +530,7 @@ export default function DashboardPage() {
           custom={2}
         >
           <CardComponent
-            title="Net Savings"
+            title="Total Balance"
             icon={<PiggyBank className="h-4 w-4" />}
             accentColor={netSavings >= 0 ? "#22c55e" : "#ef4444"}
             numberData={
@@ -540,8 +541,8 @@ export default function DashboardPage() {
             description={
               overview && incomeOverview
                 ? netSavings >= 0
-                  ? "You're saving money this month 🎉"
-                  : "Spending exceeds income this month"
+                  ? "Positive net balance till date"
+                  : "Negative net balance till date"
                 : undefined
             }
             loading={overview === null || incomeOverview === null}

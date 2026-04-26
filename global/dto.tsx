@@ -220,6 +220,7 @@ export interface UpdateIncomeReq {
 
 export interface IncomeOverview {
   userId: string;
+  total_balance?: number;
   monthlyCategoryIncome: Record<string, Record<string, number>>;
   lastMonthTotalIncome: number;
   totalAmount: number;

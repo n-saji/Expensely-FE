@@ -71,7 +71,6 @@ import {
   IncomeInsightCards,
   IncomeInsightCharts,
 } from "../dashboard/_components/income-insights";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
   SheetContent,
@@ -891,7 +890,7 @@ export default function IncomePage() {
       : [null, null];
 
   return (
-    <div className="w-full space-y-6 pb-8">
+    <div className="flex flex-col w-full space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -1037,67 +1036,69 @@ export default function IncomePage() {
         incomeItemName={incomeItemName as string | null}
         incomeItemValue={incomeItemValue as number | null}
       />
-      <Tabs defaultValue="graphs" className="w-full space-y-4">
-        <TabsList className="w-full">
-          <TabsTrigger value="graphs">Analytics</TabsTrigger>
-          <TabsTrigger value="table">Transactions</TabsTrigger>
-        </TabsList>
 
-        <TabsContent value="graphs" className="mt-0 space-y-4">
-          <IncomeInsightCharts
-            userCurrency={user.currency}
-            userTheme={user.theme}
-            incomeOverview={incomeOverview}
-            incomeOverviewV2={incomeOverviewV2}
-            incomeOverviewV2Loading={incomeOverviewV2Loading}
-            minIncomeYear={minIncomeYear}
-            minIncomeMonth={minIncomeMonth}
-            loadingIncomeYear={loadingIncomeYear}
-            loadingIncomeMonth={loadingIncomeMonth}
-            incomeCurrentYearForYearly={incomeCurrentYearForYearly}
-            setIncomeCurrentYearForYearly={setIncomeCurrentYearForYearly}
-            incomeCurrentMonth={incomeCurrentMonth}
-            incomeCurrentMonthYear={incomeCurrentMonthYear}
-            setIncomeCurrentMonth={setIncomeCurrentMonth}
-            setIncomeCurrentMonthYear={setIncomeCurrentMonthYear}
-            incomeOverviewParams={incomeOverviewParams}
-            setIncomeOverviewParams={setIncomeOverviewParams}
-          />
-        </TabsContent>
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Analytics</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <IncomeInsightCharts
+          userCurrency={user.currency}
+          userTheme={user.theme}
+          incomeOverview={incomeOverview}
+          incomeOverviewV2={incomeOverviewV2}
+          incomeOverviewV2Loading={incomeOverviewV2Loading}
+          minIncomeYear={minIncomeYear}
+          minIncomeMonth={minIncomeMonth}
+          loadingIncomeYear={loadingIncomeYear}
+          loadingIncomeMonth={loadingIncomeMonth}
+          incomeCurrentYearForYearly={incomeCurrentYearForYearly}
+          setIncomeCurrentYearForYearly={setIncomeCurrentYearForYearly}
+          incomeCurrentMonth={incomeCurrentMonth}
+          incomeCurrentMonthYear={incomeCurrentMonthYear}
+          setIncomeCurrentMonth={setIncomeCurrentMonth}
+          setIncomeCurrentMonthYear={setIncomeCurrentMonthYear}
+          incomeOverviewParams={incomeOverviewParams}
+          setIncomeOverviewParams={setIncomeOverviewParams}
+        />
+      </div>
 
-        <TabsContent value="table" className="mt-0 space-y-4">
-          <SearchAndFilter
-            query={query}
-            setQuery={setQuery}
-            selectedIncomes={selectedIncomes}
-            handleBulkDelete={handleBulkDelete}
-            categories={categories}
-            categoriesLoading={categoriesLoading}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            clearFilters={clearFilters}
-            open={open}
-            setOpen={setOpen}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-          />
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Transactions</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <SearchAndFilter
+          query={query}
+          setQuery={setQuery}
+          selectedIncomes={selectedIncomes}
+          handleBulkDelete={handleBulkDelete}
+          categories={categories}
+          categoriesLoading={categoriesLoading}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          clearFilters={clearFilters}
+          open={open}
+          setOpen={setOpen}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+        />
 
-          <DataTable
-            columns={tableColumns}
-            data={datas}
-            totalPages={incomesList.totalPages}
-            pageIndex={pageNumber - 1}
-            onPageChange={(page) => setPageNumber(page + 1)}
-            loading={tableLoading || loading}
-            sorting={sorting}
-            onSortingChange={handleSortingChange}
-            rowSelection={rowSelection}
-            onRowSelectionChange={setRowSelection}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-          />
-        </TabsContent>
-      </Tabs>
+        <DataTable
+          columns={tableColumns}
+          data={datas}
+          totalPages={incomesList.totalPages}
+          pageIndex={pageNumber - 1}
+          onPageChange={(page) => setPageNumber(page + 1)}
+          loading={tableLoading || loading}
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+        />
+      </div>
 
       {selectedDelete && (
         <AlertDialog
