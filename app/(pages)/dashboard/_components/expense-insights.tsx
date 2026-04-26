@@ -50,14 +50,15 @@ export function ExpenseInsightCards({
     });
 
   const monthChange =
-    overview &&
-    overview.lastMonthTotalExpense !== 0
+    overview && overview.lastMonthTotalExpense !== 0
       ? (
           ((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) /
             overview.lastMonthTotalExpense) *
           100
         ).toFixed(1)
-      : null;
+      : overview && overview.thisMonthTotalExpense === 0
+        ? "0"
+        : "100";
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -83,9 +84,7 @@ export function ExpenseInsightCards({
       <CardComponent
         title="This Year's Expense"
         numberData={
-          overview
-            ? `${currency}${fmt(overview.totalAmount)}`
-            : undefined
+          overview ? `${currency}${fmt(overview.totalAmount)}` : undefined
         }
         description={
           overview != null

@@ -40,7 +40,11 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
+    transition: {
+      delay: i * 0.08,
+      duration: 0.45,
+      ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+    },
   }),
 };
 
@@ -332,7 +336,6 @@ export default function DashboardPage() {
     );
   }
 
-
   const monthLabel = new Date(
     currentMonthYear,
     Math.max(currentMonth - 1, 0),
@@ -357,7 +360,10 @@ export default function DashboardPage() {
 
   const currency = currencyMapper(user?.currency || "USD");
   const fmt = (n: number) =>
-    n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    n.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   const thisMonthIncome = incomeOverview?.thisMonthTotalIncome ?? 0;
   const thisMonthExpense = overview?.thisMonthTotalExpense ?? 0;
@@ -367,7 +373,10 @@ export default function DashboardPage() {
     ? Object.entries(overview.amountByCategory).sort(([, a], [, b]) => b - a)[0]
     : null;
 
-  const upcomingRecurring = (overview?.upcomingRecurringExpenses || []).slice(0, 3);
+  const upcomingRecurring = (overview?.upcomingRecurringExpenses || []).slice(
+    0,
+    3,
+  );
   const budgets = overview ? Object.values(overview.budgetServiceMap) : [];
   const displayBudgets = budgets.slice(0, 6);
 
@@ -394,111 +403,200 @@ export default function DashboardPage() {
 
       {/* ── 4 Metric Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}
-          role="button" tabIndex={0} className="cursor-pointer"
-          onClick={() => router.push(`/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`)}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={0}
+          role="button"
+          tabIndex={0}
+          className="cursor-pointer"
+          onClick={() =>
+            router.push(
+              `/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`,
+            )
+          }
         >
           <CardComponent
             title={`${monthLabel} Expense`}
             icon={<Wallet className="h-4 w-4" />}
             accentColor="#ef4444"
-            cardAction={overview && (
-              <div className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0
-                  ? "border-red-500/40 bg-red-500/10 text-red-400"
-                  : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-              }`}>
-                {overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0
-                  ? <TrendingUp className="h-4 w-4" />
-                  : <TrendingDown className="h-4 w-4" />}
-                <p className="text-xs font-mono">
-                  {overview.lastMonthTotalExpense === 0 || overview.lastMonthTotalExpense === null
-                    ? "100%"
-                    : `${Math.abs(((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) / overview.lastMonthTotalExpense) * 100).toFixed(1)}%`}
-                </p>
-              </div>
-            )}
-            numberData={overview ? `${currency}${fmt(overview.thisMonthTotalExpense)}` : undefined}
-            description={overview
-              ? `${currency}${fmt(Math.abs(overview.thisMonthTotalExpense - overview.lastMonthTotalExpense))} ${overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0 ? "more" : "less"} than last month`
-              : undefined}
+            cardAction={
+              overview && (
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense >
+                    0
+                      ? "border-red-500/40 bg-red-500/10 text-red-400"
+                      : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                  }`}
+                >
+                  {overview.thisMonthTotalExpense -
+                    overview.lastMonthTotalExpense >
+                  0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  <p className="text-xs font-mono">
+                    {overview.lastMonthTotalExpense === 0 ||
+                    overview.lastMonthTotalExpense === null
+                      ? "100%"
+                      : `${Math.abs(((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) / overview.lastMonthTotalExpense) * 100).toFixed(1)}%`}
+                  </p>
+                </div>
+              )
+            }
+            numberData={
+              overview
+                ? `${currency}${fmt(overview.thisMonthTotalExpense)}`
+                : undefined
+            }
+            description={
+              overview
+                ? `${currency}${fmt(Math.abs(overview.thisMonthTotalExpense - overview.lastMonthTotalExpense))} ${overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0 ? "more" : "less"} than last month`
+                : undefined
+            }
             loading={overview === null}
           />
         </motion.div>
 
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}
-          role="button" tabIndex={0} className="cursor-pointer"
-          onClick={() => router.push(`/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`)}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={1}
+          role="button"
+          tabIndex={0}
+          className="cursor-pointer"
+          onClick={() =>
+            router.push(
+              `/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`,
+            )
+          }
         >
           <CardComponent
             title={`${monthLabel} Income`}
             icon={<Banknote className="h-4 w-4" />}
             accentColor="#22c55e"
-            cardAction={incomeOverview && (
-              <div className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  : "border-red-500/40 bg-red-500/10 text-red-400"
-              }`}>
-                {incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0
-                  ? <TrendingUp className="h-4 w-4" />
-                  : <TrendingDown className="h-4 w-4" />}
-                <p className="text-xs font-mono">
-                  {incomeOverview.lastMonthTotalIncome === 0
-                    ? "0%"
-                    : `${Math.abs(((incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome) / incomeOverview.lastMonthTotalIncome) * 100).toFixed(1)}%`}
-                </p>
-              </div>
-            )}
-            numberData={incomeOverview ? `${currency}${fmt(incomeOverview.thisMonthTotalIncome)}` : undefined}
-            description={incomeOverview
-              ? `${currency}${fmt(Math.abs(incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome))} ${incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0 ? "more" : "less"} than last month`
-              : undefined}
+            cardAction={
+              incomeOverview && (
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    incomeOverview.thisMonthTotalIncome -
+                      incomeOverview.lastMonthTotalIncome >
+                    0
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                      : "border-red-500/40 bg-red-500/10 text-red-400"
+                  }`}
+                >
+                  {incomeOverview.thisMonthTotalIncome -
+                    incomeOverview.lastMonthTotalIncome >
+                  0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  <p className="text-xs font-mono">
+                    {(incomeOverview.lastMonthTotalIncome === 0 || incomeOverview.lastMonthTotalIncome === null)
+                      ? incomeOverview.thisMonthTotalIncome === 0
+                        ? "0%"
+                        : "100%"
+                      : `${Math.abs(((incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome) / incomeOverview.lastMonthTotalIncome) * 100).toFixed(1)}%`}
+                  </p>
+                </div>
+              )
+            }
+            numberData={
+              incomeOverview
+                ? `${currency}${fmt(incomeOverview.thisMonthTotalIncome)}`
+                : undefined
+            }
+            description={
+              incomeOverview
+                ? `${currency}${fmt(Math.abs(incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome))} ${incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0 ? "more" : "less"} than last month`
+                : undefined
+            }
             loading={incomeOverview === null}
           />
         </motion.div>
 
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={2}
+        >
           <CardComponent
             title="Net Savings"
             icon={<PiggyBank className="h-4 w-4" />}
             accentColor={netSavings >= 0 ? "#22c55e" : "#ef4444"}
-            numberData={overview && incomeOverview ? `${currency}${fmt(Math.abs(netSavings))}` : undefined}
-            description={overview && incomeOverview
-              ? netSavings >= 0
-                ? "You're saving money this month 🎉"
-                : "Spending exceeds income this month"
-              : undefined}
+            numberData={
+              overview && incomeOverview
+                ? `${currency}${fmt(Math.abs(netSavings))}`
+                : undefined
+            }
+            description={
+              overview && incomeOverview
+                ? netSavings >= 0
+                  ? "You're saving money this month 🎉"
+                  : "Spending exceeds income this month"
+                : undefined
+            }
             loading={overview === null || incomeOverview === null}
-            cardAction={overview && incomeOverview && (
-              <div className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                netSavings >= 0
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  : "border-red-500/40 bg-red-500/10 text-red-400"
-              }`}>
-                {netSavings >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                <p className="text-xs font-mono">{netSavings >= 0 ? "+" : "-"}</p>
-              </div>
-            )}
+            cardAction={
+              overview &&
+              incomeOverview && (
+                <div
+                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
+                    netSavings >= 0
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                      : "border-red-500/40 bg-red-500/10 text-red-400"
+                  }`}
+                >
+                  {netSavings >= 0 ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  {/* <p className="text-xs font-mono">
+                    {netSavings >= 0 ? "+" : "-"}
+                  </p> */}
+                </div>
+              )
+            }
           />
         </motion.div>
 
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={3}
+        >
           <CardComponent
             title="Top Category"
             icon={<TrendingUp className="h-4 w-4" />}
             accentColor="#8b5cf6"
             numberData={topCategoryEntry ? topCategoryEntry[0] : "N/A"}
-            description={topCategoryEntry
-              ? `${currency}${fmt(topCategoryEntry[1])} spent this year`
-              : "No expenses recorded yet"}
+            description={
+              topCategoryEntry
+                ? `${currency}${fmt(topCategoryEntry[1])} spent this year`
+                : "No expenses recorded yet"
+            }
             loading={overview === null}
           />
         </motion.div>
       </div>
 
       {/* ── Income vs Expense Chart ── */}
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        custom={4}
+      >
         <IncomeExpenseComparisonChart
           expenseByMonth={expenseMonthlyCompare}
           incomeByMonth={incomeMonthlyCompare}
@@ -512,7 +610,11 @@ export default function DashboardPage() {
       {/* ── Budget + Recurring Side-by-Side ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Budget Section — 2/3 */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={5}
           className="lg:col-span-2"
         >
           <Card className="w-full h-full border-border/70 shadow-sm overflow-hidden">
@@ -525,7 +627,8 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 {budgetCount > 0 && (
-                  <Link href="/budget"
+                  <Link
+                    href="/budget"
                     className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
                   >
                     View all <ArrowRight className="h-3 w-3" />
@@ -536,34 +639,62 @@ export default function DashboardPage() {
             {overview ? (
               <CardContent>
                 {displayBudgets.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No budgets found.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No budgets found.
+                  </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {displayBudgets.map((budget) => {
-                      const pct = Math.round((budget.amountSpent / budget.amountLimit) * 100);
-                      const variant = budgetVariant(budget.amountSpent, budget.amountLimit);
-                      const borderColor = variant === "success" ? "#22c55e" : variant === "warning" ? "#eab308" : "#ef4444";
+                      const pct = Math.round(
+                        (budget.amountSpent / budget.amountLimit) * 100,
+                      );
+                      const variant = budgetVariant(
+                        budget.amountSpent,
+                        budget.amountLimit,
+                      );
+                      const borderColor =
+                        variant === "success"
+                          ? "#22c55e"
+                          : variant === "warning"
+                            ? "#eab308"
+                            : "#ef4444";
                       return (
-                        <div key={budget.id}
+                        <div
+                          key={budget.id}
                           className="group relative rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200 hover:shadow-lg hover:border-emerald-500/30 overflow-hidden"
                         >
-                          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl" style={{ backgroundColor: borderColor }} />
+                          <div
+                            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+                            style={{ backgroundColor: borderColor }}
+                          />
                           <div className="flex flex-wrap justify-between gap-2 items-center">
                             <div className="flex items-center gap-2">
                               <Label className="text-sm font-medium text-foreground">
                                 {budget.category.name}
                               </Label>
-                              {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                              {budgetIcon(
+                                budget.amountSpent,
+                                budget.amountLimit,
+                              )}
                             </div>
                             <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                               {budget.period}
                             </div>
                           </div>
                           <div className="mt-3 rounded-full bg-muted/60 p-1">
-                            <ProgressBar value={budget.amountSpent} max={budget.amountLimit} variant={variant} showAnimation={true} />
+                            <ProgressBar
+                              value={budget.amountSpent}
+                              max={budget.amountLimit}
+                              variant={variant}
+                              showAnimation={true}
+                            />
                           </div>
                           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{currency}{budget.amountSpent.toFixed(2)} / {currency}{budget.amountLimit.toFixed(2)}</span>
+                            <span>
+                              {currency}
+                              {budget.amountSpent.toFixed(2)} / {currency}
+                              {budget.amountLimit.toFixed(2)}
+                            </span>
                             <span className="font-mono">{pct}%</span>
                           </div>
                         </div>
@@ -573,7 +704,8 @@ export default function DashboardPage() {
                 )}
                 {budgets.length > 6 && (
                   <p className="mt-3 text-xs text-muted-foreground text-center">
-                    +{budgets.length - 6} more budget{budgets.length - 6 === 1 ? "" : "s"}
+                    +{budgets.length - 6} more budget
+                    {budgets.length - 6 === 1 ? "" : "s"}
                   </p>
                 )}
               </CardContent>
@@ -586,7 +718,12 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Recurring Expenses — 1/3 */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={6}
+        >
           <Card className="w-full h-full border-border/70 shadow-sm overflow-hidden">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -595,9 +732,12 @@ export default function DashboardPage() {
                     <CalendarClock className="h-4 w-4 text-muted-foreground" />
                     Upcoming
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">Recurring expenses</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Recurring expenses
+                  </p>
                 </div>
-                <Link href="/recurring-expense"
+                <Link
+                  href="/recurring-expense"
                   className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
                 >
                   Manage <ArrowRight className="h-3 w-3" />
@@ -610,22 +750,38 @@ export default function DashboardPage() {
                   <Spinner className="text-muted-foreground h-6 w-6" />
                 </div>
               ) : upcomingRecurring.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No upcoming recurring expenses.</p>
+                <p className="text-sm text-muted-foreground">
+                  No upcoming recurring expenses.
+                </p>
               ) : (
                 <div className="space-y-3">
                   {upcomingRecurring.map((expense, index) => (
-                    <div key={`${expense.id || expense.description}-${index}`}
+                    <div
+                      key={`${expense.id || expense.description}-${index}`}
                       className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-4 py-3 transition-all hover:border-border hover:shadow-sm"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{expense.description}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFeatureSettings: '"tnum"' }}>
-                          {currency}{expense.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {expense.description}
+                        </p>
+                        <p
+                          className="text-xs text-muted-foreground mt-0.5"
+                          style={{ fontFeatureSettings: '"tnum"' }}
+                        >
+                          {currency}
+                          {expense.amount.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </p>
                       </div>
                       <div className="h-12 w-12 shrink-0 rounded-lg border border-border/70 bg-background/80 flex flex-col items-center justify-center">
-                        <p className="text-[10px] leading-none text-muted-foreground">{getWeekdayShort(expense.nextOccurrence)}</p>
-                        <p className="mt-1 text-xs leading-none font-medium text-foreground">{formatDayNumberMonth(expense.nextOccurrence)}</p>
+                        <p className="text-[10px] leading-none text-muted-foreground">
+                          {getWeekdayShort(expense.nextOccurrence)}
+                        </p>
+                        <p className="mt-1 text-xs leading-none font-medium text-foreground">
+                          {formatDayNumberMonth(expense.nextOccurrence)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -638,7 +794,6 @@ export default function DashboardPage() {
     </div>
   );
 }
-
 
 function budgetVariant(amountSpent: number, amountLimit: number) {
   const usagePercentage = (amountSpent / amountLimit) * 100;
