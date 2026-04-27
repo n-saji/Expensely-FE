@@ -158,7 +158,7 @@ export default function ProfilePage({
             country_code: countryCode,
             phone: phone,
             currency: currency,
-            id: userId,
+            id: userId ?? user.id,
             profileComplete: isProfileComplete,
           }),
         );

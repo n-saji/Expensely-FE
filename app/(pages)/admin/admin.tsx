@@ -76,7 +76,6 @@ export default function AdminUI() {
             country_code: updatedUser.country_code,
             phone: updatedUser.phone,
             currency: updatedUser.currency,
-            theme: updatedUser.theme,
             language: updatedUser.language,
             isActive: updatedUser.isActive,
             isAdmin: updatedUser.isAdmin,

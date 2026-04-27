@@ -1,5 +1,10 @@
 export const CategoryTypeExpense = "expense";
 
+export const THEME_OPTIONS = ["light", "dark", "system"] as const;
+export type ThemeId = (typeof THEME_OPTIONS)[number];
+export const DEFAULT_THEME: ThemeId = "light";
+export const THEME_IDS: ThemeId[] = [...THEME_OPTIONS];
+
 export const THEME_COLOR_OPTIONS = [
   { id: "teal", label: "Teal", swatch: "#14b8a6" },
   { id: "blue", label: "Blue", swatch: "#3b82f6" },

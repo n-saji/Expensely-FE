@@ -64,7 +64,8 @@ export default function SettingsPage() {
             phone: data.user.phone,
             currency: data.user.currency,
             theme: data.user.theme,
-            themeColor: data.user.themeColor || user.themeColor,
+            themeColor:
+              data.user.themeColor ?? data.user.theme_color ?? user.themeColor,
             language: data.user.language,
             isActive: data.user.isActive,
             isAdmin: data.user.isAdmin,
@@ -118,18 +119,24 @@ export default function SettingsPage() {
 
   const handleUserUpdation = async ({
     theme,
+    themeColor,
     notification,
   }: {
     theme?: string | null;
+    themeColor?: ThemeColorId | null;
     notification?: boolean | null;
-  }) => {
-    const { themeColor: _themeColor, ...userWithoutThemeColor } = user;
-
+    }) => {
+    console.log(theme,themeColor,notification);
     await api
       .patch(`/users/update-settings`, {
-        ...userWithoutThemeColor,
-        theme: theme ?? user.theme,
-        notificationsEnabled: notification ?? user.notificationsEnabled,
+        id: user.id,
+        ...(theme !== undefined && theme !== null ? { theme } : {}),
+        ...(themeColor !== undefined && themeColor !== null
+          ? { themeColor }
+          : {}),
+        ...(notification !== undefined && notification !== null
+          ? { notificationsEnabled: notification }
+          : {}),
       })
       .then((res) => res.data)
       .then((data) => {
@@ -241,6 +248,9 @@ export default function SettingsPage() {
                             themeColor: nextColor as ThemeColorId,
                           }),
                         );
+                        handleUserUpdation({
+                          themeColor: nextColor as ThemeColorId,
+                        });
                       }}
                       className={`h-8 w-8 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                         isSelected

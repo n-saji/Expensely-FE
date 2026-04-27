@@ -75,6 +75,7 @@ export default function DashboardPage({
             phone: profile.phone,
             currency: profile.currency,
             theme: profile.theme,
+            themeColor: profile.themeColor ?? profile.theme_color,
             language: profile.language,
             isActive: profile.isActive,
             isAdmin: profile.isAdmin,

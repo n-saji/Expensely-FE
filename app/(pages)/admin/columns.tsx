@@ -22,6 +22,7 @@ export interface AdminUserRow {
   createdAt: string;
   currency: string;
   theme: string;
+  themeColor: string;
   language: string;
   isActive: boolean;
   profilePicFilePath: string | null;

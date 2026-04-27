@@ -1,4 +1,4 @@
-import type { ThemeColorId } from "./constants";
+import type { ThemeColorId, ThemeId } from "./constants";
 
 export const categoryTypes = [
   {
@@ -43,7 +43,7 @@ export interface UserSkeleton {
   country_code?: string;
   phone?: string;
   currency?: string;
-  theme?: string;
+  theme?: ThemeId;
   themeColor?: ThemeColorId;
   language?: string;
   isActive?: boolean;

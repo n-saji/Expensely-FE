@@ -500,7 +500,8 @@ export default function DashboardPage() {
                     <TrendingDown className="h-4 w-4" />
                   )}
                   <p className="text-xs font-mono">
-                    {(incomeOverview.lastMonthTotalIncome === 0 || incomeOverview.lastMonthTotalIncome === null)
+                    {incomeOverview.lastMonthTotalIncome === 0 ||
+                    incomeOverview.lastMonthTotalIncome === null
                       ? incomeOverview.thisMonthTotalIncome === 0
                         ? "0%"
                         : "100%"

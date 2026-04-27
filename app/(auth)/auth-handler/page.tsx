@@ -79,6 +79,8 @@ export default function AuthHandler() {
               phone: profileData.user.phone,
               currency: profileData.user.currency,
               theme: profileData.user.theme,
+              themeColor:
+                profileData.user.themeColor ?? profileData.user.theme_color,
               language: profileData.user.language,
               isActive: profileData.user.isActive,
               isAdmin: profileData.user.isAdmin,
