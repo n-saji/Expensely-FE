@@ -536,7 +536,7 @@ export default function DashboardPage() {
             accentColor={netSavings >= 0 ? "#22c55e" : "#ef4444"}
             numberData={
               overview && incomeOverview
-                ? `${currency}${fmt(Math.abs(netSavings))}`
+                ? `${netSavings >= 0 ? "+" : "-"}${currency}${fmt(Math.abs(netSavings))}`
                 : undefined
             }
             description={
