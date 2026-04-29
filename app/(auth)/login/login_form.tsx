@@ -62,7 +62,8 @@ export default function LoginForm() {
               isActive: data.user.isActive,
               isAdmin: data.user.isAdmin,
               notificationsEnabled: data.user.notificationsEnabled,
-              alertsEnabled: data.user.alerts_enabled ?? data.user.alertsEnabled,
+              alertsEnabled:
+                data.user.alerts_enabled ?? data.user.alertsEnabled,
               profilePicFilePath: data.user.profilePicFilePath,
               profileComplete: data.user.profileComplete,
               profilePictureUrl: data.user.profilePictureUrl,
@@ -127,7 +128,8 @@ export default function LoginForm() {
                 isActive: data.user.isActive,
                 isAdmin: data.user.isAdmin,
                 notificationsEnabled: data.user.notificationsEnabled,
-                alertsEnabled: data.user.alerts_enabled ?? data.user.alertsEnabled,
+                alertsEnabled:
+                  data.user.alerts_enabled ?? data.user.alertsEnabled,
                 profilePicFilePath: data.user.profilePicFilePath,
                 profileComplete: data.user.profileComplete,
                 profilePictureUrl: data.user.profilePictureUrl,

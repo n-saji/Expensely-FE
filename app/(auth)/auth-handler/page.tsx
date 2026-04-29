@@ -86,7 +86,8 @@ export default function AuthHandler() {
               isAdmin: profileData.user.isAdmin,
               notificationsEnabled: profileData.user.notificationsEnabled,
               alertsEnabled:
-                profileData.user.alerts_enabled ?? profileData.user.alertsEnabled,
+                profileData.user.alerts_enabled ??
+                profileData.user.alertsEnabled,
               profilePictureUrl: profileData.user.profilePictureUrl,
               profilePicFilePath: profileData.user.profilePicFilePath,
               profileComplete: profileData.user.profileComplete,
