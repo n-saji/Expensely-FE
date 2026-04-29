@@ -77,6 +77,8 @@ function syncUserFromMeResponse(response: unknown) {
         isActive?: boolean;
         isAdmin?: boolean;
         notificationsEnabled?: boolean;
+        alertsEnabled?: boolean;
+        alerts_enabled?: boolean;
         profilePicFilePath?: string;
         profilePictureUrl?: string;
         profileComplete?: boolean;
@@ -109,6 +111,7 @@ function syncUserFromMeResponse(response: unknown) {
       isActive: profile.isActive,
       isAdmin: profile.isAdmin,
       notificationsEnabled: profile.notificationsEnabled,
+      alertsEnabled: profile.alerts_enabled ?? profile.alertsEnabled,
       profilePicFilePath: profile.profilePicFilePath,
       profilePictureUrl: profile.profilePictureUrl,
       profileComplete: profile.profileComplete,

@@ -40,6 +40,7 @@ interface UserState {
   isActive: boolean;
   isAdmin: boolean;
   notificationsEnabled: boolean;
+  alertsEnabled: boolean;
   profilePicFilePath: string;
   profilePictureUrl: string;
   profileComplete: boolean;
@@ -59,6 +60,7 @@ const initialState: UserState = {
   isActive: true,
   isAdmin: false,
   notificationsEnabled: true,
+  alertsEnabled: true,
   profilePicFilePath: "",
   profilePictureUrl: "",
   profileComplete: false,
@@ -93,6 +95,10 @@ const userSlice = createSlice({
         action.payload.notificationsEnabled !== undefined
           ? action.payload.notificationsEnabled
           : state.notificationsEnabled;
+      state.alertsEnabled =
+        action.payload.alertsEnabled !== undefined
+          ? action.payload.alertsEnabled
+          : state.alertsEnabled;
       state.profilePictureUrl =
         action.payload.profilePictureUrl ?? state.profilePictureUrl;
       state.profilePicFilePath =
@@ -119,6 +125,7 @@ const userSlice = createSlice({
       state.isActive = false;
       state.isAdmin = false;
       state.notificationsEnabled = false;
+      state.alertsEnabled = false;
       state.profilePictureUrl = "";
       state.profileComplete = false;
       state.profilePicFilePath = "";

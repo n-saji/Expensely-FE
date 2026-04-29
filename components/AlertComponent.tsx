@@ -2,6 +2,7 @@
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { AlertDto } from "@/global/dto";
 import api from "@/lib/api";
+import { RootState } from "@/redux/store";
 import {
   AlertCircleIcon,
   CheckCircle2Icon,
@@ -9,12 +10,19 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 export default function AlertComponent() {
   const [alerts, setAlerts] = useState<Array<AlertDto>>([]);
-  const FetchAlerts = async () => {
+  const user = useSelector((state: RootState) => state.user);
+
+  const fetchAlerts = async () => {
+    if (!user.id || !user.alertsEnabled) {
+      return;
+    }
+
     try {
       const response = await api.get("/users/alerts");
       if (response.status === 200) {
@@ -34,16 +42,25 @@ export default function AlertComponent() {
   };
 
   useEffect(() => {
-    FetchAlerts();
-  }, []);
+    if (!user.id || !user.alertsEnabled) {
+      setAlerts([]);
+      return;
+    }
+
+    fetchAlerts();
+  }, [user.alertsEnabled, user.id]);
 
   useEffect(() => {
+    if (!user.id || !user.alertsEnabled) {
+      return;
+    }
+
     const handler = () => {
-      FetchAlerts();
+      fetchAlerts();
     };
     window.addEventListener("expense-added", handler);
     return () => window.removeEventListener("expense-added", handler);
-  }, []);
+  }, [user.alertsEnabled, user.id]);
 
   return (
     alerts &&

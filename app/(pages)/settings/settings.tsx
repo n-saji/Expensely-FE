@@ -70,6 +70,7 @@ export default function SettingsPage() {
             isActive: data.user.isActive,
             isAdmin: data.user.isAdmin,
             notificationsEnabled: data.user.notificationsEnabled,
+            alertsEnabled: data.user.alerts_enabled ?? data.user.alertsEnabled,
           }),
         );
       } else {
@@ -121,12 +122,13 @@ export default function SettingsPage() {
     theme,
     themeColor,
     notification,
+    alertsEnabled,
   }: {
     theme?: string | null;
     themeColor?: ThemeColorId | null;
     notification?: boolean | null;
-    }) => {
-    console.log(theme,themeColor,notification);
+    alertsEnabled?: boolean | null;
+  }) => {
     await api
       .patch(`/users/update-settings`, {
         id: user.id,
@@ -136,6 +138,9 @@ export default function SettingsPage() {
           : {}),
         ...(notification !== undefined && notification !== null
           ? { notificationsEnabled: notification }
+          : {}),
+        ...(alertsEnabled !== undefined && alertsEnabled !== null
+          ? { alerts_enabled: alertsEnabled }
           : {}),
       })
       .then((res) => res.data)
@@ -269,6 +274,33 @@ export default function SettingsPage() {
 
       <Card className="w-full border-border/70 shadow-sm overflow-hidden">
         <CardHeader>
+          <CardTitle>Dashboard Alerts</CardTitle>
+          <CardDescription>
+            Show or hide the alerts banner on the dashboard.
+          </CardDescription>
+          <CardAction>
+            <Switch
+              checked={user.alertsEnabled}
+              onClick={async () => {
+                const nextValue = !user.alertsEnabled;
+
+                dispatch(
+                  setUser({
+                    ...user,
+                    alertsEnabled: nextValue,
+                  }),
+                );
+                await handleUserUpdation({
+                  alertsEnabled: nextValue,
+                });
+              }}
+            />
+          </CardAction>
+        </CardHeader>
+      </Card>
+
+      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+        <CardHeader>
           <CardTitle>Notifications</CardTitle>
           <CardDescription>
             Enable or disable notifications for important updates.
@@ -277,14 +309,16 @@ export default function SettingsPage() {
             <Switch
               checked={user.notificationsEnabled}
               onClick={async () => {
+                const nextValue = !user.notificationsEnabled;
+
                 dispatch(
                   setUser({
                     ...user,
-                    notificationsEnabled: !user.notificationsEnabled,
+                    notificationsEnabled: nextValue,
                   }),
                 );
                 await handleUserUpdation({
-                  notification: !user.notificationsEnabled,
+                  notification: nextValue,
                 });
               }}
             />
