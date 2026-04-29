@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
@@ -198,241 +199,257 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Dark Mode</CardTitle>
-          <CardDescription>
-            Toggle dark mode for a better viewing experience.
-          </CardDescription>
-          <CardAction>
-            <Switch
-              checked={user.theme === "dark"}
-              onClick={async () => {
-                dispatch(
-                  setUser({
-                    ...user,
-                    theme: user.theme === "dark" ? "light" : "dark",
-                  }),
-                );
-                await handleUserUpdation({
-                  theme: user.theme === "dark" ? "light" : "dark",
-                });
-              }}
-            />
-          </CardAction>
-        </CardHeader>
-      </Card>
+      <Tabs defaultValue="preferences" className="w-full">
+        <TabsList>
+          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+        </TabsList>
 
-      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Theme Color</CardTitle>
-          <CardDescription>
-            Pick a color preset for highlights across the app.
-          </CardDescription>
-          <CardAction>
-            <div className="flex flex-col items-end gap-3">
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {THEME_COLOR_OPTIONS.map((option) => {
-                  const isSelected =
-                    (user.themeColor || DEFAULT_THEME_COLOR) === option.id;
+        <TabsContent value="preferences" className="space-y-4">
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Dark Mode</CardTitle>
+              <CardDescription>
+                Toggle dark mode for a better viewing experience.
+              </CardDescription>
+              <CardAction>
+                <Switch
+                  checked={user.theme === "dark"}
+                  onClick={async () => {
+                    dispatch(
+                      setUser({
+                        ...user,
+                        theme: user.theme === "dark" ? "light" : "dark",
+                      }),
+                    );
+                    await handleUserUpdation({
+                      theme: user.theme === "dark" ? "light" : "dark",
+                    });
+                  }}
+                />
+              </CardAction>
+            </CardHeader>
+          </Card>
 
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      aria-label={`Select ${option.label} theme color`}
-                      title={option.label}
-                      onClick={() => {
-                        const nextColor = THEME_COLOR_IDS.includes(option.id)
-                          ? option.id
-                          : DEFAULT_THEME_COLOR;
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Theme Color</CardTitle>
+              <CardDescription>
+                Pick a color preset for highlights across the app.
+              </CardDescription>
+              <CardAction>
+                <div className="flex flex-col items-end gap-3">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    {THEME_COLOR_OPTIONS.map((option) => {
+                      const isSelected =
+                        (user.themeColor || DEFAULT_THEME_COLOR) === option.id;
 
-                        dispatch(
-                          setUser({
-                            ...user,
-                            themeColor: nextColor as ThemeColorId,
-                          }),
-                        );
-                        handleUserUpdation({
-                          themeColor: nextColor as ThemeColorId,
-                        });
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          aria-label={`Select ${option.label} theme color`}
+                          title={option.label}
+                          onClick={() => {
+                            const nextColor = THEME_COLOR_IDS.includes(
+                              option.id,
+                            )
+                              ? option.id
+                              : DEFAULT_THEME_COLOR;
+
+                            dispatch(
+                              setUser({
+                                ...user,
+                                themeColor: nextColor as ThemeColorId,
+                              }),
+                            );
+                            handleUserUpdation({
+                              themeColor: nextColor as ThemeColorId,
+                            });
+                          }}
+                          className={`h-8 w-8 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                            isSelected
+                              ? "border-foreground scale-110"
+                              : "border-border/70 hover:scale-105"
+                          }`}
+                          style={{ backgroundColor: option.swatch }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardAction>
+            </CardHeader>
+          </Card>
+
+          <UserPreferences />
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-4">
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Dashboard Alerts</CardTitle>
+              <CardDescription>
+                Show or hide the alerts banner on the dashboard.
+              </CardDescription>
+              <CardAction>
+                <Switch
+                  checked={user.alertsEnabled}
+                  onClick={async () => {
+                    const nextValue = !user.alertsEnabled;
+
+                    dispatch(
+                      setUser({
+                        ...user,
+                        alertsEnabled: nextValue,
+                      }),
+                    );
+                    await handleUserUpdation({
+                      alertsEnabled: nextValue,
+                    });
+                  }}
+                />
+              </CardAction>
+            </CardHeader>
+          </Card>
+
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Notifications</CardTitle>
+              <CardDescription>
+                Enable or disable notifications for important updates.
+              </CardDescription>
+              <CardAction>
+                <Switch
+                  checked={user.notificationsEnabled}
+                  onClick={async () => {
+                    const nextValue = !user.notificationsEnabled;
+
+                    dispatch(
+                      setUser({
+                        ...user,
+                        notificationsEnabled: nextValue,
+                      }),
+                    );
+                    await handleUserUpdation({
+                      notification: nextValue,
+                    });
+                  }}
+                />
+              </CardAction>
+            </CardHeader>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-4">
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Update Password</CardTitle>
+              <CardDescription>
+                Change your password to keep your account secure.
+              </CardDescription>
+              <CardAction>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Edit2 className="h-5 w-5" />
+                  </DialogTrigger>
+
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Update Password</DialogTitle>
+                      <DialogDescription>
+                        Enter your new password below and click &quot;Save
+                        changes&quot;
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        await handlePasswordChange();
                       }}
-                      className={`h-8 w-8 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                        isSelected
-                          ? "border-foreground scale-110"
-                          : "border-border/70 hover:scale-105"
-                      }`}
-                      style={{ backgroundColor: option.swatch }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </CardAction>
-        </CardHeader>
-      </Card>
+                    >
+                      <div className="grid gap-4">
+                        <div className="grid gap-3">
+                          <Label htmlFor="password">New Password</Label>
+                          <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => {
+                              setPassword(e.target.value);
+                            }}
+                          />
+                        </div>
+                        <div className="grid gap-3">
+                          <Label htmlFor="password-1">Confirm Password</Label>
+                          <Input
+                            id="password-1"
+                            name="password"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => {
+                              setConfirmPassword(e.target.value);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter className="mt-4">
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button
+                          type="submit"
+                          disabled={
+                            password !== confirmPassword || password.length < 6
+                          }
+                        >
+                          Save changes
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </CardAction>
+            </CardHeader>
+          </Card>
 
-      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Dashboard Alerts</CardTitle>
-          <CardDescription>
-            Show or hide the alerts banner on the dashboard.
-          </CardDescription>
-          <CardAction>
-            <Switch
-              checked={user.alertsEnabled}
-              onClick={async () => {
-                const nextValue = !user.alertsEnabled;
-
-                dispatch(
-                  setUser({
-                    ...user,
-                    alertsEnabled: nextValue,
-                  }),
-                );
-                await handleUserUpdation({
-                  alertsEnabled: nextValue,
-                });
-              }}
-            />
-          </CardAction>
-        </CardHeader>
-      </Card>
-
-      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>
-            Enable or disable notifications for important updates.
-          </CardDescription>
-          <CardAction>
-            <Switch
-              checked={user.notificationsEnabled}
-              onClick={async () => {
-                const nextValue = !user.notificationsEnabled;
-
-                dispatch(
-                  setUser({
-                    ...user,
-                    notificationsEnabled: nextValue,
-                  }),
-                );
-                await handleUserUpdation({
-                  notification: nextValue,
-                });
-              }}
-            />
-          </CardAction>
-        </CardHeader>
-      </Card>
-
-      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Update Password</CardTitle>
-          <CardDescription>
-            Change your password to keep your account secure.
-          </CardDescription>
-          <CardAction>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Edit2 className="h-5 w-5" />
-              </DialogTrigger>
-
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Update Password</DialogTitle>
-                  <DialogDescription>
-                    Enter your new password below and click &quot;Save
-                    changes&quot;
-                  </DialogDescription>
-                </DialogHeader>
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    await handlePasswordChange();
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Delete Account</CardTitle>
+              <CardDescription>
+                Permanently delete your account. This action cannot be undone.
+              </CardDescription>
+              <CardAction>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    alert(
+                      "Are you sure you want to delete your account? This action cannot be undone.",
+                    );
+                    if (
+                      !window.confirm(
+                        "Are you sure you want to delete your account?",
+                      )
+                    ) {
+                      return;
+                    }
+                    handleUserDeletion();
+                    toast.success("Account deleted successfully!");
+                    setTimeout(() => {
+                      // Redirect to home or login page after deletion
+                      window.location.href = "/";
+                    }, 2000);
                   }}
                 >
-                  <div className="grid gap-4">
-                    <div className="grid gap-3">
-                      <Label htmlFor="password">New Password</Label>
-                      <Input
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                        }}
-                      />
-                    </div>
-                    <div className="grid gap-3">
-                      <Label htmlFor="password-1">Confirm Password</Label>
-                      <Input
-                        id="password-1"
-                        name="password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => {
-                          setConfirmPassword(e.target.value);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter className="mt-4">
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button
-                      type="submit"
-                      disabled={
-                        password !== confirmPassword || password.length < 6
-                      }
-                    >
-                      Save changes
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </CardAction>
-        </CardHeader>
-      </Card>
-
-      <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-        <CardHeader>
-          <CardTitle>Delete Account</CardTitle>
-          <CardDescription>
-            Permanently delete your account. This action cannot be undone.
-          </CardDescription>
-          <CardAction>
-            <Button
-              variant="destructive"
-              onClick={async () => {
-                alert(
-                  "Are you sure you want to delete your account? This action cannot be undone.",
-                );
-                if (
-                  !window.confirm(
-                    "Are you sure you want to delete your account?",
-                  )
-                ) {
-                  return;
-                }
-                handleUserDeletion();
-                toast.success("Account deleted successfully!");
-                setTimeout(() => {
-                  // Redirect to home or login page after deletion
-                  window.location.href = "/";
-                }, 2000);
-              }}
-            >
-              Delete Account
-            </Button>
-          </CardAction>
-        </CardHeader>
-      </Card>
-
-      <UserPreferences />
+                  Delete Account
+                </Button>
+              </CardAction>
+            </CardHeader>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
