@@ -80,6 +80,7 @@ export default function DashboardPage({
             isActive: profile.isActive,
             isAdmin: profile.isAdmin,
             notificationsEnabled: profile.notificationsEnabled,
+            alertsEnabled: profile.alerts_enabled ?? profile.alertsEnabled,
             profilePicFilePath: profile.profilePicFilePath,
             profileComplete: profile.profileComplete,
             profilePictureUrl: profile.profilePictureUrl,
@@ -240,7 +241,9 @@ export default function DashboardPage({
           <Navbar />
 
           {/* Alerts/Banners */}
-          {path.includes("/dashboard") && <AlertComponent />}
+          {path.includes("/dashboard") && user.id && user.alertsEnabled && (
+            <AlertComponent />
+          )}
 
           <div className="px-6 md:px-8 py-8 flex flex-col space-y-6 w-full items-center">
             <div className="w-full max-w-6xl">{children}</div>

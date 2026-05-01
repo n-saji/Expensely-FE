@@ -80,6 +80,8 @@ export default function AdminUI() {
             isActive: updatedUser.isActive,
             isAdmin: updatedUser.isAdmin,
             notificationsEnabled: updatedUser.notificationsEnabled,
+            alertsEnabled:
+              updatedUser.alerts_enabled ?? updatedUser.alertsEnabled,
             profilePicFilePath: updatedUser.profilePicFilePath || "",
             profileComplete: updatedUser.profileComplete,
           }),

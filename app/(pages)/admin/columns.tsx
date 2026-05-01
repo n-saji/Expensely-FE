@@ -28,6 +28,8 @@ export interface AdminUserRow {
   profilePicFilePath: string | null;
   profileComplete: boolean;
   notificationsEnabled: boolean;
+  alertsEnabled: boolean;
+  alerts_enabled?: boolean;
   oauth2User: boolean;
 }
 

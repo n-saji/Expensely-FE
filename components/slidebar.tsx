@@ -239,10 +239,10 @@ export default function Slidebar({
       <SheetContent className="h-full flex flex-col gap-0">
         <SheetHeader>
           <SheetTitle>Add Expense</SheetTitle>
-          <SheetDescription>
+          {/* <SheetDescription>
             Add a new expense to your ledger. You can choose to make it a
             recurring expense or a one-time transaction.
-          </SheetDescription>
+          </SheetDescription> */}
         </SheetHeader>
 
         <div className="p-4 space-y-4 flex flex-col flex-1 h-full">
@@ -456,7 +456,7 @@ export default function Slidebar({
                       </Field>
 
                       <Field>
-                        <FieldLabel htmlFor="date">Start Date</FieldLabel>
+                        <FieldLabel htmlFor="date">Date</FieldLabel>
                         <Popover
                           open={datePickerOpen}
                           onOpenChange={setDatePickerOpen}

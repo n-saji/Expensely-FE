@@ -49,6 +49,7 @@ export interface UserSkeleton {
   isActive?: boolean;
   isAdmin?: boolean;
   notificationsEnabled?: boolean;
+  alertsEnabled?: boolean;
 }
 
 export interface ExpenseOverview {
