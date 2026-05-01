@@ -119,7 +119,10 @@ export default function Page() {
 
     start.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
-    return start <= now && end >= now;
+
+    // Allow budgets that start in the future but end in the future as well, since they are still relevant for planning purposes. This way users can set up budgets ahead of time and they will become active once the start date is reached.
+    // return start <= now && end >= now;
+    return true; // Show all budgets regardless of date for better planning and visibility. Users can see upcoming budgets and past budgets for reference, and can filter by date if needed in the future.
   };
 
   useEffect(() => {
@@ -335,8 +338,7 @@ export default function Page() {
   );
   const overBudgetCount = activeBudgets.filter(
     (b) =>
-      Number(b.amountLimit) > 0 &&
-      Number(b.spent) / Number(b.amountLimit) >= 1,
+      Number(b.amountLimit) > 0 && Number(b.spent) / Number(b.amountLimit) >= 1,
   ).length;
   const healthyCount = activeBudgets.filter(
     (b) =>
