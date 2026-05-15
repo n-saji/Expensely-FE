@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   ChevronDown,
+  Edit,
   FilterX,
   MoreHorizontal,
   Search,
@@ -187,6 +188,9 @@ export default function ExpenseTableComponent({
     parsePositiveInt(searchParams.get("limit"), 10),
   );
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [attachmentEditMode, setAttachmentEditMode] = useState(false);
+  const [attachmentInputKey, setAttachmentInputKey] = useState(0);
+  const [attachmentActionLoading, setAttachmentActionLoading] = useState(false);
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((old) =>
@@ -387,6 +391,7 @@ export default function ExpenseTableComponent({
           categoryId: expense.categoryId,
           categoryName: expense.categoryName,
           currency: expense.currency,
+          receiptUrl: expense.receiptUrl,
         }));
         setDatas(formatedData);
       } catch (error) {
@@ -445,6 +450,14 @@ export default function ExpenseTableComponent({
     },
   });
 
+  useEffect(() => {
+    if (!openEditDialog || !expenseToEdit) return;
+
+    setAttachmentEditMode(!expenseToEdit.receiptUrl);
+    setAttachmentInputKey((prev) => prev + 1);
+    form.setValue("file", undefined);
+  }, [openEditDialog, expenseToEdit?.id, expenseToEdit?.receiptUrl, form]);
+
   async function handleAttachmentUpload(expenseId: string, file?: File) {
     if (!file) return null;
 
@@ -471,6 +484,63 @@ export default function ExpenseTableComponent({
 
     return key as string;
   }
+
+  const handleAttachmentDelete = async (expenseId: string) => {
+    try {
+      setAttachmentActionLoading(true);
+      const response = await api.delete(
+        `/expenses/delete-attachment/eid/${expenseId}`,
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Failed to delete attachment");
+      }
+
+      setExpensesList((prev) => ({
+        ...prev,
+        expenses: prev.expenses.map((expense) =>
+          expense.id === expenseId
+            ? {
+                ...expense,
+                receiptUrl: null,
+              }
+            : expense,
+        ),
+      }));
+
+      setDatas((prev) =>
+        prev.map((expense) =>
+          expense.id === expenseId
+            ? {
+                ...expense,
+                receiptUrl: null,
+              }
+            : expense,
+        ),
+      );
+
+      setExpenseToEdit((prev) =>
+        prev
+          ? {
+              ...prev,
+              receiptUrl: null,
+            }
+          : prev,
+      );
+
+      setAttachmentEditMode(true);
+      setAttachmentInputKey((prev) => prev + 1);
+      form.setValue("file", undefined);
+      toast.success("Attachment deleted successfully");
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      toast.error("Failed to delete attachment", {
+        description: String(error),
+      });
+    } finally {
+      setAttachmentActionLoading(false);
+    }
+  };
 
   async function onSubmitUpdate(data: z.infer<typeof expenseSchema>) {
     let updatedExpenseDate = data.expenseDate;
@@ -601,6 +671,7 @@ export default function ExpenseTableComponent({
           categoryId: expense.categoryId,
           categoryName: expense.categoryName,
           currency: expense.currency,
+          receiptUrl: expense.receiptUrl,
         }));
         setDatas(formatedData);
       } catch (error) {
@@ -1267,16 +1338,64 @@ export default function ExpenseTableComponent({
                   render={({ field }) => (
                     <FormItem className="mt-4">
                       <FormLabel>Attachment</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept=".jpg, .jpeg, .png, .pdf"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            field.onChange(file);
+                      <div className="flex items-center gap-2">
+                        <FormControl className="flex-1">
+                          {expenseToEdit?.receiptUrl && !attachmentEditMode ? (
+                            <Input
+                              type="text"
+                              value={`attachment-${expenseToEdit.id.slice(0, 6)}.pdf`}
+                              readOnly
+                              disabled
+                              className="flex-1"
+                            />
+                          ) : (
+                            <Input
+                              key={attachmentInputKey}
+                              type="file"
+                              accept=".jpg, .jpeg, .png, .pdf"
+                              onChange={(event) => {
+                                const file = event.target.files?.[0];
+                                field.onChange(file);
+                              }}
+                              className="flex-1"
+                            />
+                          )}
+                        </FormControl>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={
+                            !expenseToEdit?.receiptUrl ||
+                            attachmentActionLoading
+                          }
+                          onClick={() => {
+                            setAttachmentEditMode(true);
+                            setAttachmentInputKey((prev) => prev + 1);
+                            field.onChange(undefined);
                           }}
-                        />
-                      </FormControl>
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={
+                            !expenseToEdit?.receiptUrl ||
+                            attachmentActionLoading
+                          }
+                          onClick={() =>
+                            handleAttachmentDelete(expenseToEdit.id)
+                          }
+                        >
+                          {attachmentActionLoading ? (
+                            <Spinner />
+                          ) : (
+                            <Trash className="h-4 w-4 text-red-500" />
+                          )}
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
