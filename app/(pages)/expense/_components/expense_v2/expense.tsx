@@ -111,6 +111,7 @@ interface expense {
   categoryName: string;
   userId: string;
   currency: string;
+  receiptUrl?: string | null;
 }
 
 interface ExpenseListProps {
@@ -607,6 +608,7 @@ export default function ExpenseTableComponent({
           categoryId: expense.categoryId,
           categoryName: expense.categoryName,
           currency: expense.currency,
+          receiptUrl: expense.receiptUrl,
         }));
         setDatas(formatedData);
       } catch (error) {
@@ -677,6 +679,30 @@ export default function ExpenseTableComponent({
     return response.data;
   }
 
+  const openReceiptInNewTab = useCallback(async (expenseId: string) => {
+    try {
+      const response = await api.get(
+        `/expenses/get-download-url/eid/${expenseId}`,
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch receipt URL");
+      }
+
+      const downloadUrl = response.data?.url || response.data?.key;
+
+      if (!downloadUrl) {
+        toast.error("Receipt URL not available");
+        return;
+      }
+
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error opening receipt:", error);
+      toast.error("Error opening receipt", { description: String(error) });
+    }
+  }, []);
+
   const tableColumns = useMemo(() => {
     return columns(user?.currency).map((col) => {
       if (col.id === "actions") {
@@ -714,6 +740,15 @@ export default function ExpenseTableComponent({
                   >
                     Edit
                   </DropdownMenuItem>
+                  {expense.receiptUrl ? (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        void openReceiptInNewTab(expense.id);
+                      }}
+                    >
+                      View Receipt
+                    </DropdownMenuItem>
+                  ) : null}
 
                   <DropdownMenuItem
                     variant="destructive"
@@ -729,7 +764,7 @@ export default function ExpenseTableComponent({
       }
       return col;
     });
-  }, [user?.currency]);
+  }, [openReceiptInNewTab, user?.currency]);
 
   const handleBulkDelete = async (expenseId?: string) => {
     if (selectedExpenses.length === 0 && !expenseId) {
@@ -781,6 +816,7 @@ export default function ExpenseTableComponent({
           categoryId: expense.categoryId,
           categoryName: expense.categoryName,
           currency: expense.currency,
+          receiptUrl: expense.receiptUrl,
         }));
         setDatas(formatedData);
       } catch (error) {

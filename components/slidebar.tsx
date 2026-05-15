@@ -124,7 +124,7 @@ export default function Slidebar({
           .put(
             `/expenses/update-expense-attachment-url/eid/${expenseId}`,
             {
-              attachmentUrl: res.data.key, // Send the S3 key to your backend
+              url: res.data.key, // Send the S3 key to your backend
             }
           )
           .then((res) => {

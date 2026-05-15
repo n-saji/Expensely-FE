@@ -20,6 +20,7 @@ export type Expense = {
   categoryId: string;
   categoryName: string;
   currency: string;
+  receiptUrl?: string | null;
 };
 
 import { Checkbox } from "@/components/ui/checkbox";
