@@ -26,7 +26,7 @@ export type Expense = {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const columns = (
-  userCurrency: string | undefined
+  userCurrency: string | undefined,
 ): ColumnDef<Expense>[] => [
   {
     id: "select",

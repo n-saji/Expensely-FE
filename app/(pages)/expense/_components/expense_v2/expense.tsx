@@ -1040,7 +1040,9 @@ export default function ExpenseTableComponent({
       {/* ── Section 3: Transactions Table ── */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-foreground">Transactions</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            Transactions
+          </h2>
           <div className="flex-1 h-px bg-border" />
         </div>
         <SearchAndFilter
