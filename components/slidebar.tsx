@@ -12,7 +12,7 @@ import {
 
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { z } from "zod";
+import { file, url, z } from "zod";
 import { RootState } from "@/redux/store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,7 @@ const normalExpenseSchema = z.object({
   amount: z.coerce.number().positive("Please enter a valid amount"),
   description: z.string().trim().min(1, "Please enter a description"),
   expenseDate: z.string().min(1, "Please select a date"),
+  file: z.instanceof(File).optional(),
 });
 
 type NormalExpenseErrors = Partial<
@@ -70,6 +71,7 @@ export default function Slidebar({
   const [isRecurring, setIsRecurring] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [expense, setExpense] = useState({
+    id: "",
     user: {
       id: user.id,
     },
@@ -79,6 +81,7 @@ export default function Slidebar({
     amount: "",
     description: "",
     expenseDate: new Date().toISOString().slice(0, 10),
+    file: undefined as File | undefined,
   });
   const [adding_expense_loading, setAddingExpenseLoading] = useState(false);
   const [expenseEntryMode, setExpenseEntryMode] = useState("normal");
@@ -90,12 +93,73 @@ export default function Slidebar({
   const [normalExpenseErrors, setNormalExpenseErrors] =
     useState<NormalExpenseErrors>({});
 
+  async function handleFileUpload(expenseId: string) {
+    const file = expense.file;
+    if (!file) return;
+
+    try {
+      // STEP 1: Get the Presigned URL from your Java Backend
+      // Your backend should return { "url": "...", "key": "..." }
+      const res = await api.get(
+        `/expenses/get-presigned-url?fileName=${file.name}&expenseId=${expenseId}&contentType=${file.type}`,
+      );
+
+      console.log("Presigned URL response:", res);
+
+      // STEP 2: Upload the file directly to S3
+      // CRITICAL: Use 'PUT' and set the 'Content-Type' header
+      const uploadResponse = await fetch(res.data.url, {
+        method: "PUT",
+        body: file, // Send the file object directly as the body
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (uploadResponse.ok) {
+        console.log("Upload successful!");
+
+        // STEP 3: Tell your backend to save the image "key" in the database
+        await api
+          .put(
+            `/expenses/update-expense-attachment-url/eid/${expenseId}`,
+            {
+              attachmentUrl: res.data.key, // Send the S3 key to your backend
+            }
+          )
+          .then((res) => {
+            if (res.status === 200) {
+              console.log(
+                "Attachment URL updated successfully in the database",
+              );
+            } else {
+              console.error(
+                "Failed to update attachment URL in the database",
+                res.statusText,
+              );
+            }
+          })
+          .catch((error) => {
+            console.error(
+              "Error updating attachment URL in the database:",
+              error,
+            );
+          });
+      } else {
+        console.error("Upload failed", uploadResponse.statusText);
+      }
+    } catch (error) {
+      console.error("Error in upload flow:", error);
+    }
+  }
+
   const handleSubmit = async () => {
     const validation = normalExpenseSchema.safeParse({
       categoryId: expense.category.id,
       amount: expense.amount,
       description: expense.description,
       expenseDate: expense.expenseDate,
+      file: expense.file,
     });
 
     if (!validation.success) {
@@ -105,6 +169,7 @@ export default function Slidebar({
         amount: fieldErrors.amount?.[0],
         description: fieldErrors.description?.[0],
         expenseDate: fieldErrors.expenseDate?.[0],
+        file: fieldErrors.file?.[0],
       });
       return;
     }
@@ -131,7 +196,18 @@ export default function Slidebar({
         throw new Error("Failed to add expense");
       }
 
+      console.log("Expense creation response:", response.data);
+
+
+      try {
+        await handleFileUpload(response.data.id);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        toast.error("Expense added but failed to upload attachment");
+      }
+
       setExpense({
+        id: "",
         user: {
           id: user.id,
         },
@@ -141,6 +217,7 @@ export default function Slidebar({
         amount: "",
         description: "",
         expenseDate: new Date().toISOString().slice(0, 10),
+        file: undefined,
       });
 
       window.dispatchEvent(new Event("expense-added"));
@@ -502,6 +579,40 @@ export default function Slidebar({
                           errors={
                             normalExpenseErrors.expenseDate
                               ? [{ message: normalExpenseErrors.expenseDate }]
+                              : undefined
+                          }
+                        />
+                      </Field>
+
+                      <Field>
+                        <FieldLabel htmlFor="attachment">Attachment</FieldLabel>
+                        <Input
+                          id="attachment"
+                          type="file"
+                          accept=".jpg, .jpeg, .png, .pdf"
+                          onChange={() => {
+                            const fileInput = document.getElementById(
+                              "attachment",
+                            ) as HTMLInputElement;
+                            const file = fileInput.files
+                              ? fileInput.files[0]
+                              : null;
+                            setExpense({
+                              ...expense,
+                              file: file || undefined,
+                            });
+                            if (normalExpenseErrors.file) {
+                              setNormalExpenseErrors((prev) => ({
+                                ...prev,
+                                file: undefined,
+                              }));
+                            }
+                          }}
+                        />
+                        <FieldError
+                          errors={
+                            normalExpenseErrors.file
+                              ? [{ message: normalExpenseErrors.file }]
                               : undefined
                           }
                         />
