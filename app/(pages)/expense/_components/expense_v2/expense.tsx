@@ -425,6 +425,7 @@ export default function ExpenseTableComponent({
       id: z.string().min(1, "Category is required"),
       name: z.string().min(1, "Category name is required"),
     }),
+    file: z.instanceof(File).optional(),
   });
 
   const form = useForm<z.infer<typeof expenseSchema>>({
@@ -440,13 +441,42 @@ export default function ExpenseTableComponent({
         id: expenseToEdit?.categoryId || "",
         name: expenseToEdit?.categoryName || "",
       },
+      file: undefined,
     },
   });
+
+  async function handleAttachmentUpload(expenseId: string, file?: File) {
+    if (!file) return null;
+
+    const presignResponse = await api.get(
+      `/expenses/get-presigned-url?fileName=${file.name}&expenseId=${expenseId}&contentType=${file.type}`,
+    );
+
+    const uploadResponse = await fetch(presignResponse.data.url, {
+      method: "PUT",
+      body: file,
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Failed to upload attachment");
+    }
+
+    const key = presignResponse.data.key;
+    await api.put(`/expenses/update-expense-attachment-url/eid/${expenseId}`, {
+      url: key,
+    });
+
+    return key as string;
+  }
 
   async function onSubmitUpdate(data: z.infer<typeof expenseSchema>) {
     let updatedExpenseDate = data.expenseDate;
     try {
       setLoading(true);
+      const { file, ...payload } = data;
       const oldExpense = expensesList.expenses.find(
         (item) => item.id === data.id,
       );
@@ -469,10 +499,20 @@ export default function ExpenseTableComponent({
           data.expenseDate.slice(0, 10) + oldExpense?.expenseDate.slice(10);
       }
       const response = await api.put(`/expenses/update/${data.id}`, {
-        ...data,
+        ...payload,
         expenseDate: updatedExpenseDate,
       });
       if (response.status !== 200) throw new Error("Failed to update expense");
+
+      let updatedReceiptUrl: string | null = null;
+      if (file) {
+        try {
+          updatedReceiptUrl = await handleAttachmentUpload(data.id, file);
+        } catch (error) {
+          console.error("Error uploading attachment:", error);
+          toast.error("Expense updated but failed to upload attachment");
+        }
+      }
 
       setExpensesList((prev) => ({
         ...prev,
@@ -486,6 +526,7 @@ export default function ExpenseTableComponent({
                 categoryId: data.category.id,
                 categoryName: data.category.name,
                 currency: data.currency,
+                receiptUrl: updatedReceiptUrl ?? expense.receiptUrl,
               }
             : expense,
         ),
@@ -502,6 +543,7 @@ export default function ExpenseTableComponent({
                 categoryId: data.category.id,
                 categoryName: data.category.name,
                 currency: data.currency,
+                receiptUrl: updatedReceiptUrl ?? expense.receiptUrl,
               }
             : expense,
         ),
@@ -735,6 +777,7 @@ export default function ExpenseTableComponent({
                           id: expense.categoryId,
                           name: expense.categoryName,
                         },
+                        file: undefined,
                       });
                     }}
                   >
@@ -1212,6 +1255,27 @@ export default function ExpenseTableComponent({
                             />
                           </PopoverContent>
                         </Popover>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="file"
+                  render={({ field }) => (
+                    <FormItem className="mt-4">
+                      <FormLabel>Attachment</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept=".jpg, .jpeg, .png, .pdf"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            field.onChange(file);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
