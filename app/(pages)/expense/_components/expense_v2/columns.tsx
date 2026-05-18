@@ -101,7 +101,7 @@ export const columns = (
           >
             {description}
             {row.original.receiptUrl && (
-              <Paperclip className="inline-block ml-2 h-4 w-4 text-muted-foreground" />
+              <Paperclip className="inline-block ml-2 h-4 w-4 text-muted-foreground" aria-label="Receipt" />
             )}
           </div>
         );

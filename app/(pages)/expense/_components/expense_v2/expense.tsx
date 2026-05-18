@@ -640,7 +640,7 @@ export default function ExpenseTableComponent({
 
     try {
       setLoading(true);
-      handleAttachmentDelete(expense.id, true);
+      await handleAttachmentDelete(expense.id, true);
       const res = await api.delete(`/expenses/${expense.id}`);
 
       if (res.status !== 200) {

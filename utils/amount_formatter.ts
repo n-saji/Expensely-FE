@@ -1,5 +1,5 @@
 export const FormatAmount = (amount: number) => {
-  if (amount > 1000 && amount < 10000) {
+  if (amount >= 1000 && amount < 10000) {
     return (
       (amount / 1000).toLocaleString(undefined, {
         minimumFractionDigits: 2,

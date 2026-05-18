@@ -99,9 +99,9 @@ export function DataTable<TData extends { id: string }, TValue>({
     <div>
       <div className="overflow-hidden rounded-md border">
         <Table>
-          <TableHeader >
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} >
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="text-muted-foreground">
