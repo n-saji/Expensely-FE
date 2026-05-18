@@ -67,6 +67,7 @@ import DropDown from "@/components/drop-down";
 import { Label } from "@/components/ui/label";
 import useMediaQuery from "@/utils/useMediaQuery";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import CategoryBadge from "@/components/category-badge";
 import {
   IncomeInsightCards,
   IncomeInsightCharts,
@@ -577,8 +578,9 @@ export default function IncomePage() {
           });
         },
         onDelete: (row) => setSelectedDelete(row),
+        categories,
       }),
-    [user.currency],
+    [categories, user.currency],
   );
 
   const refreshIncomeTable = useCallback(async () => {
@@ -971,7 +973,11 @@ export default function IncomePage() {
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                      <CategoryBadge
+                        name={category.name}
+                        icon={category.icon}
+                        color={category.color}
+                      />
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1060,12 +1066,15 @@ export default function IncomePage() {
           setIncomeCurrentMonthYear={setIncomeCurrentMonthYear}
           incomeOverviewParams={incomeOverviewParams}
           setIncomeOverviewParams={setIncomeOverviewParams}
+          incomeCategories={categories}
         />
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-foreground">Transactions</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            Transactions
+          </h2>
           <div className="flex-1 h-px bg-border" />
         </div>
         <SearchAndFilter
@@ -1173,7 +1182,11 @@ export default function IncomePage() {
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                      <CategoryBadge
+                        name={category.name}
+                        icon={category.icon}
+                        color={category.color}
+                      />
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1270,6 +1283,8 @@ const SearchAndFilter = ({
     ...categories.map((category) => ({
       label: category.name,
       value: category.id,
+      icon: category.icon,
+      color: category.color,
     })),
   ];
 

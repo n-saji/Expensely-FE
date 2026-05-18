@@ -8,6 +8,9 @@ import PieChartComp, {
 } from "@/components/ExpenseChartCard";
 import { OverviewEnum, ExpenseOverview, ExpenseOverviewV2 } from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface ExpenseInsightsProps {
   userCurrency?: string;
@@ -128,6 +131,17 @@ export function ExpenseInsightCharts({
   overviewParams,
   setOverviewParams,
 }: Omit<ExpenseInsightsProps, "itemName" | "itemValue">) {
+  const categories = useSelector(
+    (state: RootState) => state.categoryExpense.categories,
+  );
+  const categoryMetaByName = useMemo(() => {
+    return Object.fromEntries(
+      categories
+        .filter((category) => category.name)
+        .map((category) => [category.name as string, category]),
+    );
+  }, [categories]);
+
   return (
     <section className="space-y-6">
       <YearlyExpenseLineChartV2
@@ -138,6 +152,7 @@ export function ExpenseInsightCharts({
         currency={userCurrency}
         setOverviewParams={setOverviewParams}
         overviewParams={overviewParams}
+        categoryMetaByName={categoryMetaByName}
         loading={overviewV2Loading || overviewV2 === null}
       />
 
@@ -149,6 +164,7 @@ export function ExpenseInsightCharts({
           setCurrentYearForYearly={setCurrentYearForYearly}
           currentYearForYearly={currentYearForYearly}
           min_year={minYear}
+          categoryMetaByName={categoryMetaByName}
           loading={loadingYear || overview === null}
         />
 

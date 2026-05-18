@@ -34,6 +34,8 @@ export interface categorySkeleton {
   };
   name?: string;
   type?: string;
+  icon?: string;
+  color?: string;
 }
 
 export interface UserSkeleton {
@@ -117,6 +119,8 @@ export interface Category {
   id: string;
   type: string;
   name: string;
+  icon?: string;
+  color?: string;
 }
 
 export interface Budget {

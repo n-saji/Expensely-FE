@@ -34,6 +34,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { currencyMapper } from "@/utils/currencyMapper";
 
 import NewUserOnboarding from "./_components/new-user-onboarding";
+import CategoryBadge from "@/components/category-badge";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -421,7 +422,13 @@ export default function DashboardPage() {
           <CardComponent
             title={`${monthLabel} Expense`}
             icon={<Wallet className="h-4 w-4" />}
-            accentColor="#ef4444"
+            accentColor={
+              (overview?.thisMonthTotalExpense || 0) -
+                (overview?.lastMonthTotalExpense || 0) >
+              0
+                ? "#ef4444"
+                : "#22c55e"
+            }
             cardAction={
               overview && (
                 <div
@@ -671,9 +678,13 @@ export default function DashboardPage() {
                           />
                           <div className="flex flex-wrap justify-between gap-2 items-center">
                             <div className="flex items-center gap-2">
-                              <Label className="text-sm font-medium text-foreground">
-                                {budget.category.name}
-                              </Label>
+                              <CategoryBadge
+                                icon={budget.category.icon}
+                                color={budget.category.color}
+                                name={budget.category.name}
+                                className="text-sm font-medium text-foreground"
+                              />
+
                               {budgetIcon(
                                 budget.amountSpent,
                                 budget.amountLimit,

@@ -7,13 +7,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import CategoryBadge from "@/components/category-badge";
 
 export default function DropDown({
   options,
   selectedOption = "Select an option",
   onSelect,
 }: {
-  options: Array<{ label: string; value: string }>;
+  options: Array<{
+    label: string;
+    value: string;
+    icon?: string;
+    color?: string;
+  }>;
   selectedOption: string;
   onSelect: (option: string) => void;
 }) {
@@ -31,7 +37,15 @@ export default function DropDown({
         <SelectContent>
           {options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
-              {option.label}
+              {option.icon || option.color ? (
+                <CategoryBadge
+                  name={option.label}
+                  icon={option.icon}
+                  color={option.color}
+                />
+              ) : (
+                option.label
+              )}
             </SelectItem>
           ))}
         </SelectContent>

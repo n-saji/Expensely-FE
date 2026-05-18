@@ -35,6 +35,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
+import CategoryBadge from "@/components/category-badge";
 
 function getTomorrowDateString() {
   const tomorrow = new Date();
@@ -162,7 +163,11 @@ export default function RecurringExpenseForm({
                     <SelectContent>
                       {categories.categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                          <CategoryBadge
+                            name={category.name}
+                            icon={category.icon}
+                            color={category.color}
+                          />
                         </SelectItem>
                       ))}
                     </SelectContent>

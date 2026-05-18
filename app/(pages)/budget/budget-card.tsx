@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { Budget } from "./columns";
+import CategoryBadge from "@/components/category-badge";
 
 type BudgetCardProps = {
   budget: Budget;
@@ -129,9 +130,12 @@ export default function BudgetCard({
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1.5 min-w-0">
-            <h3 className="text-base font-semibold text-foreground truncate leading-tight">
-              {budget.category.name}
-            </h3>
+            <CategoryBadge
+              name={budget.category.name}
+              icon={budget.category.icon}
+              color={budget.category.color}
+              size="md"
+            />
             <div className="flex items-center gap-2 flex-wrap">
               <Badge
                 variant="secondary"

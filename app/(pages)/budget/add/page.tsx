@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import CategoryBadge from "@/components/category-badge";
 
 const budgetSchema = z.object({
   Category: z.object({
@@ -228,7 +229,11 @@ export default function AddBudgetPage() {
                       <SelectContent>
                         {availableCategories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
-                            {category.name}
+                            <CategoryBadge
+                              name={category.name}
+                              icon={category.icon}
+                              color={category.color}
+                            />
                           </SelectItem>
                         ))}
                       </SelectContent>

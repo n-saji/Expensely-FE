@@ -322,6 +322,8 @@ function ExpenseList({
     id: string;
     type: string;
     name: string;
+    icon: string;
+    color: string;
   }[];
 
   setPageNumber: React.Dispatch<React.SetStateAction<number>>;
@@ -542,6 +544,8 @@ function ExpenseList({
             options={categories.map((category) => ({
               label: category.name,
               value: category.id,
+              icon: category.icon,
+              color: category.color,
             }))}
             selectedOption={categoryFilter}
             onSelect={(option) => {

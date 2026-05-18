@@ -67,6 +67,7 @@ import {
   X,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import CategoryBadge from "@/components/category-badge";
 
 import {
   AlertDialog,
@@ -817,7 +818,7 @@ export default function ExpenseTableComponent({
   }, []);
 
   const tableColumns = useMemo(() => {
-    return columns(user?.currency).map((col) => {
+    return columns(user?.currency, categories.categories).map((col) => {
       if (col.id === "actions") {
         return {
           ...col,
@@ -1075,7 +1076,7 @@ export default function ExpenseTableComponent({
     return () => {
       window.removeEventListener("expense-added", handleExpenseAdded);
     };
-  }, []);
+  }, [categories.categories, user?.currency]);
 
   const minYear = overview ? overview.earliestStartYear : 2000;
   const minMonth = overview ? overview.earliestStartMonth : 1;
@@ -1267,7 +1268,11 @@ export default function ExpenseTableComponent({
                         <SelectContent>
                           {categories.categories.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
-                              {category.name}
+                              <CategoryBadge
+                                name={category.name}
+                                icon={category.icon}
+                                color={category.color}
+                              />
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1484,6 +1489,8 @@ const SearchAndFilter = ({
               options={categories.categories.map((category) => ({
                 label: category.name,
                 value: category.id,
+                icon: category.icon,
+                color: category.color,
               }))}
               selectedOption={categoryFilter}
               onSelect={(option) => {
@@ -1593,6 +1600,8 @@ const SearchAndFilter = ({
               options={categories.categories.map((category) => ({
                 label: category.name,
                 value: category.id,
+                icon: category.icon,
+                color: category.color,
               }))}
               selectedOption={categoryFilter}
               onSelect={(option) => {

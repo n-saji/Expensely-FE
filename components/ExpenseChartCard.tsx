@@ -45,6 +45,7 @@ import { ExpenseOverview, OverviewEnum } from "@/global/dto";
 import { Spinner } from "./ui/spinner";
 import useMediaQuery from "@/utils/useMediaQuery";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { normalizeCategoryColor } from "@/components/category-icon-registry";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -79,6 +80,13 @@ type ChartRow = {
   [category: string]: number | string;
   amount: number | 0;
 };
+
+type CategoryMeta = {
+  icon?: string;
+  color?: string;
+};
+
+type CategoryMetaByName = Record<string, CategoryMeta>;
 
 const SpinnerUI = () => {
   return (
@@ -144,6 +152,13 @@ const getRowTotal = (row?: ChartRow) => {
     .reduce((sum, [, value]) => sum + Number(value), 0);
 };
 
+const getCategoryColor = (
+  categoryName: string,
+  fallback: string,
+  categoryMetaByName?: CategoryMetaByName,
+) =>
+  normalizeCategoryColor(categoryMetaByName?.[categoryName]?.color, fallback);
+
 // ========== Pie Chart: Category-wise Spending ==========
 export default function PieChartComp({
   amountByCategory,
@@ -152,6 +167,7 @@ export default function PieChartComp({
   setCurrentYearForYearly,
   currentYearForYearly,
   min_year,
+  categoryMetaByName,
   loading = false,
 }: {
   amountByCategory?: ExpenseOverview["amountByCategory"];
@@ -160,6 +176,7 @@ export default function PieChartComp({
   setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
   currentYearForYearly?: number;
   min_year?: number;
+  categoryMetaByName?: CategoryMetaByName;
   loading?: boolean;
 }) {
   const chartData = Object.entries(amountByCategory || {}).map(
@@ -262,7 +279,11 @@ export default function PieChartComp({
                             fill={
                               item.name === "__placeholder__"
                                 ? "transparent"
-                                : COLORS[index % COLORS.length]
+                                : getCategoryColor(
+                                    item.name,
+                                    COLORS[index % COLORS.length],
+                                    categoryMetaByName,
+                                  )
                             }
                           />
                         ))}
@@ -324,7 +345,11 @@ export default function PieChartComp({
                       <span
                         className="h-2.5 w-2.5 rounded-full"
                         style={{
-                          backgroundColor: COLORS[index % COLORS.length],
+                          backgroundColor: getCategoryColor(
+                            item.name,
+                            COLORS[index % COLORS.length],
+                            categoryMetaByName,
+                          ),
                         }}
                       />
                       <span className="truncate text-foreground">
@@ -751,6 +776,7 @@ export function YearlyExpenseLineChart({
   setCurrentYearForYearly,
   currentYearForYearly,
   min_year,
+  categoryMetaByName,
   loading = false,
 }: {
   amountByMonth?: ExpenseOverview["amountByMonth"];
@@ -760,6 +786,7 @@ export function YearlyExpenseLineChart({
   setCurrentYearForYearly?: React.Dispatch<React.SetStateAction<number>>;
   currentYearForYearly?: number;
   min_year?: number;
+  categoryMetaByName?: CategoryMetaByName;
   loading: boolean;
 }) {
   const [toggle, setToggle] = useState(true); // true for monthly, false for category
@@ -768,6 +795,13 @@ export function YearlyExpenseLineChart({
     null,
   );
   const categories = useSelector((state: RootState) => state.categoryExpense);
+  const categoryMeta =
+    categoryMetaByName ||
+    Object.fromEntries(
+      categories.categories
+        .filter((item) => item.name)
+        .map((item) => [item.name as string, item]),
+    );
   const totalForYear = chartData.reduce(
     (sum, item) => sum + (item.amount as number),
     0,
@@ -897,6 +931,8 @@ export function YearlyExpenseLineChart({
                 ...categories.categories.map((category) => ({
                   label: category.name,
                   value: category.id,
+                  icon: category.icon,
+                  color: category.color,
                 })),
               ]}
               selectedOption={category ? category.id : ""}
@@ -1106,12 +1142,17 @@ export function YearlyExpenseLineChart({
                       .filter((key) => key !== "name")
                       .map((category, index) => {
                         if (category === "amount") return null;
+                        const seriesColor = getCategoryColor(
+                          category,
+                          COLORS[index % COLORS.length],
+                          categoryMeta,
+                        );
                         return (
                           <Line
                             key={category}
                             type="monotone"
                             dataKey={category}
-                            stroke={COLORS[index % COLORS.length]}
+                            stroke={seriesColor}
                             strokeWidth={2}
                             dot
                           />
@@ -1166,6 +1207,7 @@ export function YearlyExpenseLineChartV2({
   darkMode,
   title,
   currency = "USD",
+  categoryMetaByName,
   loading = false,
   setOverviewParams,
   overviewParams,
@@ -1175,6 +1217,7 @@ export function YearlyExpenseLineChartV2({
   darkMode: boolean;
   title?: string;
   currency?: string;
+  categoryMetaByName?: CategoryMetaByName;
   setOverviewParams: React.Dispatch<
     React.SetStateAction<{ count?: number; type?: OverviewEnum }>
   >;
@@ -1366,6 +1409,8 @@ export function YearlyExpenseLineChartV2({
                 ...availableCategoryNames.map((categoryName) => ({
                   label: categoryName,
                   value: categoryName,
+                  icon: categoryMetaByName?.[categoryName]?.icon,
+                  color: categoryMetaByName?.[categoryName]?.color,
                 })),
               ]}
               selectedOption={category ? category.id : ""}
@@ -1421,15 +1466,25 @@ export function YearlyExpenseLineChartV2({
                 {loading ? (
                   <SpinnerUI />
                 ) : (
-                  <ComposedChart data={
-                    chartData.length === 1
-                      ? [
-                          { name: "", amount: chartData[0].amount, __ghost: true },
-                          ...chartData,
-                          { name: " ", amount: chartData[0].amount, __ghost: true },
-                        ]
-                      : chartData
-                  }>
+                  <ComposedChart
+                    data={
+                      chartData.length === 1
+                        ? [
+                            {
+                              name: "",
+                              amount: chartData[0].amount,
+                              __ghost: true,
+                            },
+                            ...chartData,
+                            {
+                              name: " ",
+                              amount: chartData[0].amount,
+                              __ghost: true,
+                            },
+                          ]
+                        : chartData
+                    }
+                  >
                     <CartesianGrid
                       stroke={darkMode ? "#242424" : "#DBDBDB"}
                       vertical={false}
@@ -1444,20 +1499,43 @@ export function YearlyExpenseLineChartV2({
                     <Tooltip
                       cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
                       content={(props) => {
-                        if (!props.active || !props.payload?.length) return null;
+                        if (!props.active || !props.payload?.length)
+                          return null;
                         if (props.payload[0]?.payload?.__ghost) return null;
                         const val = props.payload[0]?.value;
                         return (
-                          <div style={{
-                            backgroundColor: "#0f172a",
-                            borderRadius: "12px",
-                            border: "1px solid rgba(148,163,184,0.2)",
-                            boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                            padding: "8px 12px",
-                          }}>
-                            <p style={{ color: "#e2e8f0", marginBottom: 4, fontSize: 12 }}>{props.label}</p>
-                            <p style={{ color: "#4ade80", fontWeight: 600, fontSize: 14 }}>
-                              {currencyMapper(currency)}{val ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                          <div
+                            style={{
+                              backgroundColor: "#0f172a",
+                              borderRadius: "12px",
+                              border: "1px solid rgba(148,163,184,0.2)",
+                              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                              padding: "8px 12px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#e2e8f0",
+                                marginBottom: 4,
+                                fontSize: 12,
+                              }}
+                            >
+                              {props.label}
+                            </p>
+                            <p
+                              style={{
+                                color: "#4ade80",
+                                fontWeight: 600,
+                                fontSize: 14,
+                              }}
+                            >
+                              {currencyMapper(currency)}
+                              {val
+                                ? Number(val).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : "0.00"}
                             </p>
                           </div>
                         );
@@ -1470,7 +1548,8 @@ export function YearlyExpenseLineChartV2({
                       stroke="#4ade80"
                       strokeWidth={2}
                       dot={(props) => {
-                        if (props?.payload?.__ghost) return <g key={props.key} />;
+                        if (props?.payload?.__ghost)
+                          return <g key={props.key} />;
                         return (
                           <circle
                             key={props.key}
@@ -1551,15 +1630,35 @@ export function YearlyExpenseLineChartV2({
                 {loading ? (
                   <SpinnerUI />
                 ) : (
-                  <ComposedChart data={
-                    chartData.length === 1
-                      ? [
-                          { name: "", amount: chartData[0].amount, __ghost: true, ...Object.fromEntries(Object.keys(chartData[0]).filter(k => k !== "name" && k !== "amount").map(k => [k, (chartData[0] as any)[k]])) },
-                          ...chartData,
-                          { name: " ", amount: chartData[0].amount, __ghost: true, ...Object.fromEntries(Object.keys(chartData[0]).filter(k => k !== "name" && k !== "amount").map(k => [k, (chartData[0] as any)[k]])) },
-                        ]
-                      : chartData
-                  }>
+                  <ComposedChart
+                    data={
+                      chartData.length === 1
+                        ? [
+                            {
+                              name: "",
+                              amount: chartData[0].amount,
+                              __ghost: true,
+                              ...Object.fromEntries(
+                                Object.keys(chartData[0])
+                                  .filter((k) => k !== "name" && k !== "amount")
+                                  .map((k) => [k, (chartData[0] as any)[k]]),
+                              ),
+                            },
+                            ...chartData,
+                            {
+                              name: " ",
+                              amount: chartData[0].amount,
+                              __ghost: true,
+                              ...Object.fromEntries(
+                                Object.keys(chartData[0])
+                                  .filter((k) => k !== "name" && k !== "amount")
+                                  .map((k) => [k, (chartData[0] as any)[k]]),
+                              ),
+                            },
+                          ]
+                        : chartData
+                    }
+                  >
                     <CartesianGrid
                       stroke={darkMode ? "#242424" : "#DBDBDB"}
                       vertical={false}
@@ -1575,23 +1674,51 @@ export function YearlyExpenseLineChartV2({
                     <Tooltip
                       cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
                       content={(props) => {
-                        if (!props.active || !props.payload?.length) return null;
+                        if (!props.active || !props.payload?.length)
+                          return null;
                         if (props.payload[0]?.payload?.__ghost) return null;
                         return (
-                          <div style={{
-                            backgroundColor: "#0f172a",
-                            borderRadius: "12px",
-                            border: "1px solid rgba(148,163,184,0.2)",
-                            boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                            padding: "8px 12px",
-                            fontSize: 14,
-                          }}>
-                            <p style={{ color: "#e2e8f0", marginBottom: 4, fontSize: 12 }}>{props.label}</p>
-                            {props.payload.filter(p => !p.payload?.__ghost).map((p, i) => (
-                              <p key={i} style={{ color: p.color ?? "#fff", fontWeight: 600 }}>
-                                {p.name}: {currencyMapper(currency)}{p.value ? Number(p.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
-                              </p>
-                            ))}
+                          <div
+                            style={{
+                              backgroundColor: "#0f172a",
+                              borderRadius: "12px",
+                              border: "1px solid rgba(148,163,184,0.2)",
+                              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                              padding: "8px 12px",
+                              fontSize: 14,
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#e2e8f0",
+                                marginBottom: 4,
+                                fontSize: 12,
+                              }}
+                            >
+                              {props.label}
+                            </p>
+                            {props.payload
+                              .filter((p) => !p.payload?.__ghost)
+                              .map((p, i) => (
+                                <p
+                                  key={i}
+                                  style={{
+                                    color: p.color ?? "#fff",
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {p.name}: {currencyMapper(currency)}
+                                  {p.value
+                                    ? Number(p.value).toLocaleString(
+                                        undefined,
+                                        {
+                                          minimumFractionDigits: 2,
+                                          maximumFractionDigits: 2,
+                                        },
+                                      )
+                                    : "0.00"}
+                                </p>
+                              ))}
                           </div>
                         );
                       }}
@@ -1600,22 +1727,28 @@ export function YearlyExpenseLineChartV2({
                       .filter((key) => key !== "name")
                       .map((category, index) => {
                         if (category === "amount") return null;
+                        const seriesColor = getCategoryColor(
+                          category,
+                          COLORS[index % COLORS.length],
+                          categoryMetaByName,
+                        );
                         return (
                           <Line
                             key={category}
                             type="monotone"
                             dataKey={category}
-                            stroke={COLORS[index % COLORS.length]}
+                            stroke={seriesColor}
                             strokeWidth={2}
                             dot={(props: any) => {
-                              if (props?.payload?.__ghost) return <g key={props.key} />;
+                              if (props?.payload?.__ghost)
+                                return <g key={props.key} />;
                               return (
                                 <circle
                                   key={props.key}
                                   cx={props.cx}
                                   cy={props.cy}
                                   r={4}
-                                  fill={COLORS[index % COLORS.length]}
+                                  fill={seriesColor}
                                   stroke="#fff"
                                   strokeWidth={1.5}
                                 />
@@ -1737,13 +1870,22 @@ export function IncomeExpenseComparisonChart({
   const previous = chartData[chartData.length - 2];
   const trend = getTrend(latest?.income ?? 0, previous?.income ?? 0);
 
-
   const isSinglePoint = chartData.length === 1;
   const displayData = isSinglePoint
     ? [
-        { name: "", income: chartData[0].income, expense: chartData[0].expense, __ghost: true },
+        {
+          name: "",
+          income: chartData[0].income,
+          expense: chartData[0].expense,
+          __ghost: true,
+        },
         { ...chartData[0], __ghost: false },
-        { name: "", income: chartData[0].income, expense: chartData[0].expense, __ghost: true },
+        {
+          name: "",
+          income: chartData[0].income,
+          expense: chartData[0].expense,
+          __ghost: true,
+        },
       ]
     : chartData;
 
@@ -1835,13 +1977,23 @@ export function IncomeExpenseComparisonChart({
                             padding: "10px 14px",
                           }}
                         >
-                          <p style={{ color: "#e2e8f0", marginBottom: 6, fontSize: 13 }}>
+                          <p
+                            style={{
+                              color: "#e2e8f0",
+                              marginBottom: 6,
+                              fontSize: 13,
+                            }}
+                          >
                             {label}
                           </p>
                           {payload.map((entry) => (
                             <p
                               key={entry.name}
-                              style={{ color: entry.color, fontSize: 13, margin: "2px 0" }}
+                              style={{
+                                color: entry.color,
+                                fontSize: 13,
+                                margin: "2px 0",
+                              }}
                             >
                               {entry.name === "income" ? "Income" : "Expense"}:{" "}
                               {currencyMapper(currency)}

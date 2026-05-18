@@ -10,6 +10,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/lib/api";
+import CategoryStylePicker from "@/components/category-style-picker";
+import {
+  DEFAULT_CATEGORY_COLOR,
+  DEFAULT_CATEGORY_ICON_KEY,
+  normalizeCategoryColor,
+  resolveCategoryIconKey,
+} from "@/components/category-icon-registry";
+import { useRouter } from "next/navigation";
 
 export default function AddCategoryPage() {
   const user = useSelector((state: RootState) => state.user);
@@ -19,8 +27,11 @@ export default function AddCategoryPage() {
     },
     name: "",
     type: "",
+    icon: DEFAULT_CATEGORY_ICON_KEY,
+    color: DEFAULT_CATEGORY_COLOR,
   });
   const [loader, setLoader] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -35,14 +46,26 @@ export default function AddCategoryPage() {
     setLoader(true);
 
     try {
-      const response = await api.post(`/categories/create`, category);
+      const payload = {
+        ...category,
+        icon: resolveCategoryIconKey(category.icon),
+        color: normalizeCategoryColor(category.color),
+      };
+      const response = await api.post(`/categories/create`, payload);
 
       if (response.status !== 200) {
         throw new Error("Failed to add category");
       }
 
       window.dispatchEvent(new Event("category-added"));
-      toast.success("Category added successfully");
+      toast.success("Category added successfully", {
+        action: {
+          label: "View Categories",
+          onClick: () => {
+            router.push("/category");
+          },
+        },
+      });
 
       setCategory({
         user: {
@@ -50,6 +73,8 @@ export default function AddCategoryPage() {
         },
         name: "",
         type: "",
+        icon: DEFAULT_CATEGORY_ICON_KEY,
+        color: DEFAULT_CATEGORY_COLOR,
       });
     } catch (error) {
       console.error("Error adding category:", error);
@@ -111,6 +136,19 @@ export default function AddCategoryPage() {
                   type: selectedCategory ? selectedCategory.value : "",
                 });
               }}
+            />
+
+            <CategoryStylePicker
+              icon={category.icon}
+              color={category.color}
+              onIconChange={(value) => {
+                const ic = resolveCategoryIconKey(value);
+                setCategory((prev) => ({ ...prev, icon: ic }));
+              }}
+              onColorChange={(value) =>
+                setCategory((prev) => ({ ...prev, color: value }))
+              }
+              previewLabel={category.name || "New category"}
             />
             <Button type="submit" disabled={loader}>
               {loader ? <Spinner /> : "Add Category"}

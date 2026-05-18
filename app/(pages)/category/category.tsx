@@ -28,6 +28,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import CategoryBadge from "@/components/category-badge";
+import CategoryStylePicker from "@/components/category-style-picker";
+import {
+  normalizeCategoryColor,
+  resolveCategoryIconKey,
+} from "@/components/category-icon-registry";
 
 const table_data_classname = "px-1 py-3 sm:px-4 sm:py-3";
 const table_data_loading = "bg-gray-200 dark:bg-gray-500 rounded animate-pulse";
@@ -81,7 +87,11 @@ export default function CategoryPage() {
 
     if (!selectedCategory) return alert("Select one category to edit.");
 
-    const toUpdate = selectedCategory as categorySkeleton;
+    const toUpdate = {
+      ...(selectedCategory as categorySkeleton),
+      icon: resolveCategoryIconKey(selectedCategory.icon),
+      color: normalizeCategoryColor(selectedCategory.color),
+    };
 
     try {
       setUpdatingCategory(true);
@@ -210,7 +220,13 @@ export default function CategoryPage() {
                   }}
                 >
                   <td className={`${table_data_classname}`}></td>
-                  <td className={`${table_data_classname}`}>{category.name}</td>
+                  <td className={`${table_data_classname}`}>
+                    <CategoryBadge
+                      name={category.name}
+                      icon={category.icon}
+                      color={category.color}
+                    />
+                  </td>
 
                   <td className={`${table_data_classname}`}>
                     {
@@ -297,6 +313,26 @@ export default function CategoryPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <CategoryStylePicker
+                icon={selectedCategory?.icon}
+                color={selectedCategory?.color}
+                onIconChange={(value) => {
+                  if (!selectedCategory) return;
+                  setSelectedCategory({
+                    ...selectedCategory,
+                    icon: value,
+                  });
+                }}
+                onColorChange={(value) => {
+                  if (!selectedCategory) return;
+                  setSelectedCategory({
+                    ...selectedCategory,
+                    color: value,
+                  });
+                }}
+                previewLabel={selectedCategory?.name || "Category"}
+              />
 
               <div className="flex gap-2 pt-2">
                 <Button

@@ -14,9 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import CategoryBadge from "@/components/category-badge";
 
 export type RecurringExpenseRow = RecurringExpense & {
   categoryName: string;
+  categoryIcon?: string;
+  categoryColor?: string;
 };
 
 export const columns = ({
@@ -58,6 +61,13 @@ export const columns = ({
   {
     accessorKey: "categoryName",
     header: "Category",
+    cell: ({ row }) => (
+      <CategoryBadge
+        name={row.original.categoryName}
+        icon={row.original.categoryIcon}
+        color={row.original.categoryColor}
+      />
+    ),
   },
   {
     accessorKey: "recurrence",
@@ -102,7 +112,9 @@ export const columns = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel className="font-extralight">Actions</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-extralight">
+              Actions
+            </DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onEdit(recurringExpense)}>
               Update
             </DropdownMenuItem>
