@@ -157,6 +157,8 @@ function forceLogoutToLogin() {
   }
 }
 
+let refreshPromise: Promise<any> | null = null;
+
 // --- Response interceptor ---
 api.interceptors.response.use(
   (response) => {
@@ -179,19 +181,29 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Try refreshing token
-        await api.get("/users/refresh");
+        if (!refreshPromise) {
+          refreshPromise = api.get("/users/refresh").finally(() => {
+            refreshPromise = null;
+          });
+        }
 
-        // Retry the original request
+        await refreshPromise;
+
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed → redirect to login
         if (
           typeof window !== "undefined" &&
-          !window.location.href.includes("/login")
+          !window.location.pathname.includes("/login") &&
+          !window.location.pathname.match("/") 
         ) {
-          window.location.href = "/login";
+          const redirectUrl = window.location.pathname + window.location.search;
+          console.log("Redirecting to login due to inactive user. Redirect URL:", redirectUrl);
+
+          window.location.href = `/login?redirect=${encodeURIComponent(
+            redirectUrl,
+          )}`;
         }
+
         return Promise.reject(refreshError);
       }
     }
