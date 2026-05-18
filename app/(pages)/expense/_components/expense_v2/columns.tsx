@@ -10,7 +10,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  MoreHorizontal,
+  Paperclip,
+} from "lucide-react";
 import CategoryBadge from "@/components/category-badge";
 
 export type Expense = {
@@ -32,6 +38,7 @@ type CategoryMeta = {
 };
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { FormatAmount } from "@/utils/amount_formatter";
 
 export const columns = (
   userCurrency: string | undefined,
@@ -65,8 +72,40 @@ export const columns = (
       enableHiding: false,
     },
     {
+      accessorKey: "expenseDate",
+      header: ({ column }) => (
+        <div
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="flex cursor-pointer items-center"
+        >
+          Expense Date
+          {column.getIsSorted() == false ? (
+            <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          ) : column.getIsSorted() === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ArrowDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      ),
+    },
+    {
       accessorKey: "description",
       header: "Description",
+      cell: ({ row }) => {
+        const description = row.getValue("description") as string;
+        return (
+          <div
+            className="truncate tracking-tight font-semibold"
+            title={description}
+          >
+            {description}
+            {row.original.receiptUrl && (
+              <Paperclip className="inline-block ml-2 h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "amount",
@@ -87,7 +126,7 @@ export const columns = (
       ),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue("amount"));
-        const formatted = amount.toFixed(2);
+        const formatted = FormatAmount(amount);
 
         return (
           <div className="font-medium">
@@ -97,24 +136,7 @@ export const columns = (
         );
       },
     },
-    {
-      accessorKey: "expenseDate",
-      header: ({ column }) => (
-        <div
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex cursor-pointer items-center"
-        >
-          Expense Date
-          {column.getIsSorted() == false ? (
-            <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
-          ) : column.getIsSorted() === "asc" ? (
-            <ArrowUp className="ml-2 h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ArrowDown className="ml-2 h-4 w-4 text-muted-foreground" />
-          )}
-        </div>
-      ),
-    },
+
     {
       accessorKey: "categoryName",
       header: "Category",

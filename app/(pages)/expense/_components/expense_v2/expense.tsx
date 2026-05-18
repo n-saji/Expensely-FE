@@ -486,7 +486,10 @@ export default function ExpenseTableComponent({
     return key as string;
   }
 
-  const handleAttachmentDelete = async (expenseId: string) => {
+  const handleAttachmentDelete = async (
+    expenseId: string,
+    skipToast?: boolean,
+  ) => {
     try {
       setAttachmentActionLoading(true);
       const response = await api.delete(
@@ -532,7 +535,9 @@ export default function ExpenseTableComponent({
       setAttachmentEditMode(true);
       setAttachmentInputKey((prev) => prev + 1);
       form.setValue("file", undefined);
-      toast.success("Attachment deleted successfully");
+      if (!skipToast) {
+        toast.success("Attachment deleted successfully");
+      }
     } catch (error) {
       console.error("Error deleting attachment:", error);
       toast.error("Failed to delete attachment", {
@@ -635,6 +640,7 @@ export default function ExpenseTableComponent({
 
     try {
       setLoading(true);
+      handleAttachmentDelete(expense.id, true);
       const res = await api.delete(`/expenses/${expense.id}`);
 
       if (res.status !== 200) {
