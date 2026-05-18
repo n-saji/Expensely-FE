@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import validateToken from "@/utils/validate_token";
 
@@ -28,7 +28,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const user = useSelector((state: RootState) => state.user);
-
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
   const redirectToOtpVerification = (id: string, email: string) => {
@@ -83,7 +83,9 @@ export default function LoginForm() {
           return;
         }
 
-        router.push("/dashboard");
+        const redirect = searchParams.get("redirect");
+        console.log("Redirecting to:", redirect);
+        router.replace(redirect?.startsWith("/") ? redirect : "/dashboard");
       }
 
       setLoading(false);
@@ -144,7 +146,9 @@ export default function LoginForm() {
               return;
             }
 
-            router.push("/dashboard");
+            const redirect = searchParams.get("redirect");
+            console.log("Redirecting to:", redirect);
+            router.replace(redirect?.startsWith("/") ? redirect : "/dashboard");
           } else {
             const error = await response.data;
             console.error("Error fetching user data:", error);

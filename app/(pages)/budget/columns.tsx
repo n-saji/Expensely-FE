@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import CategoryBadge from "@/components/category-badge";
 
 export type Budget = {
   id: string;
@@ -26,13 +27,20 @@ export type Budget = {
 };
 
 export const columns = (
-  userCurrency: string | undefined
+  userCurrency: string | undefined,
 ): ColumnDef<Budget>[] => [
   {
     accessorFn: (row) => row.category.name,
     header: "Category",
     cell: ({ row }) => {
-      return <span className="font-medium">{row.getValue("Category")}</span>;
+      const category = row.original.category;
+      return (
+        <CategoryBadge
+          name={category?.name}
+          icon={category?.icon}
+          color={category?.color}
+        />
+      );
     },
   },
   {

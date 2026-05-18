@@ -47,6 +47,7 @@ import api from "@/lib/api";
 import { Label } from "./ui/label";
 import RecurringExpenseForm from "@/components/recurring-expense-form";
 import { BulkLoadResponse, CreateRecurringExpenseReq } from "@/global/dto";
+import CategoryBadge from "@/components/category-badge";
 
 const normalExpenseSchema = z.object({
   categoryId: z.string().min(1, "Please select a category"),
@@ -121,12 +122,9 @@ export default function Slidebar({
 
         // STEP 3: Tell your backend to save the image "key" in the database
         await api
-          .put(
-            `/expenses/update-expense-attachment-url/eid/${expenseId}`,
-            {
-              url: res.data.key, // Send the S3 key to your backend
-            }
-          )
+          .put(`/expenses/update-expense-attachment-url/eid/${expenseId}`, {
+            url: res.data.key, // Send the S3 key to your backend
+          })
           .then((res) => {
             if (res.status === 200) {
               console.log(
@@ -197,7 +195,6 @@ export default function Slidebar({
       }
 
       console.log("Expense creation response:", response.data);
-
 
       try {
         await handleFileUpload(response.data.id);
@@ -487,7 +484,11 @@ export default function Slidebar({
                           <SelectContent>
                             {categories.categories.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
-                                {category.name}
+                                <CategoryBadge
+                                  name={category.name}
+                                  icon={category.icon}
+                                  color={category.color}
+                                />
                               </SelectItem>
                             ))}
                           </SelectContent>

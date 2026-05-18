@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import CategoryBadge from "@/components/category-badge";
 
 interface NewUserOnboardingProps {
   userId: string;
@@ -442,7 +443,11 @@ export default function NewUserOnboarding({
                           <SelectContent>
                             {validExpenseCategories.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
-                                {category.name}
+                                <CategoryBadge
+                                  name={category.name}
+                                  icon={category.icon}
+                                  color={category.color}
+                                />
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -549,7 +554,11 @@ export default function NewUserOnboarding({
                           <SelectContent>
                             {availableBudgetCategories.map((category) => (
                               <SelectItem key={category.id} value={category.id}>
-                                {category.name}
+                                <CategoryBadge
+                                  name={category.name}
+                                  icon={category.icon}
+                                  color={category.color}
+                                />
                               </SelectItem>
                             ))}
                           </SelectContent>

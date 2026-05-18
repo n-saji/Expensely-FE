@@ -75,13 +75,17 @@ export default function RecurringExpensePage() {
   }, [fetchRecurringExpenses]);
 
   const rows = useMemo<RecurringExpenseRow[]>(() => {
-    return recurringExpenses.map((item) => ({
-      ...item,
-      categoryName:
-        categories.categories.find(
-          (category) => category.id === item.categoryId,
-        )?.name || "Unknown",
-    }));
+    return recurringExpenses.map((item) => {
+      const category = categories.categories.find(
+        (category) => category.id === item.categoryId,
+      );
+      return {
+        ...item,
+        categoryName: category?.name || "Unknown",
+        categoryIcon: category?.icon,
+        categoryColor: category?.color,
+      };
+    });
   }, [recurringExpenses, categories.categories]);
 
   const handleDelete = async () => {

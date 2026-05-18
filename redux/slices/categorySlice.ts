@@ -8,6 +8,8 @@ const categoryExpense = createSlice({
         id: "",
         type: "",
         name: "",
+        icon: "",
+        color: "",
       },
     ],
   },
@@ -17,7 +19,7 @@ const categoryExpense = createSlice({
     },
     removeCategory: (state, action) => {
       state.categories = state.categories.filter(
-        (category) => category.id !== action.payload.id
+        (category) => category.id !== action.payload.id,
       );
     },
     setCategories: (state, action) => {

@@ -188,10 +188,11 @@ api.interceptors.response.use(
         // Refresh failed → redirect to login
         if (
           typeof window !== "undefined" &&
-          !window.location.href.includes("/login")
+          !window.location.pathname.includes("/login")
         ) {
-          window.location.href = "/login";
+          window.location.href = `/login`;
         }
+
         return Promise.reject(refreshError);
       }
     }

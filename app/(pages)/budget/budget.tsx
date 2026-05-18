@@ -65,6 +65,7 @@ import {
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import CategoryBadge from "@/components/category-badge";
 
 const budgetSchema = z.object({
   Category: z.object({
@@ -148,6 +149,8 @@ export default function Page() {
           category: {
             id: b.category.id,
             name: b.category.name,
+            icon: b.category.icon,
+            color: b.category.color,
           } as categorySkeleton,
           period: b.period,
           amountLimit: b.amountLimit,
@@ -291,6 +294,8 @@ export default function Page() {
               category: {
                 id: b.category.id,
                 name: b.category.name,
+                icon: b.category.icon,
+                color: b.category.color,
               } as categorySkeleton,
               period: b.period,
               amountLimit: b.amountLimit,
@@ -551,7 +556,11 @@ export default function Page() {
                         <SelectContent>
                           {categories.categories.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
-                              {category.name}
+                              <CategoryBadge
+                                name={category.name}
+                                icon={category.icon}
+                                color={category.color}
+                              />
                             </SelectItem>
                           ))}
                         </SelectContent>

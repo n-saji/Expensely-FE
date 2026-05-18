@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import CategoryBadge from "@/components/category-badge";
 
 export type IncomeRow = {
   id: string;
@@ -24,14 +25,23 @@ export type IncomeRow = {
   currency: string;
 };
 
+type CategoryMeta = {
+  id: string;
+  name?: string;
+  icon?: string;
+  color?: string;
+};
+
 export const columns = ({
   userCurrency,
   onEdit,
   onDelete,
+  categories = [],
 }: {
   userCurrency?: string;
   onEdit: (row: IncomeRow) => void;
   onDelete: (row: IncomeRow) => void;
+  categories?: CategoryMeta[];
 }): ColumnDef<IncomeRow>[] => [
   {
     id: "select",
@@ -83,6 +93,18 @@ export const columns = ({
   {
     accessorKey: "categoryName",
     header: "Category",
+    cell: ({ row }) => {
+      const category = categories.find(
+        (item) => item.id === row.original.categoryId,
+      );
+      return (
+        <CategoryBadge
+          name={row.original.categoryName}
+          icon={category?.icon}
+          color={category?.color}
+        />
+      );
+    },
   },
   {
     accessorKey: "incomeDate",

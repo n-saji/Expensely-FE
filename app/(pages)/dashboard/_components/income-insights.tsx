@@ -6,8 +6,14 @@ import PieChartComp, {
   ExpensesTop5Monthly,
   YearlyExpenseLineChartV2,
 } from "@/components/ExpenseChartCard";
-import { OverviewEnum, IncomeOverview, ExpenseOverviewV2 } from "@/global/dto";
+import {
+  Category,
+  OverviewEnum,
+  IncomeOverview,
+  ExpenseOverviewV2,
+} from "@/global/dto";
 import { currencyMapper } from "@/utils/currencyMapper";
+import { useMemo } from "react";
 
 interface IncomeInsightsProps {
   userCurrency?: string;
@@ -31,6 +37,7 @@ interface IncomeInsightsProps {
   setIncomeOverviewParams: React.Dispatch<
     React.SetStateAction<{ count?: number; type?: OverviewEnum }>
   >;
+  incomeCategories?: Category[];
 }
 
 export function IncomeInsightCards({
@@ -98,7 +105,16 @@ export function IncomeInsightCharts({
   setIncomeCurrentMonthYear,
   incomeOverviewParams,
   setIncomeOverviewParams,
+  incomeCategories,
 }: Omit<IncomeInsightsProps, "incomeItemName" | "incomeItemValue">) {
+  const categoryMetaByName = useMemo(() => {
+    return Object.fromEntries(
+      (incomeCategories || [])
+        .filter((category) => category.name)
+        .map((category) => [category.name as string, category]),
+    );
+  }, [incomeCategories]);
+
   return (
     <section className="space-y-6">
       <YearlyExpenseLineChartV2
@@ -109,6 +125,7 @@ export function IncomeInsightCharts({
         currency={userCurrency}
         setOverviewParams={setIncomeOverviewParams}
         overviewParams={incomeOverviewParams}
+        categoryMetaByName={categoryMetaByName}
         loading={incomeOverviewV2Loading || incomeOverviewV2 === null}
       />
 
@@ -120,6 +137,7 @@ export function IncomeInsightCharts({
           setCurrentYearForYearly={setIncomeCurrentYearForYearly}
           currentYearForYearly={incomeCurrentYearForYearly}
           min_year={minIncomeYear}
+          categoryMetaByName={categoryMetaByName}
           loading={loadingIncomeYear || incomeOverview === null}
         />
 
@@ -175,6 +193,7 @@ export default function IncomeInsightsSection(props: IncomeInsightsProps) {
         setIncomeCurrentMonthYear={props.setIncomeCurrentMonthYear}
         incomeOverviewParams={props.incomeOverviewParams}
         setIncomeOverviewParams={props.setIncomeOverviewParams}
+        incomeCategories={props.incomeCategories}
       />
     </section>
   );

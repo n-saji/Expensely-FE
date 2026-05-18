@@ -158,6 +158,8 @@ export default function DashboardPage({
               id: category.id,
               type: category.type,
               name: category.name,
+              icon: category.icon,
+              color: category.color,
             })),
           ),
         );
