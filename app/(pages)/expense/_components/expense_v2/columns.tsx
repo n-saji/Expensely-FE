@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import CategoryBadge from "@/components/category-badge";
 
 export type Expense = {
@@ -76,7 +76,13 @@ export const columns = (
           className="flex cursor-pointer items-center"
         >
           Amount
-          <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          {column.getIsSorted() == false ? (
+            <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          ) : column.getIsSorted() === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ArrowDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          )}
         </div>
       ),
       cell: ({ row }) => {
@@ -99,7 +105,13 @@ export const columns = (
           className="flex cursor-pointer items-center"
         >
           Expense Date
-          <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          {column.getIsSorted() == false ? (
+            <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          ) : column.getIsSorted() === "asc" ? (
+            <ArrowUp className="ml-2 h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ArrowDown className="ml-2 h-4 w-4 text-muted-foreground" />
+          )}
         </div>
       ),
     },

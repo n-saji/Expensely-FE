@@ -14,7 +14,7 @@ type CategoryBadgeProps = {
   className?: string;
 };
 
-const toRgba = (hex: string, alpha: number) => {
+export const toRgba = (hex: string, alpha: number) => {
   const normalized = normalizeCategoryColor(hex, DEFAULT_CATEGORY_COLOR);
   const raw = normalized.replace("#", "");
   const full =

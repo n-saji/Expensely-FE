@@ -487,7 +487,13 @@ export default function DashboardPage() {
           <CardComponent
             title={`${monthLabel} Income`}
             icon={<Banknote className="h-4 w-4" />}
-            accentColor="#22c55e"
+            accentColor={
+              (incomeOverview?.thisMonthTotalIncome || 0) -
+                (incomeOverview?.lastMonthTotalIncome || 0) >
+              0
+                ? "#22c55e"
+                : "#ef4444"
+            }
             cardAction={
               incomeOverview && (
                 <div
@@ -678,12 +684,9 @@ export default function DashboardPage() {
                           />
                           <div className="flex flex-wrap justify-between gap-2 items-center">
                             <div className="flex items-center gap-2">
-                              <CategoryBadge
-                                icon={budget.category.icon}
-                                color={budget.category.color}
-                                name={budget.category.name}
-                                className="text-sm font-medium text-foreground"
-                              />
+                              <Label className="text-sm font-medium text-foreground">
+                                {budget.category.name}
+                              </Label>
 
                               {budgetIcon(
                                 budget.amountSpent,

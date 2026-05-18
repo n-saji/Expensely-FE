@@ -109,7 +109,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -128,7 +128,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                )
+                ),
               )}
             </TableBody>
           ) : (
@@ -142,7 +142,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                     {row.getVisibleCells().map((cell) => {
                       if (cell.column.id == "expenseDate") {
                         const date = new Date(
-                          cell.getValue() as string
+                          cell.getValue() as string,
                         ).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "short",
@@ -154,7 +154,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       );
