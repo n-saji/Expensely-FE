@@ -51,13 +51,11 @@ export default function ProfilePage({
   const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("");
   const [phone, setPhone] = useState("");
-  const [currency, setCurrency] = useState("");
   const [initialProfile, setInitialProfile] = useState({
     name: "",
     email: "",
     countryCode: "",
     phone: "",
-    currency: "",
   });
   const togglePopup = useSelector(
     (state: RootState) => state.sidebar.popUpEnabled,
@@ -70,21 +68,18 @@ export default function ProfilePage({
     email?: string;
     country_code?: string;
     phone?: string;
-    currency?: string;
   }) => {
     const currentValues = {
       name: profile.name ?? "",
       email: profile.email ?? "",
       countryCode: profile.country_code ?? "",
       phone: profile.phone ?? "",
-      currency: profile.currency ?? "",
     };
 
     setName(currentValues.name);
     setEmail(currentValues.email);
     setCountryCode(currentValues.countryCode);
     setPhone(currentValues.phone);
-    setCurrency(currentValues.currency);
     setInitialProfile(currentValues);
   };
 
@@ -124,7 +119,7 @@ export default function ProfilePage({
   }, []);
 
   const handleProfileUpdate = async () => {
-    if (!name || !email || !countryCode || !phone || !currency) {
+    if (!name || !email || !countryCode || !phone) {
       setError("All fields are required.");
       return;
     }
@@ -141,7 +136,6 @@ export default function ProfilePage({
         email,
         country_code: countryCode,
         phone,
-        currency,
         id: userId,
         profileComplete: isProfileComplete,
       })
@@ -157,7 +151,6 @@ export default function ProfilePage({
             name: name,
             country_code: countryCode,
             phone: phone,
-            currency: currency,
             id: userId ?? user.id,
             profileComplete: isProfileComplete,
           }),
@@ -167,7 +160,6 @@ export default function ProfilePage({
           email,
           countryCode,
           phone,
-          currency,
         });
         setEdit(false);
 
@@ -294,7 +286,6 @@ export default function ProfilePage({
     setEmail(initialProfile.email);
     setCountryCode(initialProfile.countryCode);
     setPhone(initialProfile.phone);
-    setCurrency(initialProfile.currency);
     setError("");
     setEdit(false);
   };
@@ -438,12 +429,6 @@ export default function ProfilePage({
               </span>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
-              <span>Currency</span>
-              <span className="font-medium text-foreground">
-                {currency || "-"}
-              </span>
-            </div>
-            <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
               <span>Phone</span>
               <span className="font-medium text-foreground">
                 {phone || "-"}
@@ -532,22 +517,6 @@ export default function ProfilePage({
               )}
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="currency" className="text-muted-foreground">
-                Preferred Currency
-              </Label>
-              {edit ? (
-                <Input
-                  id="currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                />
-              ) : (
-                <div className="flex h-10 items-center rounded-md border border-border/70 bg-background px-3">
-                  <span>{currency || "-"}</span>
-                </div>
-              )}
-            </div>
           </CardContent>
           <CardFooter className="flex flex-col items-stretch justify-between gap-3 border-t border-border/60 bg-muted/10 py-4 md:flex-row md:items-center">
             {error ? (

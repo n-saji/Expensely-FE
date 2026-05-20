@@ -3,12 +3,17 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
-import { columns, Expense } from "./columns";
+import { columns, ExpenseRow } from "./columns";
 import { DataTable } from "./data-table";
 import { RootState } from "@/redux/store";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import api from "@/lib/api";
-import { ExpenseOverview, ExpenseOverviewV2, OverviewEnum } from "@/global/dto";
+import {
+  ExpenseOverview,
+  ExpenseOverviewV2,
+  ExpenseResponse,
+  OverviewEnum,
+} from "@/global/dto";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -90,34 +95,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import DropDown from "@/components/drop-down";
 import { Label } from "@/components/ui/label";
 import useMediaQuery from "@/utils/useMediaQuery";
+import CurrencyDrawer from "@/components/currency-drawer";
 import {
   ExpenseInsightCards,
   ExpenseInsightCharts,
 } from "../../../dashboard/_components/expense-insights";
 
-interface expense {
-  id: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  category: {
-    id: string;
-    name: string;
-  };
-  amount: number;
-  description: string;
-  expenseDate: string;
-  categoryId: string;
-  categoryName: string;
-  userId: string;
-  currency: string;
-  receiptUrl?: string | null;
-}
-
 interface ExpenseListProps {
-  expenses: expense[];
+  expenses: ExpenseResponse[];
   totalPages: number;
   totalElements: number;
   pageNumber: number;
@@ -153,17 +138,21 @@ export default function ExpenseTableComponent({
   const user = useSelector((state: RootState) => state.user);
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
-  const [datas, setDatas] = useState<Expense[]>([]);
+  const [datas, setDatas] = useState<ExpenseRow[]>([]);
   const isExpenseMountedV2 = useRef(false);
   const skipInitialDebouncedFetchRef = useRef(true);
   const [pageNumber, setPageNumber] = useState(() =>
     parsePositiveInt(searchParams.get("page"), 1),
   );
-  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<ExpenseRow | null>(
+    null,
+  );
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
+  const [expenseToEdit, setExpenseToEdit] = useState<ExpenseRow | null>(null);
   const categories = useSelector((state: RootState) => state.categoryExpense);
-  const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
+  const [selectedExpenses, setSelectedExpenses] = useState<ExpenseResponse[]>(
+    [],
+  );
   const [categoryFilter, setCategoryFilter] = useState(
     () => searchParams.get("category") ?? "",
   );
@@ -227,6 +216,23 @@ export default function ExpenseTableComponent({
     count: 6,
     type: OverviewEnum.MONTH,
   });
+
+  const mapExpenseToRow = useCallback(
+    (expense: ExpenseResponse): ExpenseRow => ({
+      id: expense.id,
+      amount: expense.amount,
+      displayAmount: expense.displayAmount ?? expense.amount,
+      description: expense.description,
+      expenseDate: expense.expenseDate,
+      categoryId: expense.categoryId,
+      categoryName: expense.categoryName,
+      currency: expense.currency,
+      displayCurrency:
+        expense.displayCurrency || user.currency || expense.currency || "USD",
+      receiptUrl: expense.receiptUrl,
+    }),
+    [user.currency],
+  );
 
   useEffect(() => {
     const selectedRows = expensesList.expenses.filter(
@@ -384,16 +390,7 @@ export default function ExpenseTableComponent({
           pageNumber: data.pageNumber,
         });
 
-        const formatedData = data.expenses.map((expense: Expense) => ({
-          id: expense.id,
-          amount: expense.amount,
-          description: expense.description,
-          expenseDate: expense.expenseDate,
-          categoryId: expense.categoryId,
-          categoryName: expense.categoryName,
-          currency: expense.currency,
-          receiptUrl: expense.receiptUrl,
-        }));
+        const formatedData = data.expenses.map(mapExpenseToRow);
         setDatas(formatedData);
       } catch (error) {
         console.error("Error fetching expenses:", error);
@@ -635,7 +632,7 @@ export default function ExpenseTableComponent({
     }
   }
 
-  const handleDelete = async (expense: Expense | null) => {
+  const handleDelete = async (expense: ExpenseRow | null) => {
     if (!expense) return;
 
     try {
@@ -670,7 +667,7 @@ export default function ExpenseTableComponent({
           q: query,
         });
         setExpensesList(expenses);
-        const formatedData = expenses.expenses.map((expense: Expense) => ({
+        const formatedData = expenses.expenses.map((expense: ExpenseRow) => ({
           id: expense.id,
           amount: expense.amount,
           description: expense.description,
@@ -679,7 +676,7 @@ export default function ExpenseTableComponent({
           categoryName: expense.categoryName,
           currency: expense.currency,
           receiptUrl: expense.receiptUrl,
-        }));
+        })) as ExpenseRow[];
         setDatas(formatedData);
       } catch (error) {
         console.error("Error fetching expenses:", error);
@@ -720,16 +717,7 @@ export default function ExpenseTableComponent({
         });
 
         setExpensesList(data);
-        const formatedData = data.expenses.map((expense: Expense) => ({
-          id: expense.id,
-          amount: expense.amount,
-          description: expense.description,
-          expenseDate: expense.expenseDate,
-          categoryId: expense.categoryId,
-          categoryName: expense.categoryName,
-          currency: expense.currency,
-          receiptUrl: expense.receiptUrl,
-        }));
+        const formatedData = data.expenses.map(mapExpenseToRow);
         setDatas(formatedData);
       } catch (error) {
         console.error("Error fetching expenses:", error);
@@ -829,7 +817,7 @@ export default function ExpenseTableComponent({
         return {
           ...col,
           cell: ({ row }: any) => {
-            const expense: Expense = row.original;
+            const expense: ExpenseRow = row.original;
             return (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -929,16 +917,7 @@ export default function ExpenseTableComponent({
           q: query,
         });
         setExpensesList(expenses);
-        const formatedData = expenses.expenses.map((expense: Expense) => ({
-          id: expense.id,
-          amount: expense.amount,
-          description: expense.description,
-          expenseDate: expense.expenseDate,
-          categoryId: expense.categoryId,
-          categoryName: expense.categoryName,
-          currency: expense.currency,
-          receiptUrl: expense.receiptUrl,
-        }));
+        const formatedData = expenses.expenses.map(mapExpenseToRow);
         setDatas(formatedData);
       } catch (error) {
         console.error("Error fetching expenses:", error);
@@ -1223,25 +1202,45 @@ export default function ExpenseTableComponent({
                   )}
                 />
 
-                {/* Amount */}
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  defaultValue={form.getValues("amount")}
-                  render={({ field }) => (
-                    <FormItem className="mt-4">
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Enter expense amount"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Amount + Currency */}
+                <div className="mt-4 flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem className="w-32">
+                        <FormLabel>Currency</FormLabel>
+                        <FormControl>
+                          <CurrencyDrawer
+                            value={field.value}
+                            onChange={field.onChange}
+                            userCurrency={user.currency}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    defaultValue={form.getValues("amount")}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Enter expense amount"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* Category */}
                 <FormField
@@ -1448,7 +1447,7 @@ const SearchAndFilter = ({
 }: {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
-  selectedExpenses: Expense[];
+  selectedExpenses: ExpenseRow[];
   handleBulkDelete: () => void;
   categories: RootState["categoryExpense"];
   categoryFilter: string;

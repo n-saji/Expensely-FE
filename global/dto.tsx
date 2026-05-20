@@ -155,6 +155,21 @@ export interface BulkLoadResponse {
   }>;
 }
 
+export interface ExpenseResponse {
+  id: string;
+  description: string;
+  expenseDate: string;
+  categoryId: string;
+  categoryName: string;
+  userId: string;
+  receiptUrl?: string | null;
+  amount: number;
+  currency: string;
+  baseCurrencyAmount: number;
+  displayAmount: number;
+  displayCurrency: string;
+}
+
 export enum OverviewEnum {
   MONTH = "MONTH",
   YEAR = "YEAR",
@@ -173,6 +188,7 @@ export interface RecurringExpense {
   userId: string;
   categoryId: string;
   amount: number;
+  currency: string;
   description: string;
   recurrence: Recurrence;
   date: string;
@@ -183,6 +199,7 @@ export interface RecurringExpense {
 export interface CreateRecurringExpenseReq {
   categoryId: string;
   amount: number;
+  currency: string;
   description: string;
   recurrence: Recurrence;
   date: string;
@@ -191,6 +208,7 @@ export interface CreateRecurringExpenseReq {
 export interface UpdateRecurringExpenseReq {
   id: string;
   amount: number;
+  currency: string;
   description: string;
   recurrence: Recurrence;
   date: string;

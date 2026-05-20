@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -36,6 +36,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
 import CategoryBadge from "@/components/category-badge";
+import CurrencyDrawer from "@/components/currency-drawer";
 
 function getTomorrowDateString() {
   const tomorrow = new Date();
@@ -46,6 +47,7 @@ function getTomorrowDateString() {
 const recurringSchema = z.object({
   categoryId: z.string().optional(),
   amount: z.coerce.number().positive("Amount must be greater than 0"),
+  currency: z.string().min(1, "Currency is required"),
   description: z.string().min(1, "Description is required"),
   recurrence: z.nativeEnum(Recurrence),
   date: z
@@ -82,6 +84,7 @@ export default function RecurringExpenseForm({
   const [loading, setLoading] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const categories = useSelector((state: RootState) => state.categoryExpense);
+  const userCurrency = useSelector((state: RootState) => state.user.currency);
 
   const tomorrow = useMemo(() => getTomorrowDateString(), []);
   const form = useForm<RecurringFormValues>({
@@ -89,11 +92,18 @@ export default function RecurringExpenseForm({
     defaultValues: {
       categoryId: initialValues?.categoryId || "",
       amount: initialValues?.amount || 0,
+      currency: initialValues?.currency || userCurrency || "USD",
       description: initialValues?.description || "",
       recurrence: initialValues?.recurrence || Recurrence.Monthly,
       date: initialValues?.date || tomorrow,
     },
   });
+
+  useEffect(() => {
+    if (!form.getValues("currency") && userCurrency) {
+      form.setValue("currency", userCurrency || "USD");
+    }
+  }, [form, userCurrency]);
 
   const handleSubmit = async (data: RecurringFormValues) => {
     if (showCategory && !data.categoryId) {
@@ -109,6 +119,7 @@ export default function RecurringExpenseForm({
       await onSubmit({
         categoryId: data.categoryId || "",
         amount: data.amount,
+        currency: data.currency,
         description: data.description,
         recurrence: data.recurrence,
         date: data.date,
@@ -178,19 +189,39 @@ export default function RecurringExpenseForm({
             />
           )}
 
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Amount</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" min="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-2">
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem className="w-32">
+                  <FormLabel>Currency</FormLabel>
+                  <FormControl>
+                    <CurrencyDrawer
+                      value={field.value}
+                      onChange={field.onChange}
+                      userCurrency={userCurrency}
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="0.01" min="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}

@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import CategoryBadge from "@/components/category-badge";
+import CurrencyDrawer from "@/components/currency-drawer";
 
 interface NewUserOnboardingProps {
   userId: string;
@@ -47,6 +48,7 @@ interface ExpenseFormState {
   categoryId: string;
   description: string;
   amount: string;
+  currency: string;
   expenseDate: string;
 }
 
@@ -94,6 +96,7 @@ export default function NewUserOnboarding({
   const expenseCategories = useSelector(
     (state: RootState) => state.categoryExpense.categories,
   );
+  const userCurrency = useSelector((state: RootState) => state.user.currency);
 
   const validExpenseCategories = useMemo(
     () => expenseCategories.filter((category) => category.id),
@@ -110,8 +113,18 @@ export default function NewUserOnboarding({
     categoryId: "",
     description: "",
     amount: "",
+    currency: userCurrency || "USD",
     expenseDate: getTodayDateString(),
   });
+
+  useEffect(() => {
+    if (!expenseForm.currency && userCurrency) {
+      setExpenseForm((prev) => ({
+        ...prev,
+        currency: userCurrency || "USD",
+      }));
+    }
+  }, [expenseForm.currency, userCurrency]);
 
   const defaultBudgetPeriod = Period.Monthly;
   const defaultBudgetRange = getPeriodBoundaries(defaultBudgetPeriod);
@@ -231,6 +244,7 @@ export default function NewUserOnboarding({
         category: { id: expenseForm.categoryId },
         description: expenseForm.description.trim(),
         amount: parsedAmount,
+        currency: expenseForm.currency,
         expenseDate:
           expenseDate.toISOString().slice(0, 10) +
           "T" +
@@ -249,6 +263,7 @@ export default function NewUserOnboarding({
         categoryId: "",
         description: "",
         amount: "",
+        currency: userCurrency || "USD",
         expenseDate: getTodayDateString(),
       });
       setExpenseOpen(false);
@@ -463,19 +478,32 @@ export default function NewUserOnboarding({
                         }
                         placeholder="Description"
                       />
-                      <Input
-                        value={expenseForm.amount}
-                        onChange={(event) =>
-                          setExpenseForm((prev) => ({
-                            ...prev,
-                            amount: event.target.value,
-                          }))
-                        }
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="Amount"
-                      />
+                      <div className="flex gap-2">
+                        <CurrencyDrawer
+                          value={expenseForm.currency}
+                          onChange={(currency) =>
+                            setExpenseForm((prev) => ({
+                              ...prev,
+                              currency,
+                            }))
+                          }
+                          userCurrency={userCurrency}
+                          className="w-28"
+                        />
+                        <Input
+                          value={expenseForm.amount}
+                          onChange={(event) =>
+                            setExpenseForm((prev) => ({
+                              ...prev,
+                              amount: event.target.value,
+                            }))
+                          }
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Amount"
+                        />
+                      </div>
                       <Input
                         type="date"
                         value={expenseForm.expenseDate}

@@ -48,10 +48,12 @@ import { Label } from "./ui/label";
 import RecurringExpenseForm from "@/components/recurring-expense-form";
 import { BulkLoadResponse, CreateRecurringExpenseReq } from "@/global/dto";
 import CategoryBadge from "@/components/category-badge";
+import CurrencyDrawer from "@/components/currency-drawer";
 
 const normalExpenseSchema = z.object({
   categoryId: z.string().min(1, "Please select a category"),
   amount: z.coerce.number().positive("Please enter a valid amount"),
+  currency: z.string().min(1, "Please select a currency"),
   description: z.string().trim().min(1, "Please enter a description"),
   expenseDate: z.string().min(1, "Please select a date"),
   file: z.instanceof(File).optional(),
@@ -80,6 +82,7 @@ export default function Slidebar({
       id: "",
     },
     amount: "",
+    currency: user.currency || "USD",
     description: "",
     expenseDate: new Date().toISOString().slice(0, 10),
     file: undefined as File | undefined,
@@ -93,6 +96,12 @@ export default function Slidebar({
     useState<BulkLoadResponse | null>(null);
   const [normalExpenseErrors, setNormalExpenseErrors] =
     useState<NormalExpenseErrors>({});
+
+  React.useEffect(() => {
+    if (!expense.currency && user.currency) {
+      setExpense((prev) => ({ ...prev, currency: user.currency || "USD" }));
+    }
+  }, [expense.currency, user.currency]);
 
   async function handleFileUpload(expenseId: string) {
     const file = expense.file;
@@ -155,6 +164,7 @@ export default function Slidebar({
     const validation = normalExpenseSchema.safeParse({
       categoryId: expense.category.id,
       amount: expense.amount,
+      currency: expense.currency,
       description: expense.description,
       expenseDate: expense.expenseDate,
       file: expense.file,
@@ -165,6 +175,7 @@ export default function Slidebar({
       setNormalExpenseErrors({
         categoryId: fieldErrors.categoryId?.[0],
         amount: fieldErrors.amount?.[0],
+        currency: fieldErrors.currency?.[0],
         description: fieldErrors.description?.[0],
         expenseDate: fieldErrors.expenseDate?.[0],
         file: fieldErrors.file?.[0],
@@ -212,6 +223,7 @@ export default function Slidebar({
           id: "",
         },
         amount: "",
+        currency: user.currency || "USD",
         description: "",
         expenseDate: new Date().toISOString().slice(0, 10),
         file: undefined,
@@ -504,25 +516,48 @@ export default function Slidebar({
 
                       <Field>
                         <FieldLabel htmlFor="amount">Amount</FieldLabel>
-                        <Input
-                          id="amount"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="Amount"
-                          value={expense.amount}
-                          onChange={(e) => {
-                            setExpense({
-                              ...expense,
-                              amount: e.target.value,
-                            });
-                            if (normalExpenseErrors.amount) {
-                              setNormalExpenseErrors((prev) => ({
-                                ...prev,
-                                amount: undefined,
-                              }));
-                            }
-                          }}
+                        <div className="flex gap-2">
+                          <CurrencyDrawer
+                            value={expense.currency}
+                            onChange={(currency) => {
+                              setExpense((prev) => ({ ...prev, currency }));
+                              if (normalExpenseErrors.currency) {
+                                setNormalExpenseErrors((prev) => ({
+                                  ...prev,
+                                  currency: undefined,
+                                }));
+                              }
+                            }}
+                            userCurrency={user.currency}
+                            className="w-28"
+                          />
+                          <Input
+                            id="amount"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Amount"
+                            value={expense.amount}
+                            onChange={(e) => {
+                              setExpense({
+                                ...expense,
+                                amount: e.target.value,
+                              });
+                              if (normalExpenseErrors.amount) {
+                                setNormalExpenseErrors((prev) => ({
+                                  ...prev,
+                                  amount: undefined,
+                                }));
+                              }
+                            }}
+                          />
+                        </div>
+                        <FieldError
+                          errors={
+                            normalExpenseErrors.currency
+                              ? [{ message: normalExpenseErrors.currency }]
+                              : undefined
+                          }
                         />
                         <FieldError
                           errors={

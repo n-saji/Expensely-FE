@@ -19,14 +19,16 @@ import {
 } from "lucide-react";
 import CategoryBadge from "@/components/category-badge";
 
-export type Expense = {
+export type ExpenseRow = {
   id: string;
   amount: number;
+  displayAmount: number;
   description: string;
   expenseDate: string;
   categoryId: string;
   categoryName: string;
   currency: string;
+  displayCurrency: string;
   receiptUrl?: string | null;
 };
 
@@ -43,7 +45,7 @@ import { FormatAmount } from "@/utils/amount_formatter";
 export const columns = (
   userCurrency: string | undefined,
   categories: CategoryMeta[] = [],
-): ColumnDef<Expense>[] => {
+): ColumnDef<ExpenseRow>[] => {
   const categoryMap = new Map(
     categories.map((category) => [category.id, category]),
   );
@@ -101,14 +103,18 @@ export const columns = (
           >
             {description}
             {row.original.receiptUrl && (
-              <Paperclip className="inline-block ml-2 h-4 w-4 text-muted-foreground" aria-label="Receipt" />
+              <Paperclip
+                className="inline-block ml-2 h-4 w-4 text-muted-foreground"
+                aria-label="Receipt"
+              />
             )}
           </div>
         );
       },
     },
     {
-      accessorKey: "amount",
+      id: "amount",
+      accessorKey: "displayAmount",
       header: ({ column }) => (
         <div
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -125,12 +131,19 @@ export const columns = (
         </div>
       ),
       cell: ({ row }) => {
-        const amount = parseFloat(row.getValue("amount"));
+        const amount = Number(
+          row.original.displayAmount ?? row.original.amount,
+        );
         const formatted = FormatAmount(amount);
+        const currency =
+          row.original.displayCurrency ||
+          row.original.currency ||
+          userCurrency ||
+          "USD";
 
         return (
           <div className="font-medium">
-            {userCurrency ? currencyMapper(userCurrency) : "$"}
+            {currencyMapper(currency)}
             {formatted}
           </div>
         );
