@@ -707,7 +707,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                             <span>
-                              {currency}
+                              { currency}
                               {budget.amountSpent.toFixed(2)} / {currency}
                               {budget.amountLimit.toFixed(2)}
                             </span>
@@ -784,7 +784,7 @@ export default function DashboardPage() {
                           className="text-xs text-muted-foreground mt-0.5"
                           style={{ fontFeatureSettings: '"tnum"' }}
                         >
-                          {currency}
+                          {currencyMapper(expense.currency)}
                           {expense.amount.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,

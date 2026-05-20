@@ -87,6 +87,7 @@ export interface UpcomingRecurringExpense {
   date: string;
   nextOccurrence: string;
   active: boolean;
+  currency: string;
 }
 export interface ExpenseOverviewV2 {
   amountByMonthV2: Record<string, number>;

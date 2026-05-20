@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Edit2 } from "lucide-react";
 import api from "@/lib/api";
+import { Spinner } from "@/components/ui/spinner";
 import {
   DEFAULT_THEME_COLOR,
   THEME_COLOR_IDS,
@@ -205,8 +206,8 @@ export default function SettingsPage() {
       Boolean(user.country_code) &&
       Boolean(user.phone);
 
-    await api
-      .patch(`/users/update-profile`, {
+    try {
+      const response = await api.patch(`/users/update-profile`, {
         name: user.name,
         email: user.email,
         country_code: user.country_code,
@@ -214,25 +215,33 @@ export default function SettingsPage() {
         currency,
         id: user.id,
         profileComplete: isProfileComplete,
-      })
-      .then((response) => {
-        if (response.status !== 200) {
-          throw new Error("Failed to update preferred currency.");
-        }
-        dispatch(
-          setUser({
-            ...user,
-            currency,
-            profileComplete: isProfileComplete,
-          }),
-        );
-        toast.success("Preferred currency updated.");
-      })
-      .catch((error) => {
-        console.error("Error updating currency:", error);
-        toast.error("Failed to update preferred currency.");
       });
+
+      if (response.status !== 200) {
+        throw new Error("Failed to update preferred currency.");
+      }
+
+      dispatch(
+        setUser({
+          ...user,
+          currency,
+          profileComplete: isProfileComplete,
+        }),
+      );
+      toast.success("Preferred currency updated.");
+      return true;
+    } catch (error) {
+      console.error("Error updating currency:", error);
+      toast.error("Failed to update preferred currency.");
+      return false;
+    }
   };
+
+  const [isCurrencyDialogOpen, setIsCurrencyDialogOpen] = useState(false);
+  const [currencyDraft, setCurrencyDraft] = useState<string>(
+    user.currency || "USD",
+  );
+  const [currencySaving, setCurrencySaving] = useState(false);
 
   return (
     <div className="w-full space-y-6">
@@ -341,26 +350,80 @@ export default function SettingsPage() {
                 Set the default currency for your expense display.
               </CardDescription>
               <CardAction>
-                <Select
-                  value={user.currency || "USD"}
-                  onValueChange={handleCurrencyUpdate}
+                <Dialog
+                  open={isCurrencyDialogOpen}
+                  onOpenChange={(open) => {
+                    setIsCurrencyDialogOpen(open);
+                    if (open) setCurrencyDraft(user.currency || "USD");
+                  }}
                 >
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {orderedCurrencyCodes.map((code) => (
-                      <SelectItem key={code} value={code}>
-                        <span className="flex items-center gap-2">
-                          <span className="font-medium">{code}</span>
-                          <span className="text-muted-foreground">
-                            {currencyMap[code] || code}
-                          </span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <span className="font-medium">{user.currency || "USD"}</span>
+                      <span className="text-muted-foreground">
+                        {currencyMap[user.currency || "USD"] || user.currency || "USD"}
+                      </span>
+                      <Edit2 className="ml-1" />
+                    </Button>
+                  </DialogTrigger>
+
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Preferred Currency</DialogTitle>
+                      <DialogDescription>
+                        Choose your default currency for expense display.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="mt-2 space-y-4">
+                      <Label>Currency</Label>
+                      <Select value={currencyDraft} onValueChange={setCurrencyDraft}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {orderedCurrencyCodes.map((code) => (
+                            <SelectItem key={code} value={code}>
+                              <span className="flex items-center gap-2">
+                                <span className="font-medium">{code}</span>
+                                <span className="text-muted-foreground">
+                                  {currencyMap[code] || code}
+                                </span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <DialogFooter>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setIsCurrencyDialogOpen(false)}
+                        disabled={currencySaving}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          setCurrencySaving(true);
+                          const ok = await handleCurrencyUpdate(currencyDraft);
+                          setCurrencySaving(false);
+                          if (ok) setIsCurrencyDialogOpen(false);
+                        }}
+                        disabled={currencySaving}
+                      >
+                        {currencySaving ? (
+                          <>
+                            <Spinner /> Saving...
+                          </>
+                        ) : (
+                          "Save"
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CardAction>
             </CardHeader>
           </Card>

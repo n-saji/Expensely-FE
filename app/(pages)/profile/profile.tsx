@@ -516,7 +516,6 @@ export default function ProfilePage({
                 </div>
               )}
             </div>
-
           </CardContent>
           <CardFooter className="flex flex-col items-stretch justify-between gap-3 border-t border-border/60 bg-muted/10 py-4 md:flex-row md:items-center">
             {error ? (
