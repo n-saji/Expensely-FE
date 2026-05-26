@@ -324,10 +324,10 @@ export default function Page() {
       const api_url = "/budgets/" + budgetToEdit?.id;
       const budgetData: BudgetReq = {
         category: {
-          id: data.Category.id,
+          id: "",
         },
         user: {
-          id: data.User.id,
+          id: "",
         },
         amountLimit: data.amountLimit,
         currency: data.currency,
@@ -338,8 +338,10 @@ export default function Page() {
       const response = await api.put(api_url, budgetData);
       const resData = await response.data;
 
+      console.log(resData, response);
+
       if (response.status !== 200) {
-        toast("Failed to create budget", {
+        toast("Failed to edit budget", {
           description: resData.error || "Something went wrong.",
         });
         return;
@@ -945,44 +947,46 @@ export default function Page() {
                   )}
                 />
 
-                {/* Amount */}
-                <FormField
-                  control={form.control}
-                  name="amountLimit"
-                  defaultValue={form.getValues("amountLimit")}
-                  render={({ field }) => (
-                    <FormItem className="mt-4">
-                      <FormLabel>Amount Limit</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Enter budget amount"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="flex gap-2 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem >
+                        <FormLabel>Currency</FormLabel>
+                        <FormControl>
+                          <CurrencyDrawer
+                            value={field.value}
+                            onChange={field.onChange}
+                            userCurrency={user.currency}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Amount */}
+                  <FormField
+                    control={form.control}
+                    name="amountLimit"
+                    defaultValue={form.getValues("amountLimit")}
+                    render={({ field }) => (
+                      <FormItem >
+                        <FormLabel>Amount Limit</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Enter budget amount"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                {/* Currency */}
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem className="mt-4">
-                      <FormLabel>Currency</FormLabel>
-                      <FormControl>
-                        <CurrencyDrawer
-                          value={field.value}
-                          onChange={field.onChange}
-                          userCurrency={user.currency}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
 
                 {/* Period */}
                 <FormField
