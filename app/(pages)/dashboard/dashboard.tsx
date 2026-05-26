@@ -366,10 +366,46 @@ export default function DashboardPage() {
       maximumFractionDigits: 2,
     });
 
+  const trimTrailingZero = (value: string) =>
+    value.endsWith(".0") ? value.slice(0, -2) : value;
+
+  const formatCompactValue = (value: number) => {
+    if (value >= 1_000_000_000) {
+      return `${trimTrailingZero((value / 1_000_000_000).toFixed(1))}B`;
+    }
+    if (value >= 1_000_000) {
+      return `${trimTrailingZero((value / 1_000_000).toFixed(1))}M`;
+    }
+    if (value >= 1_000) {
+      return `${trimTrailingZero((value / 1_000).toFixed(1))}K`;
+    }
+    return fmt(value);
+  };
+
+  const formatCompactCurrency = (value: number) => {
+    const abs = Math.abs(value);
+    const full = `${currency}${fmt(abs)}`;
+    const short = `${currency}${formatCompactValue(abs)}`;
+    return {
+      full,
+      short,
+    };
+  };
+
   const netSavings =
     incomeOverview?.total_balance ??
     (incomeOverview?.thisMonthTotalIncome ?? 0) -
       (overview?.thisMonthTotalExpense ?? 0);
+
+  const monthExpenseDisplay = overview
+    ? formatCompactCurrency(overview.thisMonthTotalExpense)
+    : null;
+  const monthIncomeDisplay = incomeOverview
+    ? formatCompactCurrency(incomeOverview.thisMonthTotalIncome)
+    : null;
+  const totalBalanceDisplay =
+    overview && incomeOverview ? formatCompactCurrency(netSavings) : null;
+  const totalBalanceSign = netSavings >= 0 ? "+" : "-";
 
   const topCategoryEntry = overview
     ? Object.entries(overview.amountByCategory).sort(([, a], [, b]) => b - a)[0]
@@ -457,9 +493,10 @@ export default function DashboardPage() {
               )
             }
             numberData={
-              overview
-                ? `${currency}${fmt(overview.thisMonthTotalExpense)}`
-                : undefined
+              monthExpenseDisplay ? monthExpenseDisplay.short : undefined
+            }
+            numberDataFull={
+              monthExpenseDisplay ? monthExpenseDisplay.full : undefined
             }
             description={
               overview
@@ -524,9 +561,10 @@ export default function DashboardPage() {
               )
             }
             numberData={
-              incomeOverview
-                ? `${currency}${fmt(incomeOverview.thisMonthTotalIncome)}`
-                : undefined
+              monthIncomeDisplay ? monthIncomeDisplay.short : undefined
+            }
+            numberDataFull={
+              monthIncomeDisplay ? monthIncomeDisplay.full : undefined
             }
             description={
               incomeOverview
@@ -548,8 +586,13 @@ export default function DashboardPage() {
             icon={<PiggyBank className="h-4 w-4" />}
             accentColor={netSavings >= 0 ? "#22c55e" : "#ef4444"}
             numberData={
-              overview && incomeOverview
-                ? `${netSavings >= 0 ? "+" : "-"}${currency}${fmt(Math.abs(netSavings))}`
+              totalBalanceDisplay
+                ? `${totalBalanceSign}${totalBalanceDisplay.short}`
+                : undefined
+            }
+            numberDataFull={
+              totalBalanceDisplay
+                ? `${totalBalanceSign}${totalBalanceDisplay.full}`
                 : undefined
             }
             description={
@@ -706,12 +749,22 @@ export default function DashboardPage() {
                             />
                           </div>
                           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>
-                              { currency}
-                              {budget.amountSpent.toFixed(2)} / {currency}
-                              {budget.amountLimit.toFixed(2)}
-                            </span>
-                            <span className="font-mono">{pct}%</span>
+                            {(() => {
+                              const budgetCurrency = currencyMapper(
+                                budget.currency || user.currency || "USD",
+                              );
+                              return (
+                                <>
+                                  <span>
+                                    {budgetCurrency}
+                                    {budget.amountSpent.toFixed(2)} /{" "}
+                                    {budgetCurrency}
+                                    {budget.amountLimit.toFixed(2)}
+                                  </span>
+                                  <span className="font-mono">{pct}%</span>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       );

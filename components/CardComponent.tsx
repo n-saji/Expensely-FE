@@ -11,6 +11,7 @@ export default function CardComponent({
   title,
   cardAction,
   numberData,
+  numberDataFull,
   description,
   loading,
   icon,
@@ -19,11 +20,24 @@ export default function CardComponent({
   title: string;
   cardAction?: React.ReactNode;
   numberData?: string;
+  numberDataFull?: string;
   description?: string;
   loading?: boolean;
   icon?: React.ReactNode;
   accentColor?: string;
 }) {
+  const showNumberTooltip =
+    !!numberData && !!numberDataFull && numberDataFull !== numberData;
+
+  const numberDisplay = (
+    <p
+      className="text-2xl md:text-3xl font-semibold truncate"
+      style={{ fontFeatureSettings: '"tnum"' }}
+    >
+      {numberData || "0"}
+    </p>
+  );
+
   return (
     <Card
       className="
@@ -73,11 +87,17 @@ export default function CardComponent({
         </div>
 
         {/* Main number */}
-        {!loading && (
-          <p className="text-2xl md:text-3xl font-semibold truncate" style={{ fontFeatureSettings: '"tnum"' }}>
-            {numberData || "0"}
-          </p>
-        )}
+        {!loading &&
+          (showNumberTooltip ? (
+            <Tooltip>
+              <TooltipTrigger asChild>{numberDisplay}</TooltipTrigger>
+              <TooltipContent>
+                <p className="text-center">{numberDataFull}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            numberDisplay
+          ))}
       </CardContent>
 
       {/* Footer */}

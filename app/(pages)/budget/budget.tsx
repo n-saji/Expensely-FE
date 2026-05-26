@@ -42,7 +42,7 @@ import {
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { BudgetReq, categorySkeleton, Period } from "@/global/dto";
+import { BudgetReq, Category, categorySkeleton, Period } from "@/global/dto";
 import {
   Select,
   SelectContent,
@@ -56,6 +56,7 @@ import { Spinner } from "@/components/ui/spinner";
 import api from "@/lib/api";
 import BudgetCard from "./budget-card";
 import { currencyMapper } from "@/utils/currencyMapper";
+import CurrencyDrawer from "@/components/currency-drawer";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -64,18 +65,25 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import Link from "next/link";
 import CategoryBadge from "@/components/category-badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { FieldLabel } from "@/components/ui/field";
 
 const budgetSchema = z.object({
   Category: z.object({
     id: z.string().min(1, "Category is required"),
-    name: z.string().min(1, "Category name is required"),
   }),
   User: z.object({
     id: z.string().min(1, "User ID is required"),
   }),
   amountLimit: z.coerce.number().min(1, "Amount must be greater than 0"),
+  currency: z.string().min(1, "Currency is required"),
   period: z.enum([Period.Weekly, Period.Monthly, Period.Yearly, Period.Custom]),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: "Invalid start date",
@@ -106,6 +114,12 @@ export default function Page() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
   const [loader, setLoader] = useState(false);
+  const [addBudgetOpen, setAddBudgetOpen] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>(
+    [],
+  );
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [addBudgetLoading, setAddBudgetLoading] = useState(false);
   const categories = useSelector((state: RootState) => state.categoryExpense);
 
   const isActiveBudget = (budget: Budget) => {
@@ -155,6 +169,7 @@ export default function Page() {
           period: b.period,
           amountLimit: b.amountLimit,
           spent: b.amountSpent,
+          currency: b.currency,
           startDate: b.startDate,
           endDate: b.endDate,
         }));
@@ -170,6 +185,32 @@ export default function Page() {
 
     loadBudgets();
   }, []);
+
+  useEffect(() => {
+    if (!addBudgetOpen) return;
+
+    async function fetchAvailableCategories() {
+      try {
+        setLoadingCategories(true);
+        const res = await api.get("/budgets/available-categories");
+
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch available categories");
+        }
+
+        setAvailableCategories(res.data || []);
+      } catch (error) {
+        console.error("Error fetching available categories:", error);
+        toast("Failed to load categories", {
+          description: "Please refresh and try again.",
+        });
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+
+    fetchAvailableCategories();
+  }, [addBudgetOpen]);
 
   const handleDelete = async (budget: Budget | null) => {
     if (!budget) return;
@@ -202,10 +243,10 @@ export default function Page() {
     defaultValues: {
       Category: {
         id: budgetToEdit?.category.id || "",
-        name: budgetToEdit?.category.name || "",
       },
       User: { id: user.id || "" },
       amountLimit: budgetToEdit?.amountLimit || 0,
+      currency: budgetToEdit?.currency || user.currency || "USD",
       period: budgetToEdit?.period || Period.Monthly,
       startDate:
         budgetToEdit?.startDate || new Date().toISOString().split("T")[0],
@@ -213,28 +254,69 @@ export default function Page() {
     },
   });
 
-  const watchPeriod = form.watch("period");
+  const addForm = useForm<z.infer<typeof budgetSchema>>({
+    resolver: zodResolver(budgetSchema) as any,
+    defaultValues: {
+      Category: { id: "" },
+      User: { id: user.id || "" },
+      amountLimit: 0,
+      currency: user.currency || "USD",
+      period: Period.Monthly,
+      startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        .toISOString()
+        .split("T")[0],
+      endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+        .toISOString()
+        .split("T")[0],
+    },
+  });
+
+  const editPeriod = form.watch("period");
+  const addPeriod = addForm.watch("period");
+
   useEffect(() => {
     const start = new Date();
     let newStart = new Date(start);
     let newEnd = new Date(start);
 
-    if (watchPeriod === Period.Weekly) {
+    if (editPeriod === Period.Weekly) {
       const day = start.getDay();
       newStart.setDate(start.getDate() - day);
       newEnd = new Date(newStart);
       newEnd.setDate(newStart.getDate() + 6);
-    } else if (watchPeriod === Period.Monthly) {
+    } else if (editPeriod === Period.Monthly) {
       newStart = new Date(start.getFullYear(), start.getMonth(), 1);
       newEnd = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-    } else if (watchPeriod === Period.Yearly) {
+    } else if (editPeriod === Period.Yearly) {
       newStart = new Date(start.getFullYear(), 0, 1);
       newEnd = new Date(start.getFullYear(), 11, 31);
     }
 
     form.setValue("startDate", newStart.toISOString().split("T")[0]);
     form.setValue("endDate", newEnd.toISOString().split("T")[0]);
-  }, [watchPeriod, form]);
+  }, [editPeriod, form]);
+
+  useEffect(() => {
+    const start = new Date();
+    let newStart = new Date(start);
+    let newEnd = new Date(start);
+
+    if (addPeriod === Period.Weekly) {
+      const day = start.getDay();
+      newStart.setDate(start.getDate() - day);
+      newEnd = new Date(newStart);
+      newEnd.setDate(newStart.getDate() + 6);
+    } else if (addPeriod === Period.Monthly) {
+      newStart = new Date(start.getFullYear(), start.getMonth(), 1);
+      newEnd = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+    } else if (addPeriod === Period.Yearly) {
+      newStart = new Date(start.getFullYear(), 0, 1);
+      newEnd = new Date(start.getFullYear(), 11, 31);
+    }
+
+    addForm.setValue("startDate", newStart.toISOString().split("T")[0]);
+    addForm.setValue("endDate", newEnd.toISOString().split("T")[0]);
+  }, [addPeriod, addForm]);
 
   async function onSubmit(data: z.infer<typeof budgetSchema>) {
     try {
@@ -248,6 +330,7 @@ export default function Page() {
           id: data.User.id,
         },
         amountLimit: data.amountLimit,
+        currency: data.currency,
         period: data.period,
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
@@ -268,10 +351,10 @@ export default function Page() {
       form.reset({
         Category: {
           id: "",
-          name: "",
         },
         User: { id: user.id || "" },
         amountLimit: 0,
+        currency: user.currency || "USD",
         period: Period.Monthly,
         startDate: new Date().toISOString().split("T")[0],
         endDate: new Date().toISOString().split("T")[0],
@@ -300,6 +383,7 @@ export default function Page() {
               period: b.period,
               amountLimit: b.amountLimit,
               spent: b.amountSpent,
+              currency: b.currency,
               startDate: b.startDate,
               endDate: b.endDate,
             }));
@@ -314,16 +398,109 @@ export default function Page() {
     }
   }
 
+  async function onAddSubmit(data: z.infer<typeof budgetSchema>) {
+    try {
+      setAddBudgetLoading(true);
+      const api_url = "/budgets/create";
+      const budgetData: BudgetReq = {
+        category: {
+          id: data.Category.id,
+        },
+        user: {
+          id: data.User.id,
+        },
+        amountLimit: data.amountLimit,
+        currency: data.currency,
+        period: data.period,
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: new Date(data.endDate).toISOString(),
+      };
+
+      const response = await api.post(api_url, budgetData);
+      const resData = await response.data;
+
+      if (response.status !== 200) {
+        toast("Failed to create budget", {
+          description: resData.error || "Something went wrong.",
+        });
+        return;
+      }
+
+      toast("Budget created successfully!", {
+        description: "Your budget has been added.",
+      });
+
+      setAvailableCategories((prev) =>
+        prev.filter((category) => category.id !== data.Category.id),
+      );
+
+      addForm.reset({
+        Category: { id: "" },
+        User: { id: user.id || "" },
+        amountLimit: 0,
+        currency: user.currency || "USD",
+        period: Period.Monthly,
+        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          .toISOString()
+          .split("T")[0],
+        endDate: new Date(
+          new Date().getFullYear(),
+          new Date().getMonth() + 1,
+          0,
+        )
+          .toISOString()
+          .split("T")[0],
+      });
+
+      setAddBudgetOpen(false);
+
+      if (user_id) {
+        setLoading(true);
+        fetchBudgets({ userId: user_id })
+          .then((data) => {
+            const formatted: Budget[] = data.map((b: any) => ({
+              id: b.id,
+              category: {
+                id: b.category.id,
+                name: b.category.name,
+                icon: b.category.icon,
+                color: b.category.color,
+              } as categorySkeleton,
+              period: b.period,
+              amountLimit: b.amountLimit,
+              spent: b.amountSpent,
+              currency: b.currency,
+              startDate: b.startDate,
+              endDate: b.endDate,
+            }));
+
+            setBudgets(formatted);
+          })
+          .catch((error) =>
+            toast("Error fetching budgets", { description: String(error) }),
+          )
+          .finally(() => setLoading(false));
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast("Error", {
+        description: "Failed to create budget. Please try again.",
+      });
+    } finally {
+      setAddBudgetLoading(false);
+    }
+  }
+
   const handleEdit = (budget: Budget) => {
     setBudgetToEdit(budget);
     setOpenEditDialog(true);
     form.reset({
       Category: {
         id: budget.category.id,
-        name: budget.category.name,
       },
       User: { id: user.id },
       amountLimit: budget.amountLimit,
+      currency: budget.currency || user.currency || "USD",
       period: budget.period,
       startDate: budget.startDate,
       endDate: budget.endDate,
@@ -332,14 +509,17 @@ export default function Page() {
 
   const activeBudgets = budgets.filter(isActiveBudget);
 
-  const symbol = user?.currency ? currencyMapper(user.currency) : "$";
-  const totalLimit = activeBudgets.reduce(
-    (sum, b) => sum + Number(b.amountLimit || 0),
-    0,
-  );
-  const totalSpent = activeBudgets.reduce(
-    (sum, b) => sum + Number(b.spent || 0),
-    0,
+  const totalsByCurrency = activeBudgets.reduce(
+    (acc, budget) => {
+      const currency = budget.currency || user.currency || "USD";
+      if (!acc[currency]) {
+        acc[currency] = { limit: 0, spent: 0 };
+      }
+      acc[currency].limit += Number(budget.amountLimit || 0);
+      acc[currency].spent += Number(budget.spent || 0);
+      return acc;
+    },
+    {} as Record<string, { limit: number; spent: number }>,
   );
   const overBudgetCount = activeBudgets.filter(
     (b) =>
@@ -356,6 +536,17 @@ export default function Page() {
       maximumFractionDigits: 0,
     });
 
+  const formatCurrencyTotals = (key: "limit" | "spent") => {
+    const entries = Object.entries(totalsByCurrency);
+    if (!entries.length) return "-";
+    return entries
+      .map(([currency, values]) => {
+        const symbol = currencyMapper(currency);
+        return `${currency} ${symbol}${fmt(values[key])}`;
+      })
+      .join(" | ");
+  };
+
   return (
     <div className="w-full space-y-8">
       {/* ── Page Header ── */}
@@ -371,12 +562,13 @@ export default function Page() {
             Set limits, track spending, stay in control.
           </p>
         </div>
-        <Link href="/budget/add">
-          <Button className="gap-2 shadow-sm">
-            <Plus className="h-4 w-4" />
-            <span className="text-sm">Add Budget</span>
-          </Button>
-        </Link>
+        <Button
+          className="gap-2 shadow-sm"
+          onClick={() => setAddBudgetOpen(true)}
+        >
+          <Plus className="h-4 w-4" />
+          <span className="text-sm">Add Budget</span>
+        </Button>
       </div>
 
       {/* ── Summary Stats Bar ── */}
@@ -392,14 +584,14 @@ export default function Page() {
             },
             {
               label: "Total Budget",
-              value: `${symbol}${fmt(totalLimit)}`,
+              value: formatCurrencyTotals("limit"),
               icon: PiggyBank,
               accent: "#6366f1",
               bg: "rgba(99,102,241,0.08)",
             },
             {
               label: "Total Spent",
-              value: `${symbol}${fmt(totalSpent)}`,
+              value: formatCurrencyTotals("spent"),
               icon: TrendingUp,
               accent: "#f59e0b",
               bg: "rgba(245,158,11,0.08)",
@@ -441,6 +633,186 @@ export default function Page() {
           ))}
         </div>
       )}
+
+      <Sheet open={addBudgetOpen} onOpenChange={setAddBudgetOpen}>
+        <SheetContent className="h-full overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Add Budget</SheetTitle>
+          </SheetHeader>
+
+          <Form {...addForm}>
+            <form
+              onSubmit={addForm.handleSubmit(onAddSubmit)}
+              className="p-4 space-y-4"
+            >
+              <FormField
+                control={addForm.control}
+                name="Category.id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={loadingCategories}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              loadingCategories
+                                ? "Loading categories..."
+                                : "Select a category"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableCategories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <CategoryBadge
+                              name={category.name}
+                              icon={category.icon}
+                              color={category.color}
+                            />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div>
+                <FormLabel className="mb-2">Amount</FormLabel>
+                <div className="flex gap-2">
+                  <FormField
+                    control={addForm.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem >
+                        {/* <FormLabel>Currency</FormLabel> */}
+                        <FormControl>
+                          <CurrencyDrawer
+                            value={field.value}
+                            onChange={field.onChange}
+                            userCurrency={user.currency}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addForm.control}
+                    name="amountLimit"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        {/* <FormLabel>Amount</FormLabel> */}
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Enter budget amount"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <FormField
+                control={addForm.control}
+                name="period"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Timeframe</FormLabel>
+                    <FormControl>
+                      <Tabs
+                        value={field.value}
+                        onValueChange={(value) =>
+                          field.onChange(value as Period)
+                        }
+                        className="flex flex-wrap overflow-auto"
+                      >
+                        <TabsList>
+                          <TabsTrigger value={Period.Weekly}>
+                            Weekly
+                          </TabsTrigger>
+                          <TabsTrigger value={Period.Monthly}>
+                            Monthly
+                          </TabsTrigger>
+                          <TabsTrigger value={Period.Yearly}>
+                            Yearly
+                          </TabsTrigger>
+                          <TabsTrigger value={Period.Custom}>
+                            Custom
+                          </TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </FormControl>
+                    <FormDescription>
+                      Select the timeframe for the budget
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={addForm.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        disabled={addPeriod !== Period.Custom}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={addForm.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        disabled={addPeriod !== Period.Custom}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAddBudgetOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={addBudgetLoading}>
+                  {addBudgetLoading ? <Spinner /> : "Create Budget"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </SheetContent>
+      </Sheet>
 
       {/* ── Delete Confirmation Dialog ── */}
       {budgetToDelete && (
@@ -501,12 +873,15 @@ export default function Page() {
                 Create a budget to start tracking your spending limits.
               </p>
             </div>
-            <Link href="/budget/add">
-              <Button variant="outline" size="sm" className="gap-2 mt-1">
-                <Plus className="h-4 w-4" />
-                Create your first budget
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 mt-1"
+              onClick={() => setAddBudgetOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Create your first budget
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -514,7 +889,7 @@ export default function Page() {
               <BudgetCard
                 key={budget.id}
                 budget={budget}
-                currency={user?.currency}
+                currency={budget.currency || user?.currency}
                 onEdit={handleEdit}
                 onDelete={setBudgetToDelete}
               />
@@ -590,6 +965,25 @@ export default function Page() {
                   )}
                 />
 
+                {/* Currency */}
+                <FormField
+                  control={form.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem className="mt-4">
+                      <FormLabel>Currency</FormLabel>
+                      <FormControl>
+                        <CurrencyDrawer
+                          value={field.value}
+                          onChange={field.onChange}
+                          userCurrency={user.currency}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {/* Period */}
                 <FormField
                   control={form.control}
@@ -640,7 +1034,7 @@ export default function Page() {
                         <Input
                           type="date"
                           {...field}
-                          disabled={watchPeriod !== Period.Custom}
+                          disabled={editPeriod !== Period.Custom}
                         />
                       </FormControl>
                       <FormMessage />
@@ -659,7 +1053,7 @@ export default function Page() {
                         <Input
                           type="date"
                           {...field}
-                          disabled={watchPeriod !== Period.Custom}
+                          disabled={editPeriod !== Period.Custom}
                         />
                       </FormControl>
                       <FormMessage />

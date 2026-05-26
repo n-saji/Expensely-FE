@@ -78,6 +78,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import CurrencyDrawer from "@/components/currency-drawer";
 
 interface IncomeListProps {
   incomes: IncomeRow[];
@@ -193,12 +194,14 @@ export default function IncomePage() {
     description: "",
     incomeDate: new Date().toISOString().slice(0, 10),
     categoryId: "",
+    currency: "",
   });
   const [addForm, setAddForm] = useState({
     amount: "",
     description: "",
     incomeDate: new Date().toISOString().slice(0, 10),
     categoryId: "",
+    currency: "",
   });
 
   const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
@@ -228,6 +231,23 @@ export default function IncomePage() {
   );
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const mapIncomeToRow = useCallback(
+    (income: any): IncomeRow => ({
+      id: income.id,
+      categoryId: income.categoryId || income.category?.id,
+      categoryName: income.categoryName || income.category?.name,
+      amount: income.amount,
+      displayAmount: income.displayAmount ?? income.amount,
+      description: income.description,
+      incomeDate: income.incomeDate,
+      currency: income.currency,
+      displayCurrency:
+        income.displayCurrency || income.currency || user.currency || "USD",
+      baseCurrencyAmount: income.baseCurrencyAmount,
+    }),
+    [user.currency],
+  );
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting((old) =>
@@ -381,12 +401,15 @@ export default function IncomePage() {
   };
 
   useEffect(() => {
+    if (!addForm.currency && user.currency) {
+      setAddForm((prev) => ({ ...prev, currency: user.currency || "USD" }));
+    }
     fetchCategories();
     const categoryAddedHandler = () => fetchCategories();
     window.addEventListener("category-added", categoryAddedHandler);
     return () =>
       window.removeEventListener("category-added", categoryAddedHandler);
-  }, [fetchCategories]);
+  }, [fetchCategories, addForm.currency, user.currency]);
 
   useEffect(() => {
     fetchIncomeOverview({
@@ -424,7 +447,7 @@ export default function IncomePage() {
         });
 
         setIncomesList(data);
-        setDatas(data.incomes || []);
+        setDatas((data.incomes || []).map(mapIncomeToRow));
       } catch (error) {
         toast.error("Failed to fetch incomes", { description: String(error) });
       } finally {
@@ -436,7 +459,15 @@ export default function IncomePage() {
       isMountedRef.current = true;
       loadInitial();
     }
-  }, [fetchIncomes, categoryFilter, dateRange, pageNumber, pageSize, query]);
+  }, [
+    fetchIncomes,
+    categoryFilter,
+    dateRange,
+    pageNumber,
+    pageSize,
+    query,
+    mapIncomeToRow,
+  ]);
 
   useEffect(() => {
     // Initial load is handled by the mount-only effect above.
@@ -472,7 +503,7 @@ export default function IncomePage() {
         });
 
         setIncomesList(data);
-        setDatas(data.incomes || []);
+        setDatas((data.incomes || []).map(mapIncomeToRow));
       } catch (error) {
         toast.error("Failed to fetch incomes", { description: String(error) });
       } finally {
@@ -490,6 +521,7 @@ export default function IncomePage() {
     pageSize,
     refreshTrigger,
     fetchIncomes,
+    mapIncomeToRow,
   ]);
 
   useEffect(() => {
@@ -575,6 +607,8 @@ export default function IncomePage() {
             description: row.description,
             incomeDate: toDateOnly(row.incomeDate),
             categoryId: row.categoryId,
+            currency:
+              row.displayCurrency || row.currency || user.currency || "USD",
           });
         },
         onDelete: (row) => setSelectedDelete(row),
@@ -607,7 +641,7 @@ export default function IncomePage() {
     });
 
     setIncomesList(data);
-    setDatas(data.incomes || []);
+    setDatas((data.incomes || []).map(mapIncomeToRow));
   }, [
     sorting,
     fetchIncomes,
@@ -616,6 +650,7 @@ export default function IncomePage() {
     pageNumber,
     pageSize,
     query,
+    mapIncomeToRow,
   ]);
 
   const handleUpdateIncome = async (event: React.FormEvent) => {
@@ -645,6 +680,7 @@ export default function IncomePage() {
         amount,
         description: editForm.description,
         incomeDate: formatDateForApi(editForm.incomeDate),
+        currency: editForm.currency || user.currency || "USD",
       };
 
       const res = await api.put(
@@ -669,6 +705,7 @@ export default function IncomePage() {
                 amount: payload.amount,
                 description: payload.description,
                 incomeDate: payload.incomeDate,
+                currency: payload.currency || income.currency,
               }
             : income,
         ),
@@ -684,6 +721,14 @@ export default function IncomePage() {
                     (category) => category.id === payload.category.id,
                   )?.name || income.categoryName,
                 amount: payload.amount,
+                displayAmount: income.displayAmount ?? payload.amount,
+                currency: payload.currency || income.currency,
+                displayCurrency:
+                  payload.currency ||
+                  income.displayCurrency ||
+                  income.currency ||
+                  user.currency ||
+                  "USD",
                 description: payload.description,
                 incomeDate: payload.incomeDate,
               }
@@ -848,6 +893,7 @@ export default function IncomePage() {
         amount,
         description: addForm.description,
         incomeDate: formatDateForApi(addForm.incomeDate),
+        currency: addForm.currency || user.currency || "USD",
       };
 
       const res = await api.post("/incomes/create", payload);
@@ -860,6 +906,7 @@ export default function IncomePage() {
         amount: "",
         description: "",
         incomeDate: new Date().toISOString().slice(0, 10),
+        currency: user.currency || "USD",
       });
 
       setAddIncomeSheetOpen(false);
@@ -940,19 +987,29 @@ export default function IncomePage() {
                 }
               />
 
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Amount"
-                value={addForm.amount}
-                onChange={(event) =>
-                  setAddForm((prev) => ({
-                    ...prev,
-                    amount: event.target.value,
-                  }))
-                }
-              />
+              <div className="flex gap-2">
+                <CurrencyDrawer
+                  value={addForm.currency || user.currency || "USD"}
+                  onChange={(value) =>
+                    setAddForm((prev) => ({ ...prev, currency: value }))
+                  }
+                  userCurrency={user.currency}
+                />
+
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Amount"
+                  value={addForm.amount}
+                  onChange={(event) =>
+                    setAddForm((prev) => ({
+                      ...prev,
+                      amount: event.target.value,
+                    }))
+                  }
+                />
+              </div>
 
               <Select
                 onValueChange={(value) =>
@@ -1156,19 +1213,29 @@ export default function IncomePage() {
                 }
               />
 
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Amount"
-                value={editForm.amount}
-                onChange={(event) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    amount: event.target.value,
-                  }))
-                }
-              />
+              <div className="flex gap-2">
+                <CurrencyDrawer
+                  value={editForm.currency || user.currency || "USD"}
+                  onChange={(value) =>
+                    setEditForm((prev) => ({ ...prev, currency: value }))
+                  }
+                  userCurrency={user.currency}
+                />
+
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Amount"
+                  value={editForm.amount}
+                  onChange={(event) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      amount: event.target.value,
+                    }))
+                  }
+                />
+              </div>
 
               <Select
                 value={editForm.categoryId}

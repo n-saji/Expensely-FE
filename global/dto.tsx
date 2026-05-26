@@ -104,6 +104,7 @@ export interface BudgetReq {
   user: UserSkeleton;
   category: categorySkeleton;
   amountLimit: number;
+  currency?: string;
   period: Period;
   startDate: string;
   endDate: string;
@@ -130,6 +131,10 @@ export interface Budget {
   category: Category;
   amountLimit: number;
   amountSpent: number;
+  // Budget-level currency and exchange details
+  currency?: string;
+  baseCurrencyAmount?: number;
+  exchange_rate?: number;
   period: Period;
   startDate: string;
   endDate: string;
@@ -222,6 +227,11 @@ export interface Income {
   amount: number;
   description: string;
   incomeDate: string;
+  // Optional exchange/conversion fields
+  currency?: string;
+  baseCurrencyAmount?: number;
+  displayAmount?: number;
+  displayCurrency?: string;
 }
 
 export interface CreateIncomeReq {
@@ -231,6 +241,7 @@ export interface CreateIncomeReq {
   amount: number;
   description: string;
   incomeDate: string;
+  currency?: string;
 }
 
 export interface UpdateIncomeReq {
@@ -240,6 +251,7 @@ export interface UpdateIncomeReq {
   amount: number;
   description: string;
   incomeDate: string;
+  currency?: string;
 }
 
 export interface IncomeOverview {

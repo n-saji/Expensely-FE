@@ -304,6 +304,7 @@ export default function NewUserOnboarding({
         category: { id: budgetForm.categoryId },
         user: { id: userId },
         amountLimit,
+        currency: userCurrency || "USD",
         period: budgetForm.period,
         startDate: new Date(budgetForm.startDate).toISOString(),
         endDate: new Date(budgetForm.endDate).toISOString(),
