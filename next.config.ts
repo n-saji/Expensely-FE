@@ -40,6 +40,10 @@ const nextConfig: NextConfig = {
         destination: process.env.NEXT_PUBLIC_API_URL + "/admins/:path*",
       },
       {
+        source: "/api/exchange-rates",
+        destination: process.env.NEXT_PUBLIC_API_URL + "/exchange-rates",
+      },
+      {
         source: "/api/exchange-rates/:path*",
         destination: process.env.NEXT_PUBLIC_API_URL + "/exchange-rates/:path*",
       },
