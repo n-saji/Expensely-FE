@@ -582,20 +582,20 @@ export default function Page() {
               accent: "var(--primary)",
               bg: "rgba(var(--primary-rgb, 34,197,94), 0.08)",
             },
-            {
-              label: "Total Budget",
-              value: formatCurrencyTotals("limit"),
-              icon: PiggyBank,
-              accent: "#6366f1",
-              bg: "rgba(99,102,241,0.08)",
-            },
-            {
-              label: "Total Spent",
-              value: formatCurrencyTotals("spent"),
-              icon: TrendingUp,
-              accent: "#f59e0b",
-              bg: "rgba(245,158,11,0.08)",
-            },
+            // {
+            //   label: "Total Budget",
+            //   value: formatCurrencyTotals("limit"),
+            //   icon: PiggyBank,
+            //   accent: "#6366f1",
+            //   bg: "rgba(99,102,241,0.08)",
+            // },
+            // {
+            //   label: "Total Spent",
+            //   value: formatCurrencyTotals("spent"),
+            //   icon: TrendingUp,
+            //   accent: "#f59e0b",
+            //   bg: "rgba(245,158,11,0.08)",
+            // },
             {
               label: overBudgetCount > 0 ? "Over Budget" : "Healthy",
               value:
