@@ -336,8 +336,6 @@ export default function Page() {
       const response = await api.put(api_url, budgetData);
       const resData = await response.data;
 
-      console.log(resData, response);
-
       if (response.status !== 200) {
         toast("Failed to edit budget", {
           description: resData.error || "Something went wrong.",
