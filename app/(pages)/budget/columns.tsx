@@ -24,6 +24,10 @@ export type Budget = {
   startDate: string;
   endDate: string;
   category: categorySkeleton;
+  // Optional budget-level currency and exchange info
+  currency?: string;
+  baseCurrencyAmount?: number;
+  exchange_rate?: number;
 };
 
 export const columns = (
@@ -54,10 +58,12 @@ export const columns = (
     accessorKey: "amountLimit",
     header: "Amount Limit",
     cell: ({ row }) => {
+      const budgetCurrency = row.original.currency || userCurrency || "USD";
+      const amt = Number(row.getValue("amountLimit") || 0);
       return (
         <span className="font-medium">
-          {userCurrency ? currencyMapper(userCurrency) : "$"}
-          {row.getValue("amountLimit")}
+          {currencyMapper(budgetCurrency)}
+          {amt.toFixed(2)}
         </span>
       );
     },
@@ -66,10 +72,12 @@ export const columns = (
     accessorKey: "spent",
     header: "Spent",
     cell: ({ row }) => {
+      const budgetCurrency = row.original.currency || userCurrency || "USD";
+      const amt = Number(row.getValue("spent") || 0);
       return (
         <span className="font-medium">
-          {userCurrency ? currencyMapper(userCurrency) : "$"}
-          {row.getValue("spent")}
+          {currencyMapper(budgetCurrency)}
+          {amt.toFixed(2)}
         </span>
       );
     },

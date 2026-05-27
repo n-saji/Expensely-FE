@@ -87,6 +87,7 @@ export interface UpcomingRecurringExpense {
   date: string;
   nextOccurrence: string;
   active: boolean;
+  currency: string;
 }
 export interface ExpenseOverviewV2 {
   amountByMonthV2: Record<string, number>;
@@ -103,6 +104,7 @@ export interface BudgetReq {
   user: UserSkeleton;
   category: categorySkeleton;
   amountLimit: number;
+  currency?: string;
   period: Period;
   startDate: string;
   endDate: string;
@@ -129,6 +131,10 @@ export interface Budget {
   category: Category;
   amountLimit: number;
   amountSpent: number;
+  // Budget-level currency and exchange details
+  currency?: string;
+  baseCurrencyAmount?: number;
+  exchange_rate?: number;
   period: Period;
   startDate: string;
   endDate: string;
@@ -155,6 +161,21 @@ export interface BulkLoadResponse {
   }>;
 }
 
+export interface ExpenseResponse {
+  id: string;
+  description: string;
+  expenseDate: string;
+  categoryId: string;
+  categoryName: string;
+  userId: string;
+  receiptUrl?: string | null;
+  amount: number;
+  currency: string;
+  baseCurrencyAmount: number;
+  displayAmount: number;
+  displayCurrency: string;
+}
+
 export enum OverviewEnum {
   MONTH = "MONTH",
   YEAR = "YEAR",
@@ -173,6 +194,7 @@ export interface RecurringExpense {
   userId: string;
   categoryId: string;
   amount: number;
+  currency: string;
   description: string;
   recurrence: Recurrence;
   date: string;
@@ -183,6 +205,7 @@ export interface RecurringExpense {
 export interface CreateRecurringExpenseReq {
   categoryId: string;
   amount: number;
+  currency: string;
   description: string;
   recurrence: Recurrence;
   date: string;
@@ -191,6 +214,7 @@ export interface CreateRecurringExpenseReq {
 export interface UpdateRecurringExpenseReq {
   id: string;
   amount: number;
+  currency: string;
   description: string;
   recurrence: Recurrence;
   date: string;
@@ -203,6 +227,11 @@ export interface Income {
   amount: number;
   description: string;
   incomeDate: string;
+  // Optional exchange/conversion fields
+  currency?: string;
+  baseCurrencyAmount?: number;
+  displayAmount?: number;
+  displayCurrency?: string;
 }
 
 export interface CreateIncomeReq {
@@ -212,6 +241,7 @@ export interface CreateIncomeReq {
   amount: number;
   description: string;
   incomeDate: string;
+  currency?: string;
 }
 
 export interface UpdateIncomeReq {
@@ -221,6 +251,7 @@ export interface UpdateIncomeReq {
   amount: number;
   description: string;
   incomeDate: string;
+  currency?: string;
 }
 
 export interface IncomeOverview {

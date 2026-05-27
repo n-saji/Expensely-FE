@@ -138,6 +138,7 @@ export default function RecurringExpensePage() {
     const payload: UpdateRecurringExpenseReq = {
       id: selectedUpdate.id,
       amount: data.amount,
+      currency: data.currency,
       description: data.description,
       recurrence: data.recurrence,
       date: data.date,
@@ -232,6 +233,7 @@ export default function RecurringExpensePage() {
               showCategory={false}
               initialValues={{
                 amount: selectedUpdate.amount,
+                currency: selectedUpdate.currency,
                 description: selectedUpdate.description,
                 recurrence: selectedUpdate.recurrence,
                 date: selectedUpdate.date,

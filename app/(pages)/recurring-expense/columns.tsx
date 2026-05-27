@@ -50,9 +50,10 @@ export const columns = ({
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
+      const currency = row.original.currency || userCurrency || "USD";
       return (
         <div className="font-medium">
-          {userCurrency ? currencyMapper(userCurrency) : "$"}
+          {currencyMapper(currency)}
           {amount.toFixed(2)}
         </div>
       );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/userSlice";
@@ -31,14 +31,23 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Edit2 } from "lucide-react";
 import api from "@/lib/api";
+import { Spinner } from "@/components/ui/spinner";
 import {
   DEFAULT_THEME_COLOR,
   THEME_COLOR_IDS,
   THEME_COLOR_OPTIONS,
   ThemeColorId,
 } from "@/global/constants";
+import { currencyCodes, currencyMap } from "@/utils/currencyMapper";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
@@ -46,6 +55,13 @@ export default function SettingsPage() {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const hasFetchedRef = useRef(false);
+  const orderedCurrencyCodes = useMemo(() => {
+    if (!user.currency) return currencyCodes;
+    return [
+      user.currency,
+      ...currencyCodes.filter((code) => code !== user.currency),
+    ];
+  }, [user.currency]);
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
@@ -183,6 +199,50 @@ export default function SettingsPage() {
       });
   };
 
+  const handleCurrencyUpdate = async (currency: string) => {
+    const isProfileComplete =
+      Boolean(user.name) &&
+      Boolean(user.email) &&
+      Boolean(user.country_code) &&
+      Boolean(user.phone);
+
+    try {
+      const response = await api.patch(`/users/update-profile`, {
+        name: user.name,
+        email: user.email,
+        country_code: user.country_code,
+        phone: user.phone,
+        currency,
+        id: user.id,
+        profileComplete: isProfileComplete,
+      });
+
+      if (response.status !== 200) {
+        throw new Error("Failed to update preferred currency.");
+      }
+
+      dispatch(
+        setUser({
+          ...user,
+          currency,
+          profileComplete: isProfileComplete,
+        }),
+      );
+      toast.success("Preferred currency updated.");
+      return true;
+    } catch (error) {
+      console.error("Error updating currency:", error);
+      toast.error("Failed to update preferred currency.");
+      return false;
+    }
+  };
+
+  const [isCurrencyDialogOpen, setIsCurrencyDialogOpen] = useState(false);
+  const [currencyDraft, setCurrencyDraft] = useState<string>(
+    user.currency || "USD",
+  );
+  const [currencySaving, setCurrencySaving] = useState(false);
+
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -279,6 +339,91 @@ export default function SettingsPage() {
                     })}
                   </div>
                 </div>
+              </CardAction>
+            </CardHeader>
+          </Card>
+
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Preferred Currency</CardTitle>
+              <CardDescription>
+                Set the default currency for your expense display.
+              </CardDescription>
+              <CardAction>
+                <Dialog
+                  open={isCurrencyDialogOpen}
+                  onOpenChange={(open) => {
+                    setIsCurrencyDialogOpen(open);
+                    if (open) setCurrencyDraft(user.currency || "USD");
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      <span className="font-medium">{user.currency || "USD"}</span>
+                      <span className="text-muted-foreground">
+                        {currencyMap[user.currency || "USD"] || user.currency || "USD"}
+                      </span>
+                      <Edit2 className="ml-1" />
+                    </Button>
+                  </DialogTrigger>
+
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Preferred Currency</DialogTitle>
+                      <DialogDescription>
+                        Choose your default currency for expense display.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="mt-2 space-y-4">
+                      <Label>Currency</Label>
+                      <Select value={currencyDraft} onValueChange={setCurrencyDraft}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {orderedCurrencyCodes.map((code) => (
+                            <SelectItem key={code} value={code}>
+                              <span className="flex items-center gap-2">
+                                <span className="font-medium">{code}</span>
+                                <span className="text-muted-foreground">
+                                  {currencyMap[code] || code}
+                                </span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <DialogFooter>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setIsCurrencyDialogOpen(false)}
+                        disabled={currencySaving}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={async () => {
+                          setCurrencySaving(true);
+                          const ok = await handleCurrencyUpdate(currencyDraft);
+                          setCurrencySaving(false);
+                          if (ok) setIsCurrencyDialogOpen(false);
+                        }}
+                        disabled={currencySaving}
+                      >
+                        {currencySaving ? (
+                          <>
+                            <Spinner /> Saving...
+                          </>
+                        ) : (
+                          "Save"
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CardAction>
             </CardHeader>
           </Card>

@@ -13,6 +13,7 @@ import {
   Plus,
   Repeat,
   HandCoins,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import {
@@ -277,20 +278,61 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             General
           </SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathName === "/settings"}
-                className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-              >
-                <Link href={"/settings"}>
-                  <Settings />
-                  <span>Settings</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+          <SidebarGroupContent className="space-y-1">
+            <SidebarMenu>
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary">
+                      <ArrowLeftRight />
+                      Exchange Rate
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem key={"Exchange-rates"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/exchange-rate"}
+                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                        >
+                          <Link href={"/exchange-rate"}>
+                            <span>Exchange Rates</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem key={"Exchange-convert"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathName === "/exchange-rate/convert"}
+                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                        >
+                          <Link href={"/exchange-rate/convert"}>
+                            <span>Currency Converter</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/settings"}
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                >
+                  <Link href={"/settings"}>
+                    <Settings />
+                    <span>Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
 
         {user.isAdmin && (

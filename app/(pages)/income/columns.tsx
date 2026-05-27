@@ -22,7 +22,11 @@ export type IncomeRow = {
   amount: number;
   description: string;
   incomeDate: string;
-  currency: string;
+  currency?: string;
+  // Optional exchange/display fields
+  baseCurrencyAmount?: number;
+  displayAmount?: number;
+  displayCurrency?: string;
 };
 
 type CategoryMeta = {
@@ -81,10 +85,16 @@ export const columns = ({
       </div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
+      const rawAmount = row.original.displayAmount ?? row.getValue("amount");
+      const amount = parseFloat(String(rawAmount ?? 0));
+      const currencyCode =
+        row.original.displayCurrency ||
+        row.original.currency ||
+        userCurrency ||
+        "USD";
       return (
         <div className="font-medium">
-          {userCurrency ? currencyMapper(userCurrency) : "$"}
+          {currencyCode ? currencyMapper(currencyCode) : "$"}
           {amount.toFixed(2)}
         </div>
       );
