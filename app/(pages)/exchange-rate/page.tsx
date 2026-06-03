@@ -1,4 +1,4 @@
-import RatesClient from "./rates-client";
+import RatesClient from "@/app/(pages)/exchange-rate/rates-client"
 
 export async function generateMetadata() {
   return {
