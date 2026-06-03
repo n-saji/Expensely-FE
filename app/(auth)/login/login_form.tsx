@@ -19,6 +19,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { AxiosError } from "axios";
 import { toast, Toaster } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import UserPreferences from "@/utils/userPreferences";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -221,6 +222,8 @@ export default function LoginForm() {
       localStorage.removeItem("user_id");
 
       toast.error("Request failed. Please try again.");
+    } finally {
+      <UserPreferences />;
     }
   };
 
