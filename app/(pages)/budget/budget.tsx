@@ -871,7 +871,7 @@ export default function Page() {
                 Create a budget to start tracking your spending limits.
               </p>
             </div>
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               className="gap-2 mt-1"
@@ -879,7 +879,7 @@ export default function Page() {
             >
               <Plus className="h-4 w-4" />
               Create your first budget
-            </Button>
+            </Button> */}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

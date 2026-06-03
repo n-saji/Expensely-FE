@@ -169,7 +169,8 @@ export default function ProfilePage({
         }
       })
       .catch((error) => {
-        setError(`Error updating profile: ${error}`);
+        setError(`Something went wrong. Please try again`);
+        console.error("Profile Update Error:", error);
         setEdit(true);
       })
       .finally(() => {
