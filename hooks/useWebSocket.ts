@@ -1,8 +1,18 @@
 import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { addNotification } from "../redux/slices/notificationSlice";
+import Logout from "@/app/(auth)/logout/logout";
+import { clearUser } from "@/redux/slices/userSlice";
+import { clearCategories } from "@/redux/slices/categorySlice";
+import { clearNotifications } from "@/redux/slices/notificationSlice";
 
-export const useWebSocket = (userID: string | null) => {
+export const useWebSocket = ({
+  userID,
+  token,
+}: {
+  userID: string | null;
+  token: string | null;
+}) => {
   const dispatch = useDispatch();
   const socketRef = useRef<WebSocket | null>(null);
   const heartbeatTimerRef = useRef<number | null>(null);
@@ -10,7 +20,7 @@ export const useWebSocket = (userID: string | null) => {
   const isManuallyClosedRef = useRef(false);
 
   useEffect(() => {
-    if (!userID) {
+    if (!userID || !token) {
       return;
     }
 
@@ -64,7 +74,7 @@ export const useWebSocket = (userID: string | null) => {
       }
 
       const socket = new WebSocket(
-        `${wsBaseUrl}?uuid=${encodeURIComponent(userID)}`,
+        `${wsBaseUrl}?uuid=${encodeURIComponent(userID)}&refreshToken=${encodeURIComponent(token)}`,
       );
       socketRef.current = socket;
 
@@ -73,11 +83,35 @@ export const useWebSocket = (userID: string | null) => {
         startHeartbeat(socket);
       };
 
-      socket.onmessage = (event) => {
+      socket.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data);
 
           if (data?.type === "ping" || data?.type === "pong") {
+            return;
+          }
+          if (data?.type === "LOGOUT") {
+            isManuallyClosedRef.current = true;
+            clearHeartbeat();
+            clearReconnect();
+
+            if (
+              socketRef.current &&
+              (socketRef.current.readyState === WebSocket.OPEN ||
+                socketRef.current.readyState === WebSocket.CONNECTING)
+            ) {
+              socketRef.current.close(1000, "WebSocket forced logout");
+            }
+
+            try {
+              await Logout();
+              dispatch(clearUser());
+              dispatch(clearCategories());
+              dispatch(clearNotifications());
+              window.location.replace("/");
+            } catch (e) {
+              console.error("Logout failed after WS LOGOUT", e);
+            }
             return;
           }
 
@@ -121,5 +155,5 @@ export const useWebSocket = (userID: string | null) => {
       }
       socketRef.current = null;
     };
-  }, [userID, dispatch]);
+  }, [userID, token, dispatch]);
 };
