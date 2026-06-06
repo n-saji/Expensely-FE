@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {  useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUser } from "@/redux/slices/userSlice";
 import { API_URL } from "@/config/config";
 import UserPreferences from "@/utils/userPreferences";
-// import { motion } from "motion/react"
 import { toast } from "sonner";
 import {
   Card,
@@ -38,7 +37,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit2 } from "lucide-react";
+import {
+  Edit2,
+} from "lucide-react";
 import api from "@/lib/api";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -48,6 +49,7 @@ import {
   ThemeColorId,
 } from "@/global/constants";
 import { currencyCodes, currencyMap } from "@/utils/currencyMapper";
+import Sessions from "./_components/sessions";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
@@ -358,10 +360,18 @@ export default function SettingsPage() {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
-                      <span className="font-medium">{user.currency || "USD"}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <span className="font-medium">
+                        {user.currency || "USD"}
+                      </span>
                       <span className="text-muted-foreground">
-                        {currencyMap[user.currency || "USD"] || user.currency || "USD"}
+                        {currencyMap[user.currency || "USD"] ||
+                          user.currency ||
+                          "USD"}
                       </span>
                       <Edit2 className="ml-1" />
                     </Button>
@@ -377,7 +387,10 @@ export default function SettingsPage() {
 
                     <div className="mt-2 space-y-4">
                       <Label>Currency</Label>
-                      <Select value={currencyDraft} onValueChange={setCurrencyDraft}>
+                      <Select
+                        value={currencyDraft}
+                        onValueChange={setCurrencyDraft}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
@@ -593,6 +606,8 @@ export default function SettingsPage() {
               </CardAction>
             </CardHeader>
           </Card>
+
+          <Sessions />
         </TabsContent>
       </Tabs>
     </div>

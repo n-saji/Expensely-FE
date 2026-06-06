@@ -111,6 +111,9 @@ export default function Notifications({
             </div>
           ) : (
             notifications.notifications.map((notification) => {
+              if (notification.type === "LOGOUT") {
+                return null; // Skip rendering logout notifications
+              }
               const isUnread = !notification.isRead;
               return (
                 <div key={notification.id} className="px-3">
