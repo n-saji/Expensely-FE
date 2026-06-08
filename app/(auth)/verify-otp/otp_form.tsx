@@ -162,7 +162,7 @@ export default function OtpForm() {
     setPendingUserId(userId);
     setPendingEmail(email);
     setReady(true);
-  }, [router, user?.email, user?.id]);
+  }, [dispatch, router, user?.email, user?.id]);
 
   useEffect(() => {
     if (!ready || !pendingUserId) {
@@ -207,6 +207,7 @@ export default function OtpForm() {
       localStorage.removeItem("otp_auto_resend");
       localStorage.removeItem("user_id");
       localStorage.removeItem("theme");
+      localStorage.removeItem("pending_email_update_logout_on_refresh");
 
       dispatch(clearUser());
 
