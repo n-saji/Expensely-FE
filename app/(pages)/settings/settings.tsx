@@ -138,10 +138,10 @@ export default function SettingsPage() {
   };
 
   const handleUserUpdation = async ({
-    theme,
-    themeColor,
-    notification,
-    alertsEnabled,
+    theme = user.theme ?? "light" ,
+    themeColor = user.themeColor ?? DEFAULT_THEME_COLOR,
+    notification = user.notificationsEnabled,
+    alertsEnabled = user.alertsEnabled,
   }: {
     theme?: string | null;
     themeColor?: ThemeColorId | null;
@@ -302,44 +302,46 @@ export default function SettingsPage() {
               </CardDescription>
               <CardAction>
                 <div className="flex flex-col items-end gap-3">
-                  <div className="flex flex-wrap items-center justify-end gap-2">
-                    {THEME_COLOR_OPTIONS.map((option) => {
-                      const isSelected =
-                        (user.themeColor || DEFAULT_THEME_COLOR) === option.id;
+                  <Select
+                    value={user.themeColor || DEFAULT_THEME_COLOR}
+                    onValueChange={(value) => {
+                      const nextColor = THEME_COLOR_IDS.includes(
+                        value as ThemeColorId,
+                      )
+                        ? (value as ThemeColorId)
+                        : DEFAULT_THEME_COLOR;
 
-                      return (
-                        <button
-                          key={option.id}
-                          type="button"
-                          aria-label={`Select ${option.label} theme color`}
-                          title={option.label}
-                          onClick={() => {
-                            const nextColor = THEME_COLOR_IDS.includes(
-                              option.id,
-                            )
-                              ? option.id
-                              : DEFAULT_THEME_COLOR;
-
-                            dispatch(
-                              setUser({
-                                ...user,
-                                themeColor: nextColor as ThemeColorId,
-                              }),
-                            );
-                            handleUserUpdation({
-                              themeColor: nextColor as ThemeColorId,
-                            });
-                          }}
-                          className={`h-8 w-8 rounded-full border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                            isSelected
-                              ? "border-foreground scale-110"
-                              : "border-border/70 hover:scale-105"
-                          }`}
-                          style={{ backgroundColor: option.swatch }}
-                        />
+                      dispatch(
+                        setUser({
+                          ...user,
+                          themeColor: nextColor,
+                        }),
                       );
-                    })}
-                  </div>
+                      handleUserUpdation({
+                        themeColor: nextColor,
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-48 bg-background border-border/70 flex items-center gap-2">
+                      
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {THEME_COLOR_OPTIONS.map((option) => (
+                        <SelectItem key={option.id} value={option.id}>
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="h-3.5 w-3.5 rounded-full border border-border/50 inline-block shrink-0"
+                              style={{ backgroundColor: option.swatch }}
+                            />
+                            <span className="font-medium text-sm text-foreground">
+                              {option.label}
+                            </span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardAction>
             </CardHeader>
