@@ -50,6 +50,7 @@ export default function DashboardClient({
   useEffect(() => {
     let active = true;
 
+
     const hydrateUser = async () => {
       if (user?.id) {
         if (active) {

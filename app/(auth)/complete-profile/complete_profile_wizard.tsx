@@ -74,44 +74,35 @@ export default function CompleteProfileWizard() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // Wizard Steps
   const [step, setStep] = useState(1);
-
-  // Loading States
   const [fetchingUser, setFetchingUser] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [checkingPhone, setCheckingPhone] = useState(false);
   
-  // Progress Dialog States
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [submissionProgress, setSubmissionProgress] = useState(0);
   const [submissionStatus, setSubmissionStatus] = useState("");
 
-  // Form State
   const [countryCode, setCountryCode] = useState("+1");
   const [phone, setPhone] = useState("");
   const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
   const [profilePicPreview, setProfilePicPreview] = useState("");
   const [profilePicFilePath, setProfilePicFilePath] = useState("");
   
-  // Theme & Preferences State
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [themeColor, setThemeColor] = useState<ThemeColorId>("teal");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
 
-  // Security State
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Error States
   const [errors, setErrors] = useState<Record<string, string>>({});
   const hasFetchedRef = useRef(false);
 
-  // Alphabetically sorted country codes
   const countryCodeOptions = useMemo<CountrySelectOption[]>(
     () =>
       TOP_100_COUNTRY_CODES.map((option, index) => ({
@@ -121,7 +112,6 @@ export default function CompleteProfileWizard() {
     []
   );
 
-  // Selected option ID based on countryCode value
   const [selectedCountryOptionId, setSelectedCountryOptionId] = useState("");
 
   useEffect(() => {
@@ -133,7 +123,6 @@ export default function CompleteProfileWizard() {
     }
   }, [countryCode, countryCodeOptions]);
 
-  // Fetch current user details on mount to populate existing profile details
   useEffect(() => {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
@@ -199,7 +188,6 @@ export default function CompleteProfileWizard() {
     fetchUser();
   }, [dispatch]);
 
-  // Handle password strength checks
   const passwordStrength = useMemo(() => {
     if (!password) return { label: "", color: "", widthClass: "w-0" };
     const hasLetter = /[A-Za-z]/.test(password);
@@ -217,7 +205,6 @@ export default function CompleteProfileWizard() {
     return { label: "Strong", color: "bg-emerald-500", widthClass: "w-full" };
   }, [password]);
 
-  // Handle live theme and color updates locally so user sees immediate results
   const updateLocalTheme = (nextTheme: "light" | "dark") => {
     setTheme(nextTheme);
     dispatch(setUser({ theme: nextTheme }));
@@ -228,7 +215,6 @@ export default function CompleteProfileWizard() {
     dispatch(setUser({ themeColor: nextColor }));
   };
 
-  // Image Upload Logic (Supabase Bucket)
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -248,7 +234,6 @@ export default function CompleteProfileWizard() {
     setProfilePicFilePath("");
   };
 
-  // Step Validation Checks
   const validateStep = (currentStep: number) => {
     const nextErrors: Record<string, string> = {};
 
@@ -321,7 +306,6 @@ export default function CompleteProfileWizard() {
     setStep((prev) => prev - 1);
   };
 
-  // Form Submit Action
   const handleSubmit = async () => {
     if (!validateStep(step)) return;
 
@@ -336,7 +320,6 @@ export default function CompleteProfileWizard() {
         throw new Error("Unable to identify logged-in user.");
       }
 
-      // Step 1: Update Password
       setSubmissionProgress(25);
       setSubmissionStatus("Securing account with your password...");
       const pwdRes = await api.patch(`/users/update-password`, {
@@ -347,7 +330,6 @@ export default function CompleteProfileWizard() {
         throw pwdRes;
       }
 
-      // Step 2: Handle Profile Picture Upload if selected
       let finalFilePath = profilePicFilePath;
       let finalPictureUrl = profilePicPreview;
 
@@ -358,7 +340,7 @@ export default function CompleteProfileWizard() {
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        // If there was an old file path on Supabase, remove it first
+
         if (profilePicFilePath) {
           await supabase.storage
             .from("profiles-expensely")
@@ -381,7 +363,7 @@ export default function CompleteProfileWizard() {
         setSubmissionStatus("Linking profile picture to your profile...");
         const signedUrl = await fetchProfileUrl(filePath);
 
-        // Update profile picture reference on server
+
         const picRes = await api.patch(
           `/users/${userId}/update-profile-picture?filepath=${filePath}`,
           { imageUrl: signedUrl }
@@ -396,7 +378,6 @@ export default function CompleteProfileWizard() {
       } else if (!profilePicPreview && profilePicFilePath) {
         setSubmissionProgress(50);
         setSubmissionStatus("Removing existing profile picture...");
-        // User explicitly removed their picture
         await supabase.storage
           .from("profiles-expensely")
           .remove([profilePicFilePath])
@@ -413,7 +394,6 @@ export default function CompleteProfileWizard() {
         finalPictureUrl = "";
       }
 
-      // Step 3: Save Theme, Color settings
       setSubmissionProgress(75);
       setSubmissionStatus("Configuring personalization options...");
       const settingsRes = await api.patch(`/users/update-settings`, {
@@ -428,7 +408,6 @@ export default function CompleteProfileWizard() {
         throw settingsRes;
       }
 
-      // Step 4: Save Contact details and mark profileComplete: true
       setSubmissionProgress(90);
       setSubmissionStatus("Applying final contact details...");
       const profileRes = await api.patch(`/users/update-profile`, {
@@ -448,7 +427,6 @@ export default function CompleteProfileWizard() {
       setSubmissionProgress(100);
       setSubmissionStatus("Onboarding completed successfully!");
 
-      // Redux dispatch update
       dispatch(
         setUser({
           ...user,
