@@ -1,4 +1,5 @@
 import UserPreferences from "@/utils/userPreferences";
+import { Toaster } from "sonner";
 const maintenanceMode = process.env.NEXT_MAINTENANCE_MODE === "true";
 export default function AuthLayout({
   children,
@@ -28,6 +29,7 @@ export default function AuthLayout({
         </div>
       )}
       {!maintenanceMode && children}
+      <Toaster closeButton />
 
       <UserPreferences />
     </div>
