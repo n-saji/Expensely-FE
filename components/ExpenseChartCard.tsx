@@ -46,6 +46,7 @@ import { Spinner } from "./ui/spinner";
 import useMediaQuery from "@/utils/useMediaQuery";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { normalizeCategoryColor } from "@/components/category-icon-registry";
+import { formatAmountCompact } from "@/utils/amount_formatter";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -1940,7 +1941,7 @@ export function IncomeExpenseComparisonChart({
               {loading ? (
                 <SpinnerUI />
               ) : (
-                <ComposedChart data={displayData}>
+                <ComposedChart data={displayData} margin={{left:-15}}>
                   <CartesianGrid
                     stroke={darkMode ? "#242424" : "#DBDBDB"}
                     vertical={false}
@@ -1952,8 +1953,14 @@ export function IncomeExpenseComparisonChart({
                     interval={"preserveStartEnd"}
                     minTickGap={10}
                   />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tickFormatter={(value) =>
+                      `${formatAmountCompact(value, currency)}`
+                    }
+                  />
                   <Tooltip
-                    contentStyle={{
+                    contentStyle={{ 
                       backgroundColor: "#0f172a",
                       borderRadius: "12px",
                       border: "1px solid rgba(148,163,184,0.2)",
@@ -2007,24 +2014,40 @@ export function IncomeExpenseComparisonChart({
                       );
                     }}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="income"
-                    name="income"
-                    stroke="#22c55e"
-                    strokeWidth={2}
-                    dot={isSinglePoint ? makeDot("#22c55e") : true}
-                    isAnimationActive
-                  />
-                  <Line
+                  
+                  <Area
+                        type="bump"
+                        name="income"
+                        dataKey="income"
+                        activeDot={isSinglePoint ? makeDot("#22c55e") : true}
+                        dot={false}
+                      stroke="#4ade80"
+                      strokeWidth={2}
+                      isAnimationActive={true}
+                      fill="#4ade80"
+                        fillOpacity={0.12}
+                    />
+                  {/* <Line
                     type="monotone"
                     dataKey="expense"
                     name="expense"
                     stroke="#ef4444"
                     strokeWidth={2}
-                    dot={isSinglePoint ? makeDot("#ef4444") : true}
-                    isAnimationActive
-                  />
+                        activeDot={isSinglePoint ? makeDot("#ef4444") : true}
+                        dot={false}
+                  /> */}
+                      <Area
+                        type="bump"
+                        name="expense"
+                        dataKey="expense"
+                        activeDot={isSinglePoint ? makeDot("#ef4444") : true}
+                        dot={false}
+                      stroke="#ef4444"
+                      strokeWidth={2}
+                      isAnimationActive={true}
+                      fill="#f44444"
+                        fillOpacity={0.12}
+                    />
                 </ComposedChart>
               )}
             </ResponsiveContainer>
