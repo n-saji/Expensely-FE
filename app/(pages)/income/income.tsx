@@ -68,6 +68,7 @@ import { Label } from "@/components/ui/label";
 import useMediaQuery from "@/utils/useMediaQuery";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import CategoryBadge from "@/components/category-badge";
+import { getCategoryIcon } from "@/components/category-icon-registry";
 import {
   IncomeInsightCards,
   IncomeInsightCharts,
@@ -1163,6 +1164,8 @@ export default function IncomePage() {
           onRowSelectionChange={setRowSelection}
           pageSize={pageSize}
           setPageSize={setPageSize}
+          categories={categories}
+          userCurrency={user.currency}
         />
       </div>
 
@@ -1343,95 +1346,67 @@ const SearchAndFilter = ({
   dateRange: DateRange | undefined;
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
 }) => {
-  const isDesktop = useMediaQuery("(min-width: 530px)");
-
-  const categoryOptions = [
-    { label: "All Categories", value: "all" },
-    ...categories.map((category) => ({
-      label: category.name,
-      value: category.id,
-      icon: category.icon,
-      color: category.color,
-    })),
-  ];
-
-  return isDesktop ? (
-    <Card>
-      <CardContent className="flex flex-wrap flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 justify-between lg:items-end">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div>
-            <Label className="mb-2 text-sm font-extrabold">
-              What are you looking for?
-            </Label>
-            <div className="flex items-center relative rounded-md sm:w-full md:w-md lg:w-lg">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                className="pl-7 text-muted-foreground"
-                placeholder="Search incomes..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              {query && (
-                <Button
-                  className="absolute right-2 h-[50%] w-2"
-                  variant="ghost"
-                  onClick={() => setQuery("")}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="w-[200px]">
-            <Label className="mb-2 text-sm font-extrabold">Category</Label>
-            <DropDown
-              options={categoryOptions}
-              selectedOption={categoryFilter}
-              onSelect={setCategoryFilter}
-            />
-          </div>
-
-          <div className="w-[200px]">
-            <Label className="mb-2 text-sm font-extrabold">Date Range</Label>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  id="date"
-                  className="w-full justify-between text-muted-foreground"
-                >
-                  {dateRange?.from && dateRange?.to
-                    ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
-                    : "Select date range"}
-                  <ChevronDown />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-full overflow-hidden p-0"
-                align="start"
-              >
-                <Calendar
-                  mode="range"
-                  defaultMonth={dateRange?.from || new Date()}
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                  numberOfMonths={1}
-                  className="rounded-lg border shadow-sm"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+  return (
+    <div className="space-y-4">
+      {/* Search Input and Date Range Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full sm:items-center justify-between">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-9 pr-8 text-foreground bg-muted/20 border-muted/60 focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder="Search incomes..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <Button
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+              variant="ghost"
+              onClick={() => setQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center justify-end">
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="date"
+                className="w-fit md:w-[220px] justify-between text-muted-foreground font-normal border-muted/60 bg-muted/10"
+              >
+                {dateRange?.from && dateRange?.to
+                  ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
+                  : "Select date range"}
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto p-0"
+              align="end"
+            >
+              <Calendar
+                mode="range"
+                defaultMonth={dateRange?.from || new Date()}
+                selected={dateRange}
+                onSelect={setDateRange}
+                numberOfMonths={1}
+                className="rounded-lg border shadow-sm"
+              />
+            </PopoverContent>
+          </Popover>
+
           {selectedIncomes.length > 0 && (
             <Button
               disabled={selectedIncomes.length === 0}
               onClick={() => handleBulkDelete()}
               variant="destructive"
+              className="flex gap-2 items-center shrink-0"
             >
-              <Trash />
+              <Trash className="h-4 w-4" />
+              <span className="text-xs hidden md:inline">Delete ({selectedIncomes.length})</span>
             </Button>
           )}
 
@@ -1439,111 +1414,48 @@ const SearchAndFilter = ({
             onClick={() => clearFilters()}
             disabled={!dateRange && categoryFilter === "all" && !query}
             variant="outline"
+            className="border-muted/60 bg-muted/10 px-3 shrink-0"
+            title="Clear filters"
           >
-            <FilterX className="h-6 w-6" />
+            <FilterX className="h-4 w-4" />
           </Button>
         </div>
-      </CardContent>
-    </Card>
-  ) : (
-    <Popover>
-      <PopoverTrigger asChild className="group/collapsible">
-        <Button variant="outline" className="w-full">
-          <span>Filters & Options</span>
-          <ChevronDown className="transition-transform group-data-[state=open]/collapsible:rotate-180" />
+      </div>
+
+      {/* Category Pills Slider */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-none">
+        <Button
+          key="all"
+          variant={categoryFilter === "all" ? "default" : "outline"}
+          className={`rounded-lg px-4 py-2 text-sm flex items-center gap-2 h-9 whitespace-nowrap shrink-0 border border-muted/60 ${
+            categoryFilter === "all"
+              ? "bg-foreground text-background hover:bg-foreground/90 font-medium"
+              : "bg-muted/10 text-foreground hover:bg-muted/30 font-normal"
+          }`}
+          onClick={() => setCategoryFilter("all")}
+        >
+          All
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-4 space-y-4 bg-background" role="dialog">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div>
-            <Label className="mb-2 text-sm font-extrabold">
-              What are you looking for?
-            </Label>
-            <div className="flex items-center relative rounded-md sm:w-full md:w-md lg:w-lg">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                className="pl-7 text-muted-foreground"
-                placeholder="Search incomes..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              {query && (
-                <Button
-                  className="absolute right-2 h-[50%] w-2"
-                  variant="ghost"
-                  onClick={() => setQuery("")}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="w-[200px]">
-            <Label className="mb-2 text-sm font-extrabold">Category</Label>
-            <DropDown
-              options={categoryOptions}
-              selectedOption={categoryFilter}
-              onSelect={setCategoryFilter}
-            />
-            {categoriesLoading && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Loading categories...
-              </p>
-            )}
-          </div>
-
-          <div className="w-[200px]">
-            <Label className="mb-2 text-sm font-extrabold">Date Range</Label>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  id="date"
-                  className="w-full justify-between text-muted-foreground"
-                >
-                  {dateRange?.from && dateRange?.to
-                    ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
-                    : "Select date range"}
-                  <ChevronDown />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-full overflow-hidden p-0"
-                align="start"
-              >
-                <Calendar
-                  mode="range"
-                  defaultMonth={dateRange?.from || new Date()}
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                  numberOfMonths={1}
-                  className="rounded-lg border shadow-sm"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          {selectedIncomes.length > 0 && (
+        {!categoriesLoading && categories.map((category) => {
+          const Icon = getCategoryIcon(category.icon);
+          const isSelected = categoryFilter === category.id;
+          return (
             <Button
-              disabled={selectedIncomes.length === 0}
-              onClick={() => handleBulkDelete()}
-              variant="destructive"
+              key={category.id}
+              variant={isSelected ? "default" : "outline"}
+              className={`rounded-lg px-4 py-2 text-sm flex items-center gap-2 h-9 whitespace-nowrap shrink-0 border border-muted/60 ${
+                isSelected
+                  ? "bg-foreground text-background hover:bg-foreground/90 font-medium"
+                  : "bg-muted/10 text-foreground hover:bg-muted/30 font-normal"
+              }`}
+              onClick={() => setCategoryFilter(category.id)}
             >
-              <Trash />
+              <Icon className="h-4 w-4" style={{ color: isSelected ? undefined : category.color }} />
+              <span>{category.name}</span>
             </Button>
-          )}
-          <Button
-            onClick={() => clearFilters()}
-            disabled={!dateRange && categoryFilter === "all" && !query}
-            variant="outline"
-          >
-            <FilterX className="h-6 w-6" />
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+          );
+        })}
+      </div>
+    </div>
   );
 };
