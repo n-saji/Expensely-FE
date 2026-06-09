@@ -40,7 +40,7 @@ type CategoryMeta = {
 };
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { FormatAmount } from "@/utils/amount_formatter";
+import {  formatAmountCompact } from "@/utils/amount_formatter";
 
 export const columns = (
   userCurrency: string | undefined,
@@ -134,7 +134,7 @@ export const columns = (
         const amount = Number(
           row.original.displayAmount ?? row.original.amount,
         );
-        const formatted = FormatAmount(amount);
+        const formatted = formatAmountCompact(amount);
         const currency =
           row.original.displayCurrency ||
           row.original.currency ||

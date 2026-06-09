@@ -20,7 +20,6 @@ import {
 import { RootState } from "@/redux/store";
 import {
   ExpenseOverview,
-  ExpenseOverviewV2,
   IncomeOverview,
   OverviewEnum,
 } from "@/global/dto";
@@ -34,7 +33,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { currencyMapper } from "@/utils/currencyMapper";
 
 import NewUserOnboarding from "./_components/new-user-onboarding";
-import CategoryBadge from "@/components/category-badge";
+import { formatAmountExact, formatAmountCompact } from "@/utils/amount_formatter";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -376,7 +375,7 @@ export default function DashboardPage() {
     if (value >= 1_000_000) {
       return `${trimTrailingZero((value / 1_000_000).toFixed(1))}M`;
     }
-    if (value >= 1_000) {
+    if (value >= 1_0000) {
       return `${trimTrailingZero((value / 1_000).toFixed(1))}K`;
     }
     return fmt(value);
@@ -405,7 +404,7 @@ export default function DashboardPage() {
     : null;
   const totalBalanceDisplay =
     overview && incomeOverview ? formatCompactCurrency(netSavings) : null;
-  const totalBalanceSign = netSavings >= 0 ? "+" : "-";
+  const totalBalanceSign = netSavings >= 0 ? "" : "-";
 
   const topCategoryEntry = overview
     ? Object.entries(overview.amountByCategory).sort(([, a], [, b]) => b - a)[0]
@@ -587,7 +586,7 @@ export default function DashboardPage() {
             accentColor={netSavings >= 0 ? "#22c55e" : "#ef4444"}
             numberData={
               totalBalanceDisplay
-                ? `${totalBalanceSign}${totalBalanceDisplay.short}`
+                ? `${totalBalanceSign}${totalBalanceDisplay.short }`
                 : undefined
             }
             numberDataFull={

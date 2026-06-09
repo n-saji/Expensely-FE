@@ -156,12 +156,12 @@ export function IncomeInsightCharts({
         />
       </div>
 
-      <ExpensesTop5Monthly
+      {/* <ExpensesTop5Monthly
         amountByItem={incomeOverview?.topFiveMostIncomeItemThisMonth || {}}
         darkMode={userTheme === "dark"}
         currency={userCurrency}
         title="Top Income Contributors"
-      />
+      /> */}
     </section>
   );
 }

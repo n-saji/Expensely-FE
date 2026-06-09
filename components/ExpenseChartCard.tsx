@@ -46,6 +46,7 @@ import { Spinner } from "./ui/spinner";
 import useMediaQuery from "@/utils/useMediaQuery";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { normalizeCategoryColor } from "@/components/category-icon-registry";
+import { formatAmountCompact } from "@/utils/amount_formatter";
 // import useMediaQuery from "@/utils/useMediaQuery";
 
 const COLORS = [
@@ -1127,16 +1128,17 @@ export function YearlyExpenseLineChart({
                       cursor={{
                         stroke: darkMode ? "#525252" : "#DBDBDB",
                       }}
-                      formatter={(value) =>
-                        `${currencyMapper(currency)}${
-                          value
-                            ? value.toLocaleString(undefined, {
+                      formatter={(value) => {
+                        const rawValue = Array.isArray(value) ? value[1] - value[0] : value;
+                        return `${currencyMapper(currency)}${
+                          rawValue
+                            ? rawValue.toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })
                             : 0
-                        }`
-                      }
+                        }`;
+                      }}
                     />
                     {Object.keys(chartData[0])
                       .filter((key) => key !== "name")
@@ -1148,12 +1150,16 @@ export function YearlyExpenseLineChart({
                           categoryMeta,
                         );
                         return (
-                          <Line
+                          <Area
                             key={category}
-                            type="monotone"
+                            type="basis"
                             dataKey={category}
+                            stackId="1"
                             stroke={seriesColor}
                             strokeWidth={2}
+                            fill={seriesColor}
+                            fillOpacity={0.25}
+                            activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                             dot
                           />
                         );
@@ -1484,6 +1490,9 @@ export function YearlyExpenseLineChartV2({
                           ]
                         : chartData
                     }
+                        margin={{
+                          left:-9
+                        }}
                   >
                     <CartesianGrid
                       stroke={darkMode ? "#242424" : "#DBDBDB"}
@@ -1494,8 +1503,14 @@ export function YearlyExpenseLineChartV2({
                       dataKey="name"
                       tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                       interval={"preserveStartEnd"}
-                      minTickGap={10}
-                    />
+                          minTickGap={15}
+                        />
+                    {/* <YAxis
+                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tickFormatter={(value) =>
+                      `${formatAmountCompact(value, currency)}`
+                    }
+                  /> */}
                     <Tooltip
                       cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
                       content={(props) => {
@@ -1543,25 +1558,26 @@ export function YearlyExpenseLineChartV2({
                     />
 
                     <Area
-                      type="monotone"
+                      type="bump"
                       dataKey="amount"
                       stroke="#4ade80"
                       strokeWidth={2}
-                      dot={(props) => {
-                        if (props?.payload?.__ghost)
-                          return <g key={props.key} />;
-                        return (
-                          <circle
-                            key={props.key}
-                            cx={props.cx}
-                            cy={props.cy}
-                            r={4}
-                            fill="#4ade80"
-                            stroke="#fff"
-                            strokeWidth={1.5}
-                          />
-                        );
-                      }}
+                      // dot={(props) => {
+                      //   if (props?.payload?.__ghost)
+                      //     return <g key={props.key} />;
+                      //   return (
+                      //     <circle
+                      //       key={props.key}
+                      //       cx={props.cx}
+                      //       cy={props.cy}
+                      //       r={4}
+                      //       fill="#4ade80"
+                      //       stroke="#fff"
+                      //       strokeWidth={1.5}
+                      //     />
+                      //   );
+                          // }}
+                          dot={false}
                       activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                       isAnimationActive={true}
                       fill="#4ade80"
@@ -1699,26 +1715,31 @@ export function YearlyExpenseLineChartV2({
                             </p>
                             {props.payload
                               .filter((p) => !p.payload?.__ghost)
-                              .map((p, i) => (
-                                <p
-                                  key={i}
-                                  style={{
-                                    color: p.color ?? "#fff",
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {p.name}: {currencyMapper(currency)}
-                                  {p.value
-                                    ? Number(p.value).toLocaleString(
-                                        undefined,
-                                        {
-                                          minimumFractionDigits: 2,
-                                          maximumFractionDigits: 2,
-                                        },
-                                      )
-                                    : "0.00"}
-                                </p>
-                              ))}
+                              .map((p, i) => {
+                                const rawVal = p.dataKey && p.payload && p.payload[p.dataKey as string] !== undefined 
+                                  ? p.payload[p.dataKey as string] 
+                                  : (Array.isArray(p.value) ? p.value[1] - p.value[0] : p.value);
+                                return (
+                                  <p
+                                    key={i}
+                                    style={{
+                                      color: p.color ?? "#fff",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {p.name}: {currencyMapper(currency)}
+                                    {rawVal !== undefined && rawVal !== null
+                                      ? Number(rawVal).toLocaleString(
+                                          undefined,
+                                          {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                          },
+                                        )
+                                      : "0.00"}
+                                  </p>
+                                );
+                              })}
                           </div>
                         );
                       }}
@@ -1733,13 +1754,17 @@ export function YearlyExpenseLineChartV2({
                           categoryMetaByName,
                         );
                         return (
-                          <Line
+                          <Area
                             key={category}
-                            type="monotone"
+                            type="basis"
                             dataKey={category}
+                            stackId="1"
                             stroke={seriesColor}
                             strokeWidth={2}
-                            dot={(props: any) => {
+                            fill={seriesColor}
+                            fillOpacity={0.25}
+                            dot={false}
+                            activeDot={(props: any) => {
                               if (props?.payload?.__ghost)
                                 return <g key={props.key} />;
                               return (
@@ -1940,7 +1965,7 @@ export function IncomeExpenseComparisonChart({
               {loading ? (
                 <SpinnerUI />
               ) : (
-                <ComposedChart data={displayData}>
+                <ComposedChart data={displayData} margin={{left:-15}}>
                   <CartesianGrid
                     stroke={darkMode ? "#242424" : "#DBDBDB"}
                     vertical={false}
@@ -1950,10 +1975,16 @@ export function IncomeExpenseComparisonChart({
                     dataKey="name"
                     tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                     interval={"preserveStartEnd"}
-                    minTickGap={10}
+                    minTickGap={30}
+                  />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tickFormatter={(value) =>
+                      `${formatAmountCompact(value, currency)}`
+                    }
                   />
                   <Tooltip
-                    contentStyle={{
+                    contentStyle={{ 
                       backgroundColor: "#0f172a",
                       borderRadius: "12px",
                       border: "1px solid rgba(148,163,184,0.2)",
@@ -2007,24 +2038,40 @@ export function IncomeExpenseComparisonChart({
                       );
                     }}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="income"
-                    name="income"
-                    stroke="#22c55e"
-                    strokeWidth={2}
-                    dot={isSinglePoint ? makeDot("#22c55e") : true}
-                    isAnimationActive
-                  />
-                  <Line
+                  
+                  <Area
+                        type="bump"
+                        name="income"
+                        dataKey="income"
+                        activeDot={isSinglePoint ? makeDot("#22c55e") : true}
+                        dot={false}
+                      stroke="#4ade80"
+                      strokeWidth={2}
+                      isAnimationActive={true}
+                      fill="#4ade80"
+                        fillOpacity={0.12}
+                    />
+                  {/* <Line
                     type="monotone"
                     dataKey="expense"
                     name="expense"
                     stroke="#ef4444"
                     strokeWidth={2}
-                    dot={isSinglePoint ? makeDot("#ef4444") : true}
-                    isAnimationActive
-                  />
+                        activeDot={isSinglePoint ? makeDot("#ef4444") : true}
+                        dot={false}
+                  /> */}
+                      <Area
+                        type="bump"
+                        name="expense"
+                        dataKey="expense"
+                        activeDot={isSinglePoint ? makeDot("#ef4444") : true}
+                        dot={false}
+                      stroke="#ef4444"
+                      strokeWidth={2}
+                      isAnimationActive={true}
+                      fill="#f44444"
+                        fillOpacity={0.12}
+                    />
                 </ComposedChart>
               )}
             </ResponsiveContainer>

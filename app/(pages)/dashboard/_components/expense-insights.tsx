@@ -183,12 +183,12 @@ export function ExpenseInsightCharts({
         />
       </div>
 
-      <ExpensesTop5Monthly
+      {/* <ExpensesTop5Monthly
         amountByItem={overview?.topFiveMostExpensiveItemThisMonth || {}}
         darkMode={userTheme === "dark"}
         currency={userCurrency}
         title="Top Expense Contributors"
-      />
+      /> */}
     </section>
   );
 }
