@@ -1128,16 +1128,17 @@ export function YearlyExpenseLineChart({
                       cursor={{
                         stroke: darkMode ? "#525252" : "#DBDBDB",
                       }}
-                      formatter={(value) =>
-                        `${currencyMapper(currency)}${
-                          value
-                            ? value.toLocaleString(undefined, {
+                      formatter={(value) => {
+                        const rawValue = Array.isArray(value) ? value[1] - value[0] : value;
+                        return `${currencyMapper(currency)}${
+                          rawValue
+                            ? rawValue.toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })
                             : 0
-                        }`
-                      }
+                        }`;
+                      }}
                     />
                     {Object.keys(chartData[0])
                       .filter((key) => key !== "name")
@@ -1149,12 +1150,16 @@ export function YearlyExpenseLineChart({
                           categoryMeta,
                         );
                         return (
-                          <Line
+                          <Area
                             key={category}
-                            type="monotone"
+                            type="basis"
                             dataKey={category}
+                            stackId="1"
                             stroke={seriesColor}
                             strokeWidth={2}
+                            fill={seriesColor}
+                            fillOpacity={0.25}
+                            activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                             dot
                           />
                         );
@@ -1710,26 +1715,31 @@ export function YearlyExpenseLineChartV2({
                             </p>
                             {props.payload
                               .filter((p) => !p.payload?.__ghost)
-                              .map((p, i) => (
-                                <p
-                                  key={i}
-                                  style={{
-                                    color: p.color ?? "#fff",
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {p.name}: {currencyMapper(currency)}
-                                  {p.value
-                                    ? Number(p.value).toLocaleString(
-                                        undefined,
-                                        {
-                                          minimumFractionDigits: 2,
-                                          maximumFractionDigits: 2,
-                                        },
-                                      )
-                                    : "0.00"}
-                                </p>
-                              ))}
+                              .map((p, i) => {
+                                const rawVal = p.dataKey && p.payload && p.payload[p.dataKey as string] !== undefined 
+                                  ? p.payload[p.dataKey as string] 
+                                  : (Array.isArray(p.value) ? p.value[1] - p.value[0] : p.value);
+                                return (
+                                  <p
+                                    key={i}
+                                    style={{
+                                      color: p.color ?? "#fff",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {p.name}: {currencyMapper(currency)}
+                                    {rawVal !== undefined && rawVal !== null
+                                      ? Number(rawVal).toLocaleString(
+                                          undefined,
+                                          {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                          },
+                                        )
+                                      : "0.00"}
+                                  </p>
+                                );
+                              })}
                           </div>
                         );
                       }}
@@ -1744,14 +1754,16 @@ export function YearlyExpenseLineChartV2({
                           categoryMetaByName,
                         );
                         return (
-                          <Line
+                          <Area
                             key={category}
                             type="basis"
                             dataKey={category}
+                            stackId="1"
                             stroke={seriesColor}
                             strokeWidth={2}
+                            fill={seriesColor}
+                            fillOpacity={0.25}
                             dot={false}
-                            strokeDasharray={1}
                             activeDot={(props: any) => {
                               if (props?.payload?.__ghost)
                                 return <g key={props.key} />;
