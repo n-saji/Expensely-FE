@@ -1975,7 +1975,7 @@ export function IncomeExpenseComparisonChart({
                     dataKey="name"
                     tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                     interval={"preserveStartEnd"}
-                    minTickGap={10}
+                    minTickGap={30}
                   />
                       <YAxis
                         tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
