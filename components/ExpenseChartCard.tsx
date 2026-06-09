@@ -1485,6 +1485,9 @@ export function YearlyExpenseLineChartV2({
                           ]
                         : chartData
                     }
+                        margin={{
+                          left:-9
+                        }}
                   >
                     <CartesianGrid
                       stroke={darkMode ? "#242424" : "#DBDBDB"}
@@ -1495,8 +1498,14 @@ export function YearlyExpenseLineChartV2({
                       dataKey="name"
                       tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
                       interval={"preserveStartEnd"}
-                      minTickGap={10}
-                    />
+                          minTickGap={15}
+                        />
+                    {/* <YAxis
+                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tickFormatter={(value) =>
+                      `${formatAmountCompact(value, currency)}`
+                    }
+                  /> */}
                     <Tooltip
                       cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
                       content={(props) => {
@@ -1544,25 +1553,26 @@ export function YearlyExpenseLineChartV2({
                     />
 
                     <Area
-                      type="monotone"
+                      type="bump"
                       dataKey="amount"
                       stroke="#4ade80"
                       strokeWidth={2}
-                      dot={(props) => {
-                        if (props?.payload?.__ghost)
-                          return <g key={props.key} />;
-                        return (
-                          <circle
-                            key={props.key}
-                            cx={props.cx}
-                            cy={props.cy}
-                            r={4}
-                            fill="#4ade80"
-                            stroke="#fff"
-                            strokeWidth={1.5}
-                          />
-                        );
-                      }}
+                      // dot={(props) => {
+                      //   if (props?.payload?.__ghost)
+                      //     return <g key={props.key} />;
+                      //   return (
+                      //     <circle
+                      //       key={props.key}
+                      //       cx={props.cx}
+                      //       cy={props.cy}
+                      //       r={4}
+                      //       fill="#4ade80"
+                      //       stroke="#fff"
+                      //       strokeWidth={1.5}
+                      //     />
+                      //   );
+                          // }}
+                          dot={false}
                       activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                       isAnimationActive={true}
                       fill="#4ade80"
@@ -1736,11 +1746,13 @@ export function YearlyExpenseLineChartV2({
                         return (
                           <Line
                             key={category}
-                            type="monotone"
+                            type="basis"
                             dataKey={category}
                             stroke={seriesColor}
                             strokeWidth={2}
-                            dot={(props: any) => {
+                            dot={false}
+                            strokeDasharray={1}
+                            activeDot={(props: any) => {
                               if (props?.payload?.__ghost)
                                 return <g key={props.key} />;
                               return (
