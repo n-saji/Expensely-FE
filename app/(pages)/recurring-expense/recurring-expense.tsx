@@ -188,11 +188,7 @@ export default function RecurringExpensePage() {
         </p>
       </div>
 
-      <Card className="border-border/70 shadow-sm overflow-hidden">
-        <CardContent>
-          <DataTable columns={tableColumns} data={rows} loading={loading} />
-        </CardContent>
-      </Card>
+      <DataTable columns={tableColumns} data={rows} loading={loading} />
 
       {selectedDelete && (
         <AlertDialog

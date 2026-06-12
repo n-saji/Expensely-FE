@@ -3,10 +3,6 @@ import { RootState } from "@/redux/store";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
-import Image from "next/image";
-import filterIcon from "@/assets/icon/filter.png";
-import filterIconWhite from "@/assets/icon/filter-white.png";
-import DropDown from "@/components/drop-down";
 import { categoryTypes, categorySkeleton } from "@/global/dto";
 import api from "@/lib/api";
 import {
@@ -17,6 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Table,
   TableHeader,
@@ -32,7 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -44,9 +48,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 import CategoryBadge from "@/components/category-badge";
 import CategoryStylePicker from "@/components/category-style-picker";
 import {
+  DEFAULT_CATEGORY_COLOR,
+  DEFAULT_CATEGORY_ICON_KEY,
   normalizeCategoryColor,
   resolveCategoryIconKey,
 } from "@/components/category-icon-registry";
@@ -58,7 +65,7 @@ export default function CategoryPage() {
   const user = useSelector((state: RootState) => state.user);
   const [showTable, setShowTable] = useState(false);
   const isCategoryMounted = useRef(false);
-  const [filter, setFilter] = useState(false);
+  // const [filter, setFilter] = useState(false);
   const [categoriesList, setCategories] = useState<categorySkeleton[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingCategory, setUpdatingCategory] = useState(false);
@@ -67,7 +74,17 @@ export default function CategoryPage() {
     useState<categorySkeleton | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
 
-  const [deletingCategory, setDeletingCategory] = useState<categorySkeleton | null>(null);
+  const [openAddSheet, setOpenAddSheet] = useState(false);
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    type: "",
+    icon: DEFAULT_CATEGORY_ICON_KEY as string,
+    color: DEFAULT_CATEGORY_COLOR,
+  });
+  const [addingCategory, setAddingCategory] = useState(false);
+
+  const [deletingCategory, setDeletingCategory] =
+    useState<categorySkeleton | null>(null);
   const [dependencies, setDependencies] = useState<{
     budgetCount: number;
     expenseCount: number;
@@ -77,6 +94,52 @@ export default function CategoryPage() {
   const [isFetchingDependencies, setIsFetchingDependencies] = useState(false);
   const [openDeleteConfirmDialog, setOpenDeleteConfirmDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleAddCategory = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!newCategory.name) {
+      toast.error("Please enter a category name");
+      return;
+    }
+    if (!newCategory.type) {
+      toast.error("Please select a category type");
+      return;
+    }
+    setAddingCategory(true);
+
+    try {
+      const payload = {
+        ...newCategory,
+        user: {
+          id: user.id,
+        },
+        icon: resolveCategoryIconKey(newCategory.icon),
+        color: normalizeCategoryColor(newCategory.color),
+      };
+      const response = await api.post(`/categories/create`, payload);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to add category");
+      }
+
+      toast.success("Category added successfully");
+
+      setNewCategory({
+        name: "",
+        type: "",
+        icon: DEFAULT_CATEGORY_ICON_KEY,
+        color: DEFAULT_CATEGORY_COLOR,
+      });
+      setOpenAddSheet(false);
+      await fetchCategories(categoryFilter);
+      window.dispatchEvent(new Event("category-added"));
+    } catch (error) {
+      console.error("Error adding category:", error);
+      toast.error("Error adding category");
+    } finally {
+      setAddingCategory(false);
+    }
+  };
 
   const fetchCategories = async (type: string | null) => {
     try {
@@ -148,7 +211,9 @@ export default function CategoryPage() {
     setOpenDeleteConfirmDialog(true);
     setIsFetchingDependencies(true);
     try {
-      const response = await api.get(`/categories/find-category-dependencies/${category.id}`);
+      const response = await api.get(
+        `/categories/find-category-dependencies/${category.id}`,
+      );
       setDependencies(response.data);
     } catch (error) {
       console.error("Error fetching category dependencies:", error);
@@ -193,20 +258,121 @@ export default function CategoryPage() {
             Manage and organize your spending categories.
           </p>
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm"
-          onClick={() => setFilter(!filter)}
-        >
-          <Image
-            src={user.theme === "light" ? filterIcon : filterIconWhite}
-            alt="Filter"
-            className="w-4 h-4"
-          />
-          Filter
-        </button>
+        <div className="flex items-center gap-3">
+          {/* <button
+            type="button"
+            className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-sm text-muted-foreground shadow-sm hover:bg-muted/50 transition-colors h-9"
+            onClick={() => setFilter(!filter)}
+          >
+            <Image
+              src={user.theme === "light" ? filterIcon : filterIconWhite}
+              alt="Filter"
+              className="w-4 h-4"
+            />
+            Filter
+          </button> */}
+
+          <Sheet open={openAddSheet} onOpenChange={setOpenAddSheet}>
+            <SheetTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4" />
+                Add Category
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              className="w-full sm:max-w-md p-6 flex flex-col gap-6"
+              side="right"
+            >
+              <SheetHeader className="p-0">
+                <SheetTitle className="text-xl">Add New Category</SheetTitle>
+                <SheetDescription>
+                  Create a new category to organize expenses.
+                </SheetDescription>
+              </SheetHeader>
+
+              <form
+                className="flex flex-col gap-4 flex-1"
+                onSubmit={handleAddCategory}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="add-category-name">Category Name</Label>
+                  <Input
+                    id="add-category-name"
+                    type="text"
+                    placeholder="Category Name"
+                    value={newCategory.name}
+                    onChange={(e) =>
+                      setNewCategory((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="add-category-type">Category Type</Label>
+                  <Select
+                    value={newCategory.type}
+                    onValueChange={(value) => {
+                      setNewCategory((prev) => ({
+                        ...prev,
+                        type: value,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger id="add-category-type" className="w-full">
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoryTypes.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Style & Preview</Label>
+                  <CategoryStylePicker
+                    icon={newCategory.icon}
+                    color={newCategory.color}
+                    onIconChange={(value) => {
+                      setNewCategory((prev) => ({ ...prev, icon: value }));
+                    }}
+                    onColorChange={(value) =>
+                      setNewCategory((prev) => ({ ...prev, color: value }))
+                    }
+                    previewLabel={newCategory.name || "New category"}
+                  />
+                </div>
+
+                <div className="flex gap-2 mt-auto pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setOpenAddSheet(false)}
+                    disabled={addingCategory}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={addingCategory}
+                  >
+                    {addingCategory ? <Spinner /> : "Add Category"}
+                  </Button>
+                </div>
+              </form>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-      {filter && (
+      {/* {filter && (
         <div
           className="gap-6 sm:gap-3 md:gap-4 mb-6
           grid sm:grid-cols-3
@@ -228,7 +394,7 @@ export default function CategoryPage() {
             }}
           />
         </div>
-      )}
+      )} */}
       <div className="overflow-hidden rounded-2xl border border-border/70 bg-background/80 shadow-sm">
         <Table>
           <TableHeader>
@@ -245,7 +411,9 @@ export default function CategoryPage() {
                 {!loading && (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8">
-                      <p className="text-muted-foreground">No categories found</p>
+                      <p className="text-muted-foreground">
+                        No categories found
+                      </p>
                     </TableCell>
                   </TableRow>
                 )}
@@ -286,15 +454,17 @@ export default function CategoryPage() {
                       />
                     </TableCell>
                     <TableCell className="capitalize">
-                      {
-                        categoryTypes.find((cat) => cat.value === category.type)
-                          ?.label || category.type
-                      }
+                      {categoryTypes.find((cat) => cat.value === category.type)
+                        ?.label || category.type}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 p-0"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className="sr-only">Open menu</span>
                           </Button>
@@ -449,7 +619,8 @@ export default function CategoryPage() {
                 Are you sure you want to delete the category{" "}
                 <span className="font-semibold text-foreground">
                   "{deletingCategory?.name}"
-                </span>? This action cannot be undone.
+                </span>
+                ? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
 
@@ -525,8 +696,9 @@ export default function CategoryPage() {
                   dependencies.budgetCount > 0 ||
                   dependencies.recurringExpenseCount > 0) && (
                   <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
-                    <strong>Warning:</strong> Deleting this category will affect the
-                    associated records listed above. Please confirm you want to proceed.
+                    <strong>Warning:</strong> Deleting this category will affect
+                    the associated records listed above. Please confirm you want
+                    to proceed.
                   </div>
                 )}
               </div>

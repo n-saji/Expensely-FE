@@ -234,43 +234,18 @@ export function AppSidebar() {
               </Collapsible>
             </SidebarMenu>
             <SidebarMenu>
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary">
-                      <Logs />
-                      Category
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem key={"Expense-show"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/category"}
-                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                        >
-                          <Link href={"/category"}>
-                            <span>Categories</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem key={"Expense-add"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/category/add"}
-                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                        >
-                          <Link href={"/category/add"}>
-                            <span>Add Category</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/category"}
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                >
+                  <Link href={"/category"}>
+                    <Logs />
+                    <span>Category</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
