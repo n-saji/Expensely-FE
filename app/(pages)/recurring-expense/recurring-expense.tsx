@@ -30,6 +30,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function RecurringExpensePage() {
   const [loading, setLoading] = useState(true);
@@ -40,9 +50,20 @@ export default function RecurringExpensePage() {
     useState<RecurringExpenseRow | null>(null);
   const [selectedUpdate, setSelectedUpdate] =
     useState<RecurringExpenseRow | null>(null);
+  const [openAddSheet, setOpenAddSheet] = useState(false);
 
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector((state: RootState) => state.categoryExpense);
+
+  const handleCreateRecurring = async (data: CreateRecurringExpenseReq) => {
+    const response = await api.post(`/recurring-expenses/create`, data);
+
+    if (response.status !== 200) {
+      throw new Error("Failed to create recurring expense");
+    }
+
+    await fetchRecurringExpenses(true);
+  };
 
   const fetchRecurringExpenses = useCallback(async (noLoader?: boolean) => {
     try {
@@ -176,16 +197,45 @@ export default function RecurringExpensePage() {
 
   return (
     <div className="w-full space-y-6 pb-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Ledger
-        </p>
-        <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-          Recurring Expenses
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Manage repeating expenses and control activation states.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Ledger
+          </p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+            Recurring Expenses
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage repeating expenses and control activation states.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Sheet open={openAddSheet} onOpenChange={setOpenAddSheet}>
+            <SheetTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4" />
+                Add Recurring Expense
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              className="w-full sm:max-w-md p-6 flex flex-col gap-6"
+              side="right"
+            >
+              <SheetHeader className="p-0">
+                <SheetTitle className="text-xl">Add Recurring Expense</SheetTitle>
+                <SheetDescription>
+                  Create recurring transactions for fixed, repeatable spending.
+                </SheetDescription>
+              </SheetHeader>
+              <RecurringExpenseForm
+                submitLabel="Create Recurring Expense"
+                onSubmit={handleCreateRecurring}
+                onSuccess={() => setOpenAddSheet(false)}
+                showSuccessToast={true}
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       <DataTable columns={tableColumns} data={rows} loading={loading} />
