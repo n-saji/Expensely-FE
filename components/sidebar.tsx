@@ -195,82 +195,32 @@ export function AppSidebar() {
             </SidebarMenu>
 
             <SidebarMenu>
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary">
-                      <Repeat />
-                      Recurring Expense
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem key={"Recurring-show"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/recurring-expense"}
-                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                        >
-                          <Link href={"/recurring-expense"}>
-                            <span>Recurring Expenses</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem key={"Recurring-add"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/recurring-expense/add"}
-                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                        >
-                          <Link href={"/recurring-expense/add"}>
-                            <span>Add Recurring Expense</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/recurring-expense"}
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                >
+                  <Link href={"/recurring-expense"}>
+                    <Repeat />
+                    <span>Recurring Expenses</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
             <SidebarMenu>
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary">
-                      <Logs />
-                      Category
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem key={"Expense-show"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/category"}
-                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                        >
-                          <Link href={"/category"}>
-                            <span>Categories</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem key={"Expense-add"}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathName === "/category/add"}
-                          className="rounded-lg transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                        >
-                          <Link href={"/category/add"}>
-                            <span>Add Category</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/category"}
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                >
+                  <Link href={"/category"}>
+                    <Logs />
+                    <span>Category</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
