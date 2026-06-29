@@ -1,48 +1,25 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
+import React from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import MonthlyAnalyticsView from "@/app/(pages)/dashboard/month/MonthlyAnalyticsView";
 
-export default function MonthlyDashboardPage() {
-  const param = useParams();
-  const month = param.month;
-
+export default function MonthlyDashboardModalPage() {
   const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+
+  const month = params.month as string;
+  const type = searchParams.get("type") === "income" ? "income" : "expense";
+
   return (
     <Dialog open={true} onOpenChange={() => router.back()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle> Detailed Report for {month} </DialogTitle>
-        </DialogHeader>
-        <div className="mt-4">
-          This is the detailed report for the month of {month} inside a modal.
+      <DialogContent className="w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-6xl h-[90vh] max-h-[90vh] overflow-y-auto p-4 md:p-8 bg-background border border-border shadow-2xl rounded-2xl scrollbar-thin">
+        <div className="mt-2">
+          <MonthlyAnalyticsView monthParam={month} typeParam={type} isModal={true} />
         </div>
-        <div className="text-3xl">
-          Work in progress...
-        </div>
-        <DialogClose className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-slate-100">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogClose>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button
-              onClick={() => {
-                router.push("/dashboard");
-              }}
-            >
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
