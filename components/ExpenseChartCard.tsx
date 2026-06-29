@@ -1577,7 +1577,7 @@ export function YearlyExpenseLineChartV2({
                       //     />
                       //   );
                           // }}
-                          dot={false}
+                      dot={false}
                       activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
                       isAnimationActive={true}
                       fill="#4ade80"
@@ -1756,7 +1756,7 @@ export function YearlyExpenseLineChartV2({
                         return (
                           <Area
                             key={category}
-                            type="basis"
+                            type="monotone"
                             dataKey={category}
                             stackId="1"
                             stroke={seriesColor}
@@ -1930,23 +1930,26 @@ export function IncomeExpenseComparisonChart({
   };
 
   return (
-    <Card className="w-full overflow-hidden border-border/70 shadow-sm">
+    <Card className="w-full overflow-hidden border-border/40 shadow-none bg-card/30 backdrop-blur-sm">
       <CardHeader className="flex flex-wrap justify-between items-center gap-3">
-        <CardTitle>Income vs Expense</CardTitle>
+        <div>
+          <CardTitle className="text-lg font-medium text-foreground">Income vs Expense</CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">Monthly flow comparison</p>
+        </div>
         <CardAction>
           <Select
             value={selectedTimeframe.toString()}
             onValueChange={(value) => setSelectedTimeframe(parseInt(value, 10))}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-[140px] bg-background/50 border-border/40 text-xs">
               <SelectValue placeholder="Last 6 Months" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border-border/40">
               <SelectGroup>
-                <SelectLabel>Choose Time Period</SelectLabel>
-                <SelectItem value="0">Last 6 Months</SelectItem>
-                <SelectItem value="1">Last 12 Months</SelectItem>
-                <SelectItem value="2">All Years</SelectItem>
+                <SelectLabel className="text-xs">Choose Time Period</SelectLabel>
+                <SelectItem value="0" className="text-xs">Last 6 Months</SelectItem>
+                <SelectItem value="1" className="text-xs">Last 12 Months</SelectItem>
+                <SelectItem value="2" className="text-xs">All Years</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -1961,78 +1964,74 @@ export function IncomeExpenseComparisonChart({
           )
         ) : (
           <>
-            <ResponsiveContainer height={220}>
+            <ResponsiveContainer height={240}>
               {loading ? (
                 <SpinnerUI />
               ) : (
-                <ComposedChart data={displayData} margin={{left:-15}}>
+                <ComposedChart data={displayData} margin={{ left: -15, right: 10, top: 10 }}>
+                  <defs>
+                    <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
-                    stroke={darkMode ? "#242424" : "#DBDBDB"}
+                    stroke={darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}
                     vertical={false}
-                    strokeDasharray="1"
+                    strokeDasharray="3 3"
                   />
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                    tick={{ fontSize: 10, fill: "currentColor" }}
+                    className="text-muted-foreground font-mono"
                     interval={"preserveStartEnd"}
                     minTickGap={30}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                      <YAxis
-                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "currentColor" }}
+                    className="text-muted-foreground font-mono"
                     tickFormatter={(value) =>
                       `${formatAmountCompact(value, currency)}`
                     }
+                    axisLine={false}
+                    tickLine={false}
                   />
                   <Tooltip
                     contentStyle={{ 
-                      backgroundColor: "#0f172a",
+                      backgroundColor: "rgba(15,23,42,0.85)",
                       borderRadius: "12px",
-                      border: "1px solid rgba(148,163,184,0.2)",
-                      boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                      border: "1px solid rgba(148,163,184,0.15)",
+                      boxShadow: "0 10px 30px rgba(15,23,42,0.45)",
+                      backdropFilter: "blur(8px)",
                     }}
-                    labelStyle={{ color: "#e2e8f0" }}
-                    cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
-                    // Suppress tooltip on ghost padding entries
+                    labelStyle={{ color: "#e2e8f0", fontWeight: 500 }}
+                    cursor={{ stroke: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}
                     filterNull
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
-                      // Ghost entries have an empty label — don't show tooltip
                       if (!label) return null;
                       return (
-                        <div
-                          style={{
-                            backgroundColor: "#0f172a",
-                            borderRadius: "12px",
-                            border: "1px solid rgba(148,163,184,0.2)",
-                            boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                            padding: "10px 14px",
-                          }}
-                        >
-                          <p
-                            style={{
-                              color: "#e2e8f0",
-                              marginBottom: 6,
-                              fontSize: 13,
-                            }}
-                          >
-                            {label}
-                          </p>
+                        <div className="bg-slate-900/90 text-slate-100 rounded-lg border border-slate-800 p-3 shadow-xl backdrop-blur-sm min-w-[150px]">
+                          <p className="text-xs font-mono font-medium text-slate-400 mb-2">{label}</p>
                           {payload.map((entry) => (
-                            <p
-                              key={entry.name}
-                              style={{
-                                color: entry.color,
-                                fontSize: 13,
-                                margin: "2px 0",
-                              }}
-                            >
-                              {entry.name === "income" ? "Income" : "Expense"}:{" "}
-                              {currencyMapper(currency)}
-                              {Number(entry.value).toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                            </p>
+                            <div key={entry.name} className="flex justify-between items-center gap-4 text-xs py-0.5">
+                              <span className="capitalize" style={{ color: entry.color }}>
+                                {entry.name}:
+                              </span>
+                              <span className="font-mono font-semibold">
+                                {currencyMapper(currency)}
+                                {Number(entry.value).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </span>
+                            </div>
                           ))}
                         </div>
                       );
@@ -2040,48 +2039,37 @@ export function IncomeExpenseComparisonChart({
                   />
                   
                   <Area
-                        type="bump"
-                        name="income"
-                        dataKey="income"
-                        activeDot={isSinglePoint ? makeDot("#22c55e") : true}
-                        dot={false}
-                      stroke="#4ade80"
-                      strokeWidth={2}
-                      isAnimationActive={true}
-                      fill="#4ade80"
-                        fillOpacity={0.12}
-                    />
-                  {/* <Line
-                    type="monotone"
-                    dataKey="expense"
+                    type="bump"
+                    name="income"
+                    dataKey="income"
+                    activeDot={isSinglePoint ? makeDot("#10b981") : { r: 4, strokeWidth: 1 }}
+                    dot={false}
+                    stroke="#10b981"
+                    strokeWidth={2}
+                    isAnimationActive={true}
+                    fill="url(#incomeGrad)"
+                  />
+                  <Area
+                    type="bump"
                     name="expense"
+                    dataKey="expense"
+                    activeDot={isSinglePoint ? makeDot("#ef4444") : { r: 4, strokeWidth: 1 }}
+                    dot={false}
                     stroke="#ef4444"
                     strokeWidth={2}
-                        activeDot={isSinglePoint ? makeDot("#ef4444") : true}
-                        dot={false}
-                  /> */}
-                      <Area
-                        type="bump"
-                        name="expense"
-                        dataKey="expense"
-                        activeDot={isSinglePoint ? makeDot("#ef4444") : true}
-                        dot={false}
-                      stroke="#ef4444"
-                      strokeWidth={2}
-                      isAnimationActive={true}
-                      fill="#f44444"
-                        fillOpacity={0.12}
-                    />
+                    isAnimationActive={true}
+                    fill="url(#expenseGrad)"
+                  />
                 </ComposedChart>
               )}
             </ResponsiveContainer>
 
-            <div className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-border/30">
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Income
                 </p>
-                <p className="font-semibold text-foreground">
+                <p className="text-lg font-medium font-mono text-emerald-500">
                   {currencyMapper(currency)}
                   {totalIncome.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -2089,11 +2077,11 @@ export function IncomeExpenseComparisonChart({
                   })}
                 </p>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Expense
                 </p>
-                <p className="font-semibold text-foreground">
+                <p className="text-lg font-medium font-mono text-rose-500">
                   {currencyMapper(currency)}
                   {totalExpense.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -2101,11 +2089,11 @@ export function IncomeExpenseComparisonChart({
                   })}
                 </p>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Net
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  Net Flow
                 </p>
-                <p className="font-semibold text-foreground">
+                <p className={`text-lg font-medium font-mono ${net >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
                   {currencyMapper(currency)}
                   {net.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -2113,11 +2101,13 @@ export function IncomeExpenseComparisonChart({
                   })}
                 </p>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Income Trend
                 </p>
-                <TrendBadge trend={trend} />
+                <div className="mt-0.5">
+                  <TrendBadge trend={trend} />
+                </div>
               </div>
             </div>
           </>
