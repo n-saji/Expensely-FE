@@ -464,8 +464,7 @@ export default function DashboardPage() {
           
           {/* Monthly Income (Interactive) */}
           <div 
-            onClick={() => router.push(`/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`)}
-            className="group cursor-pointer flex flex-col justify-between space-y-3 border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8 hover:opacity-85 transition-opacity"
+            className="group flex flex-col justify-between space-y-3 border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Monthly Income</span>
@@ -490,16 +489,21 @@ export default function DashboardPage() {
                   {monthIncomeDisplay ? monthIncomeDisplay.full : "—"}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1.5 group-hover:text-foreground transition-colors flex items-center gap-1">
-                View transactions <ArrowRight className="h-3 w-3" />
-              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/month/${incomeCurrentMonthYear}-${String(incomeCurrentMonth).padStart(2, '0')}?type=income`);
+                }}
+                className="text-xs text-emerald-500 hover:text-emerald-400 hover:underline transition-colors mt-1.5 flex items-center gap-1 cursor-pointer font-medium"
+              >
+                View analytics <ArrowRight className="h-3 w-3" />
+              </button>
             </div>
           </div>
 
           {/* Monthly Expense (Interactive) */}
           <div 
-            onClick={() => router.push(`/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`)}
-            className="group cursor-pointer flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8 hover:opacity-85 transition-opacity"
+            className="group flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Monthly Expense</span>
@@ -524,9 +528,15 @@ export default function DashboardPage() {
                   {monthExpenseDisplay ? monthExpenseDisplay.full : "—"}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1.5 group-hover:text-foreground transition-colors flex items-center gap-1">
-                View transactions <ArrowRight className="h-3 w-3" />
-              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/month/${currentMonthYear}-${String(currentMonth).padStart(2, '0')}?type=expense`);
+                }}
+                className="text-xs text-emerald-500 hover:text-emerald-400 hover:underline transition-colors mt-1.5 flex items-center gap-1 cursor-pointer font-medium"
+              >
+                View analytics <ArrowRight className="h-3 w-3" />
+              </button>
             </div>
           </div>
 
@@ -625,9 +635,9 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={budget.id}
-                          className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-6 group"
+                          className="w-full py-4 first:pt-0 last:pb-0 grid grid-cols-[1fr_140px] items-center gap-6 group"
                         >
-                          <div className="min-w-0 flex-1 space-y-2">
+                          <div className="min-w-0 w-full space-y-2">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
                                 {budget.category.name}
