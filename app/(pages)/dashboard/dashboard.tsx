@@ -24,12 +24,10 @@ import {
   OverviewEnum,
 } from "@/global/dto";
 import api from "@/lib/api";
-import CardComponent from "@/components/CardComponent";
 import { IncomeExpenseComparisonChart } from "@/components/ExpenseChartCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { ProgressBar } from "@/components/ProgressBar";
 import { currencyMapper } from "@/utils/currencyMapper";
 
 import NewUserOnboarding from "./_components/new-user-onboarding";
@@ -438,214 +436,118 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── 4 Metric Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={0}
-          role="button"
-          tabIndex={0}
-          className="cursor-pointer"
-          onClick={() =>
-            router.push(
-              `/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`,
-            )
-          }
-        >
-          <CardComponent
-            title={`${monthLabel} Expense`}
-            icon={<Wallet className="h-4 w-4" />}
-            accentColor={
-              (overview?.thisMonthTotalExpense || 0) -
-                (overview?.lastMonthTotalExpense || 0) >
-              0
-                ? "#ef4444"
-                : "#22c55e"
-            }
-            cardAction={
-              overview && (
-                <div
-                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                    overview.thisMonthTotalExpense -
-                      overview.lastMonthTotalExpense >
-                    0
-                      ? "border-red-500/40 bg-red-500/10 text-red-400"
-                      : "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  }`}
-                >
-                  {overview.thisMonthTotalExpense -
-                    overview.lastMonthTotalExpense >
-                  0 ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
-                  <p className="text-xs font-mono">
-                    {overview.lastMonthTotalExpense === 0 ||
-                    overview.lastMonthTotalExpense === null
-                      ? "100%"
-                      : `${Math.abs(((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) / overview.lastMonthTotalExpense) * 100).toFixed(1)}%`}
-                  </p>
+      {/* ── Consolidated Hero Stats Panel ── */}
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        custom={0}
+        className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md p-6 md:p-8"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          {/* Net Balance (Primary focal point) */}
+          <div className="flex flex-col justify-between space-y-3">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Net Balance</span>
+            <div>
+              {overview === null || incomeOverview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-3xl md:text-4xl font-light text-foreground font-mono tracking-tight">
+                  {totalBalanceDisplay ? `${totalBalanceSign}${totalBalanceDisplay.full}` : "—"}
                 </div>
-              )
-            }
-            numberData={
-              monthExpenseDisplay ? monthExpenseDisplay.short : undefined
-            }
-            numberDataFull={
-              monthExpenseDisplay ? monthExpenseDisplay.full : undefined
-            }
-            description={
-              overview
-                ? `${currency}${fmt(Math.abs(overview.thisMonthTotalExpense - overview.lastMonthTotalExpense))} ${overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0 ? "more" : "less"} than last month`
-                : undefined
-            }
-            loading={overview === null}
-          />
-        </motion.div>
-
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={1}
-          role="button"
-          tabIndex={0}
-          className="cursor-pointer"
-          onClick={() =>
-            router.push(
-              `/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`,
-            )
-          }
-        >
-          <CardComponent
-            title={`${monthLabel} Income`}
-            icon={<Banknote className="h-4 w-4" />}
-            accentColor={
-              (incomeOverview?.thisMonthTotalIncome || 0) -
-                (incomeOverview?.lastMonthTotalIncome || 0) >
-              0
-                ? "#22c55e"
-                : "#ef4444"
-            }
-            cardAction={
-              incomeOverview && (
-                <div
-                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                    incomeOverview.thisMonthTotalIncome -
-                      incomeOverview.lastMonthTotalIncome >
-                    0
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                      : "border-red-500/40 bg-red-500/10 text-red-400"
-                  }`}
-                >
-                  {incomeOverview.thisMonthTotalIncome -
-                    incomeOverview.lastMonthTotalIncome >
-                  0 ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
-                  <p className="text-xs font-mono">
-                    {incomeOverview.lastMonthTotalIncome === 0 ||
-                    incomeOverview.lastMonthTotalIncome === null
-                      ? incomeOverview.thisMonthTotalIncome === 0
-                        ? "0%"
-                        : "100%"
-                      : `${Math.abs(((incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome) / incomeOverview.lastMonthTotalIncome) * 100).toFixed(1)}%`}
-                  </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1.5">
+                {overview === null || incomeOverview === null ? "..." : netSavings >= 0 ? "Positive cash position" : "Negative cash position"}
+              </p>
+            </div>
+          </div>
+          
+          {/* Monthly Income (Interactive) */}
+          <div 
+            onClick={() => router.push(`/income?start_date=${selectedIncomeMonthStartDate}&end_date=${selectedIncomeMonthEndDate}`)}
+            className="group cursor-pointer flex flex-col justify-between space-y-3 border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8 hover:opacity-85 transition-opacity"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Monthly Income</span>
+              {incomeOverview && (
+                <span className={`inline-flex items-center gap-0.5 text-xs font-mono px-2 py-0.5 rounded-full ${
+                  incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "bg-rose-500/10 text-rose-500"
+                }`}>
+                  {incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome >= 0 ? "+" : "-"}
+                  {incomeOverview.lastMonthTotalIncome === 0 || incomeOverview.lastMonthTotalIncome === null
+                    ? "100%"
+                    : `${Math.abs(((incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome) / incomeOverview.lastMonthTotalIncome) * 100).toFixed(0)}%`}
+                </span>
+              )}
+            </div>
+            <div>
+              {incomeOverview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {monthIncomeDisplay ? monthIncomeDisplay.full : "—"}
                 </div>
-              )
-            }
-            numberData={
-              monthIncomeDisplay ? monthIncomeDisplay.short : undefined
-            }
-            numberDataFull={
-              monthIncomeDisplay ? monthIncomeDisplay.full : undefined
-            }
-            description={
-              incomeOverview
-                ? `${currency}${fmt(Math.abs(incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome))} ${incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0 ? "more" : "less"} than last month`
-                : undefined
-            }
-            loading={incomeOverview === null}
-          />
-        </motion.div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1.5 group-hover:text-foreground transition-colors flex items-center gap-1">
+                View transactions <ArrowRight className="h-3 w-3" />
+              </p>
+            </div>
+          </div>
 
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={2}
-        >
-          <CardComponent
-            title="Total Balance"
-            icon={<PiggyBank className="h-4 w-4" />}
-            accentColor={netSavings >= 0 ? "#22c55e" : "#ef4444"}
-            numberData={
-              totalBalanceDisplay
-                ? `${totalBalanceSign}${totalBalanceDisplay.short }`
-                : undefined
-            }
-            numberDataFull={
-              totalBalanceDisplay
-                ? `${totalBalanceSign}${totalBalanceDisplay.full}`
-                : undefined
-            }
-            description={
-              overview && incomeOverview
-                ? netSavings >= 0
-                  ? "Positive net balance till date"
-                  : "Negative net balance till date"
-                : undefined
-            }
-            loading={overview === null || incomeOverview === null}
-            cardAction={
-              overview &&
-              incomeOverview && (
-                <div
-                  className={`flex items-center gap-1 rounded-md px-2 py-1 border ${
-                    netSavings >= 0
-                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                      : "border-red-500/40 bg-red-500/10 text-red-400"
-                  }`}
-                >
-                  {netSavings >= 0 ? (
-                    <TrendingUp className="h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4" />
-                  )}
-                  {/* <p className="text-xs font-mono">
-                    {netSavings >= 0 ? "+" : "-"}
-                  </p> */}
+          {/* Monthly Expense (Interactive) */}
+          <div 
+            onClick={() => router.push(`/expense?start_date=${selectedMonthStartDate}&end_date=${selectedMonthEndDate}`)}
+            className="group cursor-pointer flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8 hover:opacity-85 transition-opacity"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Monthly Expense</span>
+              {overview && (
+                <span className={`inline-flex items-center gap-0.5 text-xs font-mono px-2 py-0.5 rounded-full ${
+                  overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0
+                    ? "bg-rose-500/10 text-rose-500"
+                    : "bg-emerald-500/10 text-emerald-500"
+                }`}>
+                  {overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0 ? "+" : "-"}
+                  {overview.lastMonthTotalExpense === 0 || overview.lastMonthTotalExpense === null
+                    ? "100%"
+                    : `${Math.abs(((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) / overview.lastMonthTotalExpense) * 100).toFixed(0)}%`}
+                </span>
+              )}
+            </div>
+            <div>
+              {overview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {monthExpenseDisplay ? monthExpenseDisplay.full : "—"}
                 </div>
-              )
-            }
-          />
-        </motion.div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1.5 group-hover:text-foreground transition-colors flex items-center gap-1">
+                View transactions <ArrowRight className="h-3 w-3" />
+              </p>
+            </div>
+          </div>
 
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={3}
-        >
-          <CardComponent
-            title="Top Category"
-            icon={<TrendingUp className="h-4 w-4" />}
-            accentColor="#8b5cf6"
-            numberData={topCategoryEntry ? topCategoryEntry[0] : "N/A"}
-            description={
-              topCategoryEntry
-                ? `${currency}${fmt(topCategoryEntry[1])} spent this year`
-                : "No expenses recorded yet"
-            }
-            loading={overview === null}
-          />
-        </motion.div>
-      </div>
+          {/* Top Category */}
+          <div className="flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Top Category</span>
+            <div>
+              {overview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground truncate max-w-[200px]">
+                  {topCategoryEntry ? topCategoryEntry[0] : "None"}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                {overview === null ? "..." : topCategoryEntry ? `${currency}${fmt(topCategoryEntry[1])} this year` : "No spending this year"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* ── Income vs Expense Chart ── */}
       <motion.div
@@ -674,12 +576,12 @@ export default function DashboardPage() {
           custom={5}
           className="lg:col-span-2"
         >
-          <Card className="w-full h-full border-border/70 shadow-sm overflow-hidden">
+          <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm">
             <CardHeader>
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <CardTitle>Budgets</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <CardTitle className="text-lg font-medium text-foreground">Budgets</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
                   </p>
                 </div>
@@ -688,7 +590,7 @@ export default function DashboardPage() {
                     href="/budget"
                     className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
                   >
-                    View all <ArrowRight className="h-3 w-3" />
+                    View all <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 )}
               </div>
@@ -696,11 +598,11 @@ export default function DashboardPage() {
             {overview ? (
               <CardContent>
                 {displayBudgets.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground py-4">
                     No budgets found.
                   </p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="divide-y divide-border/30">
                     {displayBudgets.map((budget) => {
                       const pct = Math.round(
                         (budget.amountSpent / budget.amountLimit) * 100,
@@ -709,61 +611,49 @@ export default function DashboardPage() {
                         budget.amountSpent,
                         budget.amountLimit,
                       );
-                      const borderColor =
+                      const progressColor =
                         variant === "success"
-                          ? "#22c55e"
+                          ? "bg-emerald-500"
                           : variant === "warning"
-                            ? "#eab308"
-                            : "#ef4444";
+                            ? "bg-amber-500"
+                            : "bg-rose-500";
+                      
+                      const budgetCurrency = currencyMapper(
+                        budget.currency || user.currency || "USD",
+                      );
+
                       return (
                         <div
                           key={budget.id}
-                          className="group relative rounded-2xl border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200 hover:shadow-lg hover:border-emerald-500/30 overflow-hidden"
+                          className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-6 group"
                         >
-                          <div
-                            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
-                            style={{ backgroundColor: borderColor }}
-                          />
-                          <div className="flex flex-wrap justify-between gap-2 items-center">
+                          <div className="min-w-0 flex-1 space-y-2">
                             <div className="flex items-center gap-2">
-                              <Label className="text-sm font-medium text-foreground">
+                              <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
                                 {budget.category.name}
-                              </Label>
-
-                              {budgetIcon(
-                                budget.amountSpent,
-                                budget.amountLimit,
-                              )}
+                              </span>
+                              {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono bg-muted/60 px-1.5 py-0.5 rounded">
+                                {budget.period}
+                              </span>
                             </div>
-                            <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                              {budget.period}
+                            
+                            {/* Minimal thin progress bar */}
+                            <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
+                                style={{ width: `${Math.min(pct, 100)}%` }}
+                              />
                             </div>
                           </div>
-                          <div className="mt-3 rounded-full bg-muted/60 p-1">
-                            <ProgressBar
-                              value={budget.amountSpent}
-                              max={budget.amountLimit}
-                              variant={variant}
-                              showAnimation={true}
-                            />
-                          </div>
-                          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                            {(() => {
-                              const budgetCurrency = currencyMapper(
-                                budget.currency || user.currency || "USD",
-                              );
-                              return (
-                                <>
-                                  <span>
-                                    {budgetCurrency}
-                                    {budget.amountSpent.toFixed(2)} /{" "}
-                                    {budgetCurrency}
-                                    {budget.amountLimit.toFixed(2)}
-                                  </span>
-                                  <span className="font-mono">{pct}%</span>
-                                </>
-                              );
-                            })()}
+                          
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-medium text-foreground font-mono">
+                              {budgetCurrency}{budget.amountSpent.toFixed(0)} <span className="text-muted-foreground text-xs font-light font-sans">/ {budgetCurrency}{budget.amountLimit.toFixed(0)}</span>
+                            </p>
+                            <span className="text-xs font-mono text-muted-foreground mt-0.5 block">
+                              {pct}%
+                            </span>
                           </div>
                         </div>
                       );
@@ -771,7 +661,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 {budgets.length > 6 && (
-                  <p className="mt-3 text-xs text-muted-foreground text-center">
+                  <p className="mt-4 text-xs text-muted-foreground text-center">
                     +{budgets.length - 6} more budget
                     {budgets.length - 6 === 1 ? "" : "s"}
                   </p>
@@ -792,15 +682,15 @@ export default function DashboardPage() {
           animate="visible"
           custom={6}
         >
-          <Card className="w-full h-full border-border/70 shadow-sm overflow-hidden">
+          <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
+                    <CalendarClock className="h-4.5 w-4.5 text-muted-foreground" />
                     Upcoming
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Recurring expenses
                   </p>
                 </div>
@@ -808,7 +698,7 @@ export default function DashboardPage() {
                   href="/recurring-expense"
                   className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
                 >
-                  Manage <ArrowRight className="h-3 w-3" />
+                  Manage <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </CardHeader>
@@ -818,22 +708,22 @@ export default function DashboardPage() {
                   <Spinner className="text-muted-foreground h-6 w-6" />
                 </div>
               ) : upcomingRecurring.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground py-4">
                   No upcoming recurring expenses.
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className="divide-y divide-border/30">
                   {upcomingRecurring.map((expense, index) => (
                     <div
                       key={`${expense.id || expense.description}-${index}`}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-4 py-3 transition-all hover:border-border hover:shadow-sm"
+                      className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4 group"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
+                        <p className="text-sm font-medium text-foreground truncate group-hover:text-emerald-500 transition-colors">
                           {expense.description}
                         </p>
                         <p
-                          className="text-xs text-muted-foreground mt-0.5"
+                          className="text-xs text-muted-foreground mt-0.5 font-mono"
                           style={{ fontFeatureSettings: '"tnum"' }}
                         >
                           {currencyMapper(expense.currency)}
@@ -843,12 +733,13 @@ export default function DashboardPage() {
                           })}
                         </p>
                       </div>
-                      <div className="h-12 w-12 shrink-0 rounded-lg border border-border/70 bg-background/80 flex flex-col items-center justify-center">
-                        <p className="text-[10px] leading-none text-muted-foreground">
-                          {getWeekdayShort(expense.nextOccurrence)}
-                        </p>
-                        <p className="mt-1 text-xs leading-none font-medium text-foreground">
+                      
+                      <div className="shrink-0 text-right">
+                        <p className="text-xs font-semibold text-foreground font-mono">
                           {formatDayNumberMonth(expense.nextOccurrence)}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 font-mono">
+                          {getWeekdayShort(expense.nextOccurrence)}
                         </p>
                       </div>
                     </div>
