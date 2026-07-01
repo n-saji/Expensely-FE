@@ -149,7 +149,7 @@ export default function DashboardClient({
     const fetchExpenseCategories = async () => {
       try {
         const response = await api.get(
-          `/categories/user?type=${CategoryTypeExpense}`,
+          `/categories/user`,
         );
 
         if (response.status !== 200) {

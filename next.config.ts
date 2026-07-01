@@ -51,6 +51,10 @@ const nextConfig: NextConfig = {
         source: "/api/analytics/:path*",
         destination: process.env.NEXT_PUBLIC_API_URL + "/analytics/:path*",
       },
+      {
+        source: "/api/transactions/:path*",
+        destination: process.env.NEXT_PUBLIC_API_URL + "/transactions/:path*",
+      }
     ];
   },
 };
