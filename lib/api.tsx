@@ -169,7 +169,8 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     if (
       originalRequest.url?.includes("/users/refresh") ||
-      originalRequest.url?.includes("/users/login")
+      originalRequest.url?.includes("/users/login") ||
+      originalRequest.url?.includes("/users/check-auth")
     ) {
       return Promise.reject(error);
     }
