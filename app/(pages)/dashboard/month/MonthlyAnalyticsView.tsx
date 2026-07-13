@@ -278,7 +278,7 @@ export default function MonthlyAnalyticsView({
 
   // Daily totals line chart mapping
   const dailyData = (dailyAnalytics.dailyTotals || []).map((day: any) => {
-    const dateObj = new Date(day.date);
+    const dateObj = new Date(`${day.date}T00:00:00`);
     const label = dateObj.toLocaleDateString(undefined, { day: "numeric" });
     return {
       dateStr: day.date,
@@ -413,7 +413,7 @@ export default function MonthlyAnalyticsView({
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Highest Day</span>
           <span className="text-xs font-semibold text-foreground mt-2 truncate">
             {summary.highestSpendingEarningDay
-              ? new Date(summary.highestSpendingEarningDay).toLocaleDateString(undefined, {
+              ? new Date(`${summary.highestSpendingEarningDay}T00:00:00`).toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
                 })
@@ -467,7 +467,7 @@ export default function MonthlyAnalyticsView({
                     labelFormatter={(label, payload) => {
                       if (payload && payload[0]) {
                         const originalDate = payload[0].payload.dateStr;
-                        return new Date(originalDate).toLocaleDateString(undefined, {
+                        return new Date(`${originalDate}T00:00:00`).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
