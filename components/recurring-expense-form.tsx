@@ -172,7 +172,9 @@ export default function RecurringExpenseForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.categories.map((category) => (
+                      {categories.categories
+                        .filter((category) => category.type?.toLowerCase() === "expense")
+                        .map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           <CategoryBadge
                             name={category.name}

@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const getNotificationTime = (timeStr: string) => {
+  const normalized = timeStr.endsWith("Z") ? timeStr : timeStr + "Z";
+  return new Date(normalized).getTime();
+};
+
 const notificationSlice = createSlice({
   name: "notification",
   initialState: {
@@ -21,9 +26,12 @@ const notificationSlice = createSlice({
         state.notifications = state.notifications.map((n) =>
           n.id === action.payload.id ? action.payload : n
         );
-        return;
+      } else {
+        state.notifications.unshift(action.payload);
       }
-      if (!exists) state.notifications.unshift(action.payload);
+      state.notifications.sort(
+        (a, b) => getNotificationTime(b.time) - getNotificationTime(a.time)
+      );
     },
     removeNotification: (state, action) => {
       state.notifications = state.notifications.filter(
@@ -31,7 +39,9 @@ const notificationSlice = createSlice({
       );
     },
     setNotifications: (state, action) => {
-      state.notifications = action.payload;
+      state.notifications = [...action.payload].sort(
+        (a, b) => getNotificationTime(b.time) - getNotificationTime(a.time)
+      );
     },
     clearNotifications: (state) => {
       state.notifications = [];

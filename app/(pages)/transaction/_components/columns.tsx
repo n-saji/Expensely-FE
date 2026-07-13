@@ -18,18 +18,21 @@ import {
   Paperclip,
 } from "lucide-react";
 import CategoryBadge from "@/components/category-badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { formatAmountCompact } from "@/utils/amount_formatter";
 
-export type ExpenseRow = {
+export type TransactionRow = {
   id: string;
   amount: number;
   displayAmount: number;
   description: string;
-  expenseDate: string;
+  transactionDate: string;
   categoryId: string;
   categoryName: string;
   currency: string;
   displayCurrency: string;
   receiptUrl?: string | null;
+  type: "EXPENSE" | "INCOME";
 };
 
 type CategoryMeta = {
@@ -39,13 +42,10 @@ type CategoryMeta = {
   color?: string;
 };
 
-import { Checkbox } from "@/components/ui/checkbox";
-import {  formatAmountCompact } from "@/utils/amount_formatter";
-
 export const columns = (
   userCurrency: string | undefined,
   categories: CategoryMeta[] = [],
-): ColumnDef<ExpenseRow>[] => {
+): ColumnDef<TransactionRow>[] => {
   const categoryMap = new Map(
     categories.map((category) => [category.id, category]),
   );
@@ -74,13 +74,13 @@ export const columns = (
       enableHiding: false,
     },
     {
-      accessorKey: "expenseDate",
+      accessorKey: "transactionDate",
       header: ({ column }) => (
         <div
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="flex cursor-pointer items-center"
         >
-          Expense Date
+          Date
           {column.getIsSorted() == false ? (
             <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />
           ) : column.getIsSorted() === "asc" ? (
@@ -90,6 +90,11 @@ export const columns = (
           )}
         </div>
       ),
+      cell: ({ row }) => {
+        const dateStr = row.original.transactionDate;
+        if (!dateStr) return "-";
+        return <div>{dateStr.slice(0, 10)}</div>;
+      }
     },
     {
       accessorKey: "description",
@@ -102,13 +107,31 @@ export const columns = (
             title={description}
           >
             {description}
-            {row.original.receiptUrl && (
+            {row.original.type === "EXPENSE" && row.original.receiptUrl && (
               <Paperclip
                 className="inline-block ml-2 h-4 w-4 text-muted-foreground"
                 aria-label="Receipt"
               />
             )}
           </div>
+        );
+      },
+    },
+    {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => {
+        const type = row.original.type;
+        return (
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+              type === "EXPENSE"
+                ? "bg-red-500/10 text-red-500"
+                : "bg-green-500/10 text-green-500"
+            }`}
+          >
+            {type === "EXPENSE" ? "Expense" : "Income"}
+          </span>
         );
       },
     },
@@ -142,14 +165,13 @@ export const columns = (
           "USD";
 
         return (
-          <div className="font-medium">
+          <div className={`font-medium ${row.original.type === "EXPENSE" ? "text-red-500/90" : "text-green-500/90"}`}>
             {currencyMapper(currency)}
             {formatted}
           </div>
         );
       },
     },
-
     {
       accessorKey: "categoryName",
       header: "Category",
@@ -164,12 +186,10 @@ export const columns = (
         );
       },
     },
-
     {
       id: "actions",
       cell: ({ row }) => {
         const payment = row.original;
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

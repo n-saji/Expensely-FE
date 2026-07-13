@@ -28,7 +28,6 @@ import { Label } from "@/components/ui/label";
 import DropDown from "@/components/drop-down";
 import CategoryBadge, { toRgba } from "@/components/category-badge";
 import { getCategoryIcon } from "@/components/category-icon-registry";
-import { currencyMapper } from "@/utils/currencyMapper";
 import { formatAmountCompact } from "@/utils/amount_formatter";
 
 interface DataTableProps<TData, TValue> {
@@ -123,14 +122,14 @@ export function DataTable<TData extends { id: string }, TValue>({
   interface DateGroup {
     dateStr: string;
     rows: any[];
-    total: number;
+    total: number; // Summing base amounts or display amounts
     currency: string;
   }
 
   const dateGroups: DateGroup[] = [];
   table.getRowModel().rows.forEach((row) => {
-    const expense = row.original as any;
-    const dateValue = expense.expenseDate;
+    const transaction = row.original as any;
+    const dateValue = transaction.transactionDate;
     const dateStr = dateValue
       ? new Date(dateValue).toLocaleDateString("en-US", {
           year: "numeric",
@@ -139,7 +138,7 @@ export function DataTable<TData extends { id: string }, TValue>({
         })
       : "Unknown Date";
 
-    const currency = expense.displayCurrency || expense.currency || userCurrency || "USD";
+    const currency = transaction.displayCurrency || transaction.currency || userCurrency || "USD";
 
     let group = dateGroups.find((g) => g.dateStr === dateStr);
     if (!group) {
@@ -147,7 +146,13 @@ export function DataTable<TData extends { id: string }, TValue>({
       dateGroups.push(group);
     }
     group.rows.push(row);
-    group.total += Number(expense.displayAmount ?? expense.amount ?? 0);
+    // Add amount if income, subtract if expense
+    const amt = Number(transaction.displayAmount ?? transaction.amount ?? 0);
+    if (transaction.type === "EXPENSE") {
+      group.total -= amt;
+    } else {
+      group.total += amt;
+    }
   });
 
   return (
@@ -169,10 +174,9 @@ export function DataTable<TData extends { id: string }, TValue>({
           <div /> {/* Category Icon spacer */}
           <div
             className="cursor-pointer flex items-center select-none hover:text-foreground transition-colors"
-            onClick={() => handleSort("expenseDate")}
+            onClick={() => handleSort("transactionDate")}
           >
             Description
-            {/* {getSortIcon("expenseDate")} */}
           </div>
           <div
             className="text-right cursor-pointer flex items-center justify-end select-none hover:text-foreground transition-colors"
@@ -221,28 +225,22 @@ export function DataTable<TData extends { id: string }, TValue>({
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {group.dateStr}
                     </span>
-                    <span className="text-xs font-bold text-muted-foreground">
-                      {formatAmountCompact(group.total, group.currency)}
+                    <span className={`text-xs font-bold ${group.total < 0 ? "text-red-500/80" : "text-green-500/80"}`}>
+                      {group.total < 0 ? "-" : "+"}
+                      {formatAmountCompact(Math.abs(group.total), group.currency)}
                     </span>
                   </div>
 
                   {/* Group Items */}
                   <div className="divide-y divide-border/10">
                     {group.rows.map((row) => {
-                      const expense = row.original as any;
-                      const categoryMeta = categories.find((c) => c.id === expense.categoryId);
+                      const transaction = row.original as any;
+                      const categoryMeta = categories.find((c) => c.id === transaction.categoryId);
                       const resolvedColor = categoryMeta?.color || "#808080";
                       const CategoryIcon = getCategoryIcon(categoryMeta?.icon);
 
-                      const currency = expense.displayCurrency || expense.currency || userCurrency || "USD";
-                      const amountStr = formatAmountCompact(Number(expense.displayAmount ?? expense.amount ?? 0), currency);
-
-                      const formattedDayOnly = expense.expenseDate
-                        ? new Date(expense.expenseDate).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })
-                        : "";
+                      const currency = transaction.displayCurrency || transaction.currency || userCurrency || "USD";
+                      const amountStr = formatAmountCompact(Number(transaction.displayAmount ?? transaction.amount ?? 0), currency);
 
                       const actionsCell = row
                         .getVisibleCells()
@@ -281,23 +279,32 @@ export function DataTable<TData extends { id: string }, TValue>({
                             {/* Description */}
                             <div className="min-w-0 pr-4 flex flex-col gap-1">
                               <div className="font-semibold text-sm text-foreground flex items-center gap-1.5 truncate">
-                                <span className="truncate" title={expense.description}>
-                                  {expense.description}
+                                <span className="truncate" title={transaction.description}>
+                                  {transaction.description}
                                 </span>
-                                {expense.receiptUrl && (
+                                {transaction.type === "EXPENSE" && transaction.receiptUrl && (
                                   <Paperclip className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" aria-label="Has receipt" />
                                 )}
                               </div>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: resolvedColor }} />
                                 <span className="text-xs text-muted-foreground font-normal">
-                                  {expense.categoryName}
+                                  {transaction.categoryName}
+                                </span>
+                                <span
+                                  className={`ml-2 inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-semibold ${
+                                    transaction.type === "EXPENSE"
+                                      ? "bg-red-500/10 text-red-500"
+                                      : "bg-green-500/10 text-green-500"
+                                  }`}
+                                >
+                                  {transaction.type === "EXPENSE" ? "Expense" : "Income"}
                                 </span>
                               </div>
                             </div>
 
                             {/* Amount */}
-                            <div className="text-right font-semibold text-sm text-foreground">
+                            <div className={`text-right font-semibold text-sm ${transaction.type === "EXPENSE" ? "text-red-500/90" : "text-green-500/90"}`}>
                               {amountStr}
                             </div>
 
@@ -341,12 +348,12 @@ export function DataTable<TData extends { id: string }, TValue>({
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-baseline justify-between gap-2">
                                   <div className="font-semibold text-sm text-foreground flex items-center gap-1.5 truncate">
-                                    <span className="truncate">{expense.description}</span>
-                                    {expense.receiptUrl && (
+                                    <span className="truncate">{transaction.description}</span>
+                                    {transaction.type === "EXPENSE" && transaction.receiptUrl && (
                                       <Paperclip className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
                                     )}
                                   </div>
-                                  <div className="font-semibold text-sm text-foreground shrink-0">
+                                  <div className={`font-semibold text-sm shrink-0 ${transaction.type === "EXPENSE" ? "text-red-500/90" : "text-green-500/90"}`}>
                                     {amountStr}
                                   </div>
                                 </div>
@@ -354,7 +361,16 @@ export function DataTable<TData extends { id: string }, TValue>({
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                   <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: resolvedColor }} />
                                   <span className="text-[11px] text-muted-foreground font-normal">
-                                    {expense.categoryName}
+                                    {transaction.categoryName}
+                                  </span>
+                                  <span
+                                    className={`ml-2 inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-semibold ${
+                                      transaction.type === "EXPENSE"
+                                        ? "bg-red-500/10 text-red-500"
+                                        : "bg-green-500/10 text-green-500"
+                                    }`}
+                                  >
+                                    {transaction.type === "EXPENSE" ? "Expense" : "Income"}
                                   </span>
                                 </div>
                               </div>
@@ -377,7 +393,7 @@ export function DataTable<TData extends { id: string }, TValue>({
               ))
             ) : (
               <div className="h-32 flex flex-col items-center justify-center text-center p-6">
-                <span className="text-sm text-muted-foreground">No recent transactions.</span>
+                <span className="text-sm text-muted-foreground">No transactions found.</span>
               </div>
             )}
           </div>

@@ -148,26 +148,12 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathName === "/expense"}
+                  isActive={pathName === "/transaction"}
                   className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
                 >
-                  <Link href={"/expense"}>
+                  <Link href={"/transaction"}>
                     <DollarSign />
-                    <span>Expenses</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathName === "/income"}
-                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
-                >
-                  <Link href={"/income"}>
-                    <HandCoins />
-                    <span>Income</span>
+                    <span>Transactions</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

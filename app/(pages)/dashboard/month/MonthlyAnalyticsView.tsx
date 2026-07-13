@@ -265,7 +265,7 @@ export default function MonthlyAnalyticsView({
 
   // Chart Formatting Tools
   const formatChartCurrency = (val: number) => {
-    return `${currencySymbol}${formatAmountCompact(val)}`;
+    return `${formatAmountCompact(val)}`;
   };
 
   // Pie chart data mapping
@@ -278,7 +278,7 @@ export default function MonthlyAnalyticsView({
 
   // Daily totals line chart mapping
   const dailyData = (dailyAnalytics.dailyTotals || []).map((day: any) => {
-    const dateObj = new Date(day.date);
+    const dateObj = new Date(`${day.date}T00:00:00`);
     const label = dateObj.toLocaleDateString(undefined, { day: "numeric" });
     return {
       dateStr: day.date,
@@ -413,7 +413,7 @@ export default function MonthlyAnalyticsView({
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Highest Day</span>
           <span className="text-xs font-semibold text-foreground mt-2 truncate">
             {summary.highestSpendingEarningDay
-              ? new Date(summary.highestSpendingEarningDay).toLocaleDateString(undefined, {
+              ? new Date(`${summary.highestSpendingEarningDay}T00:00:00`).toLocaleDateString(undefined, {
                   month: "short",
                   day: "numeric",
                 })
@@ -467,7 +467,7 @@ export default function MonthlyAnalyticsView({
                     labelFormatter={(label, payload) => {
                       if (payload && payload[0]) {
                         const originalDate = payload[0].payload.dateStr;
-                        return new Date(originalDate).toLocaleDateString(undefined, {
+                        return new Date(`${originalDate}T00:00:00`).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
@@ -683,7 +683,7 @@ export default function MonthlyAnalyticsView({
                 <div className="border-t border-border/30 pt-2 flex justify-between items-center text-xs font-semibold">
                   <span className="text-muted-foreground">Net Savings</span>
                   <span className={`font-mono ${(incomeVsExpenseSummary.netSavings ?? 0) >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
-                    {currencySymbol}{(incomeVsExpenseSummary.netSavings ?? 0).toFixed(2)}
+                    {formatAmountCompact(incomeVsExpenseSummary.netSavings ?? 0)}
                   </span>
                 </div>
               </div>
@@ -728,7 +728,7 @@ export default function MonthlyAnalyticsView({
               <div className="border-t border-border/30 pt-3 flex justify-between text-xs font-semibold">
                 <span className="text-muted-foreground">Net Savings:</span>
                 <span className={`font-mono ${(incomeVsExpenseSummary.netSavings ?? 0) >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
-                  {currencySymbol}{(incomeVsExpenseSummary.netSavings ?? 0).toFixed(2)}
+                  {formatAmountCompact(incomeVsExpenseSummary.netSavings ?? 0)}
                 </span>
               </div>
 
@@ -823,7 +823,7 @@ export default function MonthlyAnalyticsView({
                   <th className="px-6 py-3.5">Category</th>
                   <th className="px-6 py-3.5">Amount Spent</th>
                   <th className="px-6 py-3.5">Share</th>
-                  <th className="px-6 py-3.5">TransactionsCount</th>
+                  <th className="px-6 py-3.5">Transactions Count</th>
                   <th className="px-6 py-3.5">Prev Month MoM</th>
                   <th className="px-6 py-3.5">Prev Year YoY</th>
                 </tr>
@@ -999,7 +999,6 @@ export default function MonthlyAnalyticsView({
                         </td>
                         <td className="px-6 py-4 text-right font-mono font-semibold">
                           <span className={isExpense ? "text-foreground" : "text-emerald-500"}>
-                            {isExpense ? "-" : "+"}
                             {currencySymbol}{amount.toFixed(2)}
                           </span>
                         </td>
