@@ -56,9 +56,13 @@ const nextConfig: NextConfig = {
         destination: process.env.NEXT_PUBLIC_API_URL + "/transactions/:path*",
       },
       {
+        source: "/api/v1/reminders",
+        destination: process.env.NEXT_PUBLIC_API_URL + "/v1/reminders",
+      },
+      {
         source: "/api/v1/reminders/:path*",
         destination: process.env.NEXT_PUBLIC_API_URL + "/v1/reminders/:path*",
-      }
+      },
     ];
   },
 };
