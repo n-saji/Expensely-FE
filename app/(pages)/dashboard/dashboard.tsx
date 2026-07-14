@@ -15,6 +15,15 @@ import {
   TrendingUp,
   Wallet,
   Banknote,
+  GripVertical,
+  SlidersHorizontal,
+  RotateCcw,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Plus,
 } from "lucide-react";
 
 import { RootState } from "@/redux/store";
@@ -23,6 +32,7 @@ import api from "@/lib/api";
 import { IncomeExpenseComparisonChart } from "@/components/ExpenseChartCard";
 import RemindersDashboardWidget from "@/components/reminders-widget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { currencyMapper } from "@/utils/currencyMapper";
@@ -56,6 +66,7 @@ function getGreeting(): string {
 export default function DashboardPage() {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
+  const { open: sidebarOpen, isMobile } = useSidebar();
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [loadingYear, setLoadingYear] = useState<boolean>(true);
   const [loadingMonth, setLoadingMonth] = useState<boolean>(true);
@@ -415,37 +426,163 @@ export default function DashboardPage() {
   const budgets = overview ? Object.values(overview.budgetServiceMap) : [];
   const displayBudgets = budgets.slice(0, 6);
 
-  return (
-    <div className="relative flex flex-col w-full gap-8 h-full px-4 md:px-0">
-      {/* ── Header ── */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Dashboard
-          </p>
-          <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
-            {getGreeting()}, {user.name?.split(" ")[0] || "there"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {todayLabel} · Tracking {monthLabel} {currentMonthYear}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Live insights
-        </div>
-      </div>
+  // --- LAYOUT ENGINE CONFIGURATION ---
+  interface LayoutItem {
+    id: string;
+    w: number; // width span: 1, 2, or 3 columns
+    visible: boolean;
+  }
 
-      {/* ── Consolidated Hero Stats Panel ── */}
-      <motion.div
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        custom={0}
-        className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md p-6 md:p-8"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {/* Net Balance (Primary focal point) */}
+  const widgetMeta: Record<string, { title: string; icon: React.ReactNode }> = {
+    stats: {
+      title: "Hero Stats Summary",
+      icon: <Banknote className="h-4 w-4 text-emerald-500" />,
+    },
+    chart: {
+      title: "Income & Expense Chart",
+      icon: <TrendingUp className="h-4 w-4 text-blue-500" />,
+    },
+    reminders: {
+      title: "Reminders Overview",
+      icon: <CalendarClock className="h-4 w-4 text-rose-500" />,
+    },
+    budgets: {
+      title: "Active Budgets Tracker",
+      icon: <PiggyBank className="h-4 w-4 text-amber-500" />,
+    },
+    recurring: {
+      title: "Upcoming Recurring Bills",
+      icon: <Wallet className="h-4 w-4 text-indigo-500" />,
+    },
+  };
+
+  const defaultLayout: LayoutItem[] = [
+    { id: "stats", w: 3, visible: true },
+    { id: "chart", w: 2, visible: true },
+    { id: "reminders", w: 1, visible: true },
+    { id: "budgets", w: 2, visible: true },
+    { id: "recurring", w: 1, visible: true },
+  ];
+
+  const colSpanClasses: Record<number, string> = {
+    1: "lg:col-span-1",
+    2: "lg:col-span-2",
+    3: "lg:col-span-3",
+  };
+
+  const [layout, setLayout] = useState<LayoutItem[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [layoutBackup, setLayoutBackup] = useState<LayoutItem[] | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`expensely_dashboard_layout_${user.id}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as LayoutItem[];
+        const merged = defaultLayout.map((defItem) => {
+          const userItem = parsed.find((p) => p.id === defItem.id);
+          return userItem ? { ...defItem, ...userItem } : defItem;
+        });
+        setLayout(merged);
+      } catch {
+        setLayout(defaultLayout);
+      }
+    } else {
+      setLayout(defaultLayout);
+    }
+    setIsMounted(true);
+  }, [user.id]);
+
+  const handleStartEditing = () => {
+    setLayoutBackup(layout.map(item => ({ ...item })));
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = () => {
+    if (layoutBackup) {
+      setLayout(layoutBackup);
+    }
+    setIsEditing(false);
+  };
+
+  const handleSaveEditing = () => {
+    localStorage.setItem(
+      `expensely_dashboard_layout_${user.id}`,
+      JSON.stringify(layout)
+    );
+    setIsEditing(false);
+  };
+
+  const handleResetLayout = () => {
+    setLayout(defaultLayout.map(item => ({ ...item })));
+  };
+
+  const handleToggleVisibility = (id: string) => {
+    setLayout(prev =>
+      prev.map(item => (item.id === id ? { ...item, visible: !item.visible } : item))
+    );
+  };
+
+  const handleResize = (id: string, delta: number) => {
+    setLayout(prev =>
+      prev.map(item => {
+        if (item.id === id) {
+          const newW = Math.max(1, Math.min(3, item.w + delta));
+          return { ...item, w: newW };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) return;
+
+    const draggedIndex = layout.findIndex(item => item.id === draggedId);
+    const targetIndex = layout.findIndex(item => item.id === targetId);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      const updated = [...layout];
+      const [draggedItem] = updated.splice(draggedIndex, 1);
+      updated.splice(targetIndex, 0, draggedItem);
+      setLayout(updated);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+  };
+
+  // --- WIDGET RENDERERS ---
+  const renderStatsWidget = (w: number) => {
+    let gridCols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+    let incomeBorder = "border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8";
+    let expenseBorder = "border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8";
+    let topCategoryBorder = "border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8";
+
+    if (w === 2) {
+      gridCols = "grid-cols-1 sm:grid-cols-2";
+      incomeBorder = "border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8";
+      expenseBorder = "border-t border-border/40 pt-6";
+      topCategoryBorder = "border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8";
+    } else if (w === 1) {
+      gridCols = "grid-cols-1";
+      incomeBorder = "border-t border-border/40 pt-6";
+      expenseBorder = "border-t border-border/40 pt-6";
+      topCategoryBorder = "border-t border-border/40 pt-6";
+    }
+
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md p-6 md:p-8">
+        <div className={`grid gap-6 md:gap-8 ${gridCols}`}>
           <div className="flex flex-col justify-between space-y-3">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
               Net Balance
@@ -470,8 +607,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Monthly Income (Interactive) */}
-          <div className="group flex flex-col justify-between space-y-3 border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8">
+          <div className={`group flex flex-col justify-between space-y-3 ${incomeBorder}`}>
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
                 Monthly Income
@@ -520,8 +656,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Monthly Expense (Interactive) */}
-          <div className="group flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8">
+          <div className={`group flex flex-col justify-between space-y-3 ${expenseBorder}`}>
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
                 Monthly Expense
@@ -570,8 +705,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Top Category */}
-          <div className="flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8">
+          <div className={`flex flex-col justify-between space-y-3 ${topCategoryBorder}`}>
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
               Top Category
             </span>
@@ -593,231 +727,432 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      </motion.div>
-
-      {/* ── Income vs Expense Chart & Reminders Widget ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch animate-in fade-in slide-in-from-top-4 duration-300">
-        <motion.div
-          className="lg:col-span-2 flex flex-col h-full"
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={4}
-        >
-          <IncomeExpenseComparisonChart
-            expenseByMonth={expenseMonthlyCompare}
-            incomeByMonth={incomeMonthlyCompare}
-            darkMode={user.theme === "dark"}
-            currency={user.currency}
-            loading={compareLoading}
-            setOverviewParams={setCompareOverviewParams}
-          />
-        </motion.div>
-        <motion.div
-          className="lg:col-span-1 flex flex-col h-full"
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={4.2}
-        >
-          <RemindersDashboardWidget />
-        </motion.div>
       </div>
+    );
+  };
 
-      {/* ── Budget + Recurring Side-by-Side ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Budget Section — 2/3 */}
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={5}
-          className="lg:col-span-2"
-        >
-          <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg font-medium text-foreground">
-                    Budgets
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
-                  </p>
-                </div>
-                {budgetCount > 0 && (
-                  <Link
-                    href="/budget"
-                    className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
+  const renderChartWidget = () => (
+    <IncomeExpenseComparisonChart
+      expenseByMonth={expenseMonthlyCompare}
+      incomeByMonth={incomeMonthlyCompare}
+      darkMode={user.theme === "dark"}
+      currency={user.currency}
+      loading={compareLoading}
+      setOverviewParams={setCompareOverviewParams}
+    />
+  );
+
+  const renderRemindersWidget = () => (
+    <RemindersDashboardWidget />
+  );
+
+  const renderBudgetsWidget = () => (
+    <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm">
+      <CardHeader>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg font-medium text-foreground">
+              Budgets
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
+            </p>
+          </div>
+          {budgetCount > 0 && (
+            <Link
+              href="/budget"
+              className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
+            >
+              View all <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
+        </div>
+      </CardHeader>
+      {overview ? (
+        <CardContent>
+          {displayBudgets.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">
+              No budgets found.
+            </p>
+          ) : (
+            <div className="divide-y divide-border/30">
+              {displayBudgets.map((budget) => {
+                const pct = Math.round(
+                  (budget.amountSpent / budget.amountLimit) * 100,
+                );
+                const variant = budgetVariant(
+                  budget.amountSpent,
+                  budget.amountLimit,
+                );
+                const progressColor =
+                  variant === "success"
+                    ? "bg-emerald-500"
+                    : variant === "warning"
+                      ? "bg-amber-500"
+                      : "bg-rose-500";
+
+                const budgetCurrency = currencyMapper(
+                  budget.currency || user.currency || "USD",
+                );
+
+                return (
+                  <div
+                    key={budget.id}
+                    className="w-full py-4 first:pt-0 last:pb-0 grid grid-cols-[1fr_140px] items-center gap-6 group"
                   >
-                    View all <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                )}
-              </div>
-            </CardHeader>
-            {overview ? (
-              <CardContent>
-                {displayBudgets.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4">
-                    No budgets found.
-                  </p>
-                ) : (
-                  <div className="divide-y divide-border/30">
-                    {displayBudgets.map((budget) => {
-                      const pct = Math.round(
-                        (budget.amountSpent / budget.amountLimit) * 100,
-                      );
-                      const variant = budgetVariant(
-                        budget.amountSpent,
-                        budget.amountLimit,
-                      );
-                      const progressColor =
-                        variant === "success"
-                          ? "bg-emerald-500"
-                          : variant === "warning"
-                            ? "bg-amber-500"
-                            : "bg-rose-500";
-
-                      const budgetCurrency = currencyMapper(
-                        budget.currency || user.currency || "USD",
-                      );
-
-                      return (
-                        <div
-                          key={budget.id}
-                          className="w-full py-4 first:pt-0 last:pb-0 grid grid-cols-[1fr_140px] items-center gap-6 group"
-                        >
-                          <div className="min-w-0 w-full space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
-                                {budget.category.name}
-                              </span>
-                              {budgetIcon(
-                                budget.amountSpent,
-                                budget.amountLimit,
-                              )}
-                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono bg-muted/60 px-1.5 py-0.5 rounded">
-                                {budget.period}
-                              </span>
-                            </div>
-
-                            {/* Minimal thin progress bar */}
-                            <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
-                                style={{ width: `${Math.min(pct, 100)}%` }}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="text-right shrink-0">
-                            <p className="text-sm font-medium text-foreground font-mono">
-                              {budgetCurrency}
-                              {budget.amountSpent.toFixed(0)}{" "}
-                              <span className="text-muted-foreground text-xs font-light font-sans">
-                                / {budgetCurrency}
-                                {budget.amountLimit.toFixed(0)}
-                              </span>
-                            </p>
-                            <span className="text-xs font-mono text-muted-foreground mt-0.5 block">
-                              {pct}%
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {budgets.length > 6 && (
-                  <p className="mt-4 text-xs text-muted-foreground text-center">
-                    +{budgets.length - 6} more budget
-                    {budgets.length - 6 === 1 ? "" : "s"}
-                  </p>
-                )}
-              </CardContent>
-            ) : (
-              <CardContent className="min-h-[140px] flex items-center justify-center">
-                <Spinner className="text-muted-foreground h-6 w-6" />
-              </CardContent>
-            )}
-          </Card>
-        </motion.div>
-
-        {/* Recurring Expenses — 1/3 */}
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={6}
-        >
-          <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
-                    <CalendarClock className="h-4.5 w-4.5 text-muted-foreground" />
-                    Upcoming
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Recurring expenses
-                  </p>
-                </div>
-                <Link
-                  href="/recurring-expense"
-                  className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
-                >
-                  Manage <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {overview === null ? (
-                <div className="flex h-[120px] items-center justify-center">
-                  <Spinner className="text-muted-foreground h-6 w-6" />
-                </div>
-              ) : upcomingRecurring.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4">
-                  No upcoming recurring expenses.
-                </p>
-              ) : (
-                <div className="divide-y divide-border/30">
-                  {upcomingRecurring.map((expense, index) => (
-                    <div
-                      key={`${expense.id || expense.description}-${index}`}
-                      className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4 group"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate group-hover:text-emerald-500 transition-colors">
-                          {expense.description}
-                        </p>
-                        <p
-                          className="text-xs text-muted-foreground mt-0.5 font-mono"
-                          style={{ fontFeatureSettings: '"tnum"' }}
-                        >
-                          {currencyMapper(expense.currency)}
-                          {expense.amount.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </p>
+                    <div className="min-w-0 w-full space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
+                          {budget.category.name}
+                        </span>
+                        {budgetIcon(
+                          budget.amountSpent,
+                          budget.amountLimit,
+                        )}
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono bg-muted/60 px-1.5 py-0.5 rounded">
+                          {budget.period}
+                        </span>
                       </div>
 
-                      <div className="shrink-0 text-right">
-                        <p className="text-xs font-semibold text-foreground font-mono">
-                          {formatDayNumberMonth(expense.nextOccurrence)}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 font-mono">
-                          {getWeekdayShort(expense.nextOccurrence)}
-                        </p>
+                      <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
+                          style={{ width: `${Math.min(pct, 100)}%` }}
+                        />
                       </div>
                     </div>
-                  ))}
+
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-medium text-foreground font-mono">
+                        {budgetCurrency}
+                        {budget.amountSpent.toFixed(0)}{" "}
+                        <span className="text-muted-foreground text-xs font-light font-sans">
+                          / {budgetCurrency}
+                          {budget.amountLimit.toFixed(0)}
+                        </span>
+                      </p>
+                      <span className="text-xs font-mono text-muted-foreground mt-0.5 block">
+                        {pct}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {budgets.length > 6 && (
+            <p className="mt-4 text-xs text-muted-foreground text-center">
+              +{budgets.length - 6} more budget
+              {budgets.length - 6 === 1 ? "" : "s"}
+            </p>
+          )}
+        </CardContent>
+      ) : (
+        <CardContent className="min-h-[140px] flex items-center justify-center">
+          <Spinner className="text-muted-foreground h-6 w-6" />
+        </CardContent>
+      )}
+    </Card>
+  );
+
+  const renderRecurringWidget = () => (
+    <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
+              <CalendarClock className="h-4.5 w-4.5 text-muted-foreground" />
+              Upcoming
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Recurring expenses
+            </p>
+          </div>
+          <Link
+            href="/recurring-expense"
+            className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
+          >
+            Manage <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {overview === null ? (
+          <div className="flex h-[120px] items-center justify-center">
+            <Spinner className="text-muted-foreground h-6 w-6" />
+          </div>
+        ) : upcomingRecurring.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4">
+            No upcoming recurring expenses.
+          </p>
+        ) : (
+          <div className="divide-y divide-border/30">
+            {upcomingRecurring.map((expense, index) => (
+              <div
+                key={`${expense.id || expense.description}-${index}`}
+                className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4 group"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate group-hover:text-emerald-500 transition-colors">
+                    {expense.description}
+                  </p>
+                  <p
+                    className="text-xs text-muted-foreground mt-0.5 font-mono"
+                    style={{ fontFeatureSettings: '"tnum"' }}
+                  >
+                    {currencyMapper(expense.currency)}
+                    {expense.amount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+
+                <div className="shrink-0 text-right">
+                  <p className="text-xs font-semibold text-foreground font-mono">
+                    {formatDayNumberMonth(expense.nextOccurrence)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 font-mono">
+                    {getWeekdayShort(expense.nextOccurrence)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderWidget = (id: string, w: number) => {
+    switch (id) {
+      case "stats":
+        return renderStatsWidget(w);
+      case "chart":
+        return renderChartWidget();
+      case "reminders":
+        return renderRemindersWidget();
+      case "budgets":
+        return renderBudgetsWidget();
+      case "recurring":
+        return renderRecurringWidget();
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="relative flex flex-col w-full gap-8 h-full px-4 md:px-0">
+      {/* ── Header ── */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Dashboard
+          </p>
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground">
+            {getGreeting()}, {user.name?.split(" ")[0] || "there"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {todayLabel} · Tracking {monthLabel} {currentMonthYear}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {isMounted && !isEditing && (
+            <button
+              onClick={handleStartEditing}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/70 hover:border-border bg-background/60 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+              Customize Layout
+            </button>
+          )}
+          <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Live insights
+          </div>
+        </div>
       </div>
+
+      {/* ── Edit Mode Toolbar ── */}
+      {isMounted && isEditing && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] backdrop-blur-md shadow-xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Customize Dashboard Layout
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Drag cards by their handles to reorder. Adjust widths using size controls.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleResetLayout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset Defaults
+            </button>
+            <button
+              onClick={handleCancelEditing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveEditing}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all cursor-pointer"
+            >
+              <Check className="h-3.5 w-3.5" />
+              Save Layout
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Widgets Grid ── */}
+      {!isMounted ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {defaultLayout.map((item) => {
+            const colSpanClass = colSpanClasses[item.w] || "lg:col-span-1";
+            return (
+              <div key={item.id} className={`${colSpanClass} h-[200px] bg-muted/20 animate-pulse rounded-2xl`} />
+            );
+          })}
+        </div>
+      ) : (
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-max items-start ${isEditing ? "pb-36" : ""}`}>
+          {layout
+            .filter((item) => item.visible)
+            .map((item, index) => {
+              const colSpanClass = colSpanClasses[item.w] || "lg:col-span-1";
+
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  custom={index * 0.1}
+                  className={`
+                    relative transition-all duration-200 rounded-2xl flex flex-col h-full
+                    ${colSpanClass}
+                    ${isEditing ? "border border-dashed border-emerald-500/40 p-1.5 bg-emerald-500/[0.01] shadow-xs select-none" : ""}
+                    ${isEditing && draggedId === item.id ? "opacity-30 border-solid border-emerald-500 scale-[0.98]" : ""}
+                  `}
+                >
+                  <div
+                    draggable={isEditing}
+                    onDragStart={(e) => handleDragStart(e, item.id)}
+                    onDragOver={(e) => handleDragOver(e, item.id)}
+                    onDragEnd={handleDragEnd}
+                    className="flex flex-col h-full w-full"
+                  >
+                    {isEditing && (
+                      <div className="flex items-center justify-between bg-card/90 backdrop-blur-xs border border-border/80 rounded-xl px-3 py-1.5 mb-2 text-xs shadow-xs z-10 select-none">
+                        <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground font-medium py-1 pr-3">
+                          <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                          <span className="font-semibold tracking-wide capitalize text-[11px] uppercase">
+                            {item.id === "stats" ? "Stats" : item.id === "recurring" ? "Recurring" : item.id}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            disabled={item.w <= 1}
+                            onClick={() => handleResize(item.id, -1)}
+                            className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                            title="Shrink Width"
+                          >
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                          </button>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 bg-muted rounded text-muted-foreground">
+                            {item.w}/3
+                          </span>
+                          <button
+                            disabled={item.w >= 3}
+                            onClick={() => handleResize(item.id, 1)}
+                            className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                            title="Expand Width"
+                          >
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
+
+                          <div className="w-[1px] h-3.5 bg-border/80 mx-1" />
+
+                          <button
+                            onClick={() => handleToggleVisibility(item.id)}
+                            className="p-1 rounded-md hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer"
+                            title="Hide Widget"
+                          >
+                            <EyeOff className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex-1 w-full h-full relative">
+                      {renderWidget(item.id, item.w)}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+        </div>
+      )}
+
+      {/* ── Inactive Widgets Dock (Fixed Overlay centered in content area) ── */}
+      {isMounted && isEditing && (
+        <div className={`fixed bottom-6 left-0 ${isMobile ? "lg:left-0" : sidebarOpen ? "lg:left-[16rem]" : "lg:left-[3rem]"} right-0 z-50 flex justify-center pointer-events-none transition-all duration-300`}>
+          <div className="w-full max-w-6xl px-4 md:px-0 flex justify-center pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="flex flex-col items-center justify-center gap-2 max-w-[90%] md:max-w-xl pointer-events-auto"
+            >
+              <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-semibold bg-muted/80 px-2.5 py-1 rounded-md shadow-xs select-none">
+                Inactive Widgets Dock
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 p-3 bg-card/75 backdrop-blur-md border border-border/80 rounded-2xl shadow-xl max-w-full">
+                {layout.filter((item) => !item.visible).length === 0 ? (
+                  <p className="text-xs text-muted-foreground px-4 py-2 italic font-sans">
+                    Dock is empty. All widgets are active on your dashboard.
+                  </p>
+                ) : (
+                  layout
+                    .filter((item) => !item.visible)
+                    .map((item) => {
+                      const meta = widgetMeta[item.id] || { title: item.id, icon: null };
+                      return (
+                        <motion.div
+                          key={item.id}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleToggleVisibility(item.id)}
+                          className="flex items-center gap-2.5 px-3 py-2 bg-background/80 hover:bg-emerald-500/10 border border-border/70 hover:border-emerald-500/30 rounded-xl text-xs font-medium text-foreground hover:text-emerald-500 cursor-pointer shadow-xs transition-all select-none group"
+                        >
+                          {meta.icon}
+                          <span className="font-medium">{meta.title}</span>
+                          <Plus className="h-4 w-4 ml-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 p-0.5 rounded-full transition-all group-hover:scale-110" />
+                        </motion.div>
+                      );
+                    })
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
