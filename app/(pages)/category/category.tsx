@@ -90,6 +90,7 @@ export default function CategoryPage() {
     expenseCount: number;
     incomeCount: number;
     recurringExpenseCount: number;
+    reminderCount: number;
   } | null>(null);
   const [isFetchingDependencies, setIsFetchingDependencies] = useState(false);
   const [openDeleteConfirmDialog, setOpenDeleteConfirmDialog] = useState(false);
@@ -688,17 +689,34 @@ export default function CategoryPage() {
                         {dependencies.recurringExpenseCount}
                       </span>
                     </div>
+                    <div className="flex items-center justify-between border-b pb-1.5 border-border/40 col-span-2">
+                      <span className="text-muted-foreground">Reminders</span>
+                      <span
+                        className={`font-semibold ${
+                          dependencies.reminderCount > 0
+                            ? "text-red-500 font-bold"
+                            : "text-muted-foreground/60"
+                        }`}
+                      >
+                        {dependencies.reminderCount}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {(dependencies.expenseCount > 0 ||
                   dependencies.incomeCount > 0 ||
                   dependencies.budgetCount > 0 ||
-                  dependencies.recurringExpenseCount > 0) && (
-                  <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
+                  dependencies.recurringExpenseCount > 0 ||
+                  dependencies.reminderCount > 0) && (
+                  <div className="rounded-lg border border-rose-500/25 bg-rose-500/10 p-3 text-xs text-rose-700 dark:text-rose-300">
                     <strong>Warning:</strong> Deleting this category will affect
-                    the associated records listed above. Please confirm you want
-                    to proceed.
+                    the associated records listed above.
+                    {dependencies.reminderCount > 0 && (
+                      <span className="block mt-1 font-semibold text-rose-800 dark:text-rose-200">
+                        Attention: Deleting this category will permanently hard delete all associated reminders.
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

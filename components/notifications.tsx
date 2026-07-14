@@ -22,6 +22,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import api from "@/lib/api";
 import {
   BadgeAlert,
   BadgeCheck,
@@ -29,6 +30,8 @@ import {
   BadgeX,
   Bell,
   MoreHorizontal,
+  Check,
+  Clock,
 } from "lucide-react";
 import {
   Tooltip,
@@ -51,6 +54,24 @@ export default function Notifications({
   markIndividualAsRead: (id: string) => void;
   deleteNotificationFunc: (id: string) => void;
 }) {
+  const handleCompleteReminder = async (reminderId: string, notificationId: string) => {
+    try {
+      await api.patch(`/v1/reminders/${reminderId}/complete`);
+      markIndividualAsRead(notificationId);
+    } catch (e) {
+      console.error("Failed to complete reminder:", e);
+    }
+  };
+
+  const handleSnoozeReminder = async (reminderId: string, notificationId: string, duration: string) => {
+    try {
+      await api.patch(`/v1/reminders/${reminderId}/snooze`, { duration });
+      markIndividualAsRead(notificationId);
+    } catch (e) {
+      console.error("Failed to snooze reminder:", e);
+    }
+  };
+
   const messageLength = useMemo(
     () => notifications.notifications.filter((n) => !n.isRead).length,
     [notifications.notifications],
@@ -114,6 +135,140 @@ export default function Notifications({
               if (notification.type === "LOGOUT") {
                 return null; // Skip rendering logout notifications
               }
+              if (notification.type === "REMINDER") {
+                let reminder = null;
+                try {
+                  reminder = JSON.parse(notification.message);
+                } catch (e) {
+                  // Fallback
+                }
+
+                if (reminder) {
+                  const isUnread = !notification.isRead;
+                  const categoryColor = reminder.category?.color || "#10b981";
+                  return (
+                    <div key={notification.id} className="px-3">
+                      <Item
+                        className={`rounded-2xl border border-transparent px-3 py-3 transition-colors ${
+                          isUnread
+                            ? "bg-teal-500/10 border-teal-500/20"
+                            : "bg-background/60 hover:bg-muted/40"
+                        }`}
+                      >
+                        <ItemMedia className="p-0">
+                          <div
+                            className="h-10 w-10 rounded-full flex items-center justify-center bg-teal-500/15"
+                            style={{ color: categoryColor }}
+                          >
+                            <Bell className="h-5 w-5" />
+                          </div>
+                        </ItemMedia>
+                        <ItemContent className="p-0 flex-1">
+                          <ItemTitle className="p-0 text-sm flex flex-col gap-1 items-start">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-foreground">
+                                {reminder.title}
+                              </span>
+                              {isUnread && (
+                                <Badge className="rounded-full bg-teal-500/15 text-teal-600 dark:text-teal-400 text-[10px] px-1.5 py-0">
+                                  Due
+                                </Badge>
+                              )}
+                            </div>
+                            {reminder.amount && (
+                              <span className="text-xs font-bold text-teal-600 dark:text-teal-400">
+                                {reminder.currency || "USD"} {Number(reminder.amount).toFixed(2)}
+                              </span>
+                            )}
+                          </ItemTitle>
+                          <div className="text-xs text-muted-foreground mt-1 space-y-1">
+                            {reminder.description && <p className="line-clamp-2">{reminder.description}</p>}
+                            <p className="text-[10px] text-muted-foreground/80">
+                              Due: {new Date(reminder.dueAt).toLocaleString()}
+                            </p>
+                          </div>
+                          {isUnread && (
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs px-2.5 py-1 flex items-center gap-1 border-teal-500/30 hover:bg-teal-500/10 text-teal-600 dark:text-teal-400"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCompleteReminder(reminder.reminderId, notification.id);
+                                }}
+                              >
+                                <Check className="h-3 w-3" />
+                                Done
+                              </Button>
+                              
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-xs px-2.5 py-1 flex items-center gap-1 border-border"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Clock className="h-3 w-3" />
+                                    Snooze
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start">
+                                  <DropdownMenuItem onClick={() => handleSnoozeReminder(reminder.reminderId, notification.id, "10m")}>
+                                    10 Minutes
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSnoozeReminder(reminder.reminderId, notification.id, "30m")}>
+                                    30 Minutes
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSnoozeReminder(reminder.reminderId, notification.id, "1h")}>
+                                    1 Hour
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSnoozeReminder(reminder.reminderId, notification.id, "tomorrow")}>
+                                    Tomorrow
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          )}
+                          <ItemFooter className="mt-1.5">
+                            <Label className="text-[10px] text-muted-foreground">
+                              {formatNotificationTime(new Date(notification.time + "Z"))}
+                            </Label>
+                          </ItemFooter>
+                        </ItemContent>
+                        <ItemActions>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                disabled={notification.isRead}
+                                onClick={() => markIndividualAsRead(notification.id)}
+                              >
+                                Mark as read
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => deleteNotificationFunc(notification.id)}
+                                variant="destructive"
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </ItemActions>
+                      </Item>
+                      <Separator className="my-2" />
+                    </div>
+                  );
+                }
+              }
+
               const isUnread = !notification.isRead;
               return (
                 <div key={notification.id} className="px-3">

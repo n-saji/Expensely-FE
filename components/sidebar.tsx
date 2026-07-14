@@ -14,6 +14,7 @@ import {
   Repeat,
   HandCoins,
   ArrowLeftRight,
+  Bell,
 } from "lucide-react";
 
 import {
@@ -204,6 +205,21 @@ export function AppSidebar() {
                   <Link href={"/category"}>
                     <Logs />
                     <span>Category</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathName === "/reminder"}
+                  className="rounded-xl transition-colors hover:bg-primary-500/10 data-[active=true]:bg-primary-500/15 data-[active=true]:text-primary"
+                >
+                  <Link href={"/reminder"}>
+                    <Bell />
+                    <span>Reminders</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -18,20 +18,20 @@ import {
 } from "lucide-react";
 
 import { RootState } from "@/redux/store";
-import {
-  ExpenseOverview,
-  IncomeOverview,
-  OverviewEnum,
-} from "@/global/dto";
+import { ExpenseOverview, IncomeOverview, OverviewEnum } from "@/global/dto";
 import api from "@/lib/api";
 import { IncomeExpenseComparisonChart } from "@/components/ExpenseChartCard";
+import RemindersDashboardWidget from "@/components/reminders-widget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { currencyMapper } from "@/utils/currencyMapper";
 
 import NewUserOnboarding from "./_components/new-user-onboarding";
-import { formatAmountExact, formatAmountCompact } from "@/utils/amount_formatter";
+import {
+  formatAmountExact,
+  formatAmountCompact,
+} from "@/utils/amount_formatter";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -447,35 +447,52 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {/* Net Balance (Primary focal point) */}
           <div className="flex flex-col justify-between space-y-3">
-            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Net Balance</span>
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Net Balance
+            </span>
             <div>
               {overview === null || incomeOverview === null ? (
                 <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
               ) : (
                 <div className="text-3xl md:text-4xl font-light text-foreground font-mono tracking-tight">
-                  {totalBalanceDisplay ? `${totalBalanceSign}${totalBalanceDisplay.full}` : "—"}
+                  {totalBalanceDisplay
+                    ? `${totalBalanceSign}${totalBalanceDisplay.full}`
+                    : "—"}
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-1.5">
-                {overview === null || incomeOverview === null ? "..." : netSavings >= 0 ? "Positive cash position" : "Negative cash position"}
+                {overview === null || incomeOverview === null
+                  ? "..."
+                  : netSavings >= 0
+                    ? "Positive cash position"
+                    : "Negative cash position"}
               </p>
             </div>
           </div>
-          
+
           {/* Monthly Income (Interactive) */}
-          <div 
-            className="group flex flex-col justify-between space-y-3 border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8"
-          >
+          <div className="group flex flex-col justify-between space-y-3 border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Monthly Income</span>
+              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                Monthly Income
+              </span>
               {incomeOverview && (
-                <span className={`inline-flex items-center gap-0.5 text-xs font-mono px-2 py-0.5 rounded-full ${
-                  incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome > 0
-                    ? "bg-emerald-500/10 text-emerald-500"
-                    : "bg-rose-500/10 text-rose-500"
-                }`}>
-                  {incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome >= 0 ? "+" : "-"}
-                  {incomeOverview.lastMonthTotalIncome === 0 || incomeOverview.lastMonthTotalIncome === null
+                <span
+                  className={`inline-flex items-center gap-0.5 text-xs font-mono px-2 py-0.5 rounded-full ${
+                    incomeOverview.thisMonthTotalIncome -
+                      incomeOverview.lastMonthTotalIncome >
+                    0
+                      ? "bg-emerald-500/10 text-emerald-500"
+                      : "bg-rose-500/10 text-rose-500"
+                  }`}
+                >
+                  {incomeOverview.thisMonthTotalIncome -
+                    incomeOverview.lastMonthTotalIncome >=
+                  0
+                    ? "+"
+                    : "-"}
+                  {incomeOverview.lastMonthTotalIncome === 0 ||
+                  incomeOverview.lastMonthTotalIncome === null
                     ? "100%"
                     : `${Math.abs(((incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome) / incomeOverview.lastMonthTotalIncome) * 100).toFixed(0)}%`}
                 </span>
@@ -492,7 +509,9 @@ export default function DashboardPage() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/dashboard/month/${incomeCurrentMonthYear}-${String(incomeCurrentMonth).padStart(2, '0')}?type=income`);
+                  router.push(
+                    `/dashboard/month/${incomeCurrentMonthYear}-${String(incomeCurrentMonth).padStart(2, "0")}?type=income`,
+                  );
                 }}
                 className="text-xs text-emerald-500 hover:text-emerald-400 hover:underline transition-colors mt-1.5 flex items-center gap-1 cursor-pointer font-medium"
               >
@@ -502,19 +521,28 @@ export default function DashboardPage() {
           </div>
 
           {/* Monthly Expense (Interactive) */}
-          <div 
-            className="group flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8"
-          >
+          <div className="group flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Monthly Expense</span>
+              <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                Monthly Expense
+              </span>
               {overview && (
-                <span className={`inline-flex items-center gap-0.5 text-xs font-mono px-2 py-0.5 rounded-full ${
-                  overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0
-                    ? "bg-rose-500/10 text-rose-500"
-                    : "bg-emerald-500/10 text-emerald-500"
-                }`}>
-                  {overview.thisMonthTotalExpense - overview.lastMonthTotalExpense > 0 ? "+" : "-"}
-                  {overview.lastMonthTotalExpense === 0 || overview.lastMonthTotalExpense === null
+                <span
+                  className={`inline-flex items-center gap-0.5 text-xs font-mono px-2 py-0.5 rounded-full ${
+                    overview.thisMonthTotalExpense -
+                      overview.lastMonthTotalExpense >
+                    0
+                      ? "bg-rose-500/10 text-rose-500"
+                      : "bg-emerald-500/10 text-emerald-500"
+                  }`}
+                >
+                  {overview.thisMonthTotalExpense -
+                    overview.lastMonthTotalExpense >
+                  0
+                    ? "+"
+                    : "-"}
+                  {overview.lastMonthTotalExpense === 0 ||
+                  overview.lastMonthTotalExpense === null
                     ? "100%"
                     : `${Math.abs(((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) / overview.lastMonthTotalExpense) * 100).toFixed(0)}%`}
                 </span>
@@ -531,7 +559,9 @@ export default function DashboardPage() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/dashboard/month/${currentMonthYear}-${String(currentMonth).padStart(2, '0')}?type=expense`);
+                  router.push(
+                    `/dashboard/month/${currentMonthYear}-${String(currentMonth).padStart(2, "0")}?type=expense`,
+                  );
                 }}
                 className="text-xs text-emerald-500 hover:text-emerald-400 hover:underline transition-colors mt-1.5 flex items-center gap-1 cursor-pointer font-medium"
               >
@@ -542,7 +572,9 @@ export default function DashboardPage() {
 
           {/* Top Category */}
           <div className="flex flex-col justify-between space-y-3 border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8">
-            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">Top Category</span>
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Top Category
+            </span>
             <div>
               {overview === null ? (
                 <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
@@ -552,29 +584,45 @@ export default function DashboardPage() {
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-1.5 truncate">
-                {overview === null ? "..." : topCategoryEntry ? `${currency}${fmt(topCategoryEntry[1])} this year` : "No spending this year"}
+                {overview === null
+                  ? "..."
+                  : topCategoryEntry
+                    ? `${currency}${fmt(topCategoryEntry[1])} this year`
+                    : "No spending this year"}
               </p>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* ── Income vs Expense Chart ── */}
-      <motion.div
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        custom={4}
-      >
-        <IncomeExpenseComparisonChart
-          expenseByMonth={expenseMonthlyCompare}
-          incomeByMonth={incomeMonthlyCompare}
-          darkMode={user.theme === "dark"}
-          currency={user.currency}
-          loading={compareLoading}
-          setOverviewParams={setCompareOverviewParams}
-        />
-      </motion.div>
+      {/* ── Income vs Expense Chart & Reminders Widget ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch animate-in fade-in slide-in-from-top-4 duration-300">
+        <motion.div
+          className="lg:col-span-2 flex flex-col h-full"
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={4}
+        >
+          <IncomeExpenseComparisonChart
+            expenseByMonth={expenseMonthlyCompare}
+            incomeByMonth={incomeMonthlyCompare}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            loading={compareLoading}
+            setOverviewParams={setCompareOverviewParams}
+          />
+        </motion.div>
+        <motion.div
+          className="lg:col-span-1 flex flex-col h-full"
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          custom={4.2}
+        >
+          <RemindersDashboardWidget />
+        </motion.div>
+      </div>
 
       {/* ── Budget + Recurring Side-by-Side ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -590,7 +638,9 @@ export default function DashboardPage() {
             <CardHeader>
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-lg font-medium text-foreground">Budgets</CardTitle>
+                  <CardTitle className="text-lg font-medium text-foreground">
+                    Budgets
+                  </CardTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
                   </p>
@@ -627,7 +677,7 @@ export default function DashboardPage() {
                           : variant === "warning"
                             ? "bg-amber-500"
                             : "bg-rose-500";
-                      
+
                       const budgetCurrency = currencyMapper(
                         budget.currency || user.currency || "USD",
                       );
@@ -642,24 +692,32 @@ export default function DashboardPage() {
                               <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
                                 {budget.category.name}
                               </span>
-                              {budgetIcon(budget.amountSpent, budget.amountLimit)}
+                              {budgetIcon(
+                                budget.amountSpent,
+                                budget.amountLimit,
+                              )}
                               <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono bg-muted/60 px-1.5 py-0.5 rounded">
                                 {budget.period}
                               </span>
                             </div>
-                            
+
                             {/* Minimal thin progress bar */}
                             <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
-                              <div 
+                              <div
                                 className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
                                 style={{ width: `${Math.min(pct, 100)}%` }}
                               />
                             </div>
                           </div>
-                          
+
                           <div className="text-right shrink-0">
                             <p className="text-sm font-medium text-foreground font-mono">
-                              {budgetCurrency}{budget.amountSpent.toFixed(0)} <span className="text-muted-foreground text-xs font-light font-sans">/ {budgetCurrency}{budget.amountLimit.toFixed(0)}</span>
+                              {budgetCurrency}
+                              {budget.amountSpent.toFixed(0)}{" "}
+                              <span className="text-muted-foreground text-xs font-light font-sans">
+                                / {budgetCurrency}
+                                {budget.amountLimit.toFixed(0)}
+                              </span>
                             </p>
                             <span className="text-xs font-mono text-muted-foreground mt-0.5 block">
                               {pct}%
@@ -743,7 +801,7 @@ export default function DashboardPage() {
                           })}
                         </p>
                       </div>
-                      
+
                       <div className="shrink-0 text-right">
                         <p className="text-xs font-semibold text-foreground font-mono">
                           {formatDayNumberMonth(expense.nextOccurrence)}
