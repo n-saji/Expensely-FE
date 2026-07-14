@@ -170,6 +170,7 @@ export default function PieChartComp({
   min_year,
   categoryMetaByName,
   loading = false,
+  layoutWidth,
 }: {
   amountByCategory?: ExpenseOverview["amountByCategory"];
   currency?: string;
@@ -179,6 +180,7 @@ export default function PieChartComp({
   min_year?: number;
   categoryMetaByName?: CategoryMetaByName;
   loading?: boolean;
+  layoutWidth?: number;
 }) {
   const chartData = Object.entries(amountByCategory || {}).map(
     ([category, amount]) => ({
@@ -241,7 +243,11 @@ export default function PieChartComp({
           )}
         </CardAction>
       </CardHeader>
-      <CardContent className="flex-1 grid gap-4 md:grid-cols-[minmax(0,1fr)_180px] items-center">
+      <CardContent className={`flex-1 grid gap-4 items-center ${
+        layoutWidth === 1
+          ? "grid-cols-1"
+          : "grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px]"
+      }`}>
         {sortedData.length === 0 ? (
           loading ? (
             <SpinnerUI />
@@ -332,40 +338,42 @@ export default function PieChartComp({
               </div>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Top Categories
-              </p>
-              <div className="space-y-2">
-                {topItems.map((item, index) => (
-                  <div
-                    key={item.name}
-                    className="flex items-center justify-between gap-2 text-sm"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{
-                          backgroundColor: getCategoryColor(
-                            item.name,
-                            COLORS[index % COLORS.length],
-                            categoryMetaByName,
-                          ),
-                        }}
-                      />
-                      <span className="truncate text-foreground">
-                        {item.name}
+            {layoutWidth !== 1 && (
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Top Categories
+                </p>
+                <div className="space-y-2">
+                  {topItems.map((item, index) => (
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between gap-2 text-sm"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{
+                            backgroundColor: getCategoryColor(
+                              item.name,
+                              COLORS[index % COLORS.length],
+                              categoryMetaByName,
+                            ),
+                          }}
+                        />
+                        <span className="truncate text-foreground">
+                          {item.name}
+                        </span>
+                      </div>
+                      <span className="text-muted-foreground">
+                        {totalAmount > 0
+                          ? `${Math.round((item.value / totalAmount) * 100)}%`
+                          : "0%"}
                       </span>
                     </div>
-                    <span className="text-muted-foreground">
-                      {totalAmount > 0
-                        ? `${Math.round((item.value / totalAmount) * 100)}%`
-                        : "0%"}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </CardContent>

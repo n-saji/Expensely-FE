@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,12 +24,18 @@ import {
   Eye,
   EyeOff,
   Plus,
+  PieChart as PieChartIcon,
+  Activity,
 } from "lucide-react";
 
 import { RootState } from "@/redux/store";
-import { ExpenseOverview, IncomeOverview, OverviewEnum } from "@/global/dto";
+import { ExpenseOverview, IncomeOverview, OverviewEnum, ExpenseOverviewV2 } from "@/global/dto";
 import api from "@/lib/api";
-import { IncomeExpenseComparisonChart } from "@/components/ExpenseChartCard";
+import PieChartComp, {
+  IncomeExpenseComparisonChart,
+  ExpensesOverDays,
+  YearlyExpenseLineChartV2,
+} from "@/components/ExpenseChartCard";
 import RemindersDashboardWidget from "@/components/reminders-widget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -66,6 +72,17 @@ function getGreeting(): string {
 export default function DashboardPage() {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user);
+  const categories = useSelector(
+    (state: RootState) => state.categoryExpense.categories,
+  );
+  const categoryMetaByName = useMemo(() => {
+    return Object.fromEntries(
+      (categories || [])
+        .filter((category) => category.name)
+        .map((category) => [category.name as string, category]),
+    );
+  }, [categories]);
+
   const { open: sidebarOpen, isMobile } = useSidebar();
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [loadingYear, setLoadingYear] = useState<boolean>(true);
@@ -109,6 +126,27 @@ export default function DashboardPage() {
     Record<string, number>
   >({});
   const [compareLoading, setCompareLoading] = useState<boolean>(true);
+
+  // New chart states
+  const [expenseOverviewV2, setExpenseOverviewV2] = useState<ExpenseOverviewV2 | null>(null);
+  const [expenseOverviewV2Loading, setExpenseOverviewV2Loading] = useState<boolean>(true);
+  const [expenseOverviewParams, setExpenseOverviewParams] = useState<{
+    count?: number;
+    type?: OverviewEnum;
+  }>({
+    count: 6,
+    type: OverviewEnum.MONTH,
+  });
+
+  const [incomeOverviewV2, setIncomeOverviewV2] = useState<ExpenseOverviewV2 | null>(null);
+  const [incomeOverviewV2Loading, setIncomeOverviewV2Loading] = useState<boolean>(true);
+  const [incomeOverviewParams, setIncomeOverviewParams] = useState<{
+    count?: number;
+    type?: OverviewEnum;
+  }>({
+    count: 6,
+    type: OverviewEnum.MONTH,
+  });
 
   const fetchOverview = async ({
     monthYear = currentMonthYear,
@@ -260,6 +298,56 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchMonthlyOverview = async () => {
+    try {
+      setExpenseOverviewV2Loading(true);
+      const [monthlyRes, categoryRes] = await Promise.all([
+        api.get(
+          `/expenses/monthly?count=${expenseOverviewParams.count}&type=${expenseOverviewParams.type}`,
+        ),
+        api.get(
+          `/expenses/monthly/category?count=${expenseOverviewParams.count}&type=${expenseOverviewParams.type}`,
+        ),
+      ]);
+
+      if (monthlyRes.status === 200 && categoryRes.status === 200) {
+        setExpenseOverviewV2({
+          amountByMonthV2: monthlyRes.data,
+          monthlyCategoryExpenseV2: categoryRes.data,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading monthly expense details", error);
+    } finally {
+      setExpenseOverviewV2Loading(false);
+    }
+  };
+
+  const fetchMonthlyIncomeOverview = async () => {
+    try {
+      setIncomeOverviewV2Loading(true);
+      const [monthlyRes, categoryRes] = await Promise.all([
+        api.get(
+          `/incomes/monthly?count=${incomeOverviewParams.count}&type=${incomeOverviewParams.type}`,
+        ),
+        api.get(
+          `/incomes/monthly/category?count=${incomeOverviewParams.count}&type=${incomeOverviewParams.type}`,
+        ),
+      ]);
+
+      if (monthlyRes.status === 200 && categoryRes.status === 200) {
+        setIncomeOverviewV2({
+          amountByMonthV2: monthlyRes.data,
+          monthlyCategoryExpenseV2: categoryRes.data,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading monthly income details", error);
+    } finally {
+      setIncomeOverviewV2Loading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOverview({
       hasConstraint: true,
@@ -295,8 +383,17 @@ export default function DashboardPage() {
   }, [incomeCurrentYearForYearly]);
 
   useEffect(() => {
+    fetchMonthlyOverview();
+  }, [user.id, expenseOverviewParams]);
+
+  useEffect(() => {
+    fetchMonthlyIncomeOverview();
+  }, [user.id, incomeOverviewParams]);
+
+  useEffect(() => {
     const handler = () => {
       fetchOverview({ hasConstraint: true, type: "" });
+      fetchMonthlyOverview();
     };
     window.addEventListener("expense-added", handler);
     return () => window.removeEventListener("expense-added", handler);
@@ -305,6 +402,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const handler = () => {
       fetchIncomeOverview({ hasConstraint: true, type: "" });
+      fetchMonthlyIncomeOverview();
     };
     window.addEventListener("income-added", handler);
     return () => window.removeEventListener("income-added", handler);
@@ -319,6 +417,8 @@ export default function DashboardPage() {
       fetchOverview({ hasConstraint: true, type: "" }),
       fetchIncomeOverview({ hasConstraint: true, type: "" }),
       fetchIncomeExpenseCompareOverview(),
+      fetchMonthlyOverview(),
+      fetchMonthlyIncomeOverview(),
     ]);
   };
 
@@ -328,7 +428,10 @@ export default function DashboardPage() {
   };
 
   const handleBudgetCreated = async () => {
-    await fetchOverview({ hasConstraint: true, type: "" });
+    await Promise.all([
+      fetchOverview({ hasConstraint: true, type: "" }),
+      fetchMonthlyOverview(),
+    ]);
   };
 
   const budgetCount = overview
@@ -454,6 +557,30 @@ export default function DashboardPage() {
       title: "Upcoming Recurring Bills",
       icon: <Wallet className="h-4 w-4 text-indigo-500" />,
     },
+    expense_trend: {
+      title: "Expense Trend Chart",
+      icon: <TrendingUp className="h-4 w-4 text-rose-500" />,
+    },
+    income_trend: {
+      title: "Income Trend Chart",
+      icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
+    },
+    expense_pie: {
+      title: "Expense Category Pie Chart",
+      icon: <PieChartIcon className="h-4 w-4 text-amber-500" />,
+    },
+    income_pie: {
+      title: "Income Category Pie Chart",
+      icon: <PieChartIcon className="h-4 w-4 text-teal-500" />,
+    },
+    expense_over_days: {
+      title: "Expense Over Days Line Chart",
+      icon: <Activity className="h-4 w-4 text-orange-500" />,
+    },
+    income_over_days: {
+      title: "Income Over Days Line Chart",
+      icon: <Activity className="h-4 w-4 text-lime-500" />,
+    },
   };
 
   const defaultLayout: LayoutItem[] = [
@@ -462,6 +589,12 @@ export default function DashboardPage() {
     { id: "reminders", w: 1, visible: true },
     { id: "budgets", w: 2, visible: true },
     { id: "recurring", w: 1, visible: true },
+    { id: "expense_trend", w: 3, visible: false },
+    { id: "income_trend", w: 3, visible: false },
+    { id: "expense_pie", w: 2, visible: false },
+    { id: "income_pie", w: 2, visible: false },
+    { id: "expense_over_days", w: 2, visible: false },
+    { id: "income_over_days", w: 2, visible: false },
   ];
 
   const colSpanClasses: Record<number, string> = {
@@ -924,6 +1057,108 @@ export default function DashboardPage() {
     </Card>
   );
 
+  const renderExpenseTrendWidget = () => (
+    <YearlyExpenseLineChartV2
+      amountByMonth={expenseOverviewV2?.amountByMonthV2}
+      amountByMonthV2={expenseOverviewV2?.monthlyCategoryExpenseV2}
+      darkMode={user.theme === "dark"}
+      title="Expense Trends"
+      currency={user.currency}
+      setOverviewParams={setExpenseOverviewParams}
+      overviewParams={expenseOverviewParams}
+      categoryMetaByName={categoryMetaByName}
+      loading={expenseOverviewV2Loading || expenseOverviewV2 === null}
+    />
+  );
+
+  const renderIncomeTrendWidget = () => (
+    <YearlyExpenseLineChartV2
+      amountByMonth={incomeOverviewV2?.amountByMonthV2}
+      amountByMonthV2={incomeOverviewV2?.monthlyCategoryExpenseV2}
+      darkMode={user.theme === "dark"}
+      title="Income Trends"
+      currency={user.currency}
+      setOverviewParams={setIncomeOverviewParams}
+      overviewParams={incomeOverviewParams}
+      categoryMetaByName={categoryMetaByName}
+      loading={incomeOverviewV2Loading || incomeOverviewV2 === null}
+    />
+  );
+
+  const renderExpensePieWidget = (w: number) => {
+    const minYear = overview?.earliestStartYear || new Date().getFullYear();
+    return (
+      <PieChartComp
+        amountByCategory={overview?.amountByCategory}
+        currency={user.currency}
+        title="Spending by Category"
+        setCurrentYearForYearly={setCurrentYearForYearly}
+        currentYearForYearly={currentYearForYearly}
+        min_year={minYear}
+        categoryMetaByName={categoryMetaByName}
+        loading={loadingYear || overview === null}
+        layoutWidth={w}
+      />
+    );
+  };
+
+  const renderIncomePieWidget = (w: number) => {
+    const minIncomeYear = incomeOverview?.earliestStartYear || new Date().getFullYear();
+    return (
+      <PieChartComp
+        amountByCategory={incomeOverview?.amountByCategory}
+        currency={user.currency}
+        title="Income by Category"
+        setCurrentYearForYearly={setIncomeCurrentYearForYearly}
+        currentYearForYearly={incomeCurrentYearForYearly}
+        min_year={minIncomeYear}
+        categoryMetaByName={categoryMetaByName}
+        loading={loadingIncomeYear || incomeOverview === null}
+        layoutWidth={w}
+      />
+    );
+  };
+
+  const renderExpenseOverDaysWidget = () => {
+    const minYear = overview?.earliestStartYear || new Date().getFullYear();
+    const minMonth = overview?.earliestStartMonth || new Date().getMonth() + 1;
+    return (
+      <ExpensesOverDays
+        overTheDaysThisMonth={overview?.overTheDaysThisMonth}
+        darkMode={user.theme === "dark"}
+        currency={user.currency}
+        title="Spending Over Days"
+        setCurrentMonth={setCurrentMonth}
+        setCurrentMonthYear={setCurrentMonthYear}
+        currentMonth={currentMonth}
+        currentMonthYear={currentMonthYear}
+        min_year={minYear}
+        min_month={minMonth}
+        loading={loadingMonth || overview === null}
+      />
+    );
+  };
+
+  const renderIncomeOverDaysWidget = () => {
+    const minIncomeYear = incomeOverview?.earliestStartYear || new Date().getFullYear();
+    const minIncomeMonth = incomeOverview?.earliestStartMonth || new Date().getMonth() + 1;
+    return (
+      <ExpensesOverDays
+        overTheDaysThisMonth={incomeOverview?.overTheDaysThisMonth}
+        darkMode={user.theme === "dark"}
+        currency={user.currency}
+        title="Income Over Days"
+        setCurrentMonth={setIncomeCurrentMonth}
+        setCurrentMonthYear={setIncomeCurrentMonthYear}
+        currentMonth={incomeCurrentMonth}
+        currentMonthYear={incomeCurrentMonthYear}
+        min_year={minIncomeYear}
+        min_month={minIncomeMonth}
+        loading={loadingIncomeMonth || incomeOverview === null}
+      />
+    );
+  };
+
   const renderWidget = (id: string, w: number) => {
     switch (id) {
       case "stats":
@@ -936,6 +1171,18 @@ export default function DashboardPage() {
         return renderBudgetsWidget();
       case "recurring":
         return renderRecurringWidget();
+      case "expense_trend":
+        return renderExpenseTrendWidget();
+      case "income_trend":
+        return renderIncomeTrendWidget();
+      case "expense_pie":
+        return renderExpensePieWidget(w);
+      case "income_pie":
+        return renderIncomePieWidget(w);
+      case "expense_over_days":
+        return renderExpenseOverDaysWidget();
+      case "income_over_days":
+        return renderIncomeOverDaysWidget();
       default:
         return null;
     }
@@ -1021,7 +1268,7 @@ export default function DashboardPage() {
       {/* ── Widgets Grid ── */}
       {!isMounted ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {defaultLayout.map((item) => {
+          {defaultLayout.filter((item) => item.visible).map((item) => {
             const colSpanClass = colSpanClasses[item.w] || "lg:col-span-1";
             return (
               <div key={item.id} className={`${colSpanClass} h-[200px] bg-muted/20 animate-pulse rounded-2xl`} />
@@ -1062,7 +1309,25 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground font-medium py-1 pr-3">
                           <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
                           <span className="font-semibold tracking-wide capitalize text-[11px] uppercase">
-                            {item.id === "stats" ? "Stats" : item.id === "recurring" ? "Recurring" : item.id}
+                            {item.id === "stats"
+                              ? "Stats"
+                              : item.id === "recurring"
+                                ? "Recurring"
+                                : item.id === "chart"
+                                  ? "Comparison Chart"
+                                  : item.id === "expense_trend"
+                                    ? "Expense Trend"
+                                    : item.id === "income_trend"
+                                      ? "Income Trend"
+                                      : item.id === "expense_pie"
+                                        ? "Expense Categories"
+                                        : item.id === "income_pie"
+                                          ? "Income Categories"
+                                          : item.id === "expense_over_days"
+                                            ? "Expense over Days"
+                                            : item.id === "income_over_days"
+                                              ? "Income over Days"
+                                              : item.id}
                           </span>
                         </div>
 
@@ -1120,9 +1385,9 @@ export default function DashboardPage() {
               exit={{ opacity: 0, y: 50 }}
               className="flex flex-col items-center justify-center gap-2 max-w-[90%] md:max-w-xl pointer-events-auto"
             >
-              <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-semibold bg-muted/80 px-2.5 py-1 rounded-md shadow-xs select-none">
+              {/* <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-semibold bg-muted/80 px-2.5 py-1 rounded-md shadow-xs select-none">
                 Inactive Widgets Dock
-              </div>
+              </div> */}
               <div className="flex flex-wrap items-center justify-center gap-3 p-3 bg-card/75 backdrop-blur-md border border-border/80 rounded-2xl shadow-xl max-w-full">
                 {layout.filter((item) => !item.visible).length === 0 ? (
                   <p className="text-xs text-muted-foreground px-4 py-2 italic font-sans">
