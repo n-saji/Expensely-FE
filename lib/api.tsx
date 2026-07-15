@@ -188,7 +188,8 @@ api.interceptors.response.use(
         // Refresh failed → redirect to login
         if (
           typeof window !== "undefined" &&
-          !window.location.pathname.includes("/login")
+          !window.location.pathname.includes("/login") &&
+          !window.location.pathname.includes("/")
         ) {
           window.location.href = `/login`;
         }
