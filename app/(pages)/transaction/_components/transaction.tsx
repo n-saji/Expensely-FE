@@ -9,6 +9,7 @@ import { RootState } from "@/redux/store";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import api from "@/lib/api";
 import {
+  Category,
   ExpenseOverview,
   ExpenseOverviewV2,
   IncomeOverview,
@@ -70,6 +71,17 @@ import {
   Trash,
   X,
   Download,
+  SlidersHorizontal,
+  RotateCcw,
+  Check,
+  GripVertical,
+  ChevronLeft,
+  ChevronRight,
+  EyeOff,
+  PieChart as PieChartIcon,
+  TrendingUp,
+  Activity,
+  Banknote,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import CategoryBadge from "@/components/category-badge";
@@ -96,16 +108,13 @@ import DropDown from "@/components/drop-down";
 import { Label } from "@/components/ui/label";
 import useMediaQuery from "@/utils/useMediaQuery";
 import CurrencyDrawer from "@/components/currency-drawer";
-import {
-  ExpenseInsightCards,
-  ExpenseInsightCharts,
-} from "../../dashboard/_components/expense-insights";
-import {
-  IncomeInsightCards,
-  IncomeInsightCharts,
-} from "../../dashboard/_components/income-insights";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Slidebar from "@/components/slidebar";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSidebar } from "@/components/ui/sidebar";
+import { currencyMapper } from "@/utils/currencyMapper";
+import PieChartComp, {
+  ExpensesOverDays,
+  YearlyExpenseLineChartV2,
+} from "@/components/ExpenseChartCard";
 
 const parsePositiveInt = (value: string | null, fallback: number) => {
   if (!value) return fallback;
@@ -138,6 +147,149 @@ const editTransactionSchema = z.object({
   type: z.enum(["EXPENSE", "INCOME"]),
   file: z.instanceof(File).optional(),
 });
+
+interface CategorySelectorWithTabsProps {
+  value: string | null;
+  onValueChange: (val: string | null) => void;
+  categories: Category[];
+  placeholder?: string;
+  className?: string;
+}
+
+const CategorySelectorWithTabs = ({
+  value,
+  onValueChange,
+  categories,
+  placeholder = "All Categories",
+  className = "",
+}: CategorySelectorWithTabsProps) => {
+  const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"expense" | "income">("expense");
+
+  const selectedCategory = categories.find((c) => c.id === value);
+
+  // Sync tab with selected category
+  useEffect(() => {
+    if (selectedCategory) {
+      const type = selectedCategory.type?.toLowerCase();
+      if (type === "expense") {
+        setActiveTab("expense");
+      } else if (type === "income" || type === "investment") {
+        setActiveTab("income");
+      }
+    }
+  }, [value, selectedCategory]);
+
+  const filteredCategories = categories.filter((c) => {
+    const type = c.type?.toLowerCase();
+    if (activeTab === "expense") {
+      return type === "expense";
+    } else {
+      return type === "income" || type === "investment";
+    }
+  });
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={`h-9 font-normal rounded-full border border-border/70 bg-background/60 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer flex items-center justify-between gap-2 ${className}`}
+        >
+          {selectedCategory ? (
+            <CategoryBadge
+              name={selectedCategory.name}
+              icon={selectedCategory.icon}
+              color={selectedCategory.color}
+            />
+          ) : (
+            <span className="truncate">{placeholder}</span>
+          )}
+          <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[240px] p-2 bg-card/95 backdrop-blur-md border border-border/60 rounded-xl shadow-md space-y-2" align="start">
+        {/* All Categories Option (Supersedes everything) */}
+        <button
+          type="button"
+          onClick={() => {
+            onValueChange(null);
+            setOpen(false);
+          }}
+          className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-all hover:bg-muted/80 text-left font-medium ${
+            !value || value === "all-categories"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <span className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted-foreground/10 text-muted-foreground text-[10px] font-bold">
+            ALL
+          </span>
+          All Categories
+        </button>
+
+        <div className="border-t border-border/30 my-1" />
+
+        {/* Expense/Income Tabs */}
+        <div className="flex bg-muted/40 p-0.5 rounded-lg border border-border/10">
+          <button
+            type="button"
+            onClick={() => setActiveTab("expense")}
+            className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all ${
+              activeTab === "expense"
+                ? "bg-background text-foreground shadow-xs border border-border/10"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Expense
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("income")}
+            className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all ${
+              activeTab === "income"
+                ? "bg-background text-foreground shadow-xs border border-border/10"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Income
+          </button>
+        </div>
+
+        {/* Scrollable Categories List */}
+        <div className="max-h-[200px] overflow-y-auto space-y-0.5 pr-1">
+          {filteredCategories.length === 0 ? (
+            <div className="text-xs text-muted-foreground py-6 text-center">
+              No categories found
+            </div>
+          ) : (
+            filteredCategories.map((cat) => {
+              const isSelected = value === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    onValueChange(cat.id);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm transition-all hover:bg-muted/80 text-left ${
+                    isSelected
+                      ? "bg-muted text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <CategoryBadge name={cat.name} icon={cat.icon} color={cat.color} />
+                </button>
+              );
+            })
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 export default function TransactionPage() {
   const router = useRouter();
@@ -218,6 +370,12 @@ export default function TransactionPage() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [calenderOpen, setCalenderOpen] = useState(false);
 
+  // CSV Export Dialog states
+  const [openExportDialog, setOpenExportDialog] = useState(false);
+  const [exportCategory, setExportCategory] = useState("all-categories");
+  const [exportDateRange, setExportDateRange] = useState<DateRange | undefined>(undefined);
+  const [exportSearch, setExportSearch] = useState("");
+
   // Attachment editing states
   const [attachmentEditMode, setAttachmentEditMode] = useState(false);
   const [attachmentActionLoading, setAttachmentActionLoading] = useState(false);
@@ -225,6 +383,655 @@ export default function TransactionPage() {
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const skipInitialDebouncedFetchRef = useRef(true);
+
+  // --- LAYOUT ENGINE CONFIGURATION ---
+  interface LayoutItem {
+    id: string;
+    w: number; // width span: 1, 2, or 3 columns
+    visible: boolean;
+  }
+
+  const widgetMeta: Record<string, { title: string; icon: React.ReactNode }> = {
+    stats_bar: {
+      title: "Hero Stats Summary",
+      icon: <Banknote className="h-4 w-4 text-emerald-500" />,
+    },
+    expense_trend: {
+      title: "Expense Trend Chart",
+      icon: <TrendingUp className="h-4 w-4 text-rose-500" />,
+    },
+    income_trend: {
+      title: "Income Trend Chart",
+      icon: <TrendingUp className="h-4 w-4 text-emerald-500" />,
+    },
+    expense_pie: {
+      title: "Spending by Category",
+      icon: <PieChartIcon className="h-4 w-4 text-amber-500" />,
+    },
+    income_pie: {
+      title: "Income by Category",
+      icon: <PieChartIcon className="h-4 w-4 text-teal-500" />,
+    },
+    expense_over_days: {
+      title: "Spending Over Days",
+      icon: <Activity className="h-4 w-4 text-orange-500" />,
+    },
+    income_over_days: {
+      title: "Income Over Days",
+      icon: <Activity className="h-4 w-4 text-lime-500" />,
+    },
+  };
+
+  const defaultLayout: LayoutItem[] = [
+    { id: "stats_bar", w: 3, visible: true },
+    { id: "expense_trend", w: 3, visible: true },
+    { id: "income_trend", w: 3, visible: true },
+    { id: "expense_pie", w: 2, visible: false },
+    { id: "income_pie", w: 2, visible: false },
+    { id: "expense_over_days", w: 2, visible: false },
+    { id: "income_over_days", w: 2, visible: false },
+  ];
+
+  const colSpanClasses: Record<number, string> = {
+    1: "lg:col-span-1",
+    2: "lg:col-span-2",
+    3: "lg:col-span-3",
+  };
+
+  const getSavedLayout = (userId: string): LayoutItem[] => {
+    if (typeof window === "undefined") return defaultLayout;
+    if (!userId) return defaultLayout;
+    const saved = localStorage.getItem(`expensely_transaction_layout_${userId}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as LayoutItem[];
+        const parsedMerged = parsed
+          .filter((p) => defaultLayout.some((d) => d.id === p.id))
+          .map((p) => {
+            const defItem = defaultLayout.find((d) => d.id === p.id)!;
+            return { ...defItem, ...p };
+          });
+        const missingItems = defaultLayout.filter(
+          (d) => !parsed.some((p) => p.id === d.id)
+        );
+        return [...parsedMerged, ...missingItems];
+      } catch {
+        return defaultLayout;
+      }
+    }
+    return defaultLayout;
+  };
+
+  const defaultSelectedStats = [
+    "this_month_expense",
+    "this_year_expense",
+    "this_month_income",
+    "net_savings",
+  ];
+
+  const { open: sidebarOpen, isMobile } = useSidebar();
+  const [isMounted, setIsMounted] = useState(false);
+  const [layout, setLayout] = useState<LayoutItem[]>([]);
+  const [selectedStats, setSelectedStats] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDockMinimized, setIsDockMinimized] = useState(false);
+  const [layoutBackup, setLayoutBackup] = useState<LayoutItem[] | null>(null);
+  const [selectedStatsBackup, setSelectedStatsBackup] = useState<string[] | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user.id) {
+      setLayout(getSavedLayout(user.id));
+      const savedStats = localStorage.getItem(`expensely_transaction_selected_stats_${user.id}`);
+      if (savedStats) {
+        try {
+          setSelectedStats(JSON.parse(savedStats));
+        } catch {
+          setSelectedStats(defaultSelectedStats);
+        }
+      } else {
+        setSelectedStats(defaultSelectedStats);
+      }
+      setIsMounted(true);
+    }
+  }, [user.id]);
+
+  const handleStartEditing = () => {
+    setLayoutBackup(layout.map(item => ({ ...item })));
+    setSelectedStatsBackup([...selectedStats]);
+    setIsEditing(true);
+    setIsDockMinimized(isMobile);
+  };
+
+  const handleCancelEditing = () => {
+    if (layoutBackup) {
+      setLayout(layoutBackup);
+    }
+    if (selectedStatsBackup) {
+      setSelectedStats(selectedStatsBackup);
+    }
+    setIsEditing(false);
+  };
+
+  const handleSaveEditing = () => {
+    localStorage.setItem(
+      `expensely_transaction_layout_${user.id}`,
+      JSON.stringify(layout)
+    );
+    localStorage.setItem(
+      `expensely_transaction_selected_stats_${user.id}`,
+      JSON.stringify(selectedStats)
+    );
+    setIsEditing(false);
+  };
+
+  const handleResetLayout = () => {
+    setLayout(defaultLayout.map(item => ({ ...item })));
+    setSelectedStats(defaultSelectedStats);
+  };
+
+  const handleToggleVisibility = (id: string) => {
+    setLayout(prev =>
+      prev.map(item => (item.id === id ? { ...item, visible: !item.visible } : item))
+    );
+  };
+
+  const handleResize = (id: string, delta: number) => {
+    setLayout(prev =>
+      prev.map(item => {
+        if (item.id === id) {
+          const newW = Math.max(1, Math.min(3, item.w + delta));
+          return { ...item, w: newW };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) return;
+
+    const draggedIndex = layout.findIndex(item => item.id === draggedId);
+    const targetIndex = layout.findIndex(item => item.id === targetId);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      const updated = [...layout];
+      const [draggedItem] = updated.splice(draggedIndex, 1);
+      updated.splice(targetIndex, 0, draggedItem);
+      setLayout(updated);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+  };
+
+  const cardVariants: any = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (custom: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: custom, duration: 0.4, ease: "easeOut" },
+    }),
+  };
+
+  const availableStatsList = [
+    { id: "this_month_expense", label: "This Month Expense" },
+    { id: "this_year_expense", label: "This Year Expense" },
+    { id: "top_spend_month", label: "Top Spend Month" },
+    { id: "this_month_income", label: "This Month Income" },
+    { id: "this_year_income", label: "This Year Income" },
+    { id: "top_income_month", label: "Top Income Month" },
+    { id: "net_savings", label: "Net Savings (Month)" },
+    { id: "net_balance", label: "Net Balance" },
+  ];
+
+  const renderStatCell = (id: string) => {
+    const fmt = (n: number) =>
+      n.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    const currency = currencyMapper(user.currency || "USD");
+
+    switch (id) {
+      case "this_month_expense": {
+        const monthChange =
+          overview && overview.lastMonthTotalExpense !== 0
+            ? (
+                ((overview.thisMonthTotalExpense - overview.lastMonthTotalExpense) /
+                  overview.lastMonthTotalExpense) *
+                100
+              ).toFixed(1)
+            : overview && overview.thisMonthTotalExpense === 0
+              ? "0"
+              : "100";
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              This Month's Expense
+            </span>
+            <div>
+              {overview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {currency}{fmt(overview.thisMonthTotalExpense)}
+                </div>
+              )}
+              {overview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                  <span className={Number(monthChange) >= 0 ? "text-rose-500" : "text-emerald-500"}>
+                    {Number(monthChange) >= 0 ? "▲" : "▼"} {Math.abs(Number(monthChange))}%
+                  </span>
+                  <span className="truncate">vs last month</span>
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "this_year_expense": {
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              This Year's Expense
+            </span>
+            <div>
+              {overview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {currency}{fmt(overview.totalAmount)}
+                </div>
+              )}
+              {overview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  Avg. {currency}{fmt(overview.averageMonthlyExpense ?? 0)} / month
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "top_spend_month": {
+        const topExpenseItem = (() => {
+          if (!overview || !overview.topFiveMostExpensiveItemThisMonth) return null;
+          const entries = Object.entries(overview.topFiveMostExpensiveItemThisMonth);
+          if (entries.length === 0) return null;
+          const sorted = entries.sort(([, a], [, b]) => b - a);
+          return { name: sorted[0][0], value: sorted[0][1] };
+        })();
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Top Spend This Month
+            </span>
+            <div>
+              {overview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground truncate max-w-[200px]" title={topExpenseItem ? topExpenseItem.name : "N/A"}>
+                  {topExpenseItem ? topExpenseItem.name : "N/A"}
+                </div>
+              )}
+              {overview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {topExpenseItem
+                    ? `${currency}${fmt(topExpenseItem.value)} spent`
+                    : "No expenses recorded."}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "this_month_income": {
+        const incomeMonthChange =
+          incomeOverview && incomeOverview.lastMonthTotalIncome !== 0
+            ? (
+                ((incomeOverview.thisMonthTotalIncome - incomeOverview.lastMonthTotalIncome) /
+                  incomeOverview.lastMonthTotalIncome) *
+                100
+              ).toFixed(1)
+            : incomeOverview && incomeOverview.thisMonthTotalIncome === 0
+              ? "0"
+              : "100";
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              This Month's Income
+            </span>
+            <div>
+              {incomeOverview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {currency}{fmt(incomeOverview.thisMonthTotalIncome)}
+                </div>
+              )}
+              {incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                  <span className={Number(incomeMonthChange) >= 0 ? "text-emerald-500" : "text-rose-500"}>
+                    {Number(incomeMonthChange) >= 0 ? "▲" : "▼"} {Math.abs(Number(incomeMonthChange))}%
+                  </span>
+                  <span className="truncate">vs last month</span>
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "this_year_income": {
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              This Year's Income
+            </span>
+            <div>
+              {incomeOverview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {currency}{fmt(incomeOverview.totalAmount)}
+                </div>
+              )}
+              {incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  Avg. {currency}{fmt(incomeOverview.averageMonthlyIncome ?? 0)} / month
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "top_income_month": {
+        const topIncomeItem = (() => {
+          if (!incomeOverview || !incomeOverview.topFiveMostIncomeItemThisMonth) return null;
+          const entries = Object.entries(incomeOverview.topFiveMostIncomeItemThisMonth);
+          if (entries.length === 0) return null;
+          const sorted = entries.sort(([, a], [, b]) => b - a);
+          return { name: sorted[0][0], value: sorted[0][1] };
+        })();
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Top Income This Month
+            </span>
+            <div>
+              {incomeOverview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground truncate max-w-[200px]" title={topIncomeItem ? topIncomeItem.name : "N/A"}>
+                  {topIncomeItem ? topIncomeItem.name : "N/A"}
+                </div>
+              )}
+              {incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {topIncomeItem
+                    ? `${currency}${fmt(topIncomeItem.value)} earned`
+                    : "No income recorded."}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "net_savings": {
+        const expense = overview?.thisMonthTotalExpense ?? 0;
+        const income = incomeOverview?.thisMonthTotalIncome ?? 0;
+        const savings = income - expense;
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Net Savings (Month)
+            </span>
+            <div>
+              {overview === null || incomeOverview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className={`text-2xl md:text-3xl font-light font-mono tracking-tight ${savings >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                  {savings < 0 ? "-" : ""}{currency}{fmt(Math.abs(savings))}
+                </div>
+              )}
+              {overview !== null && incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {savings >= 0 ? "Positive cash savings" : "Net deficit this month"}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case "net_balance": {
+        const balance = incomeOverview?.total_balance ?? 0;
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Net Balance
+            </span>
+            <div>
+              {incomeOverview === null ? (
+                <div className="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className={`text-2xl md:text-3xl font-light font-mono tracking-tight ${balance >= 0 ? "text-foreground" : "text-rose-500"}`}>
+                  {balance < 0 ? "-" : ""}{currency}{fmt(Math.abs(balance))}
+                </div>
+              )}
+              {incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  Total available assets
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+      default:
+        return null;
+    }
+  };
+
+  const renderStatsBarWidget = (w: number) => {
+    const cols = selectedStats.length;
+    let gridCols = "grid-cols-1";
+    if (cols === 4) gridCols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+    else if (cols === 3) gridCols = "grid-cols-1 sm:grid-cols-3";
+    else if (cols === 2) gridCols = "grid-cols-1 sm:grid-cols-2";
+
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md p-6 md:p-8 w-full">
+        {isEditing && (
+          <div className="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.02] space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Select Stats to Display (Max 4, Active: {selectedStats.length}/4)
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableStatsList.map((st) => {
+                const active = selectedStats.includes(st.id);
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => {
+                      if (active) {
+                        setSelectedStats(selectedStats.filter(id => id !== st.id));
+                      } else {
+                        if (selectedStats.length >= 4) {
+                          toast.error("You can select up to 4 stats only");
+                        } else {
+                          setSelectedStats([...selectedStats, st.id]);
+                        }
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                      active
+                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-500"
+                        : "bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {st.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {cols === 0 ? (
+          <div className="text-center py-4 text-xs text-muted-foreground">
+            No stats selected. Enter customize mode to configure.
+          </div>
+        ) : (
+          <div className={`grid gap-6 md:gap-8 ${gridCols}`}>
+            {selectedStats.map((statId, idx) => {
+              const borderClass = idx === 0
+                ? ""
+                : `border-t border-border/40 pt-6 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-6 md:pl-8 ${
+                    cols === 4 ? "lg:pl-8" : ""
+                  }`;
+              return (
+                <div key={statId} className={borderClass}>
+                  {renderStatCell(statId)}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderWidget = (id: string, w: number) => {
+    switch (id) {
+      case "stats_bar":
+        return renderStatsBarWidget(w);
+      case "expense_trend": {
+        const categoryMetaByName = Object.fromEntries(
+          categories.categories
+            .filter((category) => category.name)
+            .map((category) => [category.name as string, category]),
+        );
+        return (
+          <YearlyExpenseLineChartV2
+            amountByMonth={overviewV2?.amountByMonthV2}
+            amountByMonthV2={overviewV2?.monthlyCategoryExpenseV2}
+            darkMode={user.theme === "dark"}
+            title="Expense Trends"
+            currency={user.currency}
+            setOverviewParams={setOverviewParams}
+            overviewParams={overviewParams}
+            categoryMetaByName={categoryMetaByName}
+            loading={overviewV2Loading || overviewV2 === null}
+          />
+        );
+      }
+      case "income_trend": {
+        const categoryMetaByName = Object.fromEntries(
+          categories.categories
+            .filter((category) => category.name)
+            .map((category) => [category.name as string, category]),
+        );
+        return (
+          <YearlyExpenseLineChartV2
+            amountByMonth={incomeOverviewV2?.amountByMonthV2}
+            amountByMonthV2={incomeOverviewV2?.monthlyCategoryExpenseV2}
+            darkMode={user.theme === "dark"}
+            title="Income Trends"
+            currency={user.currency}
+            setOverviewParams={setIncomeOverviewParams}
+            overviewParams={incomeOverviewParams}
+            categoryMetaByName={categoryMetaByName}
+            loading={incomeOverviewV2Loading || incomeOverviewV2 === null}
+          />
+        );
+      }
+      case "expense_pie": {
+        const categoryMetaByName = Object.fromEntries(
+          categories.categories
+            .filter((category) => category.name)
+            .map((category) => [category.name as string, category]),
+        );
+        return (
+          <PieChartComp
+            amountByCategory={overview?.amountByCategory}
+            currency={user.currency}
+            title="Spending by Category"
+            setCurrentYearForYearly={setCurrentYearForYearly}
+            currentYearForYearly={currentYearForYearly}
+            min_year={minYear}
+            categoryMetaByName={categoryMetaByName}
+            loading={loadingYear || overview === null}
+            layoutWidth={w}
+          />
+        );
+      }
+      case "income_pie": {
+        const categoryMetaByName = Object.fromEntries(
+          categories.categories
+            .filter((category) => category.name)
+            .map((category) => [category.name as string, category]),
+        );
+        return (
+          <PieChartComp
+            amountByCategory={incomeOverview?.amountByCategory}
+            currency={user.currency}
+            title="Income by Category"
+            setCurrentYearForYearly={setIncomeCurrentYearForYearly}
+            currentYearForYearly={incomeCurrentYearForYearly}
+            min_year={incomeMinYear}
+            categoryMetaByName={categoryMetaByName}
+            loading={incomeLoadingYear || incomeOverview === null}
+            layoutWidth={w}
+          />
+        );
+      }
+      case "expense_over_days": {
+        return (
+          <ExpensesOverDays
+            overTheDaysThisMonth={overview?.overTheDaysThisMonth}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            title="Spending Over Days"
+            setCurrentMonth={setCurrentMonth}
+            setCurrentMonthYear={setCurrentMonthYear}
+            currentMonth={currentMonth}
+            currentMonthYear={currentMonthYear}
+            min_year={minYear}
+            min_month={minMonth}
+            loading={loadingMonth || overview === null}
+          />
+        );
+      }
+      case "income_over_days": {
+        return (
+          <ExpensesOverDays
+            overTheDaysThisMonth={incomeOverview?.overTheDaysThisMonth}
+            darkMode={user.theme === "dark"}
+            currency={user.currency}
+            title="Income Over Days"
+            setCurrentMonth={setIncomeCurrentMonth}
+            setCurrentMonthYear={setIncomeCurrentMonthYear}
+            currentMonth={incomeCurrentMonth}
+            currentMonthYear={incomeCurrentMonthYear}
+            min_year={incomeMinYear}
+            min_month={incomeMinMonth}
+            loading={incomeLoadingMonth || incomeOverview === null}
+          />
+        );
+      }
+      default:
+        return null;
+    }
+  };
 
   // Form setup
   const form = useForm<z.infer<typeof editTransactionSchema>>({
@@ -734,23 +1541,33 @@ export default function TransactionPage() {
     }
   };
 
-  // CSV download trigger
-  const downloadCsvHandler = async () => {
+  // CSV download trigger with custom filter options
+  const downloadCsvHandler = async (options?: {
+    category?: string;
+    dateRange?: DateRange;
+    search?: string;
+  }) => {
     try {
+      const targetCategory = options ? options.category : categoryFilter;
+      const targetDateRange = options ? options.dateRange : dateRange;
+      const targetSearch = options ? options.search : query;
+
       const sortField = sorting[0]?.id;
       const sortOrder = sorting[0]?.desc ? "desc" : "asc";
-      const fromDate = dateRange?.from
-        ? dateRange.from.toISOString().slice(0, 10)
+      const fromDate = targetDateRange?.from
+        ? targetDateRange.from.toISOString().slice(0, 10)
         : "";
-      const toDate = dateRange?.to
-        ? dateRange.to.toISOString().slice(0, 10)
+      const toDate = targetDateRange?.to
+        ? targetDateRange.to.toISOString().slice(0, 10)
         : "";
 
       const queryParams = new URLSearchParams();
       if (fromDate) queryParams.append("start_date", fromDate + " 00:00:00");
       if (toDate) queryParams.append("end_date", toDate + " 23:59:59");
-      if (categoryFilter) queryParams.append("category_id", categoryFilter);
-      if (query) queryParams.append("q", query);
+      if (targetCategory && targetCategory !== "all-categories") {
+        queryParams.append("category_id", targetCategory);
+      }
+      if (targetSearch) queryParams.append("q", targetSearch);
       if (sortField) {
         queryParams.append("sort_by", sortField);
         queryParams.append("sort_order", sortOrder);
@@ -881,81 +1698,223 @@ export default function TransactionPage() {
             Review, query, and manage your combined expenses and incomes.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <Button variant="outline" onClick={downloadCsvHandler}>
-            <Download className="mr-2 h-4 w-4" />
-            <span className="text-xs">Download CSV</span>
-          </Button>
-          <Slidebar variant="default" />
+        <div className="flex items-center gap-3">
+          {isMounted && !isEditing && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleStartEditing}
+              className="flex items-center gap-1.5 h-8 px-3.5 rounded-full border border-border/70 hover:border-border bg-background/60 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+              Customize Layout
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Tabs Switcher for insights */}
-      <div className="w-full">
-        <Tabs defaultValue="expense" className="w-full">
-          <TabsList className="grid w-full max-w-[400px] grid-cols-2 mb-6">
-            <TabsTrigger value="expense">Expense Insights</TabsTrigger>
-            <TabsTrigger value="income">Income Insights</TabsTrigger>
-          </TabsList>
+      {/* ── Edit Mode Toolbar ── */}
+      {isMounted && isEditing && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] backdrop-blur-md shadow-xs"
+        >
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              Customize Transactions Layout
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Drag cards by their handles to reorder. Adjust widths using size controls.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetLayout}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset Defaults
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancelEditing}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveEditing}
+              className="flex items-center gap-1.5 h-8 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all cursor-pointer border-0"
+            >
+              <Check className="h-3.5 w-3.5" />
+              Save Layout
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
-          <TabsContent value="expense" className="space-y-6">
-            <ExpenseInsightCards
-              userCurrency={user.currency}
-              overview={overview}
-              itemName={null}
-              itemValue={null}
-            />
-            <ExpenseInsightCharts
-              overview={overview}
-              overviewV2={overviewV2}
-              overviewV2Loading={overviewV2Loading}
-              minYear={minYear}
-              minMonth={minMonth}
-              loadingYear={loadingYear}
-              loadingMonth={loadingMonth}
-              currentYearForYearly={currentYearForYearly}
-              setCurrentYearForYearly={setCurrentYearForYearly}
-              currentMonth={currentMonth}
-              currentMonthYear={currentMonthYear}
-              setCurrentMonth={setCurrentMonth}
-              setCurrentMonthYear={setCurrentMonthYear}
-              overviewParams={overviewParams}
-              setOverviewParams={setOverviewParams}
-              userCurrency={user.currency}
-              userTheme={user.theme}
-            />
-          </TabsContent>
+      {/* Dynamic widgets grid */}
+      {!isMounted ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {defaultLayout.filter((item) => item.visible).map((item) => {
+            const colSpanClass = colSpanClasses[item.w] || "lg:col-span-1";
+            return (
+              <div key={item.id} className={`${colSpanClass} h-[200px] bg-muted/20 animate-pulse rounded-2xl`} />
+            );
+          })}
+        </div>
+      ) : (
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-max items-start ${isEditing ? "pb-36" : ""}`}>
+          {layout
+            .filter((item) => item.visible)
+            .map((item, index) => {
+              const colSpanClass = colSpanClasses[item.w] || "lg:col-span-1";
 
-          <TabsContent value="income" className="space-y-6">
-            <IncomeInsightCards
-              userCurrency={user.currency}
-              incomeOverview={incomeOverview}
-              incomeItemName={null}
-              incomeItemValue={null}
-            />
-            <IncomeInsightCharts
-              incomeOverview={incomeOverview}
-              incomeOverviewV2={incomeOverviewV2}
-              incomeOverviewV2Loading={incomeOverviewV2Loading}
-              minIncomeYear={incomeMinYear}
-              minIncomeMonth={incomeMinMonth}
-              loadingIncomeYear={incomeLoadingYear}
-              loadingIncomeMonth={incomeLoadingMonth}
-              incomeCurrentYearForYearly={incomeCurrentYearForYearly}
-              setIncomeCurrentYearForYearly={setIncomeCurrentYearForYearly}
-              incomeCurrentMonth={incomeCurrentMonth}
-              incomeCurrentMonthYear={incomeCurrentMonthYear}
-              setIncomeCurrentMonth={setIncomeCurrentMonth}
-              setIncomeCurrentMonthYear={setIncomeCurrentMonthYear}
-              incomeOverviewParams={incomeOverviewParams}
-              setIncomeOverviewParams={setIncomeOverviewParams}
-              userCurrency={user.currency}
-              userTheme={user.theme}
-              incomeCategories={categories.categories}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  custom={index * 0.1}
+                  className={`
+                    relative transition-all duration-200 rounded-2xl flex flex-col h-full
+                    ${colSpanClass}
+                    ${isEditing ? "border border-dashed border-emerald-500/40 p-1.5 bg-emerald-500/[0.01] shadow-xs select-none" : ""}
+                    ${isEditing && draggedId === item.id ? "opacity-30 border-solid border-emerald-500 scale-[0.98]" : ""}
+                  `}
+                >
+                  <div
+                    draggable={isEditing}
+                    onDragStart={(e) => handleDragStart(e, item.id)}
+                    onDragOver={(e) => handleDragOver(e, item.id)}
+                    onDragEnd={handleDragEnd}
+                    className="flex flex-col h-full w-full"
+                  >
+                    {isEditing && (
+                      <div className="flex items-center justify-between bg-card/90 backdrop-blur-xs border border-border/80 rounded-xl px-3 py-1.5 mb-2 text-xs shadow-xs z-10 select-none">
+                        <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground font-medium py-1 pr-3">
+                          <GripVertical className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                          <span className="font-semibold tracking-wide capitalize text-[11px] uppercase">
+                            {widgetMeta[item.id]?.title || item.id}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isMobile || item.w <= 1}
+                            onClick={() => handleResize(item.id, -1)}
+                            className="h-7 w-7 p-0 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                            title="Shrink Width"
+                          >
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                          </Button>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 bg-muted rounded text-muted-foreground">
+                            {item.w}/3
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isMobile || item.w >= 3}
+                            onClick={() => handleResize(item.id, 1)}
+                            className="h-7 w-7 p-0 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                            title="Expand Width"
+                          >
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </Button>
+
+                          <div className="w-[1px] h-3.5 bg-border/80 mx-1" />
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleToggleVisibility(item.id)}
+                            className="h-7 w-7 p-0 rounded-md hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer"
+                            title="Hide Widget"
+                          >
+                            <EyeOff className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex-1 w-full h-full relative">
+                      {renderWidget(item.id, item.w)}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+        </div>
+      )}
+
+      {/* ── Inactive Widgets Dock (Fixed Overlay centered in content area) ── */}
+      {isMounted && isEditing && (
+        <div className={`fixed bottom-6 left-0 ${isMobile ? "lg:left-0" : sidebarOpen ? "lg:left-[16rem]" : "lg:left-[3rem]"} right-0 z-50 flex justify-center pointer-events-none transition-all duration-300`}>
+          <div className="w-full max-w-6xl px-4 md:px-0 flex justify-center pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="flex flex-col gap-2 p-4 rounded-3xl border border-border/80 bg-background/90 backdrop-blur-xl shadow-xl pointer-events-auto max-w-full"
+            >
+              <div className="flex items-center justify-between gap-8 pb-2 border-b border-border/40">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Inactive Widgets
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 bg-muted text-muted-foreground rounded-full">
+                    {layout.filter((item) => !item.visible).length}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsDockMinimized(!isDockMinimized)}
+                  className="text-xs text-emerald-500 hover:text-emerald-400 font-medium cursor-pointer"
+                >
+                  {isDockMinimized ? "Expand" : "Collapse"}
+                </button>
+              </div>
+
+              {!isDockMinimized && (
+                <div className="flex flex-wrap items-center gap-2 max-h-[140px] overflow-y-auto pr-1">
+                  {layout.filter((item) => !item.visible).length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-2 px-1">
+                      All widgets are active.
+                    </p>
+                  ) : (
+                    layout
+                      .filter((item) => !item.visible)
+                      .map((item) => {
+                        const meta = widgetMeta[item.id];
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => handleToggleVisibility(item.id)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-border/70 bg-card hover:bg-muted text-xs text-foreground shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                          >
+                            {meta?.icon}
+                            <span className="font-medium text-[11px] uppercase tracking-wide">
+                              {meta?.title || item.id}
+                            </span>
+                          </button>
+                        );
+                      })
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </div>
+      )}
 
       {/* Ledger Table controls & filtering */}
       <div className="space-y-4 pt-4 border-t border-border/40">
@@ -967,7 +1926,7 @@ export default function TransactionPage() {
               placeholder="Search description..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className=" pl-9 pr-8 text-foreground bg-muted/20 border-muted/60 focus-visible:ring-1 focus-visible:ring-ring"
+              className="pl-9 pr-8 text-foreground bg-muted/15 border-border/40 focus-visible:ring-1 focus-visible:ring-emerald-500/20 rounded-full h-9 shadow-xs"
             />
             {searchInput && (
               <Button
@@ -977,7 +1936,7 @@ export default function TransactionPage() {
                   setSearchInput("");
                   updateQueryParams({ q: null, page: "1" });
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-full"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -985,32 +1944,22 @@ export default function TransactionPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Select
-              value={categoryFilter || "all-categories"}
+            <CategorySelectorWithTabs
+              value={categoryFilter}
               onValueChange={(val) =>
                 updateQueryParams({
-                  category_id: val === "all-categories" ? null : val,
+                  category_id: val,
                   page: "1",
                 })
               }
-            >
-              <SelectTrigger className="w-[180px] h-9">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-categories">All Categories</SelectItem>
-                {categories.categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    <CategoryBadge name={cat.name} icon={cat.icon} color={cat.color} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              categories={categories.categories}
+              className="w-[180px]"
+            />
 
             {/* Date boundaries filter */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 font-normal">
+                <Button variant="outline" size="sm" className="h-9 font-normal rounded-full border border-border/70 bg-background/60 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer">
                   {dateRange?.from ? (
                     dateRange.to ? (
                       <>
@@ -1043,6 +1992,32 @@ export default function TransactionPage() {
               </PopoverContent>
             </Popover>
 
+            {/* Options Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-full border border-border/70 bg-background/60 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-card/90 backdrop-blur-md border border-border/60 rounded-xl shadow-md p-1">
+                <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1.5 font-medium uppercase tracking-wider">
+                  Options
+                </DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setExportCategory(categoryFilter || "all-categories");
+                    setExportDateRange(dateRange);
+                    setExportSearch(searchInput || "");
+                    setOpenExportDialog(true);
+                  }}
+                  className="flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg hover:bg-muted/80 cursor-pointer text-foreground hover:text-foreground transition-all"
+                >
+                  <Download className="h-4 w-4 text-muted-foreground" />
+                  Download CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {(query || categoryFilter || dateRange) && (
               <Button
                 variant="ghost"
@@ -1057,7 +2032,7 @@ export default function TransactionPage() {
                     page: "1",
                   });
                 }}
-                className="h-9 px-2 text-muted-foreground hover:text-foreground"
+                className="h-9 px-3 rounded-full text-muted-foreground hover:text-foreground border border-transparent hover:border-border/40"
               >
                 <FilterX className="mr-2 h-4 w-4" />
                 Clear
@@ -1065,7 +2040,7 @@ export default function TransactionPage() {
             )}
 
             {selectedTransactions.length > 0 && (
-              <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="h-9">
+              <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="h-9 rounded-full">
                 <Trash className="mr-2 h-4 w-4" />
                 Delete Selected ({selectedTransactions.length})
               </Button>
@@ -1314,6 +2289,99 @@ export default function TransactionPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* CSV Export Options Dialog */}
+      <Dialog open={openExportDialog} onOpenChange={setOpenExportDialog}>
+        <DialogContent className="max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Export Transactions</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Search Input */}
+            <div className="space-y-2">
+              <Label htmlFor="export-search" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Search Query / Description</Label>
+              <Input
+                id="export-search"
+                placeholder="Search description..."
+                value={exportSearch}
+                onChange={(e) => setExportSearch(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            {/* Category Select */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</Label>
+              <CategorySelectorWithTabs
+                value={exportCategory === "all-categories" ? null : exportCategory}
+                onValueChange={(val) => setExportCategory(val || "all-categories")}
+                categories={categories.categories}
+                className="w-full"
+              />
+            </div>
+
+            {/* Date Picker */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Time Range</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-between h-9 font-normal border border-border/70 bg-background/60 hover:bg-muted text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer">
+                    {exportDateRange?.from ? (
+                      exportDateRange.to ? (
+                        <>
+                          {formatDateParam(exportDateRange.from)} - {formatDateParam(exportDateRange.to)}
+                        </>
+                      ) : (
+                        formatDateParam(exportDateRange.from)
+                      )
+                    ) : (
+                      <span>Pick dates</span>
+                    )}
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={exportDateRange?.from}
+                    selected={exportDateRange}
+                    onSelect={(range) => setExportDateRange(range)}
+                    numberOfMonths={1}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4 max-sm:flex-row w-full justify-end gap-2">
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              type="button"
+              disabled={loading}
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  await downloadCsvHandler({
+                    category: exportCategory,
+                    dateRange: exportDateRange,
+                    search: exportSearch,
+                  });
+                  setOpenExportDialog(false);
+                } catch (error) {
+                  toast.error("Failed to export CSV");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              {loading ? <Spinner /> : "Export CSV"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

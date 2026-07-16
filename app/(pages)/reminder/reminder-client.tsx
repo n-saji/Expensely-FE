@@ -75,7 +75,13 @@ interface Reminder {
   amount: number | null;
   currency: string | null;
   priority: "LOW" | "MEDIUM" | "HIGH";
-  status: "UPCOMING" | "NOTIFIED" | "COMPLETED" | "MISSED" | "SNOOZED" | "ARCHIVED";
+  status:
+    | "UPCOMING"
+    | "NOTIFIED"
+    | "COMPLETED"
+    | "MISSED"
+    | "SNOOZED"
+    | "ARCHIVED";
   repeatType: "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
   notes: string;
   deliveryType?: "IN_APP" | "EMAIL" | "BOTH";
@@ -99,7 +105,7 @@ export default function ReminderClient() {
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<string>("dueAt");
   const [sortDirection, setSortDirection] = useState<string>("ASC");
-  
+
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pageSize] = useState<number>(8);
@@ -109,16 +115,20 @@ export default function ReminderClient() {
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
-  
+
   // Snooze Dialog
   const [snoozeOpen, setSnoozeOpen] = useState(false);
-  const [snoozingReminder, setSnoozingReminder] = useState<Reminder | null>(null);
+  const [snoozingReminder, setSnoozingReminder] = useState<Reminder | null>(
+    null,
+  );
   const [snoozeDuration, setSnoozeDuration] = useState<string>("30m");
   const [customSnoozeDate, setCustomSnoozeDate] = useState<string>("");
 
   // Delete Dialog
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletingReminder, setDeletingReminder] = useState<Reminder | null>(null);
+  const [deletingReminder, setDeletingReminder] = useState<Reminder | null>(
+    null,
+  );
 
   // Form Fields
   const [title, setTitle] = useState("");
@@ -128,8 +138,12 @@ export default function ReminderClient() {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState(user.currency || "USD");
   const [priority, setPriority] = useState<"LOW" | "MEDIUM" | "HIGH">("MEDIUM");
-  const [repeatType, setRepeatType] = useState<"NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY">("NONE");
-  const [deliveryType, setDeliveryType] = useState<"IN_APP" | "EMAIL" | "BOTH">("BOTH");
+  const [repeatType, setRepeatType] = useState<
+    "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
+  >("NONE");
+  const [deliveryType, setDeliveryType] = useState<"IN_APP" | "EMAIL" | "BOTH">(
+    "BOTH",
+  );
   const [notes, setNotes] = useState("");
   const [offsets, setOffsets] = useState<string[]>(["ONE_DAY"]);
 
@@ -154,7 +168,15 @@ export default function ReminderClient() {
     if (userId) {
       loadReminders();
     }
-  }, [userId, statusFilter, categoryFilter, priorityFilter, sortBy, sortDirection, page]);
+  }, [
+    userId,
+    statusFilter,
+    categoryFilter,
+    priorityFilter,
+    sortBy,
+    sortDirection,
+    page,
+  ]);
 
   const loadCategories = async () => {
     try {
@@ -175,10 +197,12 @@ export default function ReminderClient() {
       if (res.status === 200) {
         const list: Reminder[] = res.data.content || [];
         setStats({
-          upcoming: list.filter(r => r.status === "UPCOMING" || r.status === "NOTIFIED").length,
-          snoozed: list.filter(r => r.status === "SNOOZED").length,
-          missed: list.filter(r => r.status === "MISSED").length,
-          completed: list.filter(r => r.status === "COMPLETED").length,
+          upcoming: list.filter(
+            (r) => r.status === "UPCOMING" || r.status === "NOTIFIED",
+          ).length,
+          snoozed: list.filter((r) => r.status === "SNOOZED").length,
+          missed: list.filter((r) => r.status === "MISSED").length,
+          completed: list.filter((r) => r.status === "COMPLETED").length,
         });
       }
     } catch (e) {
@@ -211,16 +235,18 @@ export default function ReminderClient() {
     setTitle("");
     setDescription("");
     setCategoryId(categories[0]?.id || "");
-    
+
     // Set default dueAt to tomorrow at 9 AM
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(9, 0, 0, 0);
     // Format to YYYY-MM-DDThh:mm
-    const tzoffset = tomorrow.getTimezoneOffset() * 60000; 
-    const localISOTime = (new Date(tomorrow.getTime() - tzoffset)).toISOString().slice(0, 16);
+    const tzoffset = tomorrow.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(tomorrow.getTime() - tzoffset)
+      .toISOString()
+      .slice(0, 16);
     setDueAt(localISOTime);
-    
+
     setAmount("");
     setCurrency(user.currency || "USD");
     setPriority("MEDIUM");
@@ -237,12 +263,14 @@ export default function ReminderClient() {
     setTitle(reminder.title);
     setDescription(reminder.description || "");
     setCategoryId(reminder.category?.id || "");
-    
+
     const dateObj = new Date(reminder.dueAt);
-    const tzoffset = dateObj.getTimezoneOffset() * 60000; 
-    const localISOTime = (new Date(dateObj.getTime() - tzoffset)).toISOString().slice(0, 16);
+    const tzoffset = dateObj.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(dateObj.getTime() - tzoffset)
+      .toISOString()
+      .slice(0, 16);
     setDueAt(localISOTime);
-    
+
     setAmount(reminder.amount ? reminder.amount.toString() : "");
     setCurrency(reminder.currency || "USD");
     setPriority(reminder.priority);
@@ -250,7 +278,7 @@ export default function ReminderClient() {
     setDeliveryType("BOTH");
     setNotes(reminder.notes || "");
     setOffsets(["ONE_DAY"]);
-    
+
     setSheetOpen(true);
     setIsFetchingDetails(true);
     try {
@@ -262,12 +290,14 @@ export default function ReminderClient() {
         setTitle(details.title);
         setDescription(details.description || "");
         setCategoryId(details.category?.id || "");
-        
+
         const dateObj = new Date(details.dueAt);
-        const tzoffset = dateObj.getTimezoneOffset() * 60000; 
-        const localISOTime = (new Date(dateObj.getTime() - tzoffset)).toISOString().slice(0, 16);
+        const tzoffset = dateObj.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(dateObj.getTime() - tzoffset)
+          .toISOString()
+          .slice(0, 16);
         setDueAt(localISOTime);
-        
+
         setAmount(details.amount ? details.amount.toString() : "");
         setCurrency(details.currency || "USD");
         setPriority(details.priority);
@@ -366,7 +396,10 @@ export default function ReminderClient() {
 
     const payload = {
       duration: snoozeDuration,
-      customSnoozedUntil: snoozeDuration === "custom" ? new Date(customSnoozeDate).toISOString() : null,
+      customSnoozedUntil:
+        snoozeDuration === "custom"
+          ? new Date(customSnoozeDate).toISOString()
+          : null,
     };
 
     try {
@@ -401,7 +434,7 @@ export default function ReminderClient() {
 
   const toggleOffset = (offsetVal: string) => {
     if (offsets.includes(offsetVal)) {
-      setOffsets(offsets.filter(x => x !== offsetVal));
+      setOffsets(offsets.filter((x) => x !== offsetVal));
     } else {
       setOffsets([...offsets, offsetVal]);
     }
@@ -419,19 +452,27 @@ export default function ReminderClient() {
 
   const getPriorityColor = (prio: string) => {
     switch (prio) {
-      case "HIGH": return "bg-rose-500/15 text-rose-500 border-rose-500/20";
-      case "MEDIUM": return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20";
-      default: return "bg-blue-500/15 text-blue-500 border-blue-500/20";
+      case "HIGH":
+        return "bg-rose-500/15 text-rose-500 border-rose-500/20";
+      case "MEDIUM":
+        return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20";
+      default:
+        return "bg-blue-500/15 text-blue-500 border-blue-500/20";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "COMPLETED": return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-      case "MISSED": return "bg-rose-500/10 text-rose-500 border-rose-500/20";
-      case "SNOOZED": return "bg-violet-500/10 text-violet-500 border-violet-500/20";
-      case "NOTIFIED": return "bg-cyan-500/10 text-cyan-500 border-cyan-500/20";
-      default: return "bg-slate-500/10 text-slate-500 border-slate-500/20";
+      case "COMPLETED":
+        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+      case "MISSED":
+        return "bg-rose-500/10 text-rose-500 border-rose-500/20";
+      case "SNOOZED":
+        return "bg-violet-500/10 text-violet-500 border-violet-500/20";
+      case "NOTIFIED":
+        return "bg-cyan-500/10 text-cyan-500 border-cyan-500/20";
+      default:
+        return "bg-slate-500/10 text-slate-500 border-slate-500/20";
     }
   };
 
@@ -459,7 +500,10 @@ export default function ReminderClient() {
             Track bills, rents, loan EMIs and verify schedules ahead of time.
           </p>
         </div>
-        <Button onClick={handleOpenAdd} className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg shadow-teal-500/10">
+        <Button
+          onClick={handleOpenAdd}
+          className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg shadow-teal-500/10"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Reminder
         </Button>
@@ -468,46 +512,65 @@ export default function ReminderClient() {
       {/* Stats Counter Section */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div
-          onClick={() => { setStatusFilter(statusFilter === "UPCOMING" ? "ALL" : "UPCOMING"); setPage(0); }}
+          onClick={() => {
+            setStatusFilter(statusFilter === "UPCOMING" ? "ALL" : "UPCOMING");
+            setPage(0);
+          }}
           className={`rounded-2xl border p-4 space-y-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm ${
             statusFilter === "UPCOMING"
               ? "border-teal-500 bg-teal-500/10 dark:bg-teal-500/15 ring-2 ring-teal-500/20"
               : "border-teal-500/10 bg-background/50 backdrop-blur"
           }`}
         >
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Upcoming</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+            Upcoming
+          </p>
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-teal-600 dark:text-teal-400">{stats.upcoming}</h3>
+            <h3 className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+              {stats.upcoming}
+            </h3>
             <div className="h-8 w-8 rounded-full bg-teal-500/15 text-teal-500 flex items-center justify-center">
               <Calendar className="h-4 w-4" />
             </div>
           </div>
         </div>
         <div
-          onClick={() => { setStatusFilter(statusFilter === "SNOOZED" ? "ALL" : "SNOOZED"); setPage(0); }}
+          onClick={() => {
+            setStatusFilter(statusFilter === "SNOOZED" ? "ALL" : "SNOOZED");
+            setPage(0);
+          }}
           className={`rounded-2xl border p-4 space-y-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm ${
             statusFilter === "SNOOZED"
               ? "border-violet-500 bg-violet-500/10 dark:bg-violet-500/15 ring-2 ring-violet-500/20"
               : "border-violet-500/10 bg-background/50 backdrop-blur"
           }`}
         >
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Snoozed</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+            Snoozed
+          </p>
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-violet-500">{stats.snoozed}</h3>
+            <h3 className="text-2xl font-bold text-violet-500">
+              {stats.snoozed}
+            </h3>
             <div className="h-8 w-8 rounded-full bg-violet-500/15 text-violet-500 flex items-center justify-center">
               <Clock className="h-4 w-4" />
             </div>
           </div>
         </div>
         <div
-          onClick={() => { setStatusFilter(statusFilter === "MISSED" ? "ALL" : "MISSED"); setPage(0); }}
+          onClick={() => {
+            setStatusFilter(statusFilter === "MISSED" ? "ALL" : "MISSED");
+            setPage(0);
+          }}
           className={`rounded-2xl border p-4 space-y-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm ${
             statusFilter === "MISSED"
               ? "border-rose-500 bg-rose-500/10 dark:bg-rose-500/15 ring-2 ring-rose-500/20"
               : "border-rose-500/10 bg-background/50 backdrop-blur"
           }`}
         >
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Missed</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+            Missed
+          </p>
           <div className="flex items-center justify-between">
             <h3 className="text-2xl font-bold text-rose-500">{stats.missed}</h3>
             <div className="h-8 w-8 rounded-full bg-rose-500/15 text-rose-500 flex items-center justify-center">
@@ -516,16 +579,23 @@ export default function ReminderClient() {
           </div>
         </div>
         <div
-          onClick={() => { setStatusFilter(statusFilter === "COMPLETED" ? "ALL" : "COMPLETED"); setPage(0); }}
+          onClick={() => {
+            setStatusFilter(statusFilter === "COMPLETED" ? "ALL" : "COMPLETED");
+            setPage(0);
+          }}
           className={`rounded-2xl border p-4 space-y-2 cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm ${
             statusFilter === "COMPLETED"
               ? "border-emerald-500 bg-emerald-500/10 dark:bg-emerald-500/15 ring-2 ring-emerald-500/20"
               : "border-emerald-500/10 bg-background/50 backdrop-blur"
           }`}
         >
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Completed</p>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+            Completed
+          </p>
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-emerald-500">{stats.completed}</h3>
+            <h3 className="text-2xl font-bold text-emerald-500">
+              {stats.completed}
+            </h3>
             <div className="h-8 w-8 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
               <CheckCircle2 className="h-4 w-4" />
             </div>
@@ -539,8 +609,16 @@ export default function ReminderClient() {
           <div className="flex flex-wrap items-center gap-3">
             {/* Status Filter */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground font-medium">Status</Label>
-              <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setPage(0); }}>
+              <Label className="text-xs text-muted-foreground font-medium">
+                Status
+              </Label>
+              <Select
+                value={statusFilter}
+                onValueChange={(val) => {
+                  setStatusFilter(val);
+                  setPage(0);
+                }}
+              >
                 <SelectTrigger className="w-[140px] h-9 rounded-xl">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
@@ -557,15 +635,25 @@ export default function ReminderClient() {
 
             {/* Category Filter */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground font-medium">Category</Label>
-              <Select value={categoryFilter} onValueChange={(val) => { setCategoryFilter(val); setPage(0); }}>
+              <Label className="text-xs text-muted-foreground font-medium">
+                Category
+              </Label>
+              <Select
+                value={categoryFilter}
+                onValueChange={(val) => {
+                  setCategoryFilter(val);
+                  setPage(0);
+                }}
+              >
                 <SelectTrigger className="w-[160px] h-9 rounded-xl">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">All Categories</SelectItem>
                   {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -573,8 +661,16 @@ export default function ReminderClient() {
 
             {/* Priority Filter */}
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground font-medium">Priority</Label>
-              <Select value={priorityFilter} onValueChange={(val) => { setPriorityFilter(val); setPage(0); }}>
+              <Label className="text-xs text-muted-foreground font-medium">
+                Priority
+              </Label>
+              <Select
+                value={priorityFilter}
+                onValueChange={(val) => {
+                  setPriorityFilter(val);
+                  setPage(0);
+                }}
+              >
                 <SelectTrigger className="w-[120px] h-9 rounded-xl">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
@@ -627,7 +723,10 @@ export default function ReminderClient() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-48 rounded-2xl border animate-pulse bg-muted/40" />
+            <div
+              key={i}
+              className="h-48 rounded-2xl border animate-pulse bg-muted/40"
+            />
           ))}
         </div>
       ) : reminders.length === 0 ? (
@@ -635,13 +734,9 @@ export default function ReminderClient() {
           <div className="h-12 w-12 rounded-full bg-teal-500/10 flex items-center justify-center mb-4 text-teal-500">
             <Bell className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No reminders found</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-            Try adjusting your filters, or create a new financial reminder to get started.
-          </p>
-          <Button onClick={handleOpenAdd} className="mt-4 bg-teal-600 hover:bg-teal-700 text-white rounded-xl">
-            Create First Reminder
-          </Button>
+          <h3 className="text  text-muted-foreground">
+            No reminders found
+          </h3>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -654,8 +749,8 @@ export default function ReminderClient() {
               <div
                 key={reminder.id}
                 className={`group relative rounded-2xl border p-5 transition-all duration-300 ${
-                  isCompleted 
-                    ? "opacity-60 bg-muted/10 border-border/30 hover:opacity-80" 
+                  isCompleted
+                    ? "opacity-60 bg-muted/10 border-border/30 hover:opacity-80"
                     : isMissed
                       ? "bg-rose-500/[0.02] border-rose-500/20 hover:border-rose-500/35 hover:bg-rose-500/[0.04]"
                       : "bg-card/45 hover:bg-card/70 hover:border-teal-500/30 border-border/40 shadow-sm hover:shadow-md"
@@ -677,12 +772,18 @@ export default function ReminderClient() {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-1.5">
-                    <Badge variant="outline" className={`rounded-full px-2 py-0.5 text-[9px] font-medium border-border/40 tracking-wider ${getPriorityColor(reminder.priority)}`}>
+                    <Badge
+                      variant="outline"
+                      className={`rounded-full px-2 py-0.5 text-[9px] font-medium border-border/40 tracking-wider ${getPriorityColor(reminder.priority)}`}
+                    >
                       {reminder.priority}
                     </Badge>
-                    <Badge variant="outline" className={`rounded-full px-2 py-0.5 text-[9px] font-medium border-border/40 tracking-wider ${getStatusColor(reminder.status)}`}>
+                    <Badge
+                      variant="outline"
+                      className={`rounded-full px-2 py-0.5 text-[9px] font-medium border-border/40 tracking-wider ${getStatusColor(reminder.status)}`}
+                    >
                       {reminder.status}
                     </Badge>
                   </div>
@@ -691,12 +792,15 @@ export default function ReminderClient() {
                 {/* Title & Description */}
                 <div className="space-y-1 mb-4">
                   <div className="flex items-start justify-between gap-3">
-                    <h4 className={`text-base font-semibold tracking-tight text-foreground line-clamp-1 ${isCompleted ? "line-through text-muted-foreground/60" : ""}`}>
+                    <h4
+                      className={`text-base font-semibold tracking-tight text-foreground line-clamp-1 ${isCompleted ? "line-through text-muted-foreground/60" : ""}`}
+                    >
                       {reminder.title}
                     </h4>
                     {reminder.amount ? (
                       <span className="text-sm font-extrabold text-foreground whitespace-nowrap">
-                        {reminder.currency || "USD"} {Number(reminder.amount).toFixed(2)}
+                        {reminder.currency || "USD"}{" "}
+                        {Number(reminder.amount).toFixed(2)}
                       </span>
                     ) : null}
                   </div>
@@ -830,9 +934,14 @@ export default function ReminderClient() {
           </div>
           <DialogFooter className="flex gap-2">
             <DialogClose asChild>
-              <Button variant="outline" className="rounded-xl flex-1">Cancel</Button>
+              <Button variant="outline" className="rounded-xl flex-1">
+                Cancel
+              </Button>
             </DialogClose>
-            <Button onClick={handleSnoozeConfirm} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl flex-1">
+            <Button
+              onClick={handleSnoozeConfirm}
+              className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl flex-1"
+            >
               Snooze
             </Button>
           </DialogFooter>
@@ -848,13 +957,18 @@ export default function ReminderClient() {
               Delete Reminder
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the reminder <strong>"{deletingReminder?.title}"</strong>?
-              This is a soft delete, but it will hide the reminder from the dashboard and cancel all notifications.
+              Are you sure you want to delete the reminder{" "}
+              <strong>"{deletingReminder?.title}"</strong>? This is a soft
+              delete, but it will hide the reminder from the dashboard and
+              cancel all notifications.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-rose-500 hover:bg-rose-600 text-white rounded-xl">
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-rose-500 hover:bg-rose-600 text-white rounded-xl"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -873,189 +987,222 @@ export default function ReminderClient() {
           {isFetchingDetails ? (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
               <Spinner className="h-8 w-8 text-teal-600 animate-spin" />
-              <p className="text-sm text-muted-foreground">Loading details...</p>
+              <p className="text-sm text-muted-foreground">
+                Loading details...
+              </p>
             </div>
           ) : (
             <form onSubmit={handleSave} className="space-y-4 px-4">
-            {/* Title */}
-            <div className="space-y-1.5">
-              <Label htmlFor="title" className="text-xs font-semibold">Title *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Rent, Electricity Bill, Insurance"
-                className="rounded-xl"
-                required
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-1.5">
-              <Label htmlFor="description" className="text-xs font-semibold">Description</Label>
-              <Input
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional summary"
-                className="rounded-xl"
-              />
-            </div>
-
-            {/* Category selection */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Category *</Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      <span className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
-                        {c.name} ({c.type})
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Due Date */}
-            <div className="space-y-1.5">
-              <Label htmlFor="dueAt" className="text-xs font-semibold">Due Date & Time *</Label>
-              <Input
-                id="dueAt"
-                type="datetime-local"
-                value={dueAt}
-                onChange={(e) => setDueAt(e.target.value)}
-                className="rounded-xl"
-                required
-              />
-            </div>
-
-            {/* Amount & Currency */}
-            <div className="grid grid-cols-2 gap-3">
+              {/* Title */}
               <div className="space-y-1.5">
-                <Label htmlFor="amount" className="text-xs font-semibold">Amount</Label>
+                <Label htmlFor="title" className="text-xs font-semibold">
+                  Title *
+                </Label>
                 <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Optional"
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Rent, Electricity Bill, Insurance"
+                  className="rounded-xl"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <Label htmlFor="description" className="text-xs font-semibold">
+                  Description
+                </Label>
+                <Input
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Optional summary"
                   className="rounded-xl"
                 />
               </div>
+
+              {/* Category selection */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Currency</Label>
-                <Select value={currency} onValueChange={setCurrency}>
+                <Label className="text-xs font-semibold">Category *</Label>
+                <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="USD" />
+                    <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD ($)</SelectItem>
-                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                    <SelectItem value="INR">INR (₹)</SelectItem>
-                    <SelectItem value="JPY">JPY (¥)</SelectItem>
-                    <SelectItem value="CAD">CAD ($)</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: c.color }}
+                          />
+                          {c.name} ({c.type})
+                        </span>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            {/* Priority & Repeat */}
-            <div className="grid grid-cols-2 gap-3">
+              {/* Due Date */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Priority *</Label>
-                <Select value={priority} onValueChange={(val: any) => setPriority(val)}>
+                <Label htmlFor="dueAt" className="text-xs font-semibold">
+                  Due Date & Time *
+                </Label>
+                <Input
+                  id="dueAt"
+                  type="datetime-local"
+                  value={dueAt}
+                  onChange={(e) => setDueAt(e.target.value)}
+                  className="rounded-xl"
+                  required
+                />
+              </div>
+
+              {/* Amount & Currency */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="amount" className="text-xs font-semibold">
+                    Amount
+                  </Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Optional"
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Currency</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="USD" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="EUR">EUR (€)</SelectItem>
+                      <SelectItem value="GBP">GBP (£)</SelectItem>
+                      <SelectItem value="INR">INR (₹)</SelectItem>
+                      <SelectItem value="JPY">JPY (¥)</SelectItem>
+                      <SelectItem value="CAD">CAD ($)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Priority & Repeat */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Priority *</Label>
+                  <Select
+                    value={priority}
+                    onValueChange={(val: any) => setPriority(val)}
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">Low</SelectItem>
+                      <SelectItem value="MEDIUM">Medium</SelectItem>
+                      <SelectItem value="HIGH">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Repeat *</Label>
+                  <Select
+                    value={repeatType}
+                    onValueChange={(val: any) => setRepeatType(val)}
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="NONE">One-time</SelectItem>
+                      <SelectItem value="DAILY">Daily</SelectItem>
+                      <SelectItem value="WEEKLY">Weekly</SelectItem>
+                      <SelectItem value="MONTHLY">Monthly</SelectItem>
+                      <SelectItem value="YEARLY">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Delivery Type Selection */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Notify me via *</Label>
+                <Select
+                  value={deliveryType}
+                  onValueChange={(val: any) => setDeliveryType(val)}
+                >
                   <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder="Delivery type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LOW">Low</SelectItem>
-                    <SelectItem value="MEDIUM">Medium</SelectItem>
-                    <SelectItem value="HIGH">High</SelectItem>
+                    <SelectItem value="IN_APP">
+                      In-App Notification only
+                    </SelectItem>
+                    <SelectItem value="EMAIL">Email only</SelectItem>
+                    <SelectItem value="BOTH">Both (In-App & Email)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Notification Offsets */}
+              <div className="space-y-2 border p-3 rounded-2xl bg-muted/20 border-border/60">
+                <Label className="text-xs font-bold block mb-1">
+                  Notification Offsets *
+                </Label>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {offsetOptions.map((opt) => {
+                    const checked = offsets.includes(opt.value);
+                    return (
+                      <label
+                        key={opt.value}
+                        className="flex items-center gap-2 cursor-pointer p-1 hover:bg-muted/40 rounded-lg"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleOffset(opt.value)}
+                          className="rounded accent-teal-600 h-4 w-4"
+                        />
+                        <span>{opt.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Notes */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Repeat *</Label>
-                <Select value={repeatType} onValueChange={(val: any) => setRepeatType(val)}>
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NONE">One-time</SelectItem>
-                    <SelectItem value="DAILY">Daily</SelectItem>
-                    <SelectItem value="WEEKLY">Weekly</SelectItem>
-                    <SelectItem value="MONTHLY">Monthly</SelectItem>
-                    <SelectItem value="YEARLY">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="notes" className="text-xs font-semibold">
+                  Notes
+                </Label>
+                <Input
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Internal notes/reminders"
+                  className="rounded-xl"
+                />
               </div>
-            </div>
 
-            {/* Delivery Type Selection */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Notify me via *</Label>
-              <Select value={deliveryType} onValueChange={(val: any) => setDeliveryType(val)}>
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Delivery type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IN_APP">In-App Notification only</SelectItem>
-                  <SelectItem value="EMAIL">Email only</SelectItem>
-                  <SelectItem value="BOTH">Both (In-App & Email)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Notification Offsets */}
-            <div className="space-y-2 border p-3 rounded-2xl bg-muted/20 border-border/60">
-              <Label className="text-xs font-bold block mb-1">Notification Offsets *</Label>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {offsetOptions.map(opt => {
-                  const checked = offsets.includes(opt.value);
-                  return (
-                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer p-1 hover:bg-muted/40 rounded-lg">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleOffset(opt.value)}
-                        className="rounded accent-teal-600 h-4 w-4"
-                      />
-                      <span>{opt.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="space-y-1.5">
-              <Label htmlFor="notes" className="text-xs font-semibold">Notes</Label>
-              <Input
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Internal notes/reminders"
-                className="rounded-xl"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isSaving}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg mt-6 py-2.5 flex items-center justify-center gap-2"
-            >
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin text-white" />}
-              {editingReminder ? "Update Reminder" : "Create Reminder"}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg mt-6 py-2.5 flex items-center justify-center gap-2"
+              >
+                {isSaving && (
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                )}
+                {editingReminder ? "Update Reminder" : "Create Reminder"}
+              </Button>
+            </form>
           )}
         </SheetContent>
       </Sheet>
