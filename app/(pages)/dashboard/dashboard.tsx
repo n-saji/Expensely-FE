@@ -21,6 +21,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Eye,
   EyeOff,
   Plus,
@@ -48,6 +50,7 @@ import {
   formatAmountExact,
   formatAmountCompact,
 } from "@/utils/amount_formatter";
+import { Button } from "@/components/ui/button";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -68,6 +71,8 @@ function getGreeting(): string {
   if (h < 17) return "Good afternoon";
   return "Good evening";
 }
+
+let hasHydrated = false;
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -603,34 +608,52 @@ export default function DashboardPage() {
     3: "lg:col-span-3",
   };
 
-  const [layout, setLayout] = useState<LayoutItem[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [layoutBackup, setLayoutBackup] = useState<LayoutItem[] | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
-  const [draggedId, setDraggedId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(`expensely_dashboard_layout_${user.id}`);
+  const getSavedLayout = (userId: string): LayoutItem[] => {
+    if (typeof window === "undefined") return defaultLayout;
+    if (!userId) return defaultLayout;
+    const saved = localStorage.getItem(`expensely_dashboard_layout_${userId}`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as LayoutItem[];
-        const merged = defaultLayout.map((defItem) => {
-          const userItem = parsed.find((p) => p.id === defItem.id);
-          return userItem ? { ...defItem, ...userItem } : defItem;
-        });
-        setLayout(merged);
+        const parsedMerged = parsed
+          .filter((p) => defaultLayout.some((d) => d.id === p.id))
+          .map((p) => {
+            const defItem = defaultLayout.find((d) => d.id === p.id)!;
+            return { ...defItem, ...p };
+          });
+        const missingItems = defaultLayout.filter(
+          (d) => !parsed.some((p) => p.id === d.id)
+        );
+        return [...parsedMerged, ...missingItems];
       } catch {
-        setLayout(defaultLayout);
+        return defaultLayout;
       }
-    } else {
-      setLayout(defaultLayout);
     }
+    return defaultLayout;
+  };
+
+  const [isMounted, setIsMounted] = useState(() => hasHydrated);
+  const [layout, setLayout] = useState<LayoutItem[]>(() => {
+    if (hasHydrated && typeof window !== "undefined") {
+      return getSavedLayout(user.id);
+    }
+    return [];
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDockMinimized, setIsDockMinimized] = useState(false);
+  const [layoutBackup, setLayoutBackup] = useState<LayoutItem[] | null>(null);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLayout(getSavedLayout(user.id));
     setIsMounted(true);
+    hasHydrated = true;
   }, [user.id]);
 
   const handleStartEditing = () => {
     setLayoutBackup(layout.map(item => ({ ...item })));
     setIsEditing(true);
+    setIsDockMinimized(isMobile);
   };
 
   const handleCancelEditing = () => {
@@ -1206,18 +1229,20 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-3">
           {isMounted && !isEditing && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleStartEditing}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/70 hover:border-border bg-background/60 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-3.5 rounded-full border border-border/70 hover:border-border bg-background/60 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground shadow-xs transition-all cursor-pointer"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
               Customize Layout
-            </button>
+            </Button>
           )}
-          <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm">
+          {/* <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-sm text-muted-foreground shadow-sm">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             Live insights
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -1230,7 +1255,7 @@ export default function DashboardPage() {
           className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] backdrop-blur-md shadow-xs"
         >
           <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+            
             <div>
               <p className="text-sm font-medium text-foreground">
                 Customize Dashboard Layout
@@ -1240,27 +1265,32 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleResetLayout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Reset Defaults
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleCancelEditing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border/80 bg-background/50 hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-all cursor-pointer"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
               onClick={handleSaveEditing}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all cursor-pointer border-0"
             >
               <Check className="h-3.5 w-3.5" />
               Save Layout
-            </button>
+            </Button>
           </div>
         </motion.div>
       )}
@@ -1332,35 +1362,41 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            disabled={item.w <= 1}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isMobile || item.w <= 1}
                             onClick={() => handleResize(item.id, -1)}
-                            className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                            className="h-7 w-7 p-0 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                             title="Shrink Width"
                           >
                             <ChevronLeft className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                           <span className="text-[10px] font-mono px-1.5 py-0.5 bg-muted rounded text-muted-foreground">
                             {item.w}/3
                           </span>
-                          <button
-                            disabled={item.w >= 3}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isMobile || item.w >= 3}
                             onClick={() => handleResize(item.id, 1)}
-                            className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                            className="h-7 w-7 p-0 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                             title="Expand Width"
                           >
                             <ChevronRight className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
 
                           <div className="w-[1px] h-3.5 bg-border/80 mx-1" />
 
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleToggleVisibility(item.id)}
-                            className="p-1 rounded-md hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer"
+                            className="h-7 w-7 p-0 rounded-md hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer"
                             title="Hide Widget"
                           >
                             <EyeOff className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -1385,10 +1421,30 @@ export default function DashboardPage() {
               exit={{ opacity: 0, y: 50 }}
               className="flex flex-col items-center justify-center gap-2 max-w-[90%] md:max-w-xl pointer-events-auto"
             >
-              {/* <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-semibold bg-muted/80 px-2.5 py-1 rounded-md shadow-xs select-none">
-                Inactive Widgets Dock
-              </div> */}
-              <div className="flex flex-wrap items-center justify-center gap-3 p-3 bg-card/75 backdrop-blur-md border border-border/80 rounded-2xl shadow-xl max-w-full">
+              {layout.filter((item) => !item.visible).length > 0 && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsDockMinimized(!isDockMinimized)}
+                  className="w-8 h-8 rounded-full border border-border bg-card/95 hover:bg-muted text-muted-foreground hover:text-foreground shadow-md transition-all hover:scale-105 active:scale-95 z-50 cursor-pointer"
+                  title={isDockMinimized ? "Expand Dock" : "Minimize Dock"}
+                >
+                  <motion.div
+                    animate={{ rotate: isDockMinimized ? 180 : 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </motion.div>
+                </Button>
+              )}
+              <motion.div
+                layout
+                className={`flex items-center bg-card/75 backdrop-blur-md border border-border/80 rounded-2xl shadow-xl max-w-full transition-all duration-300 ${
+                  isDockMinimized
+                    ? "flex-row overflow-x-auto w-full p-2.5 gap-2.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    : "flex-wrap justify-center gap-3 p-3"
+                }`}
+              >
                 {layout.filter((item) => !item.visible).length === 0 ? (
                   <p className="text-xs text-muted-foreground px-4 py-2 italic font-sans">
                     Dock is empty. All widgets are active on your dashboard.
@@ -1401,10 +1457,11 @@ export default function DashboardPage() {
                       return (
                         <motion.div
                           key={item.id}
+                          layout
                           whileHover={{ scale: 1.05, y: -2 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleToggleVisibility(item.id)}
-                          className="flex items-center gap-2.5 px-3 py-2 bg-background/80 hover:bg-emerald-500/10 border border-border/70 hover:border-emerald-500/30 rounded-xl text-xs font-medium text-foreground hover:text-emerald-500 cursor-pointer shadow-xs transition-all select-none group"
+                          className="flex items-center gap-2.5 px-3 py-2 bg-background/80 hover:bg-emerald-500/10 border border-border/70 hover:border-emerald-500/30 rounded-xl text-xs font-medium text-foreground hover:text-emerald-500 cursor-pointer shadow-xs transition-all select-none group whitespace-nowrap shrink-0"
                         >
                           {meta.icon}
                           <span className="font-medium">{meta.title}</span>
@@ -1413,7 +1470,7 @@ export default function DashboardPage() {
                       );
                     })
                 )}
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
