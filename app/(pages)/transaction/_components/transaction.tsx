@@ -316,6 +316,7 @@ export default function TransactionPage() {
   const [searchInput, setSearchInput] = useState(query);
 
   const categoryFilter = searchParams.get("category_id") || "";
+  const typeFilter = searchParams.get("transaction_type") || ""; // "EXPENSE" | "INCOME" | ""
   const pageNumber = parsePositiveInt(searchParams.get("page"), 1);
   const pageSize = parsePositiveInt(searchParams.get("limit"), 10);
 
@@ -369,6 +370,9 @@ export default function TransactionPage() {
   const [transactionToEdit, setTransactionToEdit] = useState<TransactionRow | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [calenderOpen, setCalenderOpen] = useState(false);
+  const [openMoreFiltersDialog, setOpenMoreFiltersDialog] = useState(false);
+  // Local pending state inside more filters dialog
+  const [pendingTypeFilter, setPendingTypeFilter] = useState<"" | "EXPENSE" | "INCOME">(typeFilter as "" | "EXPENSE" | "INCOME");
 
   // CSV Export Dialog states
   const [openExportDialog, setOpenExportDialog] = useState(false);
@@ -1120,6 +1124,7 @@ export default function TransactionPage() {
     fromDate,
     toDate,
     category,
+    transactionType,
     order = "desc",
     page = 1,
     limit = pageSize,
@@ -1131,6 +1136,7 @@ export default function TransactionPage() {
     fromDate?: string;
     toDate?: string;
     category?: string;
+    transactionType?: string;
     order?: string;
     page?: number;
     limit?: number;
@@ -1142,6 +1148,7 @@ export default function TransactionPage() {
     if (fromDate) queryParams.append("start_date", fromDate + " 00:00:00");
     if (toDate) queryParams.append("end_date", toDate + " 23:59:59");
     if (category) queryParams.append("category_id", category);
+    if (transactionType) queryParams.append("type", transactionType);
     if (order) queryParams.append("order", order);
     queryParams.append("page", page.toString());
     queryParams.append("limit", limit.toString());
@@ -1256,6 +1263,7 @@ export default function TransactionPage() {
           : "",
         toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 10) : "",
         category: categoryFilter,
+        transactionType: typeFilter,
         order: "desc",
         page: pageNumber,
         limit: pageSize,
@@ -1281,6 +1289,7 @@ export default function TransactionPage() {
     user.id,
     dateRange,
     categoryFilter,
+    typeFilter,
     pageNumber,
     pageSize,
     query,
@@ -1317,6 +1326,7 @@ export default function TransactionPage() {
             : "",
           toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 10) : "",
           category: categoryFilter,
+          transactionType: typeFilter,
           order: "desc",
           page: pageNumber,
           limit: pageSize,
@@ -1999,10 +2009,29 @@ export default function TransactionPage() {
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-card/90 backdrop-blur-md border border-border/60 rounded-xl shadow-md p-1">
+              <DropdownMenuContent align="end" className="w-52 bg-card/90 backdrop-blur-md border border-border/60 rounded-xl shadow-md p-1">
                 <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1.5 font-medium uppercase tracking-wider">
                   Options
                 </DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setPendingTypeFilter(typeFilter as "" | "EXPENSE" | "INCOME");
+                    setOpenMoreFiltersDialog(true);
+                  }}
+                  className="flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg hover:bg-muted/80 cursor-pointer text-foreground hover:text-foreground transition-all"
+                >
+                  <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                  <span>More Filters</span>
+                  {typeFilter && (
+                    <span className={`ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                      typeFilter === "EXPENSE"
+                        ? "bg-rose-500/15 text-rose-500"
+                        : "bg-emerald-500/15 text-emerald-500"
+                    }`}>
+                      {typeFilter === "EXPENSE" ? "Exp" : "Inc"}
+                    </span>
+                  )}
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
                     setExportCategory(categoryFilter || "all-categories");
@@ -2018,7 +2047,25 @@ export default function TransactionPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {(query || categoryFilter || dateRange) && (
+            {/* Active type filter badge */}
+            {typeFilter && (
+              <div className={`flex items-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold border ${
+                typeFilter === "EXPENSE"
+                  ? "bg-rose-500/10 border-rose-500/30 text-rose-500"
+                  : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+              }`}>
+                {typeFilter === "EXPENSE" ? "Expense Only" : "Income Only"}
+                <button
+                  type="button"
+                  onClick={() => updateQueryParams({ transaction_type: null, page: "1" })}
+                  className="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
+            {(query || categoryFilter || typeFilter || dateRange) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -2027,6 +2074,7 @@ export default function TransactionPage() {
                   updateQueryParams({
                     q: null,
                     category_id: null,
+                    transaction_type: null,
                     start_date: null,
                     end_date: null,
                     page: "1",
@@ -2378,6 +2426,85 @@ export default function TransactionPage() {
               }}
             >
               {loading ? <Spinner /> : "Export CSV"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── More Filters Dialog ── */}
+      <Dialog open={openMoreFiltersDialog} onOpenChange={(open) => {
+        setOpenMoreFiltersDialog(open);
+        if (!open) setPendingTypeFilter(typeFilter as "" | "EXPENSE" | "INCOME");
+      }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              More Filters
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            {/* Transaction Type Filter */}
+            <div className="space-y-3">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Transaction Type
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["", "EXPENSE", "INCOME"] as const).map((t) => {
+                  const isActive = pendingTypeFilter === t;
+                  const labels: Record<string, string> = {
+                    "": "All",
+                    EXPENSE: "Expense",
+                    INCOME: "Income",
+                  };
+                  const activeClass =
+                    t === ""
+                      ? "bg-foreground/10 border-foreground/30 text-foreground"
+                      : t === "EXPENSE"
+                      ? "bg-rose-500/10 border-rose-500/50 text-rose-500"
+                      : "bg-emerald-500/10 border-emerald-500/50 text-emerald-500";
+                  const inactiveClass =
+                    "bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setPendingTypeFilter(t)}
+                      className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
+                        isActive ? activeClass : inactiveClass
+                      }`}
+                    >
+                      <span className="text-base">
+                        {t === "" ? "🔀" : t === "EXPENSE" ? "📤" : "📥"}
+                      </span>
+                      <span className="text-xs font-semibold">{labels[t]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <DialogClose asChild>
+              <Button variant="outline" size="sm">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              size="sm"
+              onClick={() => {
+                updateQueryParams({
+                  transaction_type: pendingTypeFilter || null,
+                  page: "1",
+                });
+                setOpenMoreFiltersDialog(false);
+              }}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-sm shadow-emerald-500/20"
+            >
+              <Check className="h-3.5 w-3.5 mr-1.5" />
+              Apply Filters
             </Button>
           </DialogFooter>
         </DialogContent>
