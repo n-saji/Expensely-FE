@@ -35,10 +35,14 @@ export interface AdminUserRow {
 
 interface AdminColumnsProps {
   onEdit: (row: AdminUserRow) => void;
+  onSwitchSession: (row: AdminUserRow) => void;
+  currentUserId: string;
 }
 
 export const columns = ({
   onEdit,
+  onSwitchSession,
+  currentUserId,
 }: AdminColumnsProps): ColumnDef<AdminUserRow>[] => [
   {
     accessorKey: "name",
@@ -93,6 +97,14 @@ export const columns = ({
             <DropdownMenuItem onClick={() => onEdit(currentUser)}>
               Edit
             </DropdownMenuItem>
+            {currentUser.id !== currentUserId && (
+              <DropdownMenuItem
+                onClick={() => onSwitchSession(currentUser)}
+                disabled={!currentUser.isActive}
+              >
+                Switch Session
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

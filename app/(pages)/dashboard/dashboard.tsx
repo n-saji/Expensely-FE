@@ -443,97 +443,6 @@ export default function DashboardPage() {
     ? Object.values(overview.budgetServiceMap).length
     : 0;
 
-  if (newUser) {
-    return (
-      <NewUserOnboarding
-        userId={user.id}
-        onFirstExpenseCreated={handleFirstExpenseCreated}
-        onBudgetCreated={handleBudgetCreated}
-      />
-    );
-  }
-
-  const monthLabel = new Date(
-    currentMonthYear,
-    Math.max(currentMonth - 1, 0),
-  ).toLocaleString("default", { month: "long" });
-  const selectedMonthStartDate = formatDateOnly(
-    new Date(currentMonthYear, currentMonth - 1, 1),
-  );
-  const selectedMonthEndDate = formatDateOnly(
-    new Date(currentMonthYear, currentMonth, 0),
-  );
-  const selectedIncomeMonthStartDate = formatDateOnly(
-    new Date(incomeCurrentMonthYear, incomeCurrentMonth - 1, 1),
-  );
-  const selectedIncomeMonthEndDate = formatDateOnly(
-    new Date(incomeCurrentMonthYear, incomeCurrentMonth, 0),
-  );
-  const todayLabel = new Date().toLocaleDateString("default", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  const currency = currencyMapper(user?.currency || "USD");
-  const fmt = (n: number) =>
-    n.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
-  const trimTrailingZero = (value: string) =>
-    value.endsWith(".0") ? value.slice(0, -2) : value;
-
-  const formatCompactValue = (value: number) => {
-    if (value >= 1_000_000_000) {
-      return `${trimTrailingZero((value / 1_000_000_000).toFixed(1))}B`;
-    }
-    if (value >= 1_000_000) {
-      return `${trimTrailingZero((value / 1_000_000).toFixed(1))}M`;
-    }
-    if (value >= 1_0000) {
-      return `${trimTrailingZero((value / 1_000).toFixed(1))}K`;
-    }
-    return fmt(value);
-  };
-
-  const formatCompactCurrency = (value: number) => {
-    const abs = Math.abs(value);
-    const full = `${currency}${fmt(abs)}`;
-    const short = `${currency}${formatCompactValue(abs)}`;
-    return {
-      full,
-      short,
-    };
-  };
-
-  const netSavings =
-    incomeOverview?.total_balance ??
-    (incomeOverview?.thisMonthTotalIncome ?? 0) -
-      (overview?.thisMonthTotalExpense ?? 0);
-
-  const monthExpenseDisplay = overview
-    ? formatCompactCurrency(overview.thisMonthTotalExpense)
-    : null;
-  const monthIncomeDisplay = incomeOverview
-    ? formatCompactCurrency(incomeOverview.thisMonthTotalIncome)
-    : null;
-  const totalBalanceDisplay =
-    overview && incomeOverview ? formatCompactCurrency(netSavings) : null;
-  const totalBalanceSign = netSavings >= 0 ? "" : "-";
-
-  const topCategoryEntry = overview
-    ? Object.entries(overview.amountByCategory).sort(([, a], [, b]) => b - a)[0]
-    : null;
-
-  const upcomingRecurring = (overview?.upcomingRecurringExpenses || []).slice(
-    0,
-    3,
-  );
-  const budgets = overview ? Object.values(overview.budgetServiceMap) : [];
-  const displayBudgets = budgets.slice(0, 6);
-
   // --- LAYOUT ENGINE CONFIGURATION ---
   interface LayoutItem {
     id: string;
@@ -649,6 +558,97 @@ export default function DashboardPage() {
     setIsMounted(true);
     hasHydrated = true;
   }, [user.id]);
+
+  if (newUser) {
+    return (
+      <NewUserOnboarding
+        userId={user.id}
+        onFirstExpenseCreated={handleFirstExpenseCreated}
+        onBudgetCreated={handleBudgetCreated}
+      />
+    );
+  }
+
+  const monthLabel = new Date(
+    currentMonthYear,
+    Math.max(currentMonth - 1, 0),
+  ).toLocaleString("default", { month: "long" });
+  const selectedMonthStartDate = formatDateOnly(
+    new Date(currentMonthYear, currentMonth - 1, 1),
+  );
+  const selectedMonthEndDate = formatDateOnly(
+    new Date(currentMonthYear, currentMonth, 0),
+  );
+  const selectedIncomeMonthStartDate = formatDateOnly(
+    new Date(incomeCurrentMonthYear, incomeCurrentMonth - 1, 1),
+  );
+  const selectedIncomeMonthEndDate = formatDateOnly(
+    new Date(incomeCurrentMonthYear, incomeCurrentMonth, 0),
+  );
+  const todayLabel = new Date().toLocaleDateString("default", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const currency = currencyMapper(user?.currency || "USD");
+  const fmt = (n: number) =>
+    n.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+  const trimTrailingZero = (value: string) =>
+    value.endsWith(".0") ? value.slice(0, -2) : value;
+
+  const formatCompactValue = (value: number) => {
+    if (value >= 1_000_000_000) {
+      return `${trimTrailingZero((value / 1_000_000_000).toFixed(1))}B`;
+    }
+    if (value >= 1_000_000) {
+      return `${trimTrailingZero((value / 1_000_000).toFixed(1))}M`;
+    }
+    if (value >= 1_0000) {
+      return `${trimTrailingZero((value / 1_000).toFixed(1))}K`;
+    }
+    return fmt(value);
+  };
+
+  const formatCompactCurrency = (value: number) => {
+    const abs = Math.abs(value);
+    const full = `${currency}${fmt(abs)}`;
+    const short = `${currency}${formatCompactValue(abs)}`;
+    return {
+      full,
+      short,
+    };
+  };
+
+  const netSavings =
+    incomeOverview?.total_balance ??
+    (incomeOverview?.thisMonthTotalIncome ?? 0) -
+      (overview?.thisMonthTotalExpense ?? 0);
+
+  const monthExpenseDisplay = overview
+    ? formatCompactCurrency(overview.thisMonthTotalExpense)
+    : null;
+  const monthIncomeDisplay = incomeOverview
+    ? formatCompactCurrency(incomeOverview.thisMonthTotalIncome)
+    : null;
+  const totalBalanceDisplay =
+    overview && incomeOverview ? formatCompactCurrency(netSavings) : null;
+  const totalBalanceSign = netSavings >= 0 ? "" : "-";
+
+  const topCategoryEntry = overview
+    ? Object.entries(overview.amountByCategory).sort(([, a], [, b]) => b - a)[0]
+    : null;
+
+  const upcomingRecurring = (overview?.upcomingRecurringExpenses || []).slice(
+    0,
+    3,
+  );
+  const budgets = overview ? Object.values(overview.budgetServiceMap) : [];
+  const displayBudgets = budgets.slice(0, 6);
 
   const handleStartEditing = () => {
     setLayoutBackup(layout.map(item => ({ ...item })));

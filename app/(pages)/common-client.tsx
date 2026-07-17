@@ -8,6 +8,7 @@ import Link from "next/link";
 import UserPreferences from "@/utils/userPreferences";
 import Loader from "@/components/loader";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 import { setCategories } from "@/redux/slices/categorySlice";
 import { CategoryTypeExpense } from "@/global/constants";
@@ -74,6 +75,7 @@ export default function DashboardClient({
         }
 
         const profile = response.data.user;
+        const isImpersonated = response.data.isImpersonated;
         dispatch(
           setUser({
             email: profile.email,
@@ -93,6 +95,7 @@ export default function DashboardClient({
             profileComplete: profile.profileComplete,
             profilePictureUrl: profile.profilePictureUrl,
             emailVerified: profile.emailVerified,
+            isImpersonated: isImpersonated ?? false,
           }),
         );
 
@@ -261,6 +264,36 @@ export default function DashboardClient({
         </div>
         <UserPreferences />
       </div>
+      {user.isImpersonated && (
+        <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 px-4 py-2.5 rounded-full border border-border/70 bg-background/85 backdrop-blur-md shadow-2xl transition-all duration-300 hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-4">
+          <div className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+          </div>
+          <span className="text-xs md:text-sm font-medium text-foreground">
+            Impersonating: <strong className="font-semibold text-primary">{user.name}</strong>
+          </span>
+          <button
+            onClick={async () => {
+              try {
+                const response = await api.post("/admins/cancel-switch-session");
+                if (response.status === 200) {
+                  toast.success("Returned to admin session");
+                  dispatch(clearUser());
+                  window.location.href = "/dashboard";
+                } else {
+                  toast.error("Failed to cancel switch session");
+                }
+              } catch (err: any) {
+                toast.error(err.response?.data?.error || err.message || "Failed to cancel switch session");
+              }
+            }}
+            className="text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90 px-3 py-1 rounded-full font-semibold transition-all duration-200 shadow-sm flex items-center gap-1 active:scale-95 cursor-pointer"
+          >
+            Exit
+          </button>
+        </div>
+      )}
     </>
   );
 }

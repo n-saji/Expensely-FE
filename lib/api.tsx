@@ -84,6 +84,7 @@ function syncUserFromMeResponse(response: unknown) {
         profileComplete?: boolean;
         emailVerified?: boolean;
       };
+      isImpersonated?: boolean;
     };
   };
 
@@ -116,6 +117,7 @@ function syncUserFromMeResponse(response: unknown) {
       profilePictureUrl: profile.profilePictureUrl,
       profileComplete: profile.profileComplete,
       emailVerified: profile.emailVerified,
+      isImpersonated: data?.data?.isImpersonated ?? false,
     }),
   );
 
