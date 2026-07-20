@@ -13,7 +13,7 @@ const notificationSlice = createSlice({
       message: string;
       sender: string;
       time: string;
-      type: "INFO" | "ALERT" | "ERROR" | "SUCCESS" | "LOGOUT";
+      type: "INFO" | "ALERT" | "ERROR" | "SUCCESS" | "LOGOUT" | "REMINDER";
       isRead: boolean;
     }[],
   },

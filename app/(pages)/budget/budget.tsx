@@ -570,7 +570,7 @@ export default function Page() {
       </div>
 
       {/* ── Summary Stats Bar ── */}
-      {!loading && activeBudgets.length > 0 && (
+      {/* {!loading && activeBudgets.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             {
@@ -630,7 +630,7 @@ export default function Page() {
             </div>
           ))}
         </div>
-      )}
+      )} */}
 
       <Sheet open={addBudgetOpen} onOpenChange={setAddBudgetOpen}>
         <SheetContent className="h-full overflow-y-auto">

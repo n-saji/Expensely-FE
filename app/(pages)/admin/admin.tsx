@@ -100,9 +100,33 @@ export default function AdminUI() {
     setIsEditDialogOpen(true);
   }, []);
 
+  const handleSwitchSession = useCallback(
+    async (row: AdminUserRow) => {
+      try {
+        const response = await api.post(`/admins/switch-session/${row.id}`);
+        if (response.status !== 200) {
+          throw new Error("Failed to switch session");
+        }
+        toast.success(`Switched session to ${row.name}`);
+        dispatch(clearUser());
+        window.location.href = "/dashboard";
+      } catch (err: any) {
+        toast.error(
+          err.response?.data?.error || err.message || "Failed to switch session",
+        );
+      }
+    },
+    [dispatch],
+  );
+
   const tableColumns = useMemo(
-    () => columns({ onEdit: handleOpenEdit }),
-    [handleOpenEdit],
+    () =>
+      columns({
+        onEdit: handleOpenEdit,
+        onSwitchSession: handleSwitchSession,
+        currentUserId: user.id,
+      }),
+    [handleOpenEdit, handleSwitchSession, user.id],
   );
 
   const handleUserAction = useCallback(

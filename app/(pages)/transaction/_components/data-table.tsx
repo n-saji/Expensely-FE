@@ -160,7 +160,7 @@ export function DataTable<TData extends { id: string }, TValue>({
       {/* Main Container */}
       <div className="overflow-hidden rounded-xl border border-border/40 bg-card/25 shadow-sm backdrop-blur-sm">
         {/* Desktop Header */}
-        <div className="hidden sm:grid grid-cols-[40px_50px_1fr_120px_50px] gap-4 px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/30 bg-muted/10">
+        <div className="hidden sm:grid grid-cols-[40px_50px_1fr_120px_50px] gap-4 px-6 py-3 text-[11px] font-semibold text-muted-foreground/80 tracking-wider uppercase border-b border-border/20">
           <div className="flex items-center justify-center">
             <Checkbox
               checked={
@@ -190,17 +190,17 @@ export function DataTable<TData extends { id: string }, TValue>({
 
         {/* Loading / Skeleton State */}
         {loading ? (
-          <div className="divide-y divide-border/20">
+          <div className="divide-y divide-border/10">
             {[...Array(3)].map((_, groupIdx) => (
-              <div key={groupIdx} className="bg-card/10">
-                <div className="flex items-center justify-between px-4 py-2 bg-muted/5 border-y border-border/10">
+              <div key={groupIdx} className="bg-card/5">
+                <div className="flex items-center justify-between px-6 py-2.5 bg-muted/5 border-y border-border/10">
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-4 w-16" />
                 </div>
                 {[...Array(groupIdx === 0 ? 1 : 2)].map((_, itemIdx) => (
                   <div
                     key={itemIdx}
-                    className="flex items-center gap-4 px-4 py-3.5 border-b border-border/10 last:border-0"
+                    className="flex items-center gap-4 px-6 py-3.5 border-b border-border/10 last:border-0"
                   >
                     <Skeleton className="h-4 w-4 rounded shrink-0" />
                     <Skeleton className="h-10 w-10 rounded-full shrink-0" />
@@ -216,16 +216,16 @@ export function DataTable<TData extends { id: string }, TValue>({
             ))}
           </div>
         ) : (
-          <div className="divide-y divide-border/25">
+          <div className="divide-y divide-border/20">
             {dateGroups.length ? (
               dateGroups.map((group) => (
                 <div key={group.dateStr} className="bg-card/5">
                   {/* Date Group Header */}
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-muted/10 border-y border-border/15">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center justify-between px-6 py-2 bg-muted/5 border-y border-border/10">
+                    <span className="text-[11px] font-semibold text-muted-foreground/60 tracking-wider uppercase">
                       {group.dateStr}
                     </span>
-                    <span className={`text-xs font-bold ${group.total < 0 ? "text-red-500/80" : "text-green-500/80"}`}>
+                    <span className={`text-[11px] font-bold ${group.total < 0 ? "text-rose-500/80" : "text-emerald-500/80"}`}>
                       {group.total < 0 ? "-" : "+"}
                       {formatAmountCompact(Math.abs(group.total), group.currency)}
                     </span>
@@ -250,52 +250,52 @@ export function DataTable<TData extends { id: string }, TValue>({
                         <div key={row.id}>
                           {/* Desktop Row */}
                           <div
-                            className={`hidden sm:grid grid-cols-[40px_50px_1fr_120px_50px] gap-4 px-4 py-3.5 items-center hover:bg-muted/15 transition-colors ${
-                              row.getIsSelected() ? "bg-muted/20" : ""
+                            className={`hidden sm:grid grid-cols-[40px_50px_1fr_120px_50px] gap-4 px-6 py-3 items-center hover:bg-muted/5 transition-colors ${
+                              row.getIsSelected() ? "bg-muted/10" : ""
                             }`}
                           >
                             {/* Checkbox */}
                             <div className="flex items-center justify-center">
                               <Checkbox
-                                checked={row.getIsSelected()}
-                                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                                aria-label="Select row"
+                                  checked={row.getIsSelected()}
+                                  onCheckedChange={(value) => row.toggleSelected(!!value)}
+                                  aria-label="Select row"
                               />
                             </div>
 
                             {/* Category Icon */}
                             <div className="flex items-center justify-center">
                               <span
-                                className="inline-flex items-center justify-center rounded-full h-10 w-10 shrink-0 border border-border/10 shadow-sm"
+                                className="inline-flex items-center justify-center rounded-full h-8 w-8 shrink-0 border border-border/5 shadow-xs"
                                 style={{
                                   color: resolvedColor,
-                                  backgroundColor: toRgba(resolvedColor, 0.14),
+                                  backgroundColor: toRgba(resolvedColor, 0.1),
                                 }}
                               >
-                                <CategoryIcon className="h-5 w-5" />
+                                <CategoryIcon className="h-4 w-4" />
                               </span>
                             </div>
 
                             {/* Description */}
-                            <div className="min-w-0 pr-4 flex flex-col gap-1">
-                              <div className="font-semibold text-sm text-foreground flex items-center gap-1.5 truncate">
+                            <div className="min-w-0 pr-4 flex flex-col gap-0.5">
+                              <div className="font-medium text-sm text-foreground flex items-center gap-1.5 truncate">
                                 <span className="truncate" title={transaction.description}>
                                   {transaction.description}
                                 </span>
                                 {transaction.type === "EXPENSE" && transaction.receiptUrl && (
-                                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" aria-label="Has receipt" />
+                                  <Paperclip className="h-3 w-3 text-muted-foreground/60 shrink-0" aria-label="Has receipt" />
                                 )}
                               </div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: resolvedColor }} />
-                                <span className="text-xs text-muted-foreground font-normal">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[11px] text-muted-foreground font-normal">
                                   {transaction.categoryName}
                                 </span>
+                                <span className="h-1 w-1 bg-muted-foreground/30 rounded-full shrink-0" />
                                 <span
-                                  className={`ml-2 inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-semibold ${
+                                  className={`inline-flex items-center text-[9px] font-semibold uppercase tracking-wider ${
                                     transaction.type === "EXPENSE"
-                                      ? "bg-red-500/10 text-red-500"
-                                      : "bg-green-500/10 text-green-500"
+                                      ? "text-rose-500/80"
+                                      : "text-emerald-500/80"
                                   }`}
                                 >
                                   {transaction.type === "EXPENSE" ? "Expense" : "Income"}
@@ -304,7 +304,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                             </div>
 
                             {/* Amount */}
-                            <div className={`text-right font-semibold text-sm ${transaction.type === "EXPENSE" ? "text-red-500/90" : "text-green-500/90"}`}>
+                            <div className={`text-right font-medium text-sm ${transaction.type === "EXPENSE" ? "text-rose-500/90" : "text-emerald-500/90"}`}>
                               {amountStr}
                             </div>
 
@@ -320,8 +320,8 @@ export function DataTable<TData extends { id: string }, TValue>({
 
                           {/* Mobile Row */}
                           <div
-                            className={`flex sm:hidden items-center gap-3 px-3.5 py-3.5 hover:bg-muted/10 transition-colors ${
-                              row.getIsSelected() ? "bg-muted/15" : ""
+                            className={`flex sm:hidden items-center gap-3 px-4 py-3 hover:bg-muted/5 transition-colors ${
+                              row.getIsSelected() ? "bg-muted/10" : ""
                             }`}
                           >
                             {/* Checkbox */}
@@ -336,38 +336,38 @@ export function DataTable<TData extends { id: string }, TValue>({
                             {/* Icon & Details */}
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <span
-                                className="inline-flex items-center justify-center rounded-full h-10 w-10 shrink-0 border border-border/10 shadow-sm"
+                                className="inline-flex items-center justify-center rounded-full h-8 w-8 shrink-0 border border-border/5 shadow-xs"
                                 style={{
                                   color: resolvedColor,
-                                  backgroundColor: toRgba(resolvedColor, 0.14),
+                                  backgroundColor: toRgba(resolvedColor, 0.1),
                                 }}
                               >
-                                <CategoryIcon className="h-5 w-5" />
+                                <CategoryIcon className="h-4 w-4" />
                               </span>
 
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-baseline justify-between gap-2">
-                                  <div className="font-semibold text-sm text-foreground flex items-center gap-1.5 truncate">
+                                  <div className="font-medium text-sm text-foreground flex items-center gap-1.5 truncate">
                                     <span className="truncate">{transaction.description}</span>
                                     {transaction.type === "EXPENSE" && transaction.receiptUrl && (
-                                      <Paperclip className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                                      <Paperclip className="h-3 w-3 text-muted-foreground/60 shrink-0" />
                                     )}
                                   </div>
-                                  <div className={`font-semibold text-sm shrink-0 ${transaction.type === "EXPENSE" ? "text-red-500/90" : "text-green-500/90"}`}>
+                                  <div className={`font-medium text-sm shrink-0 ${transaction.type === "EXPENSE" ? "text-rose-500/90" : "text-emerald-500/90"}`}>
                                     {amountStr}
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: resolvedColor }} />
+                                <div className="flex items-center gap-1.5">
                                   <span className="text-[11px] text-muted-foreground font-normal">
                                     {transaction.categoryName}
                                   </span>
+                                  <span className="h-1 w-1 bg-muted-foreground/30 rounded-full shrink-0" />
                                   <span
-                                    className={`ml-2 inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-semibold ${
+                                    className={`inline-flex items-center text-[9px] font-semibold uppercase tracking-wider ${
                                       transaction.type === "EXPENSE"
-                                        ? "bg-red-500/10 text-red-500"
-                                        : "bg-green-500/10 text-green-500"
+                                        ? "text-rose-500/80"
+                                        : "text-emerald-500/80"
                                     }`}
                                   >
                                     {transaction.type === "EXPENSE" ? "Expense" : "Income"}

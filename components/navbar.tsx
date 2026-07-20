@@ -91,7 +91,7 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        {pathname.startsWith("/dashboard")  && <Slidebar />}
+        {(pathname.startsWith("/dashboard") || pathname.startsWith("/transaction")) && <Slidebar />}
         {user.notificationsEnabled && (
           <Notifications
             notifications={notifications}
