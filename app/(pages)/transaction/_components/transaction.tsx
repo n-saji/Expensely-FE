@@ -935,6 +935,7 @@ export default function TransactionPage() {
             overviewParams={overviewParams}
             categoryMetaByName={categoryMetaByName}
             loading={overviewV2Loading || overviewV2 === null}
+            layoutWidth={w}
           />
         );
       }
@@ -955,6 +956,7 @@ export default function TransactionPage() {
             overviewParams={incomeOverviewParams}
             categoryMetaByName={categoryMetaByName}
             loading={incomeOverviewV2Loading || incomeOverviewV2 === null}
+            layoutWidth={w}
           />
         );
       }
@@ -1012,6 +1014,7 @@ export default function TransactionPage() {
             min_year={minYear}
             min_month={minMonth}
             loading={loadingMonth || overview === null}
+            layoutWidth={w}
           />
         );
       }
@@ -1029,6 +1032,7 @@ export default function TransactionPage() {
             min_year={incomeMinYear}
             min_month={incomeMinMonth}
             loading={incomeLoadingMonth || incomeOverview === null}
+            layoutWidth={w}
           />
         );
       }
@@ -1169,19 +1173,47 @@ export default function TransactionPage() {
   }
 
   // Fetch expense stats overview
-  const fetchExpenseOverviewData = async () => {
+  const fetchExpenseOverviewData = async ({
+    yearly = currentYearForYearly,
+    month = currentMonth,
+    monthYear = currentMonthYear,
+    type = "",
+  }: {
+    yearly?: number;
+    month?: number;
+    monthYear?: number;
+    type?: string;
+  } = {}) => {
     try {
+      if (type === "") {
+        setLoadingYear(true);
+        setLoadingMonth(true);
+      } else if (type === "year") {
+        setLoadingYear(true);
+      } else if (type === "month") {
+        setLoadingMonth(true);
+      }
       const queryParams = new URLSearchParams();
+      if (yearly !== undefined) {
+        queryParams.append("req_year", yearly.toString());
+      }
+      if (month !== undefined && monthYear !== undefined) {
+        queryParams.append("req_month", month.toString());
+        queryParams.append("req_month_year", monthYear.toString());
+      }
       const res = await api.get(
         `/expenses/user/${user.id}/overview?${queryParams.toString()}`,
       );
       if (res.status === 200) {
         setOverview(res.data);
-        setMinYear(res.data.earliestStartYear || new Date().getFullYear());
-        setMinMonth(res.data.earliestStartMonth || new Date().getMonth() + 1);
+        if (res.data.earliestStartYear) setMinYear(res.data.earliestStartYear);
+        if (res.data.earliestStartMonth) setMinMonth(res.data.earliestStartMonth);
       }
     } catch (e) {
       console.error("Error loading expense overview", e);
+    } finally {
+      if (type === "" || type === "year") setLoadingYear(false);
+      if (type === "" || type === "month") setLoadingMonth(false);
     }
   };
 
@@ -1211,19 +1243,47 @@ export default function TransactionPage() {
   };
 
   // Fetch income stats overview
-  const fetchIncomeOverviewData = async () => {
+  const fetchIncomeOverviewData = async ({
+    yearly = incomeCurrentYearForYearly,
+    month = incomeCurrentMonth,
+    monthYear = incomeCurrentMonthYear,
+    type = "",
+  }: {
+    yearly?: number;
+    month?: number;
+    monthYear?: number;
+    type?: string;
+  } = {}) => {
     try {
+      if (type === "") {
+        setIncomeLoadingYear(true);
+        setIncomeLoadingMonth(true);
+      } else if (type === "year") {
+        setIncomeLoadingYear(true);
+      } else if (type === "month") {
+        setIncomeLoadingMonth(true);
+      }
       const queryParams = new URLSearchParams();
+      if (yearly !== undefined) {
+        queryParams.append("req_year", yearly.toString());
+      }
+      if (month !== undefined && monthYear !== undefined) {
+        queryParams.append("req_month", month.toString());
+        queryParams.append("req_month_year", monthYear.toString());
+      }
       const res = await api.get(
         `/incomes/overview?${queryParams.toString()}`,
       );
       if (res.status === 200) {
         setIncomeOverview(res.data);
-        setIncomeMinYear(res.data.earliestStartYear || new Date().getFullYear());
-        setIncomeMinMonth(res.data.earliestStartMonth || new Date().getMonth() + 1);
+        if (res.data.earliestStartYear) setIncomeMinYear(res.data.earliestStartYear);
+        if (res.data.earliestStartMonth) setIncomeMinMonth(res.data.earliestStartMonth);
       }
     } catch (e) {
       console.error("Error loading income overview", e);
+    } finally {
+      if (type === "" || type === "year") setIncomeLoadingYear(false);
+      if (type === "" || type === "month") setIncomeLoadingMonth(false);
     }
   };
 
@@ -1282,8 +1342,6 @@ export default function TransactionPage() {
   useEffect(() => {
     if (user.id) {
       void loadList();
-      void fetchExpenseOverviewData();
-      void fetchIncomeOverviewData();
     }
   }, [
     user.id,
@@ -1295,6 +1353,72 @@ export default function TransactionPage() {
     query,
     refreshTrigger,
   ]);
+
+  // Expense Pie Chart year change
+  useEffect(() => {
+    if (user.id) {
+      void fetchExpenseOverviewData({
+        yearly: currentYearForYearly,
+        month: currentMonth,
+        monthYear: currentMonthYear,
+        type: "year",
+      });
+    }
+  }, [user.id, currentYearForYearly]);
+
+  // Expense Spending Over Days month change
+  useEffect(() => {
+    if (user.id) {
+      void fetchExpenseOverviewData({
+        yearly: currentYearForYearly,
+        month: currentMonth,
+        monthYear: currentMonthYear,
+        type: "month",
+      });
+    }
+  }, [user.id, currentMonth, currentMonthYear]);
+
+  // Income Pie Chart year change
+  useEffect(() => {
+    if (user.id) {
+      void fetchIncomeOverviewData({
+        yearly: incomeCurrentYearForYearly,
+        month: incomeCurrentMonth,
+        monthYear: incomeCurrentMonthYear,
+        type: "year",
+      });
+    }
+  }, [user.id, incomeCurrentYearForYearly]);
+
+  // Income Over Days month change
+  useEffect(() => {
+    if (user.id) {
+      void fetchIncomeOverviewData({
+        yearly: incomeCurrentYearForYearly,
+        month: incomeCurrentMonth,
+        monthYear: incomeCurrentMonthYear,
+        type: "month",
+      });
+    }
+  }, [user.id, incomeCurrentMonth, incomeCurrentMonthYear]);
+
+  // Full refresh
+  useEffect(() => {
+    if (user.id) {
+      void fetchExpenseOverviewData({
+        yearly: currentYearForYearly,
+        month: currentMonth,
+        monthYear: currentMonthYear,
+        type: "",
+      });
+      void fetchIncomeOverviewData({
+        yearly: incomeCurrentYearForYearly,
+        month: incomeCurrentMonth,
+        monthYear: incomeCurrentMonthYear,
+        type: "",
+      });
+    }
+  }, [user.id, refreshTrigger]);
 
   useEffect(() => {
     if (user.id) {
@@ -1780,7 +1904,7 @@ export default function TransactionPage() {
           })}
         </div>
       ) : (
-        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-max items-start ${isEditing ? "pb-36" : ""}`}>
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-max items-stretch ${isEditing ? "pb-36" : ""}`}>
           {layout
             .filter((item) => item.visible)
             .map((item, index) => {

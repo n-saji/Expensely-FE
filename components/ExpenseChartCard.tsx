@@ -205,11 +205,11 @@ export default function PieChartComp({
   const isDesktop = useMediaQuery("(min-width: 530px)");
 
   return (
-    <Card className="w-full h-full min-h-[360px] md:min-h-[420px] flex flex-col overflow-hidden border-border/70 shadow-sm">
-      <CardHeader className="flex flex-wrap justify-between items-center gap-3 ">
+    <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm flex flex-col justify-between">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
         <div>
-          <CardTitle>{title || "Spending by Category"}</CardTitle>
-          <p className="text-xs text-muted-foreground mt-1">
+          <CardTitle className="text-lg font-medium text-foreground">{title || "Spending by Category"}</CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Highlights your most active categories
           </p>
         </div>
@@ -221,19 +221,19 @@ export default function PieChartComp({
                 setCurrentYearForYearly(parseInt(value, 10))
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-[100px] bg-background/50 border-border/40 text-xs">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border-border/40">
                 <SelectGroup>
-                  <SelectLabel>Select Year</SelectLabel>
+                  <SelectLabel className="text-xs">Select Year</SelectLabel>
                   {Array.from(
                     {
                       length: new Date().getFullYear() - (min_year || 2020) + 1,
                     },
                     (_, i) => (min_year || 2020) + i,
                   ).map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
+                    <SelectItem key={year} value={year.toString()} className="text-xs">
                       {year}
                     </SelectItem>
                   ))}
@@ -243,115 +243,142 @@ export default function PieChartComp({
           )}
         </CardAction>
       </CardHeader>
-      <CardContent className={`flex-1 grid gap-4 items-center ${
-        layoutWidth === 1
-          ? "grid-cols-1"
-          : "grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px]"
-      }`}>
-        {sortedData.length === 0 ? (
-          loading ? (
-            <SpinnerUI />
-          ) : (
-            <NoDataUI />
-          )
+      <CardContent
+        className={`flex-1 ${
+          !loading && sortedData.length === 0
+            ? "flex items-center justify-center min-h-[260px]"
+            : `grid gap-4 items-center ${
+                layoutWidth === 1
+                  ? "grid-cols-1"
+                  : "grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px]"
+              }`
+        }`}
+      >
+        {!loading && sortedData.length === 0 ? (
+          <NoDataUI />
         ) : (
           <>
-            <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10" />
-              <div className="relative z-10">
-                <ResponsiveContainer width="100%" height={height}>
-                  {loading ? (
-                    <SpinnerUI />
-                  ) : (
-                    <PieChart
-                      margin={{
-                        right: 0,
-                        top: 0,
-                      }}
+            <div className="relative flex-1 min-h-[220px] flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={height}>
+                {loading ? (
+                  <SpinnerUI />
+                ) : (
+                  <PieChart
+                    margin={{
+                      right: 0,
+                      top: 0,
+                    }}
+                  >
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={isDesktop ? 105 : 90}
+                      innerRadius={isDesktop ? 68 : 55}
+                      startAngle={90}
+                      endAngle={-270}
                     >
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={isDesktop ? 110 : 95}
-                        innerRadius={isDesktop ? 72 : 0}
-                        startAngle={90}
-                        endAngle={-270}
-                      >
-                        {pieData.map((item, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={
-                              item.name === "__placeholder__"
-                                ? "transparent"
-                                : getCategoryColor(
-                                    item.name,
-                                    COLORS[index % COLORS.length],
-                                    categoryMetaByName,
-                                  )
-                            }
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        itemStyle={{ color: "#fff" }}
-                        contentStyle={{
-                          backgroundColor: "#0f172a",
-                          borderRadius: "12px",
-                          border: "1px solid rgba(148,163,184,0.2)",
-                          boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                        }}
-                        labelStyle={{ color: "#e2e8f0" }}
-                        cursor={{ fill: "rgba(255, 255, 255, 0.12)" }}
-                        formatter={(value) => [
-                          `${currencyMapper(currency)}${
-                            value
-                              ? value.toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : 0
-                          }`,
-                        ]}
-                      />
-                    </PieChart>
-                  )}
-                </ResponsiveContainer>
-                {isDesktop && (
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="rounded-2xl bg-background/80 px-4 py-2 text-center shadow-sm">
-                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                        Total
-                      </p>
-                      <p className="text-lg font-semibold text-foreground">
-                        {currencyMapper(currency)}
-                        {totalAmount.toLocaleString(undefined, {
+                      {pieData.map((item, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            item.name === "__placeholder__"
+                              ? "transparent"
+                              : getCategoryColor(
+                                  item.name,
+                                  COLORS[index % COLORS.length],
+                                  categoryMetaByName,
+                                )
+                          }
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={(props) => {
+                        if (!props.active || !props.payload?.length) return null;
+                        const item = props.payload[0];
+                        if (!item || item.name === "__placeholder__") return null;
+                        const name = item.name;
+                        const val = item.value;
+                        return (
+                          <div
+                            style={{
+                              backgroundColor: "#0f172a",
+                              borderRadius: "12px",
+                              border: "1px solid rgba(148,163,184,0.2)",
+                              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                              padding: "8px 12px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#e2e8f0",
+                                marginBottom: 4,
+                                fontSize: 12,
+                                fontWeight: 500,
+                              }}
+                            >
+                              {name}
+                            </p>
+                            <p
+                              style={{
+                                color: "#4ade80",
+                                fontWeight: 600,
+                                fontSize: 14,
+                              }}
+                            >
+                              {currencyMapper(currency)}
+                              {val
+                                ? Number(val).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })
+                                : "0.00"}
+                            </p>
+                          </div>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                )}
+              </ResponsiveContainer>
+              {isDesktop && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="text-center flex flex-col items-center justify-center">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
+                      Total
+                    </p>
+                    <p className="text-base md:text-lg font-semibold font-mono text-foreground h-7 flex items-center justify-center">
+                      {loading ? (
+                        <Spinner className="size-4 text-muted-foreground" />
+                      ) : (
+                        `${currencyMapper(currency)}${totalAmount.toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
-                        })}
-                      </p>
-                    </div>
+                        })}`
+                      )}
+                    </p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {layoutWidth !== 1 && (
-              <div className="space-y-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="rounded-2xl border border-border/50 bg-background/40 p-4 space-y-3">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                   Top Categories
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {topItems.map((item, index) => (
                     <div
                       key={item.name}
-                      className="flex items-center justify-between gap-2 text-sm"
+                      className="flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className="h-2.5 w-2.5 rounded-full"
+                          className="h-2.5 w-2.5 rounded-full shrink-0"
                           style={{
                             backgroundColor: getCategoryColor(
                               item.name,
@@ -360,14 +387,18 @@ export default function PieChartComp({
                             ),
                           }}
                         />
-                        <span className="truncate text-foreground">
+                        <span className="truncate font-medium text-foreground">
                           {item.name}
                         </span>
                       </div>
-                      <span className="text-muted-foreground">
-                        {totalAmount > 0
-                          ? `${Math.round((item.value / totalAmount) * 100)}%`
-                          : "0%"}
+                      <span className="font-mono text-muted-foreground shrink-0 h-5 flex items-center">
+                        {loading ? (
+                          <Spinner className="size-3.5 text-muted-foreground" />
+                        ) : totalAmount > 0 ? (
+                          `${Math.round((item.value / totalAmount) * 100)}%`
+                        ) : (
+                          "0%"
+                        )}
                       </span>
                     </div>
                   ))}
@@ -524,6 +555,7 @@ export function ExpensesOverDays({
   min_year,
   min_month,
   loading = false,
+  layoutWidth,
 }: {
   overTheDaysThisMonth?: ExpenseOverview["overTheDaysThisMonth"];
   darkMode: boolean;
@@ -536,6 +568,7 @@ export function ExpensesOverDays({
   min_year: number;
   min_month: number;
   loading: boolean;
+  layoutWidth?: number;
 }) {
   // Transform to recharts-friendly format
   const chartData = Object.entries(overTheDaysThisMonth || {}).map(
@@ -559,14 +592,12 @@ export function ExpensesOverDays({
 
   return (
     <Card
-      title={title || "Spending Over Days"}
-      // description="Tracks your expenses day by day for the current month"
-      className="w-full h-full min-h-[360px] md:min-h-[420px] flex flex-col overflow-hidden border-border/70 shadow-sm"
+      className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm flex flex-col justify-between"
     >
       <CardHeader className="flex flex-wrap justify-between items-center gap-3">
         <div>
-          <CardTitle>{title || "Spending Over Days"}</CardTitle>
-          <p className="text-xs text-muted-foreground mt-1">
+          <CardTitle className="text-lg font-medium text-foreground">{title || "Spending Over Days"}</CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Day-by-day spending pulse
           </p>
         </div>
@@ -577,12 +608,12 @@ export function ExpensesOverDays({
                 value={currentMonth.toString()}
                 onValueChange={(value) => setCurrentMonth(parseInt(value, 10))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-[100px] bg-background/50 border-border/40 text-xs">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border-border/40">
                   <SelectGroup>
-                    <SelectLabel>Select Month</SelectLabel>
+                    <SelectLabel className="text-xs">Select Month</SelectLabel>
                     {Array.from({ length: 12 }, (_, i) => i + 1).map(
                       (month) => (
                         <SelectItem
@@ -591,9 +622,10 @@ export function ExpensesOverDays({
                           disabled={
                             currentMonthYear === min_year && month < min_month
                           }
+                          className="text-xs"
                         >
                           {new Date(0, month - 1).toLocaleString("default", {
-                            month: "long",
+                            month: "short",
                           })}
                         </SelectItem>
                       ),
@@ -609,12 +641,12 @@ export function ExpensesOverDays({
                   setCurrentMonthYear(parseInt(value, 10))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-[100px] bg-background/50 border-border/40 text-xs">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border-border/40">
                   <SelectGroup>
-                    <SelectLabel>Select Year</SelectLabel>
+                    <SelectLabel className="text-xs">Select Year</SelectLabel>
                     {Array.from(
                       {
                         length:
@@ -622,7 +654,7 @@ export function ExpensesOverDays({
                       },
                       (_, i) => (min_year || 2020) + i,
                     ).map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
+                      <SelectItem key={year} value={year.toString()} className="text-xs">
                         {year}
                       </SelectItem>
                     ))}
@@ -633,143 +665,167 @@ export function ExpensesOverDays({
           </div>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex-1">
-        {chartData.length > 0 ? (
-          <>
-            <ResponsiveContainer height={height}>
+      <CardContent className="flex-1 flex flex-col justify-between">
+        {!loading && chartData.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center min-h-[260px]">
+            <NoDataUI />
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col justify-between">
+            <div className="flex-1 min-h-[180px] w-full flex items-center justify-center">
               {loading ? (
                 <SpinnerUI />
               ) : (
-                <ComposedChart data={orderedDays}>
-                  <defs>
-                    <linearGradient id="daysFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor="#34d399"
-                        stopOpacity={0.35}
-                      />
-                      <stop
-                        offset="70%"
-                        stopColor="#34d399"
-                        stopOpacity={0.05}
-                      />
-                      <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    stroke={darkMode ? "#5f6266" : "#ccc"}
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="day"
-                    interval={"preserveStartEnd"}
-                    minTickGap={10}
-                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                    tickFormatter={(value: string) =>
-                      `${value}${(() => {
-                        if (value === "1") return "st";
-                        if (value === "2") return "nd";
-                        if (value === "3") return "rd";
-                        return "th";
-                      })()}`
-                    }
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                    tickFormatter={(value: number) =>
-                      `${currencyMapper(currency)}${value.toFixed(0)}`
-                    }
-                    width={35}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0f172a",
-                      borderRadius: "12px",
-                      border: "1px solid rgba(148,163,184,0.2)",
-                      boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                    }}
-                    labelStyle={{ color: "#e2e8f0" }}
-                    cursor={{
-                      stroke: darkMode ? "#0D0D0D" : "#DBDBDB",
-                      strokeWidth: 1,
-                      fill: "rgba(255, 255, 255, 0.1)",
-                    }}
-                    formatter={(spent) =>
-                      `${currencyMapper(currency)}${
-                        spent
-                          ? spent.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })
-                          : 0
-                      }`
-                    }
-                    labelFormatter={(key) => {
-                      return `${key}${(() => {
-                        if (key === "1") return "st";
-                        if (key === "2") return "nd";
-                        if (key === "3") return "rd";
-                        return "th";
-                      })()}`;
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#34d399"
-                    strokeWidth={3}
-                    fill="url(#daysFill)"
-                    dot={false}
-                    activeDot={{ r: 5, stroke: "#10b981", strokeWidth: 2 }}
-                  />
-                </ComposedChart>
+                <ResponsiveContainer width="100%" height={height}>
+                  <ComposedChart data={orderedDays}>
+                    <defs>
+                      <linearGradient id="daysFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="0%"
+                          stopColor="#34d399"
+                          stopOpacity={0.35}
+                        />
+                        <stop
+                          offset="70%"
+                          stopColor="#34d399"
+                          stopOpacity={0.05}
+                        />
+                        <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      stroke={darkMode ? "#5f6266" : "#ccc"}
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="day"
+                      interval={"preserveStartEnd"}
+                      minTickGap={layoutWidth === 1 ? 20 : 10}
+                      tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                      tickFormatter={(value: string) =>
+                        `${value}${(() => {
+                          if (value === "1") return "st";
+                          if (value === "2") return "nd";
+                          if (value === "3") return "rd";
+                          return "th";
+                        })()}`
+                      }
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                      tickFormatter={(value: number) =>
+                        `${currencyMapper(currency)}${value.toFixed(0)}`
+                      }
+                      width={35}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#0f172a",
+                        borderRadius: "12px",
+                        border: "1px solid rgba(148,163,184,0.2)",
+                        boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                      }}
+                      labelStyle={{ color: "#e2e8f0" }}
+                      cursor={{
+                        stroke: darkMode ? "#0D0D0D" : "#DBDBDB",
+                        strokeWidth: 1,
+                        fill: "rgba(255, 255, 255, 0.1)",
+                      }}
+                      formatter={(spent) =>
+                        `${currencyMapper(currency)}${
+                          spent
+                            ? spent.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : 0
+                        }`
+                      }
+                      labelFormatter={(key) => {
+                        return `${key}${(() => {
+                          if (key === "1") return "st";
+                          if (key === "2") return "nd";
+                          if (key === "3") return "rd";
+                          return "th";
+                        })()}`;
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#34d399"
+                      strokeWidth={3}
+                      fill="url(#daysFill)"
+                      dot={false}
+                      activeDot={{ r: 5, stroke: "#10b981", strokeWidth: 2 }}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
               )}
-            </ResponsiveContainer>
-            <div className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm ">
+            </div>
+            <div
+              className={`mt-4 grid gap-2.5 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm ${
+                layoutWidth === 1
+                  ? "grid-cols-2"
+                  : "grid-cols-2 sm:grid-cols-4"
+              }`}
+            >
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                   Total
                 </p>
-                <p className="font-semibold text-foreground">
-                  {currencyMapper(currency)}
-                  {totalSpent.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-3.5 text-muted-foreground" />
+                  ) : (
+                    `${currencyMapper(currency)}${totalSpent.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  )}
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                   Daily Avg
                 </p>
-                <p className="font-semibold text-foreground">
-                  {currencyMapper(currency)}
-                  {avgSpent.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-3.5 text-muted-foreground" />
+                  ) : (
+                    `${currencyMapper(currency)}${avgSpent.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  )}
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                   Peak Day
                 </p>
-                <p className="font-semibold text-foreground">
-                  Day {peakDay.day}
+                <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-3.5 text-muted-foreground" />
+                  ) : (
+                    `Day ${peakDay.day}`
+                  )}
                 </p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                   Last vs Prev
                 </p>
-                <TrendBadge trend={dayTrend} />
+                <div className="h-6 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-3.5 text-muted-foreground" />
+                  ) : (
+                    <TrendBadge trend={dayTrend} />
+                  )}
+                </div>
               </div>
             </div>
-          </>
-        ) : loading ? (
-          <SpinnerUI />
-        ) : (
-          <NoDataUI />
+          </div>
         )}
       </CardContent>
     </Card>
@@ -1225,6 +1281,7 @@ export function YearlyExpenseLineChartV2({
   loading = false,
   setOverviewParams,
   overviewParams,
+  layoutWidth,
 }: {
   amountByMonth?: ExpenseOverview["amountByMonth"];
   amountByMonthV2?: ExpenseOverview["monthlyCategoryExpense"];
@@ -1237,6 +1294,7 @@ export function YearlyExpenseLineChartV2({
   >;
   overviewParams: { count?: number; type?: OverviewEnum };
   loading: boolean;
+  layoutWidth?: number;
 }) {
   const [toggle, setToggle] = useState(true); // true for monthly, false for category
   const [chartData, setChartData] = useState<ChartRow[]>([]);
@@ -1368,19 +1426,16 @@ export function YearlyExpenseLineChartV2({
   }, [selectedTimeframe, setOverviewParams]);
 
   return (
-    <Card className="w-full overflow-hidden border-border/70 shadow-sm">
-      <CardHeader
-        className="flex flex-wrap justify-between items-center gap-3 
-      "
-      >
-        <CardTitle className="flex items-center justify-between w-fit gap-2">
-          {title || "Expense Trends"}
+    <Card className="w-full h-full border-border/40 shadow-none overflow-hidden bg-card/30 backdrop-blur-sm flex flex-col justify-between">
+      <CardHeader className="flex flex-wrap justify-between items-center gap-3">
+        <CardTitle className="flex flex-wrap items-center justify-between w-fit gap-3 text-lg font-medium text-foreground">
+          <span>{title || "Expense Trends"}</span>
           <Tabs defaultValue="monthly">
-            <TabsList>
-              <TabsTrigger value="monthly" onClick={() => setToggle(true)}>
+            <TabsList className="bg-background/50 border border-border/40">
+              <TabsTrigger value="monthly" onClick={() => setToggle(true)} className="text-xs">
                 Monthly
               </TabsTrigger>
-              <TabsTrigger value="category" onClick={() => setToggle(false)}>
+              <TabsTrigger value="category" onClick={() => setToggle(false)} className="text-xs">
                 Category
               </TabsTrigger>
             </TabsList>
@@ -1395,17 +1450,18 @@ export function YearlyExpenseLineChartV2({
                 }
                 value={selectedTimeframe.toString()}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-[130px] bg-background/50 border-border/40 text-xs">
                   <SelectValue placeholder="Past 6 Months" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border-border/40">
                   <SelectGroup>
-                    <SelectLabel>Choose Time Period</SelectLabel>
+                    <SelectLabel className="text-xs">Choose Time Period</SelectLabel>
                     {Array.from({ length: 3 }, (_, i) => i).map((index) => (
                       <SelectItem
                         key={index}
                         value={index.toString()}
                         onClick={() => setSelectedTimeframe(index)}
+                        className="text-xs"
                       >
                         {typesMapper[index as keyof typeof typesMapper]}
                       </SelectItem>
@@ -1444,17 +1500,18 @@ export function YearlyExpenseLineChartV2({
                 }
                 value={selectedTimeframe.toString()}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-[130px] bg-background/50 border-border/40 text-xs">
                   <SelectValue placeholder="Past 6 Months" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border-border/40">
                   <SelectGroup>
-                    <SelectLabel>Choose Time Period</SelectLabel>
+                    <SelectLabel className="text-xs">Choose Time Period</SelectLabel>
                     {Array.from({ length: 3 }, (_, i) => i).map((index) => (
                       <SelectItem
                         key={index}
                         value={index.toString()}
                         onClick={() => setSelectedTimeframe(index)}
+                        className="text-xs"
                       >
                         {typesMapper[index as keyof typeof typesMapper]}
                       </SelectItem>
@@ -1467,367 +1524,397 @@ export function YearlyExpenseLineChartV2({
         )}
       </CardHeader>
       {toggle ? (
-        <CardContent>
-          {chartData.length === 0 ? (
-            loading ? (
-              <SpinnerUI />
-            ) : (
+        <CardContent className="flex-1 flex flex-col justify-between pt-0 pb-4">
+          {!loading && chartData.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center min-h-[260px]">
               <NoDataUI />
-            )
+            </div>
           ) : (
-            <>
-              <ResponsiveContainer height={220}>
+            <div className="flex-1 flex flex-col justify-between">
+              <div className="flex-1 min-h-[180px] w-full flex items-center justify-center">
                 {loading ? (
                   <SpinnerUI />
                 ) : (
-                  <ComposedChart
-                    data={
-                      chartData.length === 1
-                        ? [
-                            {
-                              name: "",
-                              amount: chartData[0].amount,
-                              __ghost: true,
-                            },
-                            ...chartData,
-                            {
-                              name: " ",
-                              amount: chartData[0].amount,
-                              __ghost: true,
-                            },
-                          ]
-                        : chartData
-                    }
-                        margin={{
-                          left:-9
-                        }}
-                  >
-                    <CartesianGrid
-                      stroke={darkMode ? "#242424" : "#DBDBDB"}
-                      vertical={false}
-                      strokeDasharray="1"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                      interval={"preserveStartEnd"}
-                          minTickGap={15}
-                        />
-                    {/* <YAxis
-                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                    tickFormatter={(value) =>
-                      `${formatAmountCompact(value, currency)}`
-                    }
-                  /> */}
-                    <Tooltip
-                      cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
-                      content={(props) => {
-                        if (!props.active || !props.payload?.length)
-                          return null;
-                        if (props.payload[0]?.payload?.__ghost) return null;
-                        const val = props.payload[0]?.value;
-                        return (
-                          <div
-                            style={{
-                              backgroundColor: "#0f172a",
-                              borderRadius: "12px",
-                              border: "1px solid rgba(148,163,184,0.2)",
-                              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                              padding: "8px 12px",
-                            }}
-                          >
-                            <p
-                              style={{
-                                color: "#e2e8f0",
-                                marginBottom: 4,
-                                fontSize: 12,
-                              }}
-                            >
-                              {props.label}
-                            </p>
-                            <p
-                              style={{
-                                color: "#4ade80",
-                                fontWeight: 600,
-                                fontSize: 14,
-                              }}
-                            >
-                              {currencyMapper(currency)}
-                              {val
-                                ? Number(val).toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                : "0.00"}
-                            </p>
-                          </div>
-                        );
+                  <ResponsiveContainer width="100%" height={220}>
+                    <ComposedChart
+                      data={
+                        chartData.length === 1
+                          ? [
+                              {
+                                name: "",
+                                amount: chartData[0].amount,
+                                __ghost: true,
+                              },
+                              ...chartData,
+                              {
+                                name: " ",
+                                amount: chartData[0].amount,
+                                __ghost: true,
+                              },
+                            ]
+                          : chartData
+                      }
+                      margin={{
+                        left: 0,
+                        right: 10,
+                        top: 10,
+                        bottom: 0,
                       }}
-                    />
+                    >
+                      <CartesianGrid
+                        stroke={darkMode ? "#242424" : "#DBDBDB"}
+                        vertical={false}
+                        strokeDasharray="1"
+                      />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                        interval={"preserveStartEnd"}
+                        minTickGap={layoutWidth === 1 ? 25 : 15}
+                      />
+                      <Tooltip
+                        cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
+                        content={(props) => {
+                          if (!props.active || !props.payload?.length)
+                            return null;
+                          if (props.payload[0]?.payload?.__ghost) return null;
+                          const val = props.payload[0]?.value;
+                          return (
+                            <div
+                              style={{
+                                backgroundColor: "#0f172a",
+                                borderRadius: "12px",
+                                border: "1px solid rgba(148,163,184,0.2)",
+                                boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                                padding: "8px 12px",
+                              }}
+                            >
+                              <p
+                                style={{
+                                  color: "#e2e8f0",
+                                  marginBottom: 4,
+                                  fontSize: 12,
+                                }}
+                              >
+                                {props.label}
+                              </p>
+                              <p
+                                style={{
+                                  color: "#4ade80",
+                                  fontWeight: 600,
+                                  fontSize: 14,
+                                }}
+                              >
+                                {currencyMapper(currency)}
+                                {val
+                                  ? Number(val).toLocaleString(undefined, {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
+                                  : "0.00"}
+                              </p>
+                            </div>
+                          );
+                        }}
+                      />
 
-                    <Area
-                      type="bump"
-                      dataKey="amount"
-                      stroke="#4ade80"
-                      strokeWidth={2}
-                      // dot={(props) => {
-                      //   if (props?.payload?.__ghost)
-                      //     return <g key={props.key} />;
-                      //   return (
-                      //     <circle
-                      //       key={props.key}
-                      //       cx={props.cx}
-                      //       cy={props.cy}
-                      //       r={4}
-                      //       fill="#4ade80"
-                      //       stroke="#fff"
-                      //       strokeWidth={1.5}
-                      //     />
-                      //   );
-                          // }}
-                      dot={false}
-                      activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
-                      isAnimationActive={true}
-                      fill="#4ade80"
-                      fillOpacity={0.12}
-                    />
-                  </ComposedChart>
+                      <Area
+                        type="bump"
+                        dataKey="amount"
+                        stroke="#4ade80"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+                        isAnimationActive={true}
+                        fill="#4ade80"
+                        fillOpacity={0.12}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
                 )}
-              </ResponsiveContainer>
+              </div>
               <div
-                className="mt-4 grid gap-2 grid-cols-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 
-              text-sm"
+                className={`mt-4 grid gap-2.5 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm ${
+                  layoutWidth === 1
+                    ? "grid-cols-2"
+                    : "grid-cols-2 sm:grid-cols-4"
+                }`}
               >
                 <div>
-                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Total
                   </Label>
-                  <p className="font-semibold text-foreground">
-                    {currencyMapper(currency)}
-                    {totalForPeriod.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                  <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      `${currencyMapper(currency)}${totalForPeriod.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`
+                    )}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Avg / Period
                   </Label>
-                  <p className="font-semibold text-foreground">
-                    {currencyMapper(currency)}
-                    {avgForPeriod.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                  <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      `${currencyMapper(currency)}${avgForPeriod.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`
+                    )}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Peak
                   </Label>
-                  <p className="font-semibold text-foreground">
-                    {peakPeriod.name}
+                  <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      peakPeriod.name
+                    )}
                   </p>
                 </div>
                 <div>
-                  <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Last vs Prev
                   </Label>
-                  <TrendBadge trend={periodTrend} />
+                  <div className="h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      <TrendBadge trend={periodTrend} />
+                    )}
+                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </CardContent>
       ) : (
-        <CardContent>
-          {chartData.length === 0 ? (
-            loading ? (
-              <SpinnerUI />
-            ) : (
+        <CardContent className="flex-1 flex flex-col justify-between pt-0 pb-4">
+          {!loading && chartData.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center min-h-[260px]">
               <NoDataUI />
-            )
+            </div>
           ) : (
-            <>
-              <ResponsiveContainer height={220}>
+            <div className="flex-1 flex flex-col justify-between">
+              <div className="flex-1 min-h-[180px] w-full flex items-center justify-center">
                 {loading ? (
                   <SpinnerUI />
                 ) : (
-                  <ComposedChart
-                    data={
-                      chartData.length === 1
-                        ? [
-                            {
-                              name: "",
-                              amount: chartData[0].amount,
-                              __ghost: true,
-                              ...Object.fromEntries(
-                                Object.keys(chartData[0])
-                                  .filter((k) => k !== "name" && k !== "amount")
-                                  .map((k) => [k, (chartData[0] as any)[k]]),
-                              ),
-                            },
-                            ...chartData,
-                            {
-                              name: " ",
-                              amount: chartData[0].amount,
-                              __ghost: true,
-                              ...Object.fromEntries(
-                                Object.keys(chartData[0])
-                                  .filter((k) => k !== "name" && k !== "amount")
-                                  .map((k) => [k, (chartData[0] as any)[k]]),
-                              ),
-                            },
-                          ]
-                        : chartData
-                    }
-                  >
-                    <CartesianGrid
-                      stroke={darkMode ? "#242424" : "#DBDBDB"}
-                      vertical={false}
-                      strokeDasharray="1"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
-                      interval={"preserveStartEnd"}
-                      minTickGap={10}
-                    />
+                  <ResponsiveContainer width="100%" height={220}>
+                    <ComposedChart
+                      data={
+                        chartData.length === 1
+                          ? [
+                              {
+                                name: "",
+                                amount: chartData[0].amount,
+                                __ghost: true,
+                                ...Object.fromEntries(
+                                  Object.keys(chartData[0])
+                                    .filter((k) => k !== "name" && k !== "amount")
+                                    .map((k) => [k, (chartData[0] as any)[k]]),
+                                ),
+                              },
+                              ...chartData,
+                              {
+                                name: " ",
+                                amount: chartData[0].amount,
+                                __ghost: true,
+                                ...Object.fromEntries(
+                                  Object.keys(chartData[0])
+                                    .filter((k) => k !== "name" && k !== "amount")
+                                    .map((k) => [k, (chartData[0] as any)[k]]),
+                                ),
+                              },
+                            ]
+                          : chartData
+                      }
+                      margin={{
+                        left: 0,
+                        right: 10,
+                        top: 10,
+                        bottom: 0,
+                      }}
+                    >
+                      <CartesianGrid
+                        stroke={darkMode ? "#242424" : "#DBDBDB"}
+                        vertical={false}
+                        strokeDasharray="1"
+                      />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 12, fill: darkMode ? "#fff" : "#000" }}
+                        interval={"preserveStartEnd"}
+                        minTickGap={layoutWidth === 1 ? 25 : 15}
+                      />
 
-                    <Tooltip
-                      cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
-                      content={(props) => {
-                        if (!props.active || !props.payload?.length)
-                          return null;
-                        if (props.payload[0]?.payload?.__ghost) return null;
-                        return (
-                          <div
-                            style={{
-                              backgroundColor: "#0f172a",
-                              borderRadius: "12px",
-                              border: "1px solid rgba(148,163,184,0.2)",
-                              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
-                              padding: "8px 12px",
-                              fontSize: 14,
-                            }}
-                          >
-                            <p
+                      <Tooltip
+                        cursor={{ stroke: darkMode ? "#525252" : "#DBDBDB" }}
+                        content={(props) => {
+                          if (!props.active || !props.payload?.length)
+                            return null;
+                          if (props.payload[0]?.payload?.__ghost) return null;
+                          return (
+                            <div
                               style={{
-                                color: "#e2e8f0",
-                                marginBottom: 4,
-                                fontSize: 12,
+                                backgroundColor: "#0f172a",
+                                borderRadius: "12px",
+                                border: "1px solid rgba(148,163,184,0.2)",
+                                boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+                                padding: "8px 12px",
+                                fontSize: 14,
                               }}
                             >
-                              {props.label}
-                            </p>
-                            {props.payload
-                              .filter((p) => !p.payload?.__ghost)
-                              .map((p, i) => {
-                                const rawVal = p.dataKey && p.payload && p.payload[p.dataKey as string] !== undefined 
-                                  ? p.payload[p.dataKey as string] 
-                                  : (Array.isArray(p.value) ? p.value[1] - p.value[0] : p.value);
+                              <p
+                                style={{
+                                  color: "#e2e8f0",
+                                  marginBottom: 4,
+                                  fontSize: 12,
+                                }}
+                              >
+                                {props.label}
+                              </p>
+                              {props.payload
+                                .filter((p) => !p.payload?.__ghost)
+                                .map((p, i) => {
+                                  const rawVal = p.dataKey && p.payload && p.payload[p.dataKey as string] !== undefined 
+                                    ? p.payload[p.dataKey as string] 
+                                    : (Array.isArray(p.value) ? p.value[1] - p.value[0] : p.value);
+                                  return (
+                                    <p
+                                      key={i}
+                                      style={{
+                                        color: p.color ?? "#fff",
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      {p.name}: {currencyMapper(currency)}
+                                      {rawVal !== undefined && rawVal !== null
+                                        ? Number(rawVal).toLocaleString(
+                                            undefined,
+                                            {
+                                              minimumFractionDigits: 2,
+                                              maximumFractionDigits: 2,
+                                            },
+                                          )
+                                        : "0.00"}
+                                    </p>
+                                  );
+                                })}
+                            </div>
+                          );
+                        }}
+                      />
+                      {Object.keys(chartData[0])
+                        .filter((key) => key !== "name")
+                        .map((category, index) => {
+                          if (category === "amount") return null;
+                          const seriesColor = getCategoryColor(
+                            category,
+                            COLORS[index % COLORS.length],
+                            categoryMetaByName,
+                          );
+                          return (
+                            <Area
+                              key={category}
+                              type="monotone"
+                              dataKey={category}
+                              stackId="1"
+                              stroke={seriesColor}
+                              strokeWidth={2}
+                              fill={seriesColor}
+                              fillOpacity={0.25}
+                              dot={false}
+                              activeDot={(props: any) => {
+                                if (props?.payload?.__ghost)
+                                  return <g key={props.key} />;
                                 return (
-                                  <p
-                                    key={i}
-                                    style={{
-                                      color: p.color ?? "#fff",
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    {p.name}: {currencyMapper(currency)}
-                                    {rawVal !== undefined && rawVal !== null
-                                      ? Number(rawVal).toLocaleString(
-                                          undefined,
-                                          {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                          },
-                                        )
-                                      : "0.00"}
-                                  </p>
+                                  <circle
+                                    key={props.key}
+                                    cx={props.cx}
+                                    cy={props.cy}
+                                    r={4}
+                                    fill={seriesColor}
+                                    stroke="#fff"
+                                    strokeWidth={1.5}
+                                  />
                                 );
-                              })}
-                          </div>
-                        );
-                      }}
-                    />
-                    {Object.keys(chartData[0])
-                      .filter((key) => key !== "name")
-                      .map((category, index) => {
-                        if (category === "amount") return null;
-                        const seriesColor = getCategoryColor(
-                          category,
-                          COLORS[index % COLORS.length],
-                          categoryMetaByName,
-                        );
-                        return (
-                          <Area
-                            key={category}
-                            type="monotone"
-                            dataKey={category}
-                            stackId="1"
-                            stroke={seriesColor}
-                            strokeWidth={2}
-                            fill={seriesColor}
-                            fillOpacity={0.25}
-                            dot={false}
-                            activeDot={(props: any) => {
-                              if (props?.payload?.__ghost)
-                                return <g key={props.key} />;
-                              return (
-                                <circle
-                                  key={props.key}
-                                  cx={props.cx}
-                                  cy={props.cy}
-                                  r={4}
-                                  fill={seriesColor}
-                                  stroke="#fff"
-                                  strokeWidth={1.5}
-                                />
-                              );
-                            }}
-                            isAnimationActive={true}
-                          />
-                        );
-                      })}
-                    {/* <Legend /> */}
-                  </ComposedChart>
+                              }}
+                              isAnimationActive={true}
+                            />
+                          );
+                        })}
+                    </ComposedChart>
+                  </ResponsiveContainer>
                 )}
-              </ResponsiveContainer>
-              <div className="mt-4 grid gap-2 sm:grid-cols-4 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
+              </div>
+              <div
+                className={`mt-4 grid gap-2.5 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 ${
+                  layoutWidth === 1
+                    ? "grid-cols-2"
+                    : "grid-cols-2 sm:grid-cols-4"
+                }`}
+              >
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Series
                   </p>
-                  <p className="font-semibold text-foreground">
-                    {seriesCountV2}
+                  <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      seriesCountV2
+                    )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Periods
                   </p>
-                  <p className="font-semibold text-foreground">
-                    {chartData.length}
+                  <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      chartData.length
+                    )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Latest
                   </p>
-                  <p className="font-semibold text-foreground">
-                    {chartData[chartData.length - 1]?.name || "-"}
+                  <p className="font-semibold text-foreground truncate h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      chartData[chartData.length - 1]?.name || "-"
+                    )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium block truncate">
                     Trend
                   </p>
-                  <TrendBadge trend={categoryTrendV2} />
+                  <div className="h-6 flex items-center">
+                    {loading ? (
+                      <Spinner className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      <TrendBadge trend={categoryTrendV2} />
+                    )}
+                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </CardContent>
       )}
@@ -1964,12 +2051,10 @@ export function IncomeExpenseComparisonChart({
         </CardAction>
       </CardHeader>
       <CardContent>
-        {chartData.length === 0 ? (
-          loading ? (
-            <SpinnerUI />
-          ) : (
+        {!loading && chartData.length === 0 ? (
+          <div className="flex items-center justify-center min-h-[240px]">
             <NoDataUI />
-          )
+          </div>
         ) : (
           <>
             <ResponsiveContainer height={240}>
@@ -2077,44 +2162,57 @@ export function IncomeExpenseComparisonChart({
                 <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Income
                 </p>
-                <p className="text-lg font-medium font-mono text-emerald-500">
-                  {currencyMapper(currency)}
-                  {totalIncome.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                <p className="text-lg font-medium font-mono text-emerald-500 h-7 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-4 text-muted-foreground" />
+                  ) : (
+                    `${currencyMapper(currency)}${totalIncome.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  )}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Expense
                 </p>
-                <p className="text-lg font-medium font-mono text-rose-500">
-                  {currencyMapper(currency)}
-                  {totalExpense.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                <p className="text-lg font-medium font-mono text-rose-500 h-7 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-4 text-muted-foreground" />
+                  ) : (
+                    `${currencyMapper(currency)}${totalExpense.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  )}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Net Flow
                 </p>
-                <p className={`text-lg font-medium font-mono ${net >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
-                  {currencyMapper(currency)}
-                  {net.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                <p className={`text-lg font-medium font-mono h-7 flex items-center ${net >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                  {loading ? (
+                    <Spinner className="size-4 text-muted-foreground" />
+                  ) : (
+                    `${currencyMapper(currency)}${net.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`
+                  )}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                   Income Trend
                 </p>
-                <div className="mt-0.5">
-                  <TrendBadge trend={trend} />
+                <div className="h-7 flex items-center">
+                  {loading ? (
+                    <Spinner className="size-4 text-muted-foreground" />
+                  ) : (
+                    <TrendBadge trend={trend} />
+                  )}
                 </div>
               </div>
             </div>
