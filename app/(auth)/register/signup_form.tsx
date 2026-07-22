@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import GoogleLogo from "@/assets/icon/google-logo.png";
 import { signIn } from "next-auth/react";
+import { FaGithub, FaDiscord } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -440,17 +441,49 @@ export default function SignUpForm() {
         <hr className="w-full border-border/60" />
       </div>
 
-      <Button
-        type="button"
-        variant={"outline"}
-        className="w-full"
-        onClick={() => {
-          handleGoogleLogin();
-        }}
-      >
-        <Image src={GoogleLogo} alt="Google Logo" width={20} className="mr-2" />
-        <span className="sm:inline">Sign Up with Google</span>
-      </Button>
+      <div className="grid grid-cols-3 gap-2">
+        <Button
+          type="button"
+          variant={"outline"}
+          className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
+          onClick={() => {
+            signIn("google", { callbackUrl: "/dashboard" });
+          }}
+        >
+          <Image
+            src={GoogleLogo}
+            alt="Google Logo"
+            width={16}
+            height={16}
+            className="shrink-0"
+          />
+          <span>Google</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant={"outline"}
+          className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
+          onClick={() => {
+            signIn("github", { callbackUrl: "/dashboard" });
+          }}
+        >
+          <FaGithub className="h-4 w-4 shrink-0 text-neutral-900 dark:text-neutral-100" />
+          <span>GitHub</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant={"outline"}
+          className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
+          onClick={() => {
+            signIn("discord", { callbackUrl: "/dashboard" });
+          }}
+        >
+          <FaDiscord className="h-4 w-4 shrink-0 text-indigo-500" />
+          <span>Discord</span>
+        </Button>
+      </div>
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}

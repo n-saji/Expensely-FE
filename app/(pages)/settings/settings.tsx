@@ -50,6 +50,7 @@ import {
 } from "@/global/constants";
 import { currencyCodes, currencyMap } from "@/utils/currencyMapper";
 import Sessions from "./_components/sessions";
+import OAuthAccounts from "./_components/oauth-accounts";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
@@ -574,6 +575,8 @@ export default function SettingsPage() {
               </CardAction>
             </CardHeader>
           </Card>
+
+          <OAuthAccounts />
 
           <Card className="w-full border-border/70 shadow-sm overflow-hidden">
             <CardHeader>

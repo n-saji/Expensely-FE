@@ -19,6 +19,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { AxiosError } from "axios";
 import { toast, Toaster } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { FaGithub, FaDiscord } from "react-icons/fa";
 import UserPreferences from "@/utils/userPreferences";
 
 export default function LoginForm() {
@@ -231,10 +232,10 @@ export default function LoginForm() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    signIn("google", { callbackUrl: "/dashboard" }).catch((error) => {
-      console.error("Google login error:", error);
-      toast.error("Google login failed. Please try again.");
+  const handleOAuthLogin = (provider: string) => {
+    signIn(provider, { callbackUrl: "/dashboard" }).catch((error) => {
+      console.error(`${provider} login error:`, error);
+      toast.error(`${provider} login failed. Please try again.`);
     });
   };
 
@@ -325,22 +326,43 @@ export default function LoginForm() {
           <hr className="w-full border-border/60" />
         </div>
 
-        <Button
-          type="button"
-          variant={"outline"}
-          className="w-full"
-          onClick={() => {
-            handleGoogleLogin();
-          }}
-        >
-          <Image
-            src={GoogleLogo}
-            alt="Google Logo"
-            width={20}
-            className="mr-2"
-          />
-          <span className="sm:inline">Log in with Google</span>
-        </Button>
+        <div className="grid grid-cols-3 gap-2">
+          <Button
+            type="button"
+            variant={"outline"}
+            className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
+            onClick={() => handleOAuthLogin("google")}
+          >
+            <Image
+              src={GoogleLogo}
+              alt="Google Logo"
+              width={16}
+              height={16}
+              className="shrink-0"
+            />
+            <span>Google</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant={"outline"}
+            className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
+            onClick={() => handleOAuthLogin("github")}
+          >
+            <FaGithub className="h-4 w-4 shrink-0 text-neutral-900 dark:text-neutral-100" />
+            <span>GitHub</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant={"outline"}
+            className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
+            onClick={() => handleOAuthLogin("discord")}
+          >
+            <FaDiscord className="h-4 w-4 shrink-0 text-indigo-500" />
+            <span>Discord</span>
+          </Button>
+        </div>
       </div>
 
       <div className="text-center text-sm text-muted-foreground">

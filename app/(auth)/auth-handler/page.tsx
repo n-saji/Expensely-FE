@@ -1,34 +1,64 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
-import fetchProfileUrl from "@/utils/fetchProfileURl";
 import api from "@/lib/api";
 
 export default function AuthHandler() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && session) {
+      const isLinkingMode = searchParams.get("action") === "link";
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (session.idToken) {
+        headers["Authorization"] = `Bearer ${session.idToken}`;
+      }
+
+      if (isLinkingMode) {
+        // Handle linking to currently authenticated user session
+        api
+          .post(
+            `/users/oauth/link`,
+            {
+              provider: session.provider || "google",
+              providerUserId: session.providerAccountId || session.user?.email || "",
+              providerEmail: session.user?.email || "",
+            }
+          )
+          .then(() => {
+            router.push("/settings?tab=security&linked=success");
+          })
+          .catch((err) => {
+            console.error("Error linking OAuth account:", err);
+            const msg = err?.response?.data?.message || err?.message || "Failed to link account.";
+            router.push(`/settings?tab=security&linked=error&message=${encodeURIComponent(msg)}`);
+          });
+        return;
+      }
+
       api
         .post(
           `/users/verify-oauth-login`,
           {
+            provider: session.provider || "google",
+            providerUserId: session.providerAccountId || session.user?.email || "",
             email: session.user ? session.user.email : null,
             name: session.user ? session.user.name : null,
             image: session.user ? session.user.image : null,
             token: session.accessToken,
           },
           {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.idToken}`, //dont remove - token from google
-            },
+            headers: headers as any,
           },
         )
         .catch((error) => {
@@ -38,9 +68,10 @@ export default function AuthHandler() {
           );
           return Promise.reject(error);
         })
-        .then((res) => res.data)
+        .then((res) => res?.data)
         .then(async (data) => {
-          if (data.error !== "") {
+          if (!data) return;
+          if (data.error && data.error !== "") {
             setError(
               data.message || "Authentication failed. Please try again.",
             );
@@ -115,7 +146,7 @@ export default function AuthHandler() {
     } else if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status]);
+  }, [status, session, searchParams, router, dispatch]);
 
   return (
     <div
