@@ -249,16 +249,26 @@ export default function CompleteProfileWizard() {
     }
 
     if (currentStep === 2) {
-      if (!password) {
-        nextErrors.password = "Password is required.";
-      } else if (!STRONG_PASSWORD_REGEX.test(password)) {
-        nextErrors.password =
-          "Password must be at least 8 characters, with letters, numbers, and special characters.";
-      }
-      if (!confirmPassword) {
-        nextErrors.confirmPassword = "Confirm password is required.";
-      } else if (password !== confirmPassword) {
-        nextErrors.confirmPassword = "Passwords do not match.";
+      if (!user.isOauth2User) {
+        if (!password) {
+          nextErrors.password = "Password is required.";
+        } else if (!STRONG_PASSWORD_REGEX.test(password)) {
+          nextErrors.password =
+            "Password must be at least 8 characters, with letters, numbers, and special characters.";
+        }
+        if (!confirmPassword) {
+          nextErrors.confirmPassword = "Confirm password is required.";
+        } else if (password !== confirmPassword) {
+          nextErrors.confirmPassword = "Passwords do not match.";
+        }
+      } else if (password) {
+        if (!STRONG_PASSWORD_REGEX.test(password)) {
+          nextErrors.password =
+            "Password must be at least 8 characters, with letters, numbers, and special characters.";
+        }
+        if (password !== confirmPassword) {
+          nextErrors.confirmPassword = "Passwords do not match.";
+        }
       }
     }
 
@@ -320,14 +330,16 @@ export default function CompleteProfileWizard() {
         throw new Error("Unable to identify logged-in user.");
       }
 
-      setSubmissionProgress(25);
-      setSubmissionStatus("Securing account with your password...");
-      const pwdRes = await api.patch(`/users/update-password`, {
-        password: password,
-        id: userId,
-      });
-      if (pwdRes.status !== 200 || pwdRes.data?.error) {
-        throw pwdRes;
+      if (password && password.trim().length > 0) {
+        setSubmissionProgress(25);
+        setSubmissionStatus("Securing account with your password...");
+        const pwdRes = await api.patch(`/users/update-password`, {
+          password: password,
+          id: userId,
+        });
+        if (pwdRes.status !== 200 || pwdRes.data?.error) {
+          throw pwdRes;
+        }
       }
 
       let finalFilePath = profilePicFilePath;
@@ -643,6 +655,12 @@ export default function CompleteProfileWizard() {
               {/* Step 2: Password Inputs */}
               {step === 2 && (
                 <div className="space-y-5">
+                  {user.isOauth2User && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/10 p-3 text-xs text-primary flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      <span>You signed in using Google. Setting a password is optional.</span>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                       New Password

@@ -83,6 +83,8 @@ function syncUserFromMeResponse(response: unknown) {
         profilePictureUrl?: string;
         profileComplete?: boolean;
         emailVerified?: boolean;
+        isOauth2User?: boolean;
+        is_oauth2_user?: boolean;
       };
       isImpersonated?: boolean;
     };
@@ -118,6 +120,7 @@ function syncUserFromMeResponse(response: unknown) {
       profileComplete: profile.profileComplete,
       emailVerified: profile.emailVerified,
       isImpersonated: data?.data?.isImpersonated ?? false,
+      isOauth2User: profile.isOauth2User ?? profile.is_oauth2_user ?? false,
     }),
   );
 

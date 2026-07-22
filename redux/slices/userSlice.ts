@@ -46,6 +46,7 @@ interface UserState {
   profileComplete: boolean;
   emailVerified: boolean;
   isImpersonated: boolean;
+  isOauth2User: boolean;
 }
 
 const initialState: UserState = {
@@ -67,6 +68,7 @@ const initialState: UserState = {
   profileComplete: false,
   emailVerified: true,
   isImpersonated: false,
+  isOauth2User: false,
 };
 
 const userSlice = createSlice({
@@ -117,6 +119,10 @@ const userSlice = createSlice({
         action.payload.isImpersonated !== undefined
           ? action.payload.isImpersonated
           : state.isImpersonated;
+      state.isOauth2User =
+        action.payload.isOauth2User !== undefined
+          ? action.payload.isOauth2User
+          : state.isOauth2User;
     },
     clearUser: (state) => {
       state.email = "";
@@ -137,6 +143,7 @@ const userSlice = createSlice({
       state.profilePicFilePath = "";
       state.emailVerified = true;
       state.isImpersonated = false;
+      state.isOauth2User = false;
     },
   },
 });
