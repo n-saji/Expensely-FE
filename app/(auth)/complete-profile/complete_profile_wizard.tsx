@@ -249,24 +249,14 @@ export default function CompleteProfileWizard() {
     }
 
     if (currentStep === 2) {
-      if (!user.isOauth2User) {
-        if (!password) {
-          nextErrors.password = "Password is required.";
-        } else if (!STRONG_PASSWORD_REGEX.test(password)) {
+      if (password) {
+        if (!STRONG_PASSWORD_REGEX.test(password)) {
           nextErrors.password =
             "Password must be at least 8 characters, with letters, numbers, and special characters.";
         }
         if (!confirmPassword) {
           nextErrors.confirmPassword = "Confirm password is required.";
         } else if (password !== confirmPassword) {
-          nextErrors.confirmPassword = "Passwords do not match.";
-        }
-      } else if (password) {
-        if (!STRONG_PASSWORD_REGEX.test(password)) {
-          nextErrors.password =
-            "Password must be at least 8 characters, with letters, numbers, and special characters.";
-        }
-        if (password !== confirmPassword) {
           nextErrors.confirmPassword = "Passwords do not match.";
         }
       }
@@ -290,20 +280,25 @@ export default function CompleteProfileWizard() {
     if (step === 1) {
       if (!validateStep(1)) return;
 
-      setCheckingPhone(true);
-      try {
-        const response = await api.get(`/users/check/phone/${phone}`);
-        if (response.data === true) {
-          setErrors((prev) => ({
-            ...prev,
-            phone: "This phone number is already registered.",
-          }));
-          return;
+      const cleanPhone = phone.replace(/\D/g, "");
+      const cleanUserPhone = (user.phone || "").replace(/\D/g, "");
+
+      if (cleanPhone !== cleanUserPhone) {
+        setCheckingPhone(true);
+        try {
+          const response = await api.get(`/users/check/phone/${cleanPhone}`);
+          if (response.data === true) {
+            setErrors((prev) => ({
+              ...prev,
+              phone: "This phone number is already registered.",
+            }));
+            return;
+          }
+        } catch (err) {
+          console.error("Error checking phone number:", err);
+        } finally {
+          setCheckingPhone(false);
         }
-      } catch (err) {
-        console.error("Error checking phone number:", err);
-      } finally {
-        setCheckingPhone(false);
       }
     }
 
