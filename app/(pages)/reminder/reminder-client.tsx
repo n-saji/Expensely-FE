@@ -774,6 +774,23 @@ export default function ReminderClient() {
                   </div>
 
                   <div className="flex items-center gap-1.5">
+                    {((reminder.deliveryType === "IN_APP" || reminder.deliveryType === "BOTH") && !user.inAppNotificationsEnabled) ||
+                    ((reminder.deliveryType === "EMAIL" || reminder.deliveryType === "BOTH") && !user.emailNotificationsEnabled) ? (
+                      <Badge
+                        variant="outline"
+                        className="rounded-full px-2 py-0.5 text-[9px] font-medium border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center gap-1"
+                        title={
+                          reminder.deliveryType === "BOTH" && !user.inAppNotificationsEnabled && !user.emailNotificationsEnabled
+                            ? "In-App & Email notifications are disabled in Settings"
+                            : (reminder.deliveryType === "IN_APP" || reminder.deliveryType === "BOTH") && !user.inAppNotificationsEnabled
+                              ? "In-App notifications disabled in Settings"
+                              : "Email notifications disabled in Settings"
+                        }
+                      >
+                        <AlertTriangle className="h-2.5 w-2.5 text-amber-500" />
+                        <span>Channel Disabled</span>
+                      </Badge>
+                    ) : null}
                     <Badge
                       variant="outline"
                       className={`rounded-full px-2 py-0.5 text-[9px] font-medium border-border/40 tracking-wider ${getPriorityColor(reminder.priority)}`}
@@ -1150,6 +1167,27 @@ export default function ReminderClient() {
                     <SelectItem value="BOTH">Both (In-App & Email)</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {/* Notification Preference Warning Banner */}
+                {((deliveryType === "IN_APP" || deliveryType === "BOTH") && !user.inAppNotificationsEnabled) ||
+                ((deliveryType === "EMAIL" || deliveryType === "BOTH") && !user.emailNotificationsEnabled) ? (
+                  <div className="mt-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs space-y-1">
+                    <div className="flex items-center gap-1.5 font-semibold">
+                      <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                      <span>Disabled Notification Warning</span>
+                    </div>
+                    {(deliveryType === "IN_APP" || deliveryType === "BOTH") && !user.inAppNotificationsEnabled && (
+                      <p className="text-[11px] leading-relaxed">
+                        • <strong>In-App notifications</strong> are disabled in your Account Settings.
+                      </p>
+                    )}
+                    {(deliveryType === "EMAIL" || deliveryType === "BOTH") && !user.emailNotificationsEnabled && (
+                      <p className="text-[11px] leading-relaxed">
+                        • <strong>Email notifications</strong> are disabled in your Account Settings.
+                      </p>
+                    )}
+                  </div>
+                ) : null}
               </div>
 
               {/* Notification Offsets */}

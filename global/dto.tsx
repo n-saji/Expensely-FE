@@ -51,6 +51,8 @@ export interface UserSkeleton {
   isActive?: boolean;
   isAdmin?: boolean;
   notificationsEnabled?: boolean;
+  emailNotificationsEnabled?: boolean;
+  inAppNotificationsEnabled?: boolean;
   alertsEnabled?: boolean;
 }
 

@@ -94,6 +94,8 @@ export default function SettingsPage() {
             isActive: data.user.isActive,
             isAdmin: data.user.isAdmin,
             notificationsEnabled: data.user.notificationsEnabled,
+            emailNotificationsEnabled: data.user.emailNotificationsEnabled ?? true,
+            inAppNotificationsEnabled: data.user.inAppNotificationsEnabled ?? data.user.notificationsEnabled ?? true,
             alertsEnabled: data.user.alerts_enabled ?? data.user.alertsEnabled,
           }),
         );
@@ -146,11 +148,15 @@ export default function SettingsPage() {
     theme = user.theme ?? "light" ,
     themeColor = user.themeColor ?? DEFAULT_THEME_COLOR,
     notification = user.notificationsEnabled,
+    emailNotificationsEnabled = user.emailNotificationsEnabled,
+    inAppNotificationsEnabled = user.inAppNotificationsEnabled,
     alertsEnabled = user.alertsEnabled,
   }: {
     theme?: string | null;
     themeColor?: ThemeColorId | null;
     notification?: boolean | null;
+    emailNotificationsEnabled?: boolean | null;
+    inAppNotificationsEnabled?: boolean | null;
     alertsEnabled?: boolean | null;
   }) => {
     await api
@@ -162,6 +168,12 @@ export default function SettingsPage() {
           : {}),
         ...(notification !== undefined && notification !== null
           ? { notificationsEnabled: notification }
+          : {}),
+        ...(emailNotificationsEnabled !== undefined && emailNotificationsEnabled !== null
+          ? { emailNotificationsEnabled }
+          : {}),
+        ...(inAppNotificationsEnabled !== undefined && inAppNotificationsEnabled !== null
+          ? { inAppNotificationsEnabled }
           : {}),
         ...(alertsEnabled !== undefined && alertsEnabled !== null
           ? { alerts_enabled: alertsEnabled }
@@ -483,6 +495,62 @@ export default function SettingsPage() {
         <TabsContent value="notifications" className="space-y-4">
           <Card className="w-full border-border/70 shadow-sm overflow-hidden">
             <CardHeader>
+              <CardTitle>In-App Notifications</CardTitle>
+              <CardDescription>
+                Receive real-time in-app alerts and notifications for financial reminders and budget limits.
+              </CardDescription>
+              <CardAction>
+                <Switch
+                  checked={user.inAppNotificationsEnabled}
+                  onClick={async () => {
+                    const nextValue = !user.inAppNotificationsEnabled;
+
+                    dispatch(
+                      setUser({
+                        ...user,
+                        inAppNotificationsEnabled: nextValue,
+                        notificationsEnabled: nextValue,
+                      }),
+                    );
+                    await handleUserUpdation({
+                      inAppNotificationsEnabled: nextValue,
+                      notification: nextValue,
+                    });
+                  }}
+                />
+              </CardAction>
+            </CardHeader>
+          </Card>
+
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle>Email Notifications</CardTitle>
+              <CardDescription>
+                Receive email alerts for upcoming financial reminders, budget expirations, and account updates.
+              </CardDescription>
+              <CardAction>
+                <Switch
+                  checked={user.emailNotificationsEnabled}
+                  onClick={async () => {
+                    const nextValue = !user.emailNotificationsEnabled;
+
+                    dispatch(
+                      setUser({
+                        ...user,
+                        emailNotificationsEnabled: nextValue,
+                      }),
+                    );
+                    await handleUserUpdation({
+                      emailNotificationsEnabled: nextValue,
+                    });
+                  }}
+                />
+              </CardAction>
+            </CardHeader>
+          </Card>
+
+          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle>Dashboard Alerts</CardTitle>
               <CardDescription>
                 Show or hide the alerts banner on the dashboard.
@@ -501,33 +569,6 @@ export default function SettingsPage() {
                     );
                     await handleUserUpdation({
                       alertsEnabled: nextValue,
-                    });
-                  }}
-                />
-              </CardAction>
-            </CardHeader>
-          </Card>
-
-          <Card className="w-full border-border/70 shadow-sm overflow-hidden">
-            <CardHeader>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>
-                Enable or disable notifications for important updates.
-              </CardDescription>
-              <CardAction>
-                <Switch
-                  checked={user.notificationsEnabled}
-                  onClick={async () => {
-                    const nextValue = !user.notificationsEnabled;
-
-                    dispatch(
-                      setUser({
-                        ...user,
-                        notificationsEnabled: nextValue,
-                      }),
-                    );
-                    await handleUserUpdation({
-                      notification: nextValue,
                     });
                   }}
                 />
