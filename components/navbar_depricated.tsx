@@ -53,24 +53,18 @@ export default function Navbar({
   }, [profileDropDown]);
 
   useEffect(() => {
-    const fetchProfilePicture = async () => {
-      if (user?.profilePicFilePath && !user.profilePictureUrl) {
-        try {
-          const url = await fetchProfileUrl(user.profilePicFilePath);
-          dispatch(
-            setUser({
-              ...user,
-              profilePictureUrl: url,
-            })
-          );
-        } catch (error) {
-          console.error("Error fetching profile picture:", error);
-        }
-      }
-    };
-
-    fetchProfilePicture();
-  }, [user?.profilePicFilePath]);
+    if (user?.profilePicFilePath && !user.profilePictureUrl) {
+      const url = user.profilePicFilePath.startsWith("http")
+        ? user.profilePicFilePath
+        : `https://expensely-profiles.s3.amazonaws.com/${user.profilePicFilePath}`;
+      dispatch(
+        setUser({
+          ...user,
+          profilePictureUrl: url,
+        })
+      );
+    }
+  }, [user?.profilePicFilePath, user?.profilePictureUrl]);
 
   const handleLogout = async () => {
     dispatch(setLoading(true));

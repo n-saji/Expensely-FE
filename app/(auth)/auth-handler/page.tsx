@@ -58,16 +58,10 @@ export default function AuthHandler() {
           }
 
           const profileData = await response.data;
-          if (profileData.user.profilePicFilePath) {
-            const profilePictureUrl = await fetchProfileUrl(
-              profileData.user.profilePicFilePath,
-            ).catch((error) => {
-              console.error("Error fetching profile picture URL:", error);
-              return "";
-            });
-            profileData.user.profilePictureUrl = profilePictureUrl;
-          } else {
-            profileData.user.profilePictureUrl = "";
+          if (!profileData.user.profilePictureUrl && profileData.user.profilePicFilePath) {
+            profileData.user.profilePictureUrl = profileData.user.profilePicFilePath.startsWith("http")
+              ? profileData.user.profilePicFilePath
+              : `https://expensely-profiles.s3.amazonaws.com/${profileData.user.profilePicFilePath}`;
           }
 
           dispatch(

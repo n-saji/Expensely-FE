@@ -1,19 +1,9 @@
-import { supabase } from "@/utils/supabase";
 export default async function fetchProfileUrl(
   filePath: string
 ): Promise<string> {
-  const { data, error: signedUrlError } = await supabase.storage
-    .from("profiles-expensely")
-    .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 1 week expiration
-
-  if (signedUrlError) {
-    console.error("Signed URL Error:", signedUrlError.message);
-    return "";
+  if (!filePath) return "";
+  if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+    return filePath;
   }
-
-  const signedUrl = data?.signedUrl;
-  if (!signedUrl) {
-    throw new Error("Failed to fetch signed URL for profile picture");
-  }
-  return signedUrl;
+  return `https://expensely-profiles.s3.us-east-2.amazonaws.com/${filePath}`;
 }

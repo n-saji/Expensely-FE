@@ -2,7 +2,29 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["qidkhnousdwexgmgvytk.supabase.co"],
+    domains: [
+      "qidkhnousdwexgmgvytk.supabase.co",
+      "expensely-profiles.s3.amazonaws.com",
+      "expensely-profiles.s3.us-east-2.amazonaws.com",
+    ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "expensely-profiles.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "expensely-profiles.s3.us-east-2.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.*.amazonaws.com",
+      },
+    ],
   },
   async rewrites() {
     return [

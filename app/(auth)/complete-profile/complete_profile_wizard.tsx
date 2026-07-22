@@ -335,56 +335,49 @@ export default function CompleteProfileWizard() {
 
       if (profilePicFile) {
         setSubmissionProgress(40);
-        setSubmissionStatus("Uploading profile picture to storage...");
-        const fileExt = profilePicFile.name.split(".").pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        setSubmissionStatus("Uploading profile picture to S3 storage...");
 
+        const presignedRes = await api.get(
+          `/users/get-profile-presigned-url?fileName=${encodeURIComponent(profilePicFile.name)}&contentType=${encodeURIComponent(profilePicFile.type)}`
+        );
 
-        if (profilePicFilePath) {
-          await supabase.storage
-            .from("profiles-expensely")
-            .remove([profilePicFilePath])
-            .catch((err) => console.error("Error removing old image:", err));
-        }
+        const { url, key } = presignedRes.data;
 
-        const { error: uploadError } = await supabase.storage
-          .from("profiles-expensely")
-          .upload(filePath, profilePicFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+        const uploadResponse = await fetch(url, {
+          method: "PUT",
+          body: profilePicFile,
+          headers: {
+            "Content-Type": profilePicFile.type,
+          },
+        });
 
-        if (uploadError) {
-          throw new Error(`Profile pic upload failed: ${uploadError.message}`);
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload profile picture to S3.");
         }
 
         setSubmissionProgress(60);
         setSubmissionStatus("Linking profile picture to your profile...");
-        const signedUrl = await fetchProfileUrl(filePath);
-
 
         const picRes = await api.patch(
-          `/users/${userId}/update-profile-picture?filepath=${filePath}`,
-          { imageUrl: signedUrl }
+          `/users/${userId}/update-profile-picture?filepath=${encodeURIComponent(key)}`,
+          { imageUrl: "" }
         );
 
         if (picRes.status !== 200) {
           throw picRes;
         }
 
-        finalFilePath = filePath;
-        finalPictureUrl = signedUrl;
+        const updatedUser = picRes.data?.user || picRes.data;
+        const publicUrl = updatedUser?.profilePictureUrl || `https://expensely-profiles.s3.us-east-2.amazonaws.com/${key}`;
+
+        finalFilePath = key;
+        finalPictureUrl = publicUrl;
       } else if (!profilePicPreview && profilePicFilePath) {
         setSubmissionProgress(50);
         setSubmissionStatus("Removing existing profile picture...");
-        await supabase.storage
-          .from("profiles-expensely")
-          .remove([profilePicFilePath])
-          .catch((err) => console.error("Error removing image:", err));
 
         const picRes = await api.patch(
-          `/users/${userId}/update-profile-picture?filepath=${""}`,
+          `/users/${userId}/update-profile-picture?filepath=`,
           { imageUrl: "" }
         );
         if (picRes.status !== 200) {

@@ -271,18 +271,9 @@ export default function ProfilePage({
     }
     try {
       setImageLoading(true);
-      const { error: deleteError } = await supabase.storage
-        .from("profiles-expensely")
-        .remove([user.profilePicFilePath]);
-
-      if (deleteError) {
-        console.error("Delete Error:", deleteError.message);
-        return;
-      }
-
       const response = await api.patch(
-        `/users/${userId}/update-profile-picture?filepath=${""}`,
-        { imageUrl: "" },
+        `/users/${userId}/update-profile-picture?filepath=`,
+        { imageUrl: "" }
       );
 
       if (response.status !== 200) {
@@ -294,7 +285,7 @@ export default function ProfilePage({
           ...user,
           profilePictureUrl: "",
           profilePicFilePath: "",
-        }),
+        })
       );
     } catch (err) {
       console.error("Error removing profile picture:", err);
@@ -306,66 +297,49 @@ export default function ProfilePage({
   const handleImageUpload = async (file: File) => {
     if (!file) return;
 
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
-    let signedUrl = "";
-
     try {
       setImageLoading(true);
-      if (user.profilePicFilePath) {
-        const { error: deleteError } = await supabase.storage
-          .from("profiles-expensely")
-          .remove([user.profilePicFilePath]);
-        if (deleteError) {
-          console.error("Delete Error:", deleteError.message);
-          return;
-        }
+      const presignedRes = await api.get(
+        `/users/get-profile-presigned-url?fileName=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}`
+      );
+
+      const { url, key } = presignedRes.data;
+
+      const uploadResponse = await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload image to S3");
       }
-
-      const { error: uploadError } = await supabase.storage
-        .from("profiles-expensely")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("Upload Error:", uploadError.message);
-        return;
-      }
-
-      await fetchProfileUrl(filePath)
-        .then((url) => {
-          signedUrl = url;
-        })
-        .catch((err) => {
-          console.error("Error fetching signed URL:", err);
-          throw new Error("Failed to fetch signed URL for profile picture");
-        });
 
       const response = await api.patch(
-        `/users/${userId}/update-profile-picture?filepath=${filePath}`,
-
-        { imageUrl: signedUrl },
+        `/users/${userId}/update-profile-picture?filepath=${encodeURIComponent(key)}`
       );
 
       if (response.status !== 200) {
         throw new Error("Failed to update profile picture in backend.");
       }
+
+      const updatedUser = response.data?.user || response.data;
+      const publicUrl = updatedUser?.profilePictureUrl || `https://expensely-profiles.s3.us-east-2.amazonaws.com/${key}`;
+
+      dispatch(
+        setUser({
+          ...user,
+          profilePictureUrl: publicUrl,
+          profilePicFilePath: key,
+        })
+      );
     } catch (err) {
-      console.error("Error during upload:", err);
+      console.error("Error during profile picture upload:", err);
     } finally {
       setImageLoading(false);
     }
-
-    dispatch(
-      setUser({
-        ...user,
-        profilePictureUrl: `${signedUrl}`,
-        profilePicFilePath: filePath,
-      }),
-    );
   };
 
   const handleCancelEdit = () => {
