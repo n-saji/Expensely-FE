@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import LandingPageNavBar from "@/components/landing-page-navbar";
+import { Button } from "@/components/ui/button";
 import {
   FaLock,
   FaChartPie,
@@ -9,215 +12,177 @@ import {
   FaFileExport,
   FaBell,
 } from "react-icons/fa";
+import { BookOpen, Sparkles } from "lucide-react";
 
 export default function AboutPage() {
   const router = useRouter();
+
   return (
-    <main className="bg-background text-foreground">
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-32 right-0 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-0 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mx-auto max-w-6xl px-6 py-20 text-center"
-        >
-          <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-4 py-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            About Expensely
-          </p>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
-            A modern workspace for confident expense decisions.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Expensely keeps your team aligned on budgets, approvals, and spend
-            visibility with a clean interface and instant insights.
-          </p>
-        </motion.div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground selection:bg-emerald-500/30 font-sans">
+      <LandingPageNavBar />
 
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-6xl px-6 py-16"
-      >
-        <div className="grid gap-6 md:grid-cols-3">
-          {[
-            {
-              title: "Effortless tracking",
-              description:
-                "Log expenses, categorize spend, and keep every detail searchable.",
-            },
-            {
-              title: "Clear reporting",
-              description:
-                "Live dashboards surface trends without manual spreadsheet work.",
-            },
-            {
-              title: "Secure by design",
-              description:
-                "Role-based access and encryption keep sensitive data protected.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm"
-            >
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {item.description}
-              </p>
+      <main className="relative overflow-hidden">
+        {/* Glow Spheres */}
+        <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-0 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl" />
+
+        {/* Hero Section */}
+        <section className="mx-auto max-w-7xl px-6 py-20 text-center sm:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              About Expensely
+            </p>
+            <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl max-w-4xl mx-auto">
+              A modern enterprise workspace for confident financial decisions.
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+              Expensely aligns individuals and teams on budgets, approvals, recurring expenses, and live spend visibility with zero manual overhead.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Link href="/learn-more">
+                <Button className="rounded-full bg-emerald-600 hover:bg-emerald-500 font-semibold px-6 shadow-lg shadow-emerald-500/20">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Explore Platform Guide
+                </Button>
+              </Link>
             </div>
-          ))}
-        </div>
-      </motion.section>
+          </motion.div>
+        </section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="bg-muted/40"
-      >
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Core capabilities
-            </p>
-            <h2 className="text-3xl font-semibold">
-              Everything teams need to manage spend.
-            </h2>
-            <p className="max-w-2xl text-muted-foreground">
-              Track expenses, monitor budgets, and export reports in minutes.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        {/* Value Pillars */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-7xl px-6 py-12 sm:px-8"
+        >
+          <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                icon: <FaPlusCircle size={24} />,
-                title: "Capture spend",
+                title: "Effortless Spend Tracking",
+                description:
+                  "Log transactions in seconds, categorize spend with custom tags, and keep every digital receipt searchable in secure cloud storage.",
               },
               {
-                icon: <FaChartPie size={24} />,
-                title: "Visual dashboards",
+                title: "Live Intelligent Reporting",
+                description:
+                  "Interactive dashboards surface spend velocity, net profit margins, and monthly budget progress automatically.",
               },
               {
-                icon: <FaFileExport size={24} />,
-                title: "Export-ready",
+                title: "Bank-Grade Encryption",
+                description:
+                  "Bank-level data encryption, protected account access, and password confirmation ensure total privacy.",
               },
-              {
-                icon: <FaBell size={24} />,
-                title: "Smart reminders",
-              },
-              {
-                icon: <FaLock size={24} />,
-                title: "Secure access",
-              },
-            ].map((feature) => (
+            ].map((item) => (
               <div
-                key={feature.title}
-                className="flex flex-col items-center gap-3 rounded-2xl border border-border/70 bg-card p-5 text-center"
+                key={item.title}
+                className="rounded-3xl border border-border/70 bg-card p-8 shadow-sm transition-all hover:border-emerald-500/40 hover:-translate-y-1"
               >
-                <div className="rounded-full border border-border/70 bg-background p-3 text-emerald-600">
-                  {feature.icon}
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  {feature.title}
+                <h3 className="text-xl font-bold text-foreground">{item.title}</h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                  {item.description}
                 </p>
               </div>
             ))}
           </div>
-        </div>
-      </motion.section>
+        </motion.section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-6xl px-6 py-16"
-      >
-        <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              How it works
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold">
-              A simple flow from intake to insight.
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Get set up quickly, sync your team, and unlock a clear view of
-              every category without extra overhead.
-            </p>
+        {/* Core Capabilities */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-card/40 border-y border-border/50 py-16"
+        >
+          <div className="mx-auto max-w-7xl px-6 sm:px-8">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <p className="text-xs uppercase tracking-[0.3em] font-semibold text-emerald-600 dark:text-emerald-400">
+                Platform Capabilities
+              </p>
+              <h2 className="text-3xl font-extrabold sm:text-4xl">
+                Everything you need to master money management.
+              </h2>
+            </div>
+
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                { icon: <FaPlusCircle size={22} />, title: "Instant Logging" },
+                { icon: <FaChartPie size={22} />, title: "Live Analytics" },
+                { icon: <FaFileExport size={22} />, title: "CSV Reports" },
+                { icon: <FaBell size={22} />, title: "Smart Reminders" },
+                { icon: <FaLock size={22} />, title: "Bank-Level Security" },
+              ].map((feature) => (
+                <div
+                  key={feature.title}
+                  className="flex flex-col items-center gap-4 rounded-3xl border border-border/60 bg-card p-6 text-center shadow-sm"
+                >
+                  <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-600 dark:text-emerald-400">
+                    {feature.icon}
+                  </div>
+                  <p className="text-sm font-bold text-foreground">
+                    {feature.title}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-          <ol className="space-y-4">
-            {[
-              "Create your workspace and invite stakeholders.",
-              "Log expenses and map spend to categories.",
-              "Review dashboards and approvals in real time.",
-              "Export reports for finance and planning.",
-            ].map((step, i) => (
-              <li
-                key={step}
-                className="flex items-start gap-4 rounded-2xl border border-border/70 bg-card px-5 py-4"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
-                  {i + 1}
-                </span>
-                <p className="text-sm text-foreground">{step}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </motion.section>
+        </motion.section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 pb-16 text-center"
-      >
-        <h2 className="text-3xl font-semibold">Built with care.</h2>
-        <p className="mt-4 text-muted-foreground">
-          Expensely is crafted by{" "}
-          <span
-            className="font-semibold text-foreground underline cursor-pointer"
-            onClick={() => {
-              window.open("https://nikhilsaji.me");
-            }}
-          >
-            Nikhil Saji
-          </span>
-          , focused on making expense management simple and stress-free for
-          every team.
-        </p>
-      </motion.section>
-
-      <motion.section
-        initial={{ opacity: 0, scale: 0.97 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="mx-auto max-w-6xl px-6 pb-20 text-center"
-      >
-        <div className="rounded-3xl border border-border/70 bg-gradient-to-br from-emerald-500/10 via-transparent to-cyan-500/10 px-8 py-12">
-          <h2 className="text-3xl font-semibold">
-            Ready to run smarter budgets?
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Launch your workspace in minutes and keep every approval on track.
+        {/* Author & Mission */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-4xl px-6 py-16 text-center sm:px-8"
+        >
+          <h2 className="text-3xl font-extrabold tracking-tight">Engineered for Perfection.</h2>
+          <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+            Expensely was designed and developed by{" "}
+            <span
+              className="font-bold text-foreground underline decoration-emerald-500 cursor-pointer hover:text-emerald-500 transition-colors"
+              onClick={() => {
+                window.open("https://nikhilsaji.me");
+              }}
+            >
+              Nikhil Saji
+            </span>
+            , focused on delivering luxury financial software, sub-second latency, and intuitive clarity for every user.
           </p>
-          <button
-            className="mt-8 rounded-full bg-emerald-500 px-8 py-3 text-base font-semibold text-foreground shadow-sm transition hover:bg-emerald-600"
-            onClick={() => router.push("/register")}
-          >
-            Get Started for Free
-          </button>
-        </div>
-      </motion.section>
-    </main>
+        </motion.section>
+
+        {/* CTA */}
+        <motion.section
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto max-w-7xl px-6 pb-20 sm:px-8 text-center"
+        >
+          <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-card to-cyan-500/10 px-8 py-12 shadow-xl">
+            <h2 className="text-3xl font-extrabold sm:text-4xl">
+              Take full control of your spend today.
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground text-sm sm:text-base">
+              Create your account in seconds and unlock real-time financial freedom.
+            </p>
+            <Button
+              size="lg"
+              className="mt-8 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 shadow-lg shadow-emerald-500/25"
+              onClick={() => router.push("/register")}
+            >
+              Get Started for Free
+            </Button>
+          </div>
+        </motion.section>
+      </main>
+    </div>
   );
 }
