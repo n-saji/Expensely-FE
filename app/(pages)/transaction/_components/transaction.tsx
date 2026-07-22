@@ -1417,6 +1417,8 @@ export default function TransactionPage() {
         monthYear: incomeCurrentMonthYear,
         type: "",
       });
+      void fetchMonthlyOverview();
+      void fetchMonthlyIncomeOverview();
     }
   }, [user.id, refreshTrigger]);
 
@@ -1477,8 +1479,14 @@ export default function TransactionPage() {
     };
 
     window.addEventListener("transaction-added", handleAdd);
+    window.addEventListener("expense-added", handleAdd);
+    window.addEventListener("income-added", handleAdd);
+    window.addEventListener("recurring-expense-added", handleAdd);
     return () => {
       window.removeEventListener("transaction-added", handleAdd);
+      window.removeEventListener("expense-added", handleAdd);
+      window.removeEventListener("income-added", handleAdd);
+      window.removeEventListener("recurring-expense-added", handleAdd);
     };
   }, []);
 

@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const getNotificationTime = (timeStr: string) => {
-  const normalized = timeStr.endsWith("Z") ? timeStr : timeStr + "Z";
-  return new Date(normalized).getTime();
+  if (!timeStr) return 0;
+  const d = new Date(timeStr);
+  return isNaN(d.getTime()) ? 0 : d.getTime();
 };
 
 const notificationSlice = createSlice({

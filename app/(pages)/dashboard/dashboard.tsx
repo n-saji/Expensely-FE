@@ -408,21 +408,21 @@ export default function DashboardPage() {
   }, [user.id, incomeOverviewParams]);
 
   useEffect(() => {
-    const handler = () => {
-      fetchOverview({ hasConstraint: true, type: "" });
-      fetchMonthlyOverview();
+    const handleTransactionAdded = () => {
+      void refreshDashboardData();
     };
-    window.addEventListener("expense-added", handler);
-    return () => window.removeEventListener("expense-added", handler);
-  }, []);
 
-  useEffect(() => {
-    const handler = () => {
-      fetchIncomeOverview({ hasConstraint: true, type: "" });
-      fetchMonthlyIncomeOverview();
+    window.addEventListener("transaction-added", handleTransactionAdded);
+    window.addEventListener("expense-added", handleTransactionAdded);
+    window.addEventListener("income-added", handleTransactionAdded);
+    window.addEventListener("recurring-expense-added", handleTransactionAdded);
+
+    return () => {
+      window.removeEventListener("transaction-added", handleTransactionAdded);
+      window.removeEventListener("expense-added", handleTransactionAdded);
+      window.removeEventListener("income-added", handleTransactionAdded);
+      window.removeEventListener("recurring-expense-added", handleTransactionAdded);
     };
-    window.addEventListener("income-added", handler);
-    return () => window.removeEventListener("income-added", handler);
   }, []);
 
   useEffect(() => {

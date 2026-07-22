@@ -233,7 +233,7 @@ export default function Notifications({
                           )}
                           <ItemFooter className="mt-1.5">
                             <Label className="text-[10px] text-muted-foreground">
-                              {formatNotificationTime(new Date(notification.time + "Z"))}
+                              {formatNotificationTime(notification.time)}
                             </Label>
                           </ItemFooter>
                         </ItemContent>
@@ -319,9 +319,7 @@ export default function Notifications({
                       </ItemTitle>
                       <ItemFooter>
                         <Label className="text-xs text-muted-foreground">
-                          {formatNotificationTime(
-                            new Date(notification.time + "Z"),
-                          )}
+                          {formatNotificationTime(notification.time)}
                         </Label>
                       </ItemFooter>
                     </ItemContent>

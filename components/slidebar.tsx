@@ -2,9 +2,7 @@
 
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -18,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -32,16 +29,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "./ui/field";
 
 import * as React from "react";
-import { ChevronDown, Plus } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Calendar as CalendarIcon,
+  ChevronDown,
+  Paperclip,
+  Plus,
+  SlidersHorizontal,
+  Upload,
+  FileSpreadsheet,
+} from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { Label } from "./ui/label";
@@ -74,8 +74,10 @@ export default function Slidebar({
   const categories = useSelector((state: RootState) => state.categoryExpense);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [transactionType, setTransactionType] = useState<"expense" | "income">(
-    "expense",
+    "expense"
   );
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [entryMode, setEntryMode] = useState<"normal" | "bulk">("normal");
   const [isRecurring, setIsRecurring] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [transaction, setTransaction] = useState({
@@ -94,7 +96,6 @@ export default function Slidebar({
   });
   const [adding_transaction_loading, setAddingTransactionLoading] =
     useState(false);
-  const [entryMode, setEntryMode] = useState("normal");
   const [bulkLoadValidation, setBulkLoadValidation] = useState(false);
   const [bulkLoadLoading, setBulkLoadLoading] = useState(false);
   const [bulkLoadFile, setBulkLoadFile] = useState<File | null>(null);
@@ -124,10 +125,8 @@ export default function Slidebar({
 
     try {
       const res = await api.get(
-        `/transactions/get-presigned-url?fileName=${file.name}&transactionId=${transactionId}&contentType=${file.type}`,
+        `/transactions/get-presigned-url?fileName=${file.name}&transactionId=${transactionId}&contentType=${file.type}`
       );
-
-      console.log("Presigned URL response:", res);
 
       const uploadResponse = await fetch(res.data.url, {
         method: "PUT",
@@ -138,35 +137,16 @@ export default function Slidebar({
       });
 
       if (uploadResponse.ok) {
-        console.log("Upload successful!");
-
         await api
           .put(
             `/transactions/update-transaction-attachment-url/eid/${transactionId}`,
             {
               url: res.data.key,
-            },
-          )
-          .then((res) => {
-            if (res.status === 200) {
-              console.log(
-                "Attachment URL updated successfully in the database",
-              );
-            } else {
-              console.error(
-                "Failed to update attachment URL in the database",
-                res.statusText,
-              );
             }
-          })
+          )
           .catch((error) => {
-            console.error(
-              "Error updating attachment URL in the database:",
-              error,
-            );
+            console.error("Error updating attachment URL in DB:", error);
           });
-      } else {
-        console.error("Upload failed", uploadResponse.statusText);
       }
     } catch (error) {
       console.error("Error in upload flow:", error);
@@ -219,8 +199,6 @@ export default function Slidebar({
         throw new Error("Failed to add transaction");
       }
 
-      console.log("Transaction creation response:", response.data);
-
       if (transactionType === "expense" && transaction.file) {
         try {
           await handleFileUpload(response.data.id);
@@ -232,12 +210,8 @@ export default function Slidebar({
 
       setTransaction({
         id: "",
-        user: {
-          id: user.id,
-        },
-        category: {
-          id: "",
-        },
+        user: { id: user.id },
+        category: { id: "" },
         amount: "",
         currency: user.currency || "USD",
         description: "",
@@ -246,7 +220,14 @@ export default function Slidebar({
       });
 
       window.dispatchEvent(new Event("transaction-added"));
-      toast.success("Transaction added successfully");
+      if (transactionType === "expense") {
+        window.dispatchEvent(new Event("expense-added"));
+      } else {
+        window.dispatchEvent(new Event("income-added"));
+      }
+      toast.success(
+        `${transactionType === "expense" ? "Expense" : "Income"} logged successfully`
+      );
       setSheetOpen(false);
     } catch (error) {
       console.error("Error adding transaction:", error);
@@ -258,13 +239,12 @@ export default function Slidebar({
 
   const handleRecurringSubmit = async (data: CreateRecurringExpenseReq) => {
     const response = await api.post(`/recurring-expenses/create`, data);
-
     if (response.status !== 200) {
       throw new Error("Failed to add recurring expense");
     }
-
     window.dispatchEvent(new Event("recurring-expense-added"));
     window.dispatchEvent(new Event("transaction-added"));
+    window.dispatchEvent(new Event("expense-added"));
     setSheetOpen(false);
   };
 
@@ -282,7 +262,7 @@ export default function Slidebar({
       const validationResponse = await api.post(
         `/transactions/bulk_upload/validate`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } },
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       const data = validationResponse.data;
@@ -303,12 +283,12 @@ export default function Slidebar({
 
       setBulkLoadLoading(true);
       const response = await api.get(
-        `/transactions/bulk_upload/upload?file_id=${data.validationId}`,
+        `/transactions/bulk_upload/upload?file_id=${data.validationId}`
       );
 
       if (response.status !== 200) {
         throw new Error(
-          "Failed to upload transactions: " + JSON.stringify(response.data),
+          "Failed to upload transactions: " + JSON.stringify(response.data)
         );
       }
 
@@ -323,7 +303,7 @@ export default function Slidebar({
         error instanceof Error ? error.message : "Error uploading transactions",
         {
           description: bulkLoadResponse?.error || "Unknown error occurred",
-        },
+        }
       );
     } finally {
       setBulkLoadLoading(false);
@@ -332,421 +312,464 @@ export default function Slidebar({
   };
 
   const filteredCategories = categories.categories.filter(
-    (cat) => cat.type?.toLowerCase() === transactionType,
+    (cat) => cat.type?.toLowerCase() === transactionType
   );
+
+  const formattedSelectedDate = () => {
+    if (!transaction.transactionDate) return "Select date";
+    const today = new Date().toISOString().slice(0, 10);
+    if (transaction.transactionDate === today) return "Today";
+    const [year, month, day] = transaction.transactionDate.split("-");
+    const d = new Date(Number(year), Number(month) - 1, Number(day));
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   return (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
       <SheetTrigger asChild>
-        <Button variant={variant || "ghost"}>
-          <Plus className="h-3 w-3" />
-          <Label className="text-xs">Add Transaction</Label>
+        <Button variant={variant || "ghost"} className="gap-1.5 font-medium">
+          <Plus className="h-4 w-4" />
+          <span>Add Transaction</span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="h-full flex flex-col gap-0 ">
-        <SheetHeader className="mb-4">
-          <SheetTitle>Add Transaction</SheetTitle>
-        </SheetHeader>
-        <div className="p-4 space-y-4 flex flex-col flex-1 h-full">
-          <Tabs
-            value={transactionType}
-            onValueChange={(val) =>
-              setTransactionType(val as "expense" | "income")
-            }
-            className="w-full mb-4"
-          >
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="expense">Expense</TabsTrigger>
-              <TabsTrigger value="income">Income</TabsTrigger>
-            </TabsList>
-          </Tabs>
 
-          <div className="space-y-4 flex flex-col flex-1 h-full">
-            {transactionType === "expense" && (
-              <div className="flex items-center justify-between rounded-md border border-border/70 p-3">
-                <div className="space-y-0.5">
-                  <Label htmlFor="recurring-toggle">Recurring expense</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Toggle to create a recurring expense that repeats on a
-                    regular schedule.
-                  </p>
-                </div>
-                <Switch
-                  id="recurring-toggle"
-                  checked={isRecurring}
-                  onCheckedChange={setIsRecurring}
+      <SheetContent className="w-full sm:max-w-md flex flex-col h-full p-0 gap-0 border-l border-border/60 bg-background/95 backdrop-blur-xl">
+        {/* Header */}
+        <SheetHeader className="px-6 py-4 border-b border-border/40 flex flex-row items-center justify-between">
+          <SheetTitle className="text-lg font-semibold tracking-tight">
+            Add Transaction
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          {/* Clear-Cut Separation Switch (Expense vs Income) */}
+          <div className="grid grid-cols-2 gap-2 p-1 bg-muted/50 rounded-xl border border-border/40">
+            <button
+              type="button"
+              onClick={() => setTransactionType("expense")}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium text-sm transition-all duration-200 ${
+                transactionType === "expense"
+                  ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shadow-sm font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              }`}
+            >
+              <ArrowDownRight
+                className={`h-4 w-4 ${
+                  transactionType === "expense"
+                    ? "text-rose-500"
+                    : "text-muted-foreground"
+                }`}
+              />
+              <span>Expense</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTransactionType("income")}
+              className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium text-sm transition-all duration-200 ${
+                transactionType === "income"
+                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              }`}
+            >
+              <ArrowUpRight
+                className={`h-4 w-4 ${
+                  transactionType === "income"
+                    ? "text-emerald-500"
+                    : "text-muted-foreground"
+                }`}
+              />
+              <span>Income</span>
+            </button>
+          </div>
+
+          {/* Quick Normal / Bulk Mode Selector */}
+          {entryMode === "bulk" ? (
+            /* Bulk Upload View */
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Bulk CSV / Excel Upload
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setEntryMode("normal")}
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  ← Back to Single Entry
+                </button>
+              </div>
+
+              <div className="p-4 rounded-xl bg-muted/40 border border-border/50 space-y-2 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">Format Guidelines:</p>
+                <p>
+                  Columns required: <code className="text-foreground">description</code>,{" "}
+                  <code className="text-foreground">amount</code>,{" "}
+                  <code className="text-foreground">category</code>,{" "}
+                  <code className="text-foreground">date (YYYY-MM-DD)</code>, and{" "}
+                  <code className="text-foreground">type (EXPENSE/INCOME)</code>.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bulk-file" className="text-xs font-medium">
+                  Select Spreadsheet File
+                </Label>
+                <Input
+                  id="bulk-file"
+                  type="file"
+                  accept=".csv, .xlsx"
+                  disabled={bulkLoadLoading || bulkLoadValidation}
+                  onChange={(e) =>
+                    setBulkLoadFile(e.target.files ? e.target.files[0] : null)
+                  }
+                  className="text-xs cursor-pointer"
                 />
               </div>
-            )}
 
-            {transactionType === "expense" && isRecurring ? (
-              <>
-                <RecurringExpenseForm
-                  submitLabel="Add Recurring Expense"
-                  onSubmit={handleRecurringSubmit}
-                />
-                <SheetClose asChild>
-                  <Button variant="outline" className="w-full">
-                    Cancel
-                  </Button>
-                </SheetClose>
-              </>
-            ) : (
-              <>
-                <Tabs
-                  value={entryMode}
-                  onValueChange={setEntryMode}
-                  className="w-full flex-1 flex flex-col"
+              <Button
+                type="button"
+                className="w-full h-11 font-medium"
+                disabled={bulkLoadLoading || bulkLoadValidation}
+                onClick={
+                  bulkLoadFile
+                    ? handleBulkUpload
+                    : () => toast.error("Please select a file to upload")
+                }
+              >
+                {bulkLoadLoading ? (
+                  <>
+                    <Spinner className="mr-2 h-4 w-4" /> Uploading...
+                  </>
+                ) : bulkLoadValidation ? (
+                  <>
+                    <Spinner className="mr-2 h-4 w-4" /> Validating...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" /> Upload File
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : isRecurring && transactionType === "expense" ? (
+            /* Recurring Expense View */
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Recurring Expense Mode
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsRecurring(false)}
+                  className="text-xs text-primary hover:underline font-medium"
                 >
-                  <TabsList className="w-full grid grid-cols-2">
-                    <TabsTrigger value="normal">Normal Entry</TabsTrigger>
-                    <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
-                  </TabsList>
+                  Switch to One-time
+                </button>
+              </div>
+              <RecurringExpenseForm
+                submitLabel="Save Recurring Expense"
+                onSubmit={handleRecurringSubmit}
+              />
+            </div>
+          ) : (
+            /* Minimalist Fast-Entry Form */
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              className="space-y-5"
+            >
+              {/* Hero Amount Field */}
+              <div className="relative rounded-2xl border border-border/60 bg-muted/30 p-4 transition-all focus-within:border-ring focus-within:ring-1 focus-within:ring-ring">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                  <span className="font-medium">Amount</span>
+                  <CurrencyDrawer
+                    value={transaction.currency}
+                    onChange={(currency) => {
+                      setTransaction((prev) => ({ ...prev, currency }));
+                      if (normalTransactionErrors.currency) {
+                        setNormalTransactionErrors((prev) => ({
+                          ...prev,
+                          currency: undefined,
+                        }));
+                      }
+                    }}
+                    userCurrency={user.currency}
+                    className="h-6 px-2 text-xs font-semibold"
+                  />
+                </div>
 
-                  <TabsContent value="bulk" className="flex-1 mt-4">
-                    <div className="flex flex-col space-y-4 h-full">
-                      <div className="space-y-2 text-sm">
-                        <Label className="font-semibold">Requirements</Label>
-                        <p className="text-muted-foreground">
-                          Upload a spreadsheet with columns: description,
-                          amount, category, date (YYYY-MM-DD), and type
-                          (EXPENSE/INCOME).
-                        </p>
-                        <p className="text-muted-foreground">
-                          Category values should match existing category names.
-                        </p>
-                      </div>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`text-2xl font-bold ${
+                      transactionType === "expense"
+                        ? "text-rose-500"
+                        : "text-emerald-500"
+                    }`}
+                  >
+                    {transactionType === "expense" ? "-" : "+"}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={transaction.amount}
+                    onChange={(e) => {
+                      setTransaction({
+                        ...transaction,
+                        amount: e.target.value,
+                      });
+                      if (normalTransactionErrors.amount) {
+                        setNormalTransactionErrors((prev) => ({
+                          ...prev,
+                          amount: undefined,
+                        }));
+                      }
+                    }}
+                    className="w-full bg-transparent text-3xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40"
+                    autoFocus
+                  />
+                </div>
 
-                      <div className="grid w-full items-center gap-3">
-                        <Label htmlFor="transaction-bulk-file">
-                          Excel File
+                {normalTransactionErrors.amount && (
+                  <p className="text-xs text-destructive mt-1.5 font-medium">
+                    {normalTransactionErrors.amount}
+                  </p>
+                )}
+              </div>
+
+              {/* Category Field */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Category
+                </Label>
+                <Select
+                  onValueChange={(option) => {
+                    setTransaction({
+                      ...transaction,
+                      category: { id: option },
+                    });
+                    if (normalTransactionErrors.categoryId) {
+                      setNormalTransactionErrors((prev) => ({
+                        ...prev,
+                        categoryId: undefined,
+                      }));
+                    }
+                  }}
+                  value={transaction.category.id}
+                >
+                  <SelectTrigger className="w-full h-11 rounded-xl">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {filteredCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <CategoryBadge
+                          name={category.name}
+                          icon={category.icon}
+                          color={category.color}
+                        />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {normalTransactionErrors.categoryId && (
+                  <p className="text-xs text-destructive font-medium">
+                    {normalTransactionErrors.categoryId}
+                  </p>
+                )}
+              </div>
+
+              {/* Description Field */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Description
+                </Label>
+                <Input
+                  type="text"
+                  placeholder={
+                    transactionType === "expense"
+                      ? "e.g. Coffee, Groceries, Rent..."
+                      : "e.g. Salary, Freelance, Dividend..."
+                  }
+                  value={transaction.description}
+                  onChange={(e) => {
+                    setTransaction({
+                      ...transaction,
+                      description: e.target.value,
+                    });
+                    if (normalTransactionErrors.description) {
+                      setNormalTransactionErrors((prev) => ({
+                        ...prev,
+                        description: undefined,
+                      }));
+                    }
+                  }}
+                  className="h-11 rounded-xl"
+                />
+                {normalTransactionErrors.description && (
+                  <p className="text-xs text-destructive font-medium">
+                    {normalTransactionErrors.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Date Quick Selector */}
+              <div className="flex items-center justify-between py-1">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Date
+                </span>
+                <Popover
+                  open={datePickerOpen}
+                  onOpenChange={setDatePickerOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 rounded-lg text-xs font-medium"
+                    >
+                      <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{formattedSelectedDate()}</span>
+                      <ChevronDown className="h-3 w-3 text-muted-foreground opacity-60" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        transaction.transactionDate
+                          ? new Date(`${transaction.transactionDate}T00:00:00`)
+                          : undefined
+                      }
+                      onSelect={(date) => {
+                        if (!date) return;
+                        setTransaction({
+                          ...transaction,
+                          transactionDate: date.toISOString().slice(0, 10),
+                        });
+                        if (normalTransactionErrors.transactionDate) {
+                          setNormalTransactionErrors((prev) => ({
+                            ...prev,
+                            transactionDate: undefined,
+                          }));
+                        }
+                        setDatePickerOpen(false);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Optional Advanced Accordion / Toggle */}
+              <div className="pt-2 border-t border-border/40">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors font-medium py-1"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  <span>
+                    {showAdvanced
+                      ? "Hide options"
+                      : "More options (Attachment, Recurring, Bulk)"}
+                  </span>
+                  <ChevronDown
+                    className={`h-3 w-3 transition-transform duration-200 ${
+                      showAdvanced ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {showAdvanced && (
+                  <div className="mt-3 p-3.5 rounded-xl bg-muted/40 border border-border/40 space-y-4 text-xs">
+                    {/* Attachment Option */}
+                    {transactionType === "expense" && (
+                      <div className="space-y-1.5">
+                        <Label
+                          htmlFor="attachment"
+                          className="text-xs font-medium text-muted-foreground flex items-center gap-1.5"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" /> Attachment (Receipt / Invoice)
                         </Label>
                         <Input
+                          id="attachment"
                           type="file"
-                          id="transaction-bulk-file"
-                          accept=".csv, .xlsx"
-                          disabled={bulkLoadLoading || bulkLoadValidation}
-                          onChange={(e) =>
-                            setBulkLoadFile(
-                              e.target.files ? e.target.files[0] : null,
-                            )
-                          }
+                          accept=".jpg, .jpeg, .png, .pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            setTransaction({
+                              ...transaction,
+                              file: file || undefined,
+                            });
+                          }}
+                          className="h-9 text-xs cursor-pointer"
                         />
                       </div>
+                    )}
 
-                      <div className="flex flex-col space-y-4 mt-auto">
-                        <Button
-                          type="button"
-                          disabled={bulkLoadLoading || bulkLoadValidation}
-                          onClick={
-                            bulkLoadFile
-                              ? handleBulkUpload
-                              : () =>
-                                  toast.error("Please select a file to upload")
-                          }
-                        >
-                          {bulkLoadLoading ? (
-                            <>
-                              <Spinner /> Uploading...
-                            </>
-                          ) : bulkLoadValidation ? (
-                            <>
-                              <Spinner /> Validating...
-                            </>
-                          ) : (
-                            "Upload"
-                          )}
-                        </Button>
-                        <SheetClose asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </SheetClose>
+                    {/* Recurring Expense Option */}
+                    {transactionType === "expense" && (
+                      <div className="flex items-center justify-between pt-1">
+                        <div>
+                          <p className="font-medium text-foreground">Recurring Expense</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            Set repeat schedule for this expense
+                          </p>
+                        </div>
+                        <Switch
+                          checked={isRecurring}
+                          onCheckedChange={setIsRecurring}
+                        />
                       </div>
+                    )}
+
+                    {/* Bulk Upload Link */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                      <span className="text-muted-foreground">Need to import multiple?</span>
+                      <button
+                        type="button"
+                        onClick={() => setEntryMode("bulk")}
+                        className="flex items-center gap-1 text-primary hover:underline font-medium"
+                      >
+                        <FileSpreadsheet className="h-3.5 w-3.5" />
+                        Bulk Upload
+                      </button>
                     </div>
-                  </TabsContent>
+                  </div>
+                )}
+              </div>
 
-                  <TabsContent value="normal" className="flex-1 mt-4">
-                    <form
-                      className="flex flex-col space-y-4 h-full"
-                      onSubmit={(event) => {
-                        event.preventDefault();
-                        handleSubmit();
-                      }}
-                    >
-                      <FieldGroup className="flex flex-col flex-1 space-y-4 gap-0">
-                        <Field>
-                          <FieldLabel htmlFor="transaction-desc">
-                            Description
-                          </FieldLabel>
-                          <FieldContent>
-                            <Input
-                              id="transaction-desc"
-                              type="text"
-                              placeholder="Rent, salary, subscription, etc."
-                              value={transaction.description}
-                              onChange={(e) => {
-                                setTransaction({
-                                  ...transaction,
-                                  description: e.target.value,
-                                });
-                                if (normalTransactionErrors.description) {
-                                  setNormalTransactionErrors((prev) => ({
-                                    ...prev,
-                                    description: undefined,
-                                  }));
-                                }
-                              }}
-                            />
-                          </FieldContent>
-                          <FieldError
-                            errors={
-                              normalTransactionErrors.description
-                                ? [
-                                    {
-                                      message:
-                                        normalTransactionErrors.description,
-                                    },
-                                  ]
-                                : undefined
-                            }
-                          />
-                        </Field>
-
-                        <Field>
-                          <FieldLabel>Category</FieldLabel>
-                          <Select
-                            onValueChange={(option) => {
-                              setTransaction({
-                                ...transaction,
-                                category: {
-                                  id: option,
-                                },
-                              });
-                              if (normalTransactionErrors.categoryId) {
-                                setNormalTransactionErrors((prev) => ({
-                                  ...prev,
-                                  categoryId: undefined,
-                                }));
-                              }
-                            }}
-                            value={transaction.category.id}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filteredCategories.map((category) => (
-                                <SelectItem
-                                  key={category.id}
-                                  value={category.id}
-                                >
-                                  <CategoryBadge
-                                    name={category.name}
-                                    icon={category.icon}
-                                    color={category.color}
-                                  />
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FieldError
-                            errors={
-                              normalTransactionErrors.categoryId
-                                ? [
-                                    {
-                                      message:
-                                        normalTransactionErrors.categoryId,
-                                    },
-                                  ]
-                                : undefined
-                            }
-                          />
-                        </Field>
-
-                        <Field>
-                          <FieldLabel htmlFor="amount">Amount</FieldLabel>
-                          <div className="flex gap-2">
-                            <CurrencyDrawer
-                              value={transaction.currency}
-                              onChange={(currency) => {
-                                setTransaction((prev) => ({
-                                  ...prev,
-                                  currency,
-                                }));
-                                if (normalTransactionErrors.currency) {
-                                  setNormalTransactionErrors((prev) => ({
-                                    ...prev,
-                                    currency: undefined,
-                                  }));
-                                }
-                              }}
-                              userCurrency={user.currency}
-                              className="w-28"
-                            />
-                            <Input
-                              id="amount"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="Amount"
-                              value={transaction.amount}
-                              onChange={(e) => {
-                                setTransaction({
-                                  ...transaction,
-                                  amount: e.target.value,
-                                });
-                                if (normalTransactionErrors.amount) {
-                                  setNormalTransactionErrors((prev) => ({
-                                    ...prev,
-                                    amount: undefined,
-                                  }));
-                                }
-                              }}
-                            />
-                          </div>
-                          <FieldError
-                            errors={
-                              normalTransactionErrors.currency
-                                ? [
-                                    {
-                                      message: normalTransactionErrors.currency,
-                                    },
-                                  ]
-                                : undefined
-                            }
-                          />
-                          <FieldError
-                            errors={
-                              normalTransactionErrors.amount
-                                ? [{ message: normalTransactionErrors.amount }]
-                                : undefined
-                            }
-                          />
-                        </Field>
-
-                        <Field>
-                          <FieldLabel htmlFor="date">Date</FieldLabel>
-                          <Popover
-                            open={datePickerOpen}
-                            onOpenChange={setDatePickerOpen}
-                          >
-                            <PopoverTrigger asChild>
-                              <Button
-                                id="date"
-                                type="button"
-                                variant="outline"
-                                className="w-full justify-between text-muted-foreground"
-                              >
-                                {transaction.transactionDate || "Select date"}
-                                <ChevronDown className="h-4 w-4" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-full p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={
-                                  transaction.transactionDate
-                                    ? new Date(
-                                        `${transaction.transactionDate}T00:00:00`,
-                                      )
-                                    : undefined
-                                }
-                                onSelect={(date) => {
-                                  if (!date) return;
-                                  setTransaction({
-                                    ...transaction,
-                                    transactionDate: date
-                                      .toISOString()
-                                      .slice(0, 10),
-                                  });
-                                  if (normalTransactionErrors.transactionDate) {
-                                    setNormalTransactionErrors((prev) => ({
-                                      ...prev,
-                                      transactionDate: undefined,
-                                    }));
-                                  }
-                                  setDatePickerOpen(false);
-                                }}
-                                captionLayout="dropdown"
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FieldError
-                            errors={
-                              normalTransactionErrors.transactionDate
-                                ? [
-                                    {
-                                      message:
-                                        normalTransactionErrors.transactionDate,
-                                    },
-                                  ]
-                                : undefined
-                            }
-                          />
-                        </Field>
-
-                        {transactionType === "expense" && (
-                          <Field>
-                            <FieldLabel htmlFor="attachment">
-                              Attachment
-                            </FieldLabel>
-                            <Input
-                              id="attachment"
-                                type="file"
-                                className=""
-                              accept=".jpg, .jpeg, .png, .pdf"
-                              onChange={() => {
-                                const fileInput = document.getElementById(
-                                  "attachment",
-                                ) as HTMLInputElement;
-                                const file = fileInput.files
-                                  ? fileInput.files[0]
-                                  : null;
-                                setTransaction({
-                                  ...transaction,
-                                  file: file || undefined,
-                                });
-                                if (normalTransactionErrors.file) {
-                                  setNormalTransactionErrors((prev) => ({
-                                    ...prev,
-                                    file: undefined,
-                                  }));
-                                }
-                              }}
-                            />
-                            <FieldError
-                              errors={
-                                normalTransactionErrors.file
-                                  ? [{ message: normalTransactionErrors.file }]
-                                  : undefined
-                              }
-                            />
-                          </Field>
-                        )}
-                      </FieldGroup>
-                      <div className="flex flex-col space-y-4">
-                        <Button
-                          type="submit"
-                          disabled={adding_transaction_loading}
-                        >
-                          {adding_transaction_loading ? (
-                            <Spinner />
-                          ) : (
-                            "Add Transaction"
-                          )}
-                        </Button>
-                        <SheetClose asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </SheetClose>
-                      </div>
-                    </form>
-                  </TabsContent>
-                </Tabs>
-              </>
-            )}
-          </div>
+              {/* Action Button */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={adding_transaction_loading}
+                  className={`w-full h-12 rounded-xl text-base font-semibold transition-all shadow-md ${
+                    transactionType === "expense"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20"
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                  }`}
+                >
+                  {adding_transaction_loading ? (
+                    <Spinner />
+                  ) : (
+                    <span>
+                      Add {transactionType === "expense" ? "Expense" : "Income"}
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
       </SheetContent>
     </Sheet>

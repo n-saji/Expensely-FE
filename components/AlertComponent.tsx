@@ -58,8 +58,16 @@ export default function AlertComponent() {
     const handler = () => {
       fetchAlerts();
     };
+    window.addEventListener("transaction-added", handler);
     window.addEventListener("expense-added", handler);
-    return () => window.removeEventListener("expense-added", handler);
+    window.addEventListener("income-added", handler);
+    window.addEventListener("recurring-expense-added", handler);
+    return () => {
+      window.removeEventListener("transaction-added", handler);
+      window.removeEventListener("expense-added", handler);
+      window.removeEventListener("income-added", handler);
+      window.removeEventListener("recurring-expense-added", handler);
+    };
   }, [user.alertsEnabled, user.id]);
 
   return (
