@@ -55,6 +55,10 @@ import OAuthAccounts from "./_components/oauth-accounts";
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false);
+  const [deleteAccountPassword, setDeleteAccountPassword] = useState("");
+  const [isVerifyingDeletePassword, setIsVerifyingDeletePassword] = useState(false);
+  const [deletePasswordError, setDeletePasswordError] = useState("");
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const hasFetchedRef = useRef(false);
@@ -177,29 +181,58 @@ export default function SettingsPage() {
       });
   };
 
-  const handleUserDeletion = async () => {
+  const handleConfirmAndDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!user.id) {
       toast.error("User ID is required for deletion.");
       return;
     }
-    await api
-      .delete(`${API_URL}/users/delete-account/${user.id}`)
-      .then((res) => res.data)
-      .then((data) => {
+    if (!deleteAccountPassword) {
+      setDeletePasswordError("Password is required to delete your account.");
+      return;
+    }
+    setDeletePasswordError("");
+    setIsVerifyingDeletePassword(true);
+
+    try {
+      // 1. Confirm identity via API call
+      const res = await api.post(`${API_URL}/users/confirm-password`, {
+        userId: user.id,
+        password: deleteAccountPassword,
+      });
+
+      if (res.data?.valid) {
+        // 2. Proceed with account deletion flow
+        const deleteRes = await api.delete(`${API_URL}/users/delete-account/${user.id}`);
+        const data = deleteRes.data;
+
         if (data.error === null) {
           dispatch(setUser({ ...user, isActive: false }));
           toast.success("Account deleted successfully!");
           localStorage.removeItem("user_id");
           localStorage.removeItem("theme");
           localStorage.removeItem("themeColor");
+          setDeleteAccountModalOpen(false);
+          setDeleteAccountPassword("");
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1500);
         } else {
           toast.error(data.message || "Failed to delete account.");
         }
-      })
-      .catch((err) => {
-        console.error("Error deleting account:", err);
-        toast.error("An error occurred while deleting the account.");
-      });
+      } else {
+        const errorMsg = res.data?.message || "Incorrect password. Please try again.";
+        setDeletePasswordError(errorMsg);
+        toast.error(errorMsg);
+      }
+    } catch (err: any) {
+      console.error("Error confirming password / deleting account:", err);
+      const msg = err?.response?.data?.message || "Invalid password or failed to verify identity.";
+      setDeletePasswordError(msg);
+      toast.error(msg);
+    } finally {
+      setIsVerifyingDeletePassword(false);
+    }
   };
 
   const handleCurrencyUpdate = async (currency: string) => {
@@ -585,29 +618,74 @@ export default function SettingsPage() {
                 Permanently delete your account. This action cannot be undone.
               </CardDescription>
               <CardAction>
-                <Button
-                  variant="destructive"
-                  onClick={async () => {
-                    alert(
-                      "Are you sure you want to delete your account? This action cannot be undone.",
-                    );
-                    if (
-                      !window.confirm(
-                        "Are you sure you want to delete your account?",
-                      )
-                    ) {
-                      return;
+                <Dialog
+                  open={deleteAccountModalOpen}
+                  onOpenChange={(open) => {
+                    setDeleteAccountModalOpen(open);
+                    if (!open) {
+                      setDeleteAccountPassword("");
+                      setDeletePasswordError("");
                     }
-                    handleUserDeletion();
-                    toast.success("Account deleted successfully!");
-                    setTimeout(() => {
-                      // Redirect to home or login page after deletion
-                      window.location.href = "/";
-                    }, 2000);
                   }}
                 >
-                  Delete Account
-                </Button>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">Delete Account</Button>
+                  </DialogTrigger>
+
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete your account? This action is permanent and cannot be undone. Please enter your password to confirm your identity.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleConfirmAndDeleteAccount}>
+                      <div className="grid gap-4 py-2">
+                        <div className="grid gap-2">
+                          <Label htmlFor="delete-account-password">Password</Label>
+                          <Input
+                            id="delete-account-password"
+                            type="password"
+                            placeholder="Enter your password"
+                            value={deleteAccountPassword}
+                            onChange={(e) => {
+                              setDeleteAccountPassword(e.target.value);
+                              if (deletePasswordError) setDeletePasswordError("");
+                            }}
+                            disabled={isVerifyingDeletePassword}
+                          />
+                          {deletePasswordError && (
+                            <p className="text-xs text-destructive mt-1">{deletePasswordError}</p>
+                          )}
+                        </div>
+                      </div>
+                      <DialogFooter className="mt-4 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setDeleteAccountModalOpen(false)}
+                          disabled={isVerifyingDeletePassword}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant="destructive"
+                          disabled={!deleteAccountPassword || isVerifyingDeletePassword}
+                        >
+                          {isVerifyingDeletePassword ? (
+                            <div className="flex items-center gap-2">
+                              <Spinner className="h-4 w-4 text-destructive-foreground" />
+                              <span>Confirming...</span>
+                            </div>
+                          ) : (
+                            "Confirm & Delete Account"
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </CardAction>
             </CardHeader>
           </Card>
