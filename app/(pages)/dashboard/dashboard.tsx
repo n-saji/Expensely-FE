@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "@/redux/slices/userSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -76,6 +77,7 @@ let hasHydrated = false;
 
 export default function DashboardPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
   const categories = useSelector(
     (state: RootState) => state.categoryExpense.categories,
@@ -92,7 +94,13 @@ export default function DashboardPage() {
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
   const [loadingYear, setLoadingYear] = useState<boolean>(true);
   const [loadingMonth, setLoadingMonth] = useState<boolean>(true);
-  const [newUser, setNewUser] = useState<boolean>(false);
+  const [newUser, setNewUser] = useState<boolean>(!user.hasTransactions);
+
+  useEffect(() => {
+    if (user.id) {
+      setNewUser(!user.hasTransactions);
+    }
+  }, [user.id, user.hasTransactions]);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentMonthYear, setCurrentMonthYear] = useState(
     new Date().getFullYear(),
@@ -428,11 +436,14 @@ export default function DashboardPage() {
   };
 
   const handleFirstExpenseCreated = async () => {
+    dispatch(setUser({ hasTransactions: true }));
     setNewUser(false);
     await refreshDashboardData();
   };
 
   const handleBudgetCreated = async () => {
+    dispatch(setUser({ hasTransactions: true }));
+    setNewUser(false);
     await Promise.all([
       fetchOverview({ hasConstraint: true, type: "" }),
       fetchMonthlyOverview(),

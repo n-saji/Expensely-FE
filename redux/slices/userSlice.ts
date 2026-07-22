@@ -47,6 +47,7 @@ interface UserState {
   emailVerified: boolean;
   isImpersonated: boolean;
   isOauth2User: boolean;
+  hasTransactions: boolean;
 }
 
 const initialState: UserState = {
@@ -69,6 +70,7 @@ const initialState: UserState = {
   emailVerified: true,
   isImpersonated: false,
   isOauth2User: false,
+  hasTransactions: false,
 };
 
 const userSlice = createSlice({
@@ -123,6 +125,10 @@ const userSlice = createSlice({
         action.payload.isOauth2User !== undefined
           ? action.payload.isOauth2User
           : state.isOauth2User;
+      state.hasTransactions =
+        action.payload.hasTransactions !== undefined
+          ? action.payload.hasTransactions
+          : state.hasTransactions;
     },
     clearUser: (state) => {
       state.email = "";
@@ -144,6 +150,7 @@ const userSlice = createSlice({
       state.emailVerified = true;
       state.isImpersonated = false;
       state.isOauth2User = false;
+      state.hasTransactions = false;
     },
   },
 });
