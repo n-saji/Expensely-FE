@@ -96,7 +96,7 @@ export default function DashboardClient({
             profilePictureUrl: profile.profilePictureUrl,
             emailVerified: profile.emailVerified,
             isImpersonated: isImpersonated ?? false,
-            hasTransactions: profile.hasTransactions ?? false,
+            hasTransactions: profile.hasTransactions ?? profile.has_transactions ?? false,
           }),
         );
 

@@ -86,6 +86,10 @@ export default function AuthHandler() {
               profilePicFilePath: profileData.user.profilePicFilePath,
               profileComplete: profileData.user.profileComplete,
               emailVerified: profileData.user.emailVerified,
+              hasTransactions:
+                profileData.user.hasTransactions ??
+                profileData.user.has_transactions ??
+                false,
             }),
           );
           localStorage.setItem("theme", profileData.user.theme);

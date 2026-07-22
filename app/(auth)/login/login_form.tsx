@@ -69,6 +69,8 @@ export default function LoginForm() {
               profileComplete: data.user.profileComplete,
               profilePictureUrl: data.user.profilePictureUrl,
               emailVerified: data.user.emailVerified,
+              hasTransactions:
+                data.user.hasTransactions ?? data.user.has_transactions ?? false,
             }),
           );
           localStorage.setItem("theme", data.user.theme);
@@ -137,6 +139,8 @@ export default function LoginForm() {
                 profileComplete: data.user.profileComplete,
                 profilePictureUrl: data.user.profilePictureUrl,
                 emailVerified: data.user.emailVerified,
+                hasTransactions:
+                  data.user.hasTransactions ?? data.user.has_transactions ?? false,
               }),
             );
             localStorage.setItem("theme", data.user.theme);

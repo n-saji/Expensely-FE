@@ -85,6 +85,8 @@ function syncUserFromMeResponse(response: unknown) {
         emailVerified?: boolean;
         isOauth2User?: boolean;
         is_oauth2_user?: boolean;
+        hasTransactions?: boolean;
+        has_transactions?: boolean;
       };
       isImpersonated?: boolean;
     };
@@ -121,6 +123,7 @@ function syncUserFromMeResponse(response: unknown) {
       emailVerified: profile.emailVerified,
       isImpersonated: data?.data?.isImpersonated ?? false,
       isOauth2User: profile.isOauth2User ?? profile.is_oauth2_user ?? false,
+      hasTransactions: profile.hasTransactions ?? profile.has_transactions ?? false,
     }),
   );
 
