@@ -249,16 +249,16 @@ export default function CompleteProfileWizard() {
     }
 
     if (currentStep === 2) {
-      if (password) {
-        if (!STRONG_PASSWORD_REGEX.test(password)) {
-          nextErrors.password =
-            "Password must be at least 8 characters, with letters, numbers, and special characters.";
-        }
-        if (!confirmPassword) {
-          nextErrors.confirmPassword = "Confirm password is required.";
-        } else if (password !== confirmPassword) {
-          nextErrors.confirmPassword = "Passwords do not match.";
-        }
+      if (!password) {
+        nextErrors.password = "Password is required.";
+      } else if (!STRONG_PASSWORD_REGEX.test(password)) {
+        nextErrors.password =
+          "Password must be at least 8 characters, with letters, numbers, and special characters.";
+      }
+      if (!confirmPassword) {
+        nextErrors.confirmPassword = "Confirm password is required.";
+      } else if (password !== confirmPassword) {
+        nextErrors.confirmPassword = "Passwords do not match.";
       }
     }
 
@@ -653,7 +653,7 @@ export default function CompleteProfileWizard() {
                   {user.isOauth2User && (
                     <div className="rounded-lg border border-primary/20 bg-primary/10 p-3 text-xs text-primary flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 shrink-0" />
-                      <span>You signed in using Google. Setting a password is optional.</span>
+                      <span>You signed in using Google. Please set a password for your account.</span>
                     </div>
                   )}
                   <div className="space-y-2">
