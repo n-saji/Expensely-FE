@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import CurrencyHistoryDialog from "@/app/(pages)/exchange-rate/_components/currency-history-dialog";
 
 interface ExchangeRateItem {
   baseCurrency: string;
@@ -30,6 +31,7 @@ export default function RatesClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [rates, setRates] = useState<ExchangeRateItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [historyDialogCurrency, setHistoryDialogCurrency] = useState<string | null>(null);
 
   const fetchRates = async (target?: string) => {
     try {
@@ -144,7 +146,11 @@ export default function RatesClient() {
               ))
             ) : rates.length > 0 ? (
               rates.map((item, idx) => (
-                <TableRow key={`${item.targetCurrency}-${idx}`} className="hover:bg-muted/30 transition-colors">
+                <TableRow
+                  key={`${item.targetCurrency}-${idx}`}
+                  className="hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => setHistoryDialogCurrency(item.targetCurrency)}
+                >
                   <TableCell className="font-medium py-3.5">
                     <span className="flex items-center gap-2">
                       <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-md text-xs font-semibold">
@@ -190,6 +196,12 @@ export default function RatesClient() {
           </TableBody>
         </Table>
       </div>
+
+      <CurrencyHistoryDialog
+        targetCurrency={historyDialogCurrency}
+        open={historyDialogCurrency !== null}
+        onOpenChange={(open) => !open && setHistoryDialogCurrency(null)}
+      />
     </div>
   );
 }
