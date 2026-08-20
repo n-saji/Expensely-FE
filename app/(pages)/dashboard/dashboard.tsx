@@ -40,7 +40,7 @@ import PieChartComp, {
   ExpensesOverDays,
   YearlyExpenseLineChartV2,
 } from "@/components/ExpenseChartCard";
-import RemindersDashboardWidget from "@/components/reminders-widget";
+import RemindersDashboardWidget, { Reminder } from "@/components/reminders-widget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Label } from "@/components/ui/label";
@@ -165,6 +165,10 @@ export default function DashboardPage() {
     count: 6,
     type: OverviewEnum.MONTH,
   });
+
+  const [upcomingReminders, setUpcomingReminders] = useState<Reminder[]>([]);
+  const [upcomingRemindersLoading, setUpcomingRemindersLoading] =
+    useState<boolean>(true);
 
   const fetchOverview = async ({
     monthYear = currentMonthYear,
@@ -370,6 +374,26 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchUpcomingReminders = async () => {
+    try {
+      setUpcomingRemindersLoading(true);
+      const res = await api.get("/v1/reminders?size=100");
+      if (res.status === 200) {
+        const list: Reminder[] = res.data.content || [];
+        const upcoming = list
+          .filter((r) => r.status === "UPCOMING" || r.status === "NOTIFIED")
+          .sort(
+            (a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime(),
+          );
+        setUpcomingReminders(upcoming);
+      }
+    } catch (error) {
+      console.error("Error loading upcoming reminders", error);
+    } finally {
+      setUpcomingRemindersLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOverview({
       hasConstraint: true,
@@ -413,6 +437,12 @@ export default function DashboardPage() {
   }, [user.id, incomeOverviewParams]);
 
   useEffect(() => {
+    if (user.id) {
+      fetchUpcomingReminders();
+    }
+  }, [user.id]);
+
+  useEffect(() => {
     const handleTransactionAdded = () => {
       void refreshDashboardData();
     };
@@ -441,6 +471,7 @@ export default function DashboardPage() {
       fetchIncomeExpenseCompareOverview(),
       fetchMonthlyOverview(),
       fetchMonthlyIncomeOverview(),
+      fetchUpcomingReminders(),
     ]);
   };
 
@@ -577,6 +608,8 @@ export default function DashboardPage() {
     { id: "this_year_income", label: "This Year Income" },
     { id: "net_savings", label: "Net Savings (Month)" },
     { id: "top_spend_month", label: "Top Spend This Month" },
+    { id: "upcoming_expense", label: "Upcoming Expense" },
+    { id: "upcoming_reminder", label: "Upcoming Reminder" },
   ];
 
   const getSavedSelectedStats = (userId: string): string[] => {
@@ -1064,6 +1097,70 @@ export default function DashboardPage() {
                   {topExpenseItem
                     ? `${currency}${fmt(topExpenseItem.value)} spent`
                     : "No expenses recorded."}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      case "upcoming_expense": {
+        const nextExpense = upcomingRecurring[0] || null;
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Upcoming Expense
+            </span>
+            <div>
+              {overview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div
+                  className="text-2xl md:text-3xl font-light text-foreground truncate max-w-[200px]"
+                  title={nextExpense ? nextExpense.description : "N/A"}
+                >
+                  {nextExpense ? nextExpense.description : "None due"}
+                </div>
+              )}
+              {overview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {nextExpense
+                    ? `${currencyMapper(nextExpense.currency)}${fmt(nextExpense.amount)} · ${formatDayNumberMonth(nextExpense.nextOccurrence)}`
+                    : "No upcoming recurring expenses"}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      case "upcoming_reminder": {
+        const nextReminder = upcomingReminders[0] || null;
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Upcoming Reminder
+            </span>
+            <div>
+              {upcomingRemindersLoading ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div
+                  className="text-2xl md:text-3xl font-light text-foreground truncate max-w-[200px]"
+                  title={nextReminder ? nextReminder.title : "N/A"}
+                >
+                  {nextReminder ? nextReminder.title : "None due"}
+                </div>
+              )}
+              {!upcomingRemindersLoading && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {nextReminder
+                    ? `${formatDayNumberMonth(nextReminder.dueAt)}${
+                        nextReminder.amount
+                          ? ` · ${nextReminder.currency || "USD"}${Number(nextReminder.amount).toFixed(2)}`
+                          : ""
+                      }`
+                    : "No upcoming reminders"}
                 </p>
               )}
             </div>
