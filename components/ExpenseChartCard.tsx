@@ -2086,7 +2086,7 @@ export function IncomeExpenseComparisonChart({
                     axisLine={false}
                     tickLine={false}
                   />
-                  <YAxis
+                  {/* <YAxis
                     tick={{ fontSize: 10, fill: "currentColor" }}
                     className="text-muted-foreground font-mono"
                     tickFormatter={(value) =>
@@ -2094,7 +2094,7 @@ export function IncomeExpenseComparisonChart({
                     }
                     axisLine={false}
                     tickLine={false}
-                  />
+                  /> */}
                   <Tooltip
                     contentStyle={{ 
                       backgroundColor: "rgba(15,23,42,0.85)",

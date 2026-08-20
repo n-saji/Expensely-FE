@@ -6,6 +6,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   AlertTriangle,
   ArrowRight,
@@ -45,6 +46,10 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { currencyMapper } from "@/utils/currencyMapper";
+import {
+  normalizeCategoryColor,
+  DEFAULT_CATEGORY_COLOR,
+} from "@/components/category-icon-registry";
 
 import NewUserOnboarding from "./_components/new-user-onboarding";
 import {
@@ -479,7 +484,7 @@ export default function DashboardPage() {
       icon: <CalendarClock className="h-4 w-4 text-rose-500" />,
     },
     budgets: {
-      title: "Active Budgets Tracker",
+      title: "Budget Breakdown",
       icon: <PiggyBank className="h-4 w-4 text-amber-500" />,
     },
     recurring: {
@@ -556,6 +561,40 @@ export default function DashboardPage() {
     return defaultLayout;
   };
 
+  const defaultSelectedStats = [
+    "net_balance",
+    "monthly_income",
+    "monthly_expense",
+    "top_category",
+  ];
+
+  const availableStatsList = [
+    { id: "net_balance", label: "Net Balance" },
+    { id: "monthly_income", label: "Monthly Income" },
+    { id: "monthly_expense", label: "Monthly Expense" },
+    { id: "top_category", label: "Top Category" },
+    { id: "this_year_expense", label: "This Year Expense" },
+    { id: "this_year_income", label: "This Year Income" },
+    { id: "net_savings", label: "Net Savings (Month)" },
+    { id: "top_spend_month", label: "Top Spend This Month" },
+  ];
+
+  const getSavedSelectedStats = (userId: string): string[] => {
+    if (typeof window === "undefined") return defaultSelectedStats;
+    if (!userId) return defaultSelectedStats;
+    const saved = localStorage.getItem(
+      `expensely_dashboard_selected_stats_${userId}`,
+    );
+    if (saved) {
+      try {
+        return JSON.parse(saved) as string[];
+      } catch {
+        return defaultSelectedStats;
+      }
+    }
+    return defaultSelectedStats;
+  };
+
   const [isMounted, setIsMounted] = useState(() => hasHydrated);
   const [layout, setLayout] = useState<LayoutItem[]>(() => {
     if (hasHydrated && typeof window !== "undefined") {
@@ -563,13 +602,23 @@ export default function DashboardPage() {
     }
     return [];
   });
+  const [selectedStats, setSelectedStats] = useState<string[]>(() => {
+    if (hasHydrated && typeof window !== "undefined") {
+      return getSavedSelectedStats(user.id);
+    }
+    return [];
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [isDockMinimized, setIsDockMinimized] = useState(false);
   const [layoutBackup, setLayoutBackup] = useState<LayoutItem[] | null>(null);
+  const [selectedStatsBackup, setSelectedStatsBackup] = useState<
+    string[] | null
+  >(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
 
   useEffect(() => {
     setLayout(getSavedLayout(user.id));
+    setSelectedStats(getSavedSelectedStats(user.id));
     setIsMounted(true);
     hasHydrated = true;
   }, [user.id]);
@@ -667,6 +716,7 @@ export default function DashboardPage() {
 
   const handleStartEditing = () => {
     setLayoutBackup(layout.map(item => ({ ...item })));
+    setSelectedStatsBackup([...selectedStats]);
     setIsEditing(true);
     setIsDockMinimized(isMobile);
   };
@@ -674,6 +724,9 @@ export default function DashboardPage() {
   const handleCancelEditing = () => {
     if (layoutBackup) {
       setLayout(layoutBackup);
+    }
+    if (selectedStatsBackup) {
+      setSelectedStats(selectedStatsBackup);
     }
     setIsEditing(false);
   };
@@ -683,11 +736,16 @@ export default function DashboardPage() {
       `expensely_dashboard_layout_${user.id}`,
       JSON.stringify(layout)
     );
+    localStorage.setItem(
+      `expensely_dashboard_selected_stats_${user.id}`,
+      JSON.stringify(selectedStats)
+    );
     setIsEditing(false);
   };
 
   const handleResetLayout = () => {
     setLayout(defaultLayout.map(item => ({ ...item })));
+    setSelectedStats(defaultSelectedStats);
   };
 
   const handleToggleVisibility = (id: string) => {
@@ -733,28 +791,11 @@ export default function DashboardPage() {
   };
 
   // --- WIDGET RENDERERS ---
-  const renderStatsWidget = (w: number) => {
-    let gridCols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
-    let incomeBorder = "border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8";
-    let expenseBorder = "border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8";
-    let topCategoryBorder = "border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-6 md:pl-8";
-
-    if (w === 2) {
-      gridCols = "grid-cols-1 sm:grid-cols-2";
-      incomeBorder = "border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8";
-      expenseBorder = "border-t border-border/40 pt-6";
-      topCategoryBorder = "border-t sm:border-t-0 sm:border-l border-border/40 pt-6 sm:pt-0 sm:pl-6 md:pl-8";
-    } else if (w === 1) {
-      gridCols = "grid-cols-1";
-      incomeBorder = "border-t border-border/40 pt-6";
-      expenseBorder = "border-t border-border/40 pt-6";
-      topCategoryBorder = "border-t border-border/40 pt-6";
-    }
-
-    return (
-      <div className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md p-6 md:p-8">
-        <div className={`grid gap-6 md:gap-8 ${gridCols}`}>
-          <div className="flex flex-col justify-between space-y-3">
+  const renderStatCell = (id: string) => {
+    switch (id) {
+      case "net_balance":
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
               Net Balance
             </span>
@@ -777,8 +818,11 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
+        );
 
-          <div className={`group flex flex-col justify-between space-y-3 ${incomeBorder}`}>
+      case "monthly_income":
+        return (
+          <div className="group flex flex-col justify-between space-y-3 h-full">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
                 Monthly Income
@@ -826,8 +870,11 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+        );
 
-          <div className={`group flex flex-col justify-between space-y-3 ${expenseBorder}`}>
+      case "monthly_expense":
+        return (
+          <div className="group flex flex-col justify-between space-y-3 h-full">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
                 Monthly Expense
@@ -875,8 +922,11 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+        );
 
-          <div className={`flex flex-col justify-between space-y-3 ${topCategoryBorder}`}>
+      case "top_category":
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
               Top Category
             </span>
@@ -897,7 +947,210 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-        </div>
+        );
+
+      case "this_year_expense":
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              This Year&apos;s Expense
+            </span>
+            <div>
+              {overview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {currency}
+                  {fmt(overview.totalAmount)}
+                </div>
+              )}
+              {overview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  Avg. {currency}
+                  {fmt(overview.averageMonthlyExpense ?? 0)} / month
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case "this_year_income":
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              This Year&apos;s Income
+            </span>
+            <div>
+              {incomeOverview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div className="text-2xl md:text-3xl font-light text-foreground font-mono tracking-tight">
+                  {currency}
+                  {fmt(incomeOverview.totalAmount)}
+                </div>
+              )}
+              {incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  Avg. {currency}
+                  {fmt(incomeOverview.averageMonthlyIncome ?? 0)} / month
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case "net_savings": {
+        const expense = overview?.thisMonthTotalExpense ?? 0;
+        const income = incomeOverview?.thisMonthTotalIncome ?? 0;
+        const savings = income - expense;
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Net Savings (Month)
+            </span>
+            <div>
+              {overview === null || incomeOverview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div
+                  className={`text-2xl md:text-3xl font-light font-mono tracking-tight ${savings >= 0 ? "text-emerald-500" : "text-rose-500"}`}
+                >
+                  {savings < 0 ? "-" : ""}
+                  {currency}
+                  {fmt(Math.abs(savings))}
+                </div>
+              )}
+              {overview !== null && incomeOverview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {savings >= 0
+                    ? "Positive cash savings"
+                    : "Net deficit this month"}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      case "top_spend_month": {
+        const topExpenseItem = (() => {
+          if (!overview || !overview.topFiveMostExpensiveItemThisMonth)
+            return null;
+          const entries = Object.entries(
+            overview.topFiveMostExpensiveItemThisMonth,
+          );
+          if (entries.length === 0) return null;
+          const sorted = entries.sort(([, a], [, b]) => b - a);
+          return { name: sorted[0][0], value: sorted[0][1] };
+        })();
+        return (
+          <div className="flex flex-col justify-between space-y-3 h-full">
+            <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+              Top Spend This Month
+            </span>
+            <div>
+              {overview === null ? (
+                <div className="h-8 w-28 bg-muted/40 animate-pulse rounded-md" />
+              ) : (
+                <div
+                  className="text-2xl md:text-3xl font-light text-foreground truncate max-w-[200px]"
+                  title={topExpenseItem ? topExpenseItem.name : "N/A"}
+                >
+                  {topExpenseItem ? topExpenseItem.name : "N/A"}
+                </div>
+              )}
+              {overview !== null && (
+                <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                  {topExpenseItem
+                    ? `${currency}${fmt(topExpenseItem.value)} spent`
+                    : "No expenses recorded."}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      default:
+        return null;
+    }
+  };
+
+  const renderStatsWidget = (w: number) => {
+    const cols = selectedStats.length;
+    let gridCols = "grid-cols-1";
+    if (cols === 4) gridCols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+    else if (cols === 3) gridCols = "grid-cols-1 sm:grid-cols-3";
+    else if (cols === 2) gridCols = "grid-cols-1 sm:grid-cols-2";
+
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/45 backdrop-blur-md p-6 md:p-8 w-full">
+        {isEditing && (
+          <div
+            className="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.02] space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Select Stats to Display (Max 4, Active: {selectedStats.length}
+                /4)
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableStatsList.map((st) => {
+                const active = selectedStats.includes(st.id);
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => {
+                      if (active) {
+                        setSelectedStats(
+                          selectedStats.filter((id) => id !== st.id),
+                        );
+                      } else {
+                        if (selectedStats.length >= 4) {
+                          toast.error("You can select up to 4 stats only");
+                        } else {
+                          setSelectedStats([...selectedStats, st.id]);
+                        }
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                      active
+                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-500"
+                        : "bg-muted/30 border-border/50 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {st.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {cols === 0 ? (
+          <div className="text-center py-4 text-xs text-muted-foreground">
+            No stats selected. Enter customize mode to configure.
+          </div>
+        ) : (
+          <div className={`grid gap-6 md:gap-8 ${gridCols}`}>
+            {selectedStats.map((statId, idx) => {
+              const borderClass =
+                idx === 0
+                  ? ""
+                  : `border-t border-border/40 pt-6 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-6 md:pl-8 ${
+                      cols === 4 ? "lg:pl-8" : ""
+                    }`;
+              return (
+                <div key={statId} className={borderClass}>
+                  {renderStatCell(statId)}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
@@ -922,17 +1175,19 @@ export default function DashboardPage() {
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-lg font-medium text-foreground">
-              Budgets
+            <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
+              <PieChartIcon className="h-4.5 w-4.5 text-muted-foreground" />
+              Budget Breakdown
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {budgetCount} active budget{budgetCount === 1 ? "" : "s"}
+              Here&apos;s a summary of your budget breakdown so far on{" "}
+              {monthLabel}.
             </p>
           </div>
           {budgetCount > 0 && (
             <Link
               href="/budget"
-              className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium"
+              className="flex items-center gap-1 text-xs text-emerald-500 hover:text-emerald-400 transition-colors font-medium shrink-0"
             >
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -946,70 +1201,105 @@ export default function DashboardPage() {
               No budgets found.
             </p>
           ) : (
-            <div className="divide-y divide-border/30">
-              {displayBudgets.map((budget) => {
-                const pct = Math.round(
-                  (budget.amountSpent / budget.amountLimit) * 100,
-                );
-                const variant = budgetVariant(
-                  budget.amountSpent,
-                  budget.amountLimit,
-                );
-                const progressColor =
-                  variant === "success"
-                    ? "bg-emerald-500"
-                    : variant === "warning"
-                      ? "bg-amber-500"
-                      : "bg-rose-500";
+            <>
+              <div className="flex items-center gap-1.5 mb-5">
+                {displayBudgets.map((budget) => {
+                  const categoryColor = normalizeCategoryColor(
+                    budget.category.color,
+                    DEFAULT_CATEGORY_COLOR,
+                  );
+                  const budgetCurrency = currencyMapper(
+                    budget.currency || user.currency || "USD",
+                  );
+                  return (
+                    <div
+                      key={budget.id}
+                      className="h-1.5 rounded-full transition-all duration-500"
+                      style={{
+                        backgroundColor: categoryColor,
+                        flexGrow: Math.max(budget.amountSpent, 0) || 0.001,
+                        flexBasis: 0,
+                        minWidth: "8px",
+                      }}
+                      title={`${budget.category.name}: ${budgetCurrency}${budget.amountSpent.toFixed(0)}`}
+                    />
+                  );
+                })}
+              </div>
 
-                const budgetCurrency = currencyMapper(
-                  budget.currency || user.currency || "USD",
-                );
+              <div className="divide-y divide-border/30">
+                {displayBudgets.map((budget) => {
+                  const pct = Math.round(
+                    (budget.amountSpent / budget.amountLimit) * 100,
+                  );
+                  const variant = budgetVariant(
+                    budget.amountSpent,
+                    budget.amountLimit,
+                  );
+                  const progressColor =
+                    variant === "success"
+                      ? "bg-emerald-500"
+                      : variant === "warning"
+                        ? "bg-amber-500"
+                        : "bg-rose-500";
+                  const categoryColor = normalizeCategoryColor(
+                    budget.category.color,
+                    DEFAULT_CATEGORY_COLOR,
+                  );
 
-                return (
-                  <div
-                    key={budget.id}
-                    className="w-full py-4 first:pt-0 last:pb-0 grid grid-cols-[1fr_140px] items-center gap-6 group"
-                  >
-                    <div className="min-w-0 w-full space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
-                          {budget.category.name}
-                        </span>
-                        {budgetIcon(
-                          budget.amountSpent,
-                          budget.amountLimit,
-                        )}
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono bg-muted/60 px-1.5 py-0.5 rounded">
-                          {budget.period}
-                        </span>
+                  const budgetCurrency = currencyMapper(
+                    budget.currency || user.currency || "USD",
+                  );
+
+                  return (
+                    <div
+                      key={budget.id}
+                      className="w-full py-4 first:pt-0 last:pb-0 grid grid-cols-[1fr_140px] items-center gap-6 group"
+                    >
+                      <div className="min-w-0 w-full space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="h-2 w-2 rounded-full shrink-0"
+                            style={{ backgroundColor: categoryColor }}
+                          />
+                          <span className="text-sm font-medium text-foreground group-hover:text-emerald-500 transition-colors">
+                            {budget.category.name}
+                          </span>
+                          {budgetIcon(
+                            budget.amountSpent,
+                            budget.amountLimit,
+                          )}
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono bg-muted/60 px-1.5 py-0.5 rounded">
+                            {budget.period}
+                          </span>
+                        </div>
+
+                        <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
+                            style={{ width: `${Math.min(pct, 100)}%` }}
+                          />
+                        </div>
                       </div>
 
-                      <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
-                          style={{ width: `${Math.min(pct, 100)}%` }}
-                        />
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-medium text-foreground font-mono">
+                          {budgetCurrency}
+                          {budget.amountSpent.toFixed(0)}{" "}
+                          <span className="text-muted-foreground text-xs font-light font-sans">
+                            / {budgetCurrency}
+                            {budget.amountLimit.toFixed(0)}
+                          </span>
+                        </p>
+                        <span className="text-xs font-mono text-muted-foreground mt-0.5 block">
+                          {pct}%
+                        </span>
                       </div>
                     </div>
-
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-medium text-foreground font-mono">
-                        {budgetCurrency}
-                        {budget.amountSpent.toFixed(0)}{" "}
-                        <span className="text-muted-foreground text-xs font-light font-sans">
-                          / {budgetCurrency}
-                          {budget.amountLimit.toFixed(0)}
-                        </span>
-                      </p>
-                      <span className="text-xs font-mono text-muted-foreground mt-0.5 block">
-                        {pct}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </>
           )}
           {budgets.length > 6 && (
             <p className="mt-4 text-xs text-muted-foreground text-center">
@@ -1036,7 +1326,7 @@ export default function DashboardPage() {
               Upcoming
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Recurring expenses
+              Bill & Payments
             </p>
           </div>
           <Link
