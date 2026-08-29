@@ -179,9 +179,12 @@ export default function OverviewCharts({ range }: { range: RangeOption }) {
                     tickLine={false}
                     axisLine={false}
                     width={40}
-                    tickFormatter={(val: number) => `${val}ms`}
+                    tickFormatter={(val: number) => `${Number(val.toFixed(3))}ms`}
                   />
-                  <RechartsTooltip contentStyle={tooltipStyle} />
+                  <RechartsTooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(val: any, name: any) => [`${Number(Number(val).toFixed(3))} ms`, name]}
+                  />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Line
                     type="monotone"
