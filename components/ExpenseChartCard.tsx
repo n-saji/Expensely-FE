@@ -1,6 +1,6 @@
 "use client";
 import { currencyMapper } from "@/utils/currencyMapper";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -181,6 +181,49 @@ const monthKeyTimestamp = (key: string) => {
     return Number.MAX_SAFE_INTEGER;
   }
   return Date.UTC(2000 + Number(match[2]), MONTH_INDEX[match[1]], 1);
+};
+
+const chartTimeframeStorageKey = (userId: string, chartKey: string) =>
+  `expensely_chart_timeframe_${userId}_${chartKey}`;
+
+const normalizeChartKey = (value: string) =>
+  value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+const usePersistedChartTimeframe = (chartKey: string, maxValue = 2) => {
+  const userId = useSelector((state: RootState) => state.user.id);
+  const [selectedTimeframe, setSelectedTimeframe] = useState(0);
+
+  useEffect(() => {
+    if (!userId || typeof window === "undefined") return;
+
+    const storedValue = window.localStorage.getItem(
+      chartTimeframeStorageKey(userId, chartKey),
+    );
+    const parsedValue = Number(storedValue);
+    setSelectedTimeframe(
+      Number.isInteger(parsedValue) && parsedValue >= 0 && parsedValue <= maxValue
+        ? parsedValue
+        : 0,
+    );
+  }, [chartKey, maxValue, userId]);
+
+  const updateSelectedTimeframe = useCallback(
+    (value: number) => {
+      const nextValue =
+        Number.isInteger(value) && value >= 0 && value <= maxValue ? value : 0;
+      setSelectedTimeframe(nextValue);
+
+      if (userId && typeof window !== "undefined") {
+        window.localStorage.setItem(
+          chartTimeframeStorageKey(userId, chartKey),
+          nextValue.toString(),
+        );
+      }
+    },
+    [chartKey, maxValue, userId],
+  );
+
+  return [selectedTimeframe, updateSelectedTimeframe] as const;
 };
 
 // ========== Pie Chart: Category-wise Spending ==========
@@ -1383,7 +1426,10 @@ export function YearlyExpenseLineChartV2({
       );
     }
   }, [category, amountByMonthV2]);
-  const [selectedTimeframe, setSelectedTimeframe] = useState(0);
+  const [selectedTimeframe, setSelectedTimeframe] =
+    usePersistedChartTimeframe(
+      normalizeChartKey(title || "expense-trends"),
+    );
   const setOverviewParamsIfChanged = (nextParams: {
     count?: number;
     type?: OverviewEnum;
@@ -1962,7 +2008,8 @@ export function IncomeExpenseComparisonChart({
     React.SetStateAction<{ count?: number; type?: OverviewEnum }>
   >;
 }) {
-  const [selectedTimeframe, setSelectedTimeframe] = useState(0);
+  const [selectedTimeframe, setSelectedTimeframe] =
+    usePersistedChartTimeframe("income-vs-expense");
 
   const setOverviewParamsIfChanged = (nextParams: {
     count?: number;
