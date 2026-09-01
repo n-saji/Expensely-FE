@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import DeleteAccountCard from "./_components/delete-account-card";
 
 
 export default function ProfilePage({
@@ -575,6 +576,8 @@ export default function ProfilePage({
             )}
           </CardContent>
         </Card>
+
+      <DeleteAccountCard />
 
 
       {/* Profile Pic Upload Dialog - keep original togglePopup modal */}

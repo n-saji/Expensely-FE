@@ -48,6 +48,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import CategoryBadge from "@/components/category-badge";
 import CategoryStylePicker from "@/components/category-style-picker";
@@ -69,7 +70,7 @@ export default function CategoryPage() {
   const [categoriesList, setCategories] = useState<categorySkeleton[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingCategory, setUpdatingCategory] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState("expense");
   const [selectedCategory, setSelectedCategory] =
     useState<categorySkeleton | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -77,7 +78,7 @@ export default function CategoryPage() {
   const [openAddSheet, setOpenAddSheet] = useState(false);
   const [newCategory, setNewCategory] = useState({
     name: "",
-    type: "",
+    type: "expense",
     icon: DEFAULT_CATEGORY_ICON_KEY as string,
     color: DEFAULT_CATEGORY_COLOR,
   });
@@ -125,14 +126,16 @@ export default function CategoryPage() {
 
       toast.success("Category added successfully");
 
+      const createdCategoryType = newCategory.type;
       setNewCategory({
         name: "",
-        type: "",
+        type: createdCategoryType,
         icon: DEFAULT_CATEGORY_ICON_KEY,
         color: DEFAULT_CATEGORY_COLOR,
       });
       setOpenAddSheet(false);
-      await fetchCategories(categoryFilter);
+      setCategoryFilter(createdCategoryType);
+      await fetchCategories(createdCategoryType);
       window.dispatchEvent(new Event("category-added"));
     } catch (error) {
       console.error("Error adding category:", error);
@@ -166,7 +169,7 @@ export default function CategoryPage() {
   useEffect(() => {
     if (!isCategoryMounted.current) {
       isCategoryMounted.current = true;
-      fetchCategories("");
+      fetchCategories("expense");
     }
   }, []);
 
@@ -195,7 +198,9 @@ export default function CategoryPage() {
         throw new Error("Failed to update expense");
       }
 
-      await fetchCategories(categoryFilter);
+      const updatedCategoryType = selectedCategory.type || categoryFilter;
+      setCategoryFilter(updatedCategoryType);
+      await fetchCategories(updatedCategoryType);
       window.dispatchEvent(new Event("category-added"));
       setOpenEditDialog(false);
     } catch (error) {
@@ -256,7 +261,7 @@ export default function CategoryPage() {
             Categories
           </h1>
           <p className="text-sm text-muted-foreground">
-            Manage and organize your spending categories.
+            Manage and organize categories by transaction type.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -275,7 +280,14 @@ export default function CategoryPage() {
 
           <Sheet open={openAddSheet} onOpenChange={setOpenAddSheet}>
             <SheetTrigger asChild>
-              <Button>
+              <Button
+                onClick={() =>
+                  setNewCategory((current) => ({
+                    ...current,
+                    type: categoryFilter,
+                  }))
+                }
+              >
                 <Plus className="w-4 h-4" />
                 Add Category
               </Button>
@@ -287,7 +299,7 @@ export default function CategoryPage() {
               <SheetHeader className="p-0">
                 <SheetTitle className="text-xl">Add New Category</SheetTitle>
                 <SheetDescription>
-                  Create a new category to organize expenses.
+                  Create a new category to organize transactions.
                 </SheetDescription>
               </SheetHeader>
 
@@ -397,6 +409,29 @@ export default function CategoryPage() {
         </div>
       )} */}
       <div className="overflow-hidden rounded-2xl border border-border/70 bg-background/80 shadow-sm">
+        <div className="border-b border-border/70 p-4">
+          <Tabs
+            value={categoryFilter}
+            onValueChange={(type) => {
+              setCategoryFilter(type);
+              fetchCategories(type);
+            }}
+          >
+            <TabsList
+              aria-label="Category type"
+              className="h-auto flex-wrap justify-start"
+            >
+              {categoryTypes.map((categoryType) => (
+                <TabsTrigger
+                  key={categoryType.value}
+                  value={categoryType.value}
+                >
+                  {categoryType.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
         <Table>
           <TableHeader>
             <TableRow>
