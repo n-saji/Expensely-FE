@@ -6,11 +6,10 @@ import { clearUser, setUser } from "@/redux/slices/userSlice";
 import { store } from "@/redux/store";
 import {
   DEFAULT_THEME,
-  DEFAULT_THEME_COLOR,
-  THEME_COLOR_IDS,
   THEME_IDS,
   ThemeColorId,
   ThemeId,
+  normalizeThemeColor,
 } from "@/global/constants";
 
 const api = axios.create({
@@ -26,17 +25,6 @@ function normalizeTheme(theme?: string): ThemeId {
     return normalizedTheme as ThemeId;
   }
   return DEFAULT_THEME;
-}
-
-function normalizeThemeColor(themeColor?: string): ThemeColorId {
-  const normalizedThemeColor = themeColor?.trim().toLowerCase();
-  if (
-    normalizedThemeColor &&
-    THEME_COLOR_IDS.includes(normalizedThemeColor as ThemeColorId)
-  ) {
-    return normalizedThemeColor as ThemeColorId;
-  }
-  return DEFAULT_THEME_COLOR;
 }
 
 function applyThemeToDocument(theme: ThemeId, themeColor: ThemeColorId) {
@@ -123,7 +111,8 @@ function syncUserFromMeResponse(response: unknown) {
       emailVerified: profile.emailVerified,
       isImpersonated: data?.data?.isImpersonated ?? false,
       isOauth2User: profile.isOauth2User ?? profile.is_oauth2_user ?? false,
-      hasTransactions: profile.hasTransactions ?? profile.has_transactions ?? false,
+      hasTransactions:
+        profile.hasTransactions ?? profile.has_transactions ?? false,
     }),
   );
 
@@ -177,7 +166,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     if (
       originalRequest.url?.includes("/users/refresh") ||
-      originalRequest.url?.includes("/users/login") 
+      originalRequest.url?.includes("/users/login")
     ) {
       return Promise.reject(error);
     }

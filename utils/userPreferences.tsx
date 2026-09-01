@@ -3,11 +3,7 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import {
-  DEFAULT_THEME_COLOR,
-  THEME_COLOR_IDS,
-  ThemeColorId,
-} from "@/global/constants";
+import { normalizeThemeColor } from "@/global/constants";
 
 export default function UserPreferences(): React.ReactElement | null {
   const user = useSelector((state: RootState) => state.user);
@@ -34,12 +30,10 @@ export default function UserPreferences(): React.ReactElement | null {
   }, [user.theme]);
 
   useEffect(() => {
-    const themeColor = THEME_COLOR_IDS.includes(user.themeColor)
-      ? user.themeColor
-      : DEFAULT_THEME_COLOR;
+    const themeColor = normalizeThemeColor(user.themeColor);
 
     document.documentElement.setAttribute("data-theme-color", themeColor);
-    localStorage.setItem("themeColor", themeColor as ThemeColorId);
+    localStorage.setItem("themeColor", themeColor);
   }, [user.themeColor]);
 
   return null;

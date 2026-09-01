@@ -2,10 +2,10 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   DEFAULT_THEME,
   DEFAULT_THEME_COLOR,
-  THEME_COLOR_IDS,
   THEME_IDS,
   ThemeId,
   ThemeColorId,
+  normalizeThemeColor,
 } from "@/global/constants";
 
 const normalizeTheme = (theme?: string): ThemeId => {
@@ -14,17 +14,6 @@ const normalizeTheme = (theme?: string): ThemeId => {
     return normalizedTheme as ThemeId;
   }
   return DEFAULT_THEME;
-};
-
-const normalizeThemeColor = (themeColor?: string): ThemeColorId => {
-  const normalizedThemeColor = themeColor?.trim().toLowerCase();
-  if (
-    normalizedThemeColor &&
-    THEME_COLOR_IDS.includes(normalizedThemeColor as ThemeColorId)
-  ) {
-    return normalizedThemeColor as ThemeColorId;
-  }
-  return DEFAULT_THEME_COLOR;
 };
 
 interface UserState {

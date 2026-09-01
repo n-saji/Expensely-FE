@@ -44,6 +44,7 @@ import {
   ThemeColorId,
   DEFAULT_THEME_COLOR,
   THEME_COLOR_IDS,
+  normalizeThemeColor,
 } from "@/global/constants";
 import {
   Phone,
@@ -91,7 +92,7 @@ export default function CompleteProfileWizard() {
   const [profilePicFilePath, setProfilePicFilePath] = useState("");
   
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [themeColor, setThemeColor] = useState<ThemeColorId>("teal");
+  const [themeColor, setThemeColor] = useState<ThemeColorId>(DEFAULT_THEME_COLOR);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
 
@@ -160,7 +161,7 @@ export default function CompleteProfileWizard() {
           if (profile.phone) setPhone(profile.phone);
           if (profile.theme) setTheme(profile.theme);
           if (profile.themeColor ?? profile.theme_color) {
-            setThemeColor((profile.themeColor ?? profile.theme_color) as ThemeColorId);
+            setThemeColor(normalizeThemeColor(profile.themeColor ?? profile.theme_color));
           }
           if (profile.notificationsEnabled !== undefined) {
             setNotificationsEnabled(profile.notificationsEnabled);
