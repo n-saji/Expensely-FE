@@ -160,6 +160,29 @@ const getCategoryColor = (
 ) =>
   normalizeCategoryColor(categoryMetaByName?.[categoryName]?.color, fallback);
 
+const MONTH_INDEX: Record<string, number> = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Aug: 7,
+  Sep: 8,
+  Oct: 9,
+  Nov: 10,
+  Dec: 11,
+};
+
+const monthKeyTimestamp = (key: string) => {
+  const match = /^([A-Za-z]{3})\/(\d{2})$/.exec(key.trim());
+  if (!match || MONTH_INDEX[match[1]] === undefined) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+  return Date.UTC(2000 + Number(match[2]), MONTH_INDEX[match[1]], 1);
+};
+
 // ========== Pie Chart: Category-wise Spending ==========
 export default function PieChartComp({
   amountByCategory,
@@ -1975,7 +1998,7 @@ export function IncomeExpenseComparisonChart({
       ...Object.keys(expenseByMonth || {}),
       ...Object.keys(incomeByMonth || {}),
     ]),
-  ];
+  ].sort((left, right) => monthKeyTimestamp(left) - monthKeyTimestamp(right));
 
   const chartData = allMonths.map((month) => ({
     name: month,
