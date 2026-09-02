@@ -582,8 +582,7 @@ export default function CategoryPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Category type cannot be changed after creation because it is
-                  used by transactions, budgets, and analytics.
+                  Category type cannot be changed after creation.
                 </p>
               </div>
 
