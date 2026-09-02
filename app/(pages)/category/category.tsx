@@ -569,16 +569,7 @@ export default function CategoryPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-category-type">Category Type</Label>
-                <Select
-                  value={selectedCategory?.type || ""}
-                  onValueChange={(value) => {
-                    if (!selectedCategory) return;
-                    setSelectedCategory({
-                      ...selectedCategory,
-                      type: value,
-                    });
-                  }}
-                >
+                <Select value={selectedCategory?.type || ""} disabled>
                   <SelectTrigger id="edit-category-type" className="w-full">
                     <SelectValue placeholder="Select Type" />
                   </SelectTrigger>
@@ -590,6 +581,10 @@ export default function CategoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Category type cannot be changed after creation because it is
+                  used by transactions, budgets, and analytics.
+                </p>
               </div>
 
               <CategoryStylePicker
