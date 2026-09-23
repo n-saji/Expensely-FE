@@ -377,6 +377,7 @@ export default function TransactionPage() {
   // CSV Export Dialog states
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportCategory, setExportCategory] = useState("all-categories");
+  const [exportType, setExportType] = useState("all-types");
   const [exportDateRange, setExportDateRange] = useState<DateRange | undefined>(undefined);
   const [exportSearch, setExportSearch] = useState("");
 
@@ -387,6 +388,8 @@ export default function TransactionPage() {
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const skipInitialDebouncedFetchRef = useRef(true);
+  const searchInputRef = useRef(query);
+  const submittedSearchRef = useRef<string | null>(null);
 
   // --- LAYOUT ENGINE CONFIGURATION ---
   interface LayoutItem {
@@ -1086,6 +1089,12 @@ export default function TransactionPage() {
 
   // Sync searchInput when URL query changes (e.g. from Clear button or external navigation)
   useEffect(() => {
+    if (query === submittedSearchRef.current) {
+      submittedSearchRef.current = null;
+      // Do not let a completed navigation overwrite text typed after it started.
+      if (searchInputRef.current !== query) return;
+    }
+    searchInputRef.current = query;
     setSearchInput(query);
   }, [query]);
 
@@ -1093,8 +1102,9 @@ export default function TransactionPage() {
   useEffect(() => {
     if (searchInput === query) return;
     const delayDebounceFn = setTimeout(() => {
+      submittedSearchRef.current = searchInput;
       updateQueryParams({ q: searchInput, page: "1" });
-    }, 400);
+    }, 500);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchInput, query, updateQueryParams]);
@@ -1686,11 +1696,13 @@ export default function TransactionPage() {
   // CSV download trigger with custom filter options
   const downloadCsvHandler = async (options?: {
     category?: string;
+    transactionType?: string;
     dateRange?: DateRange;
     search?: string;
   }) => {
     try {
       const targetCategory = options ? options.category : categoryFilter;
+      const targetType = options ? options.transactionType : typeFilter;
       const targetDateRange = options ? options.dateRange : dateRange;
       const targetSearch = options ? options.search : query;
 
@@ -1708,6 +1720,9 @@ export default function TransactionPage() {
       if (toDate) queryParams.append("end_date", toDate + " 23:59:59");
       if (targetCategory && targetCategory !== "all-categories") {
         queryParams.append("category_id", targetCategory);
+      }
+      if (targetType && targetType !== "all-types") {
+        queryParams.append("type", targetType);
       }
       if (targetSearch) queryParams.append("q", targetSearch);
       if (sortField) {
@@ -2067,7 +2082,11 @@ export default function TransactionPage() {
               type="text"
               placeholder="Search description..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                searchInputRef.current = value;
+                setSearchInput(value);
+              }}
               className="pl-9 pr-8 text-foreground bg-muted/15 border-border/40 focus-visible:ring-1 focus-visible:ring-emerald-500/20 rounded-full h-9 shadow-xs"
             />
             {searchInput && (
@@ -2075,6 +2094,7 @@ export default function TransactionPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
+                  searchInputRef.current = "";
                   setSearchInput("");
                   updateQueryParams({ q: null, page: "1" });
                 }}
@@ -2167,6 +2187,7 @@ export default function TransactionPage() {
                 <DropdownMenuItem
                   onClick={() => {
                     setExportCategory(categoryFilter || "all-categories");
+                    setExportType(typeFilter || "all-types");
                     setExportDateRange(dateRange);
                     setExportSearch(searchInput || "");
                     setOpenExportDialog(true);
@@ -2202,6 +2223,7 @@ export default function TransactionPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
+                  searchInputRef.current = "";
                   setSearchInput("");
                   updateQueryParams({
                     q: null,
@@ -2500,6 +2522,21 @@ export default function TransactionPage() {
               />
             </div>
 
+            {/* Transaction Type Select */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</Label>
+              <Select value={exportType} onValueChange={setExportType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-types">All transactions</SelectItem>
+                  <SelectItem value="EXPENSE">Expenses only</SelectItem>
+                  <SelectItem value="INCOME">Income only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Date Picker */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Time Range</Label>
@@ -2546,6 +2583,7 @@ export default function TransactionPage() {
                 try {
                   await downloadCsvHandler({
                     category: exportCategory,
+                    transactionType: exportType,
                     dateRange: exportDateRange,
                     search: exportSearch,
                   });
