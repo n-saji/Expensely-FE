@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { createElement } from "react";
 import {
   getCategoryIcon,
   normalizeCategoryColor,
@@ -38,7 +39,6 @@ export default function CategoryBadge({
   showName = true,
   className,
 }: CategoryBadgeProps) {
-  const Icon = getCategoryIcon(icon);
   const resolvedColor = normalizeCategoryColor(color, DEFAULT_CATEGORY_COLOR);
   const label = name?.trim() || "Unknown";
 
@@ -64,7 +64,7 @@ export default function CategoryBadge({
           backgroundColor: toRgba(resolvedColor, 0.16),
         }}
       >
-        <Icon className={iconSize} />
+        {createElement(getCategoryIcon(icon), { className: iconSize })}
       </span>
       {showName ? <span className="truncate">{label}</span> : null}
     </span>

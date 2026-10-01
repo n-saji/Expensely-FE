@@ -74,7 +74,7 @@ export default function Hero3DBackground() {
     window.addEventListener("resize", handleResize);
 
     let animId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);

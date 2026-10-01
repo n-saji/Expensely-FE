@@ -648,7 +648,7 @@ export default function CategoryPage() {
               <DialogDescription>
                 Are you sure you want to delete the category{" "}
                 <span className="font-semibold text-foreground">
-                  "{deletingCategory?.name}"
+                  &quot;{deletingCategory?.name}&quot;
                 </span>
                 ? This action cannot be undone.
               </DialogDescription>

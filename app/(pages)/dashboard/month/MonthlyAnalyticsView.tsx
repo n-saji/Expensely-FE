@@ -295,7 +295,7 @@ export default function MonthlyAnalyticsView({
   }));
 
   return (
-    <div className="space-y-8 w-full pb-8">
+    <div className="space-y-8 w-full min-w-0 max-w-full pb-8">
       {/* ── HEADER SECTION ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border/40 pb-6">
         <div>
@@ -430,7 +430,7 @@ export default function MonthlyAnalyticsView({
       </div>
 
       {/* ── CHARTS CONTAINER ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid min-w-0 grid-cols-1 lg:grid-cols-3 gap-6 [&>*]:min-w-0">
         {/* Daily Spending Trend (2/3 width) */}
         <Card className="lg:col-span-2 border-border/40 shadow-none bg-card/15">
           <CardHeader className="pb-2">
@@ -562,7 +562,7 @@ export default function MonthlyAnalyticsView({
       </div>
 
       {/* ── HISTORICAL CHART & BUDGET SECTION & MoM SUMMARY ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid min-w-0 grid-cols-1 md:grid-cols-3 gap-6 [&>*]:min-w-0">
         {/* Historical Year Comparison */}
         <Card className="border-border/40 shadow-none bg-card/15">
           <CardHeader className="pb-2">
@@ -816,7 +816,23 @@ export default function MonthlyAnalyticsView({
       <div className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Category Analytics</h2>
         <Card className="border-border/40 shadow-none overflow-hidden bg-card/15">
-          <div className="overflow-x-auto">
+          <div className="divide-y divide-border/30 sm:hidden">
+            {categoryAnalytics.length ? categoryAnalytics.map((cat: any, idx: number) => (
+              <div key={idx} className="space-y-3 p-4 min-w-0">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <CategoryBadge name={cat.categoryName} icon={cat.categoryIcon} color={cat.categoryColor} />
+                  <span className="font-mono font-semibold break-all">{currencySymbol}{(cat.totalAmount ?? 0).toFixed(2)}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <span>Share: {cat.percentageOfTotal?.toFixed(0) ?? 0}%</span>
+                  <span>Transactions: {cat.transactionCount ?? 0}</span>
+                  <span>Month change: {cat.previousMonthComparison?.percentageChange == null ? "—" : `${cat.previousMonthComparison.percentageChange.toFixed(0)}%`}</span>
+                  <span>Year change: {cat.sameMonthLastYearComparison?.percentageChange == null ? "—" : `${cat.sameMonthLastYearComparison.percentageChange.toFixed(0)}%`}</span>
+                </div>
+              </div>
+            )) : <div className="p-6 text-center text-sm text-muted-foreground">No categories analytic data available.</div>}
+          </div>
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
               <thead>
                 <tr className="border-b border-border/40 bg-muted/20 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -962,7 +978,27 @@ export default function MonthlyAnalyticsView({
 
         {/* Table/List View */}
         <Card className="border-border/40 shadow-none overflow-hidden bg-card/15">
-          <div className="overflow-x-auto">
+          <div className="divide-y divide-border/30 sm:hidden">
+            {processedTransactions.length ? processedTransactions.map((tx: any) => {
+              const amount = tx.displayAmount ?? tx.amount;
+              const catMeta = categoryMap.get(tx.categoryId);
+              return (
+                <button key={tx.id} type="button" className="block w-full p-4 text-left hover:bg-muted/15 min-w-0" onClick={() => { setSelectedTransaction(tx); setDetailModalOpen(true); }}>
+                  <div className="flex items-start justify-between gap-2 min-w-0">
+                    <span className="min-w-0 break-words font-semibold">{tx.description}</span>
+                    <span className={`max-w-[45%] break-all text-right font-mono font-semibold ${isExpense ? "text-rose-500" : "text-emerald-500"}`}>
+                      {isExpense ? "-" : "+"}{currencySymbol}{amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span>{new Date(tx.expenseDate || tx.incomeDate || tx.date || 0).toLocaleDateString()}</span>
+                    <CategoryBadge name={tx.categoryName} icon={catMeta?.icon} color={catMeta?.color} />
+                  </div>
+                </button>
+              );
+            }) : <div className="p-6 text-center text-sm text-muted-foreground">No transactions match current filters.</div>}
+          </div>
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
               <thead>
                 <tr className="border-b border-border/40 bg-muted/20 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -1043,24 +1079,24 @@ export default function MonthlyAnalyticsView({
       {/* ── TRANSACTION DETAIL DIALOG MODAL ── */}
       {selectedTransaction && (
         <Dialog open={detailModalOpen} onOpenChange={setDetailModalOpen}>
-          <DialogContent className="sm:max-w-md bg-background border border-border">
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] sm:max-w-md max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background border border-border">
             <DialogHeader>
               <DialogTitle>Transaction Details</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4 py-3">
               {/* Header Info */}
-              <div className="flex justify-between items-start border-b border-border/40 pb-4">
-                <div>
-                  <h4 className="font-bold text-lg text-foreground max-w-[220px] break-words">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-border/40 pb-4 min-w-0">
+                <div className="min-w-0 max-w-full">
+                  <h4 className="font-bold text-lg text-foreground break-words">
                     {selectedTransaction.description}
                   </h4>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1 break-all">
                     ID: {selectedTransaction.id}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xl font-bold font-mono">
+                <div className="text-left sm:text-right min-w-0 max-w-full">
+                  <p className="text-xl font-bold font-mono break-all">
                     {currencySymbol}{(selectedTransaction.displayAmount ?? selectedTransaction.amount).toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -1070,7 +1106,7 @@ export default function MonthlyAnalyticsView({
               </div>
 
               {/* Data list */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-4 text-sm [&>*]:min-w-0">
                 <div>
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">Date</span>
                   <span className="font-medium text-foreground mt-1 block">
@@ -1097,10 +1133,10 @@ export default function MonthlyAnalyticsView({
                 <div className="border-t border-border/40 pt-4 space-y-2">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">Receipt Attachment</span>
                   {selectedTransaction.receiptUrl ? (
-                    <div className="flex items-center justify-between bg-muted/10 p-3 rounded-lg border border-border/40">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/10 p-3 rounded-lg border border-border/40 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
                         <FileText className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-xs text-foreground truncate max-w-[180px]">
+                        <span className="text-xs text-foreground truncate min-w-0">
                           {selectedTransaction.receiptUrl.split("/").pop() || "receipt_attachment"}
                         </span>
                       </div>

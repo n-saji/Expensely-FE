@@ -28,7 +28,8 @@ import { Label } from "@/components/ui/label";
 import DropDown from "@/components/drop-down";
 import CategoryBadge, { toRgba } from "@/components/category-badge";
 import { getCategoryIcon } from "@/components/category-icon-registry";
-import { formatAmountCompact } from "@/utils/amount_formatter";
+import { formatAmountCompact, formatAmountExact } from "@/utils/amount_formatter";
+import type { TransactionRow } from "./columns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -45,9 +46,10 @@ interface DataTableProps<TData, TValue> {
   setPageSize: (pageSize: number) => void;
   categories?: any[];
   userCurrency?: string;
+  showTotals?: boolean;
 }
 
-export function DataTable<TData extends { id: string }, TValue>({
+export function DataTable<TData extends TransactionRow, TValue>({
   columns,
   data,
   totalPages,
@@ -62,6 +64,7 @@ export function DataTable<TData extends { id: string }, TValue>({
   setPageSize,
   categories = [],
   userCurrency = "USD",
+  showTotals = false,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -154,6 +157,26 @@ export function DataTable<TData extends { id: string }, TValue>({
       group.total += amt;
     }
   });
+
+  // The table is server paginated, so these totals describe only the rows
+  // currently visible after the active filters and page selection.
+  const totals = { expense: 0, income: 0 };
+  const categoryTotals = new Map<string, { name: string; expense: number; income: number }>();
+  for (const row of table.getRowModel().rows) {
+    const transaction = row.original;
+    const amount = Number(transaction.displayAmount ?? transaction.amount ?? 0);
+    if (!Number.isFinite(amount)) continue;
+    const key = transaction.type === "EXPENSE" ? "expense" : "income";
+    totals[key] += amount;
+    const categoryKey = transaction.categoryId || transaction.categoryName || "uncategorized";
+    const category = categoryTotals.get(categoryKey) || {
+      name: transaction.categoryName || "Uncategorized",
+      expense: 0,
+      income: 0,
+    };
+    category[key] += amount;
+    categoryTotals.set(categoryKey, category);
+  }
 
   return (
     <div className="space-y-4">
@@ -396,6 +419,31 @@ export function DataTable<TData extends { id: string }, TValue>({
                 <span className="text-sm text-muted-foreground">No transactions found.</span>
               </div>
             )}
+          </div>
+        )}
+        {showTotals && !loading && dateGroups.length > 0 && (
+          <div className="border-t border-border/40 bg-muted/15 px-4 py-4 sm:px-6" aria-label="Visible transaction totals">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Totals for this page</div>
+            <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
+              <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 p-3">
+                <div className="text-xs text-muted-foreground">Total expense</div>
+                <div className="break-all font-semibold text-rose-500">{formatAmountExact(totals.expense, userCurrency)}</div>
+              </div>
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <div className="text-xs text-muted-foreground">Total income</div>
+                <div className="break-all font-semibold text-emerald-500">{formatAmountExact(totals.income, userCurrency)}</div>
+              </div>
+            </div>
+            <div className="mt-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">By category</div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from(categoryTotals.entries()).map(([id, category]) => (
+                <div key={id} className="min-w-0 rounded-lg border border-border/40 bg-background/40 px-3 py-2 text-sm">
+                  <div className="truncate font-medium" title={category.name}>{category.name}</div>
+                  {category.expense > 0 && <div className="break-all text-rose-500">Expense: {formatAmountExact(category.expense, userCurrency)}</div>}
+                  {category.income > 0 && <div className="break-all text-emerald-500">Income: {formatAmountExact(category.income, userCurrency)}</div>}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

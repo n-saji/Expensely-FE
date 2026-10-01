@@ -243,7 +243,7 @@ export default function ConvertClient() {
               </div>
               <h3 className="text-sm font-semibold text-foreground">No Conversion Active</h3>
               <p className="text-xs text-muted-foreground max-w-[240px] mt-1">
-                Select your currencies and amount, then click "Convert Money" to see calculations here.
+                Select your currencies and amount, then click &quot;Convert Money&quot; to see calculations here.
               </p>
             </Card>
           )}

@@ -189,7 +189,7 @@ export default function RatesClient() {
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="h-32 text-center text-muted-foreground font-medium">
-                  No exchange rates found matching "{searchQuery}".
+                  No exchange rates found matching &quot;{searchQuery}&quot;.
                 </TableCell>
               </TableRow>
             )}

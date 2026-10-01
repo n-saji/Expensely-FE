@@ -975,7 +975,7 @@ export default function ReminderClient() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete the reminder{" "}
-              <strong>"{deletingReminder?.title}"</strong>? This is a soft
+              <strong>&quot;{deletingReminder?.title}&quot;</strong>? This is a soft
               delete, but it will hide the reminder from the dashboard and
               cancel all notifications.
             </AlertDialogDescription>

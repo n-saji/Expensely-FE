@@ -2079,7 +2079,7 @@ export function IncomeExpenseComparisonChart({
       ]
     : chartData;
 
-  const makeDot = (color: string) => (props: any) => {
+  const makeDot = (color: string) => function ChartDot(props: any) {
     if (props.payload.__ghost) return null;
     return (
       <circle

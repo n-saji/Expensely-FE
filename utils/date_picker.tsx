@@ -3,7 +3,7 @@ export default function GetMonthRanges({
 }: {
   start_month: number;
 }) {
-  let months_array = [
+  const months_array = [
     { label: "January", value: "01" },
     { label: "February", value: "02" },
     { label: "March", value: "03" },

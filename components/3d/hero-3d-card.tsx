@@ -204,7 +204,7 @@ export default function Hero3DCard() {
     window.addEventListener("resize", handleResize);
 
     // Animation Loop
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
     let animId: number;
 
     const animate = () => {

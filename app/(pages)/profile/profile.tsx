@@ -395,7 +395,7 @@ export default function ProfilePage({
                 </h1>
                 {!user.profileComplete &&
                   <Badge variant={user.profileComplete ? "default" : "outline"} className="font-semibold text-xs py-0.5">
-                     "Incomplete Profile"
+                     &quot;Incomplete Profile&quot;
                   </Badge>
                 }
               </div>

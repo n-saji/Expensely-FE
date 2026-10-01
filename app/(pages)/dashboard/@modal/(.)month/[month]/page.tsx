@@ -16,8 +16,8 @@ export default function MonthlyDashboardModalPage() {
 
   return (
     <Dialog open={true} onOpenChange={() => router.back()}>
-      <DialogContent className="w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-6xl h-[90vh] max-h-[90vh] overflow-y-auto p-4 md:p-8 bg-background border border-border shadow-2xl rounded-2xl scrollbar-thin">
-        <div className="mt-2">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] sm:w-[90vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-6xl h-[90dvh] max-h-[90dvh] min-w-0 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 bg-background border border-border shadow-2xl rounded-2xl scrollbar-thin">
+        <div className="mt-2 min-w-0 max-w-full">
           <MonthlyAnalyticsView monthParam={month} typeParam={type} isModal={true} />
         </div>
       </DialogContent>

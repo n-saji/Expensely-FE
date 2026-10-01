@@ -307,9 +307,21 @@ export default function TransactionPage() {
     pageNumber: 1,
   });
   const [datas, setDatas] = useState<TransactionRow[]>([]);
+  const [showTotals, setShowTotals] = useState(false);
   const [selectedTransactions, setSelectedTransactions] = useState<TransactionRow[]>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  useEffect(() => {
+    if (!user.id) return;
+    setShowTotals(window.localStorage.getItem(`expensely_transaction_show_totals_${user.id}`) === "true");
+  }, [user.id]);
+
+  const toggleTotals = () => {
+    const next = !showTotals;
+    setShowTotals(next);
+    if (user.id) window.localStorage.setItem(`expensely_transaction_show_totals_${user.id}`, String(next));
+  };
 
   // Filters from Query Params
   const query = searchParams.get("q") || "";
@@ -622,7 +634,7 @@ export default function TransactionPage() {
         return (
           <div className="flex flex-col justify-between space-y-3 h-full">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
-              This Month's Expense
+              This Month&apos;s Expense
             </span>
             <div>
               {overview === null ? (
@@ -648,7 +660,7 @@ export default function TransactionPage() {
         return (
           <div className="flex flex-col justify-between space-y-3 h-full">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
-              This Year's Expense
+              This Year&apos;s Expense
             </span>
             <div>
               {overview === null ? (
@@ -713,7 +725,7 @@ export default function TransactionPage() {
         return (
           <div className="flex flex-col justify-between space-y-3 h-full">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
-              This Month's Income
+              This Month&apos;s Income
             </span>
             <div>
               {incomeOverview === null ? (
@@ -739,7 +751,7 @@ export default function TransactionPage() {
         return (
           <div className="flex flex-col justify-between space-y-3 h-full">
             <span className="text-xs uppercase tracking-[0.15em] text-muted-foreground font-semibold">
-              This Year's Income
+              This Year&apos;s Income
             </span>
             <div>
               {incomeOverview === null ? (
@@ -2197,6 +2209,14 @@ export default function TransactionPage() {
                   <Download className="h-4 w-4 text-muted-foreground" />
                   Download CSV
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={toggleTotals}
+                  className="flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg hover:bg-muted/80 cursor-pointer text-foreground"
+                >
+                  <PieChartIcon className="h-4 w-4 text-muted-foreground" />
+                  <span>{showTotals ? "Hide" : "Show"} page totals</span>
+                  {showTotals && <Check className="ml-auto h-4 w-4" />}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -2266,6 +2286,7 @@ export default function TransactionPage() {
           setPageSize={setPageSize}
           categories={categories.categories}
           userCurrency={user.currency}
+          showTotals={showTotals}
         />
       </div>
 
