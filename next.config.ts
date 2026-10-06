@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
+import { fileURLToPath } from "node:url";
+
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 const nextConfig: NextConfig = {
+  // Keep file tracing and the dev compiler inside this repository. A lockfile
+  // in the user's home directory otherwise makes Next scan far outside the app.
+  outputFileTracingRoot: projectRoot,
+  turbopack: {
+    root: projectRoot,
+  },
   images: {
     domains: [
       "qidkhnousdwexgmgvytk.supabase.co",
@@ -77,6 +86,14 @@ const nextConfig: NextConfig = {
         source: "/api/transactions/:path*",
         destination: process.env.NEXT_PUBLIC_API_URL + "/transactions/:path*",
       },
+      ...["accounts", "debts", "savings-goals", "investment-accounts", "finances"].map((resource) => ({
+        source: `/api/${resource}/:path*`,
+        destination: process.env.NEXT_PUBLIC_API_URL + `/${resource}/:path*`,
+      })),
+      ...["accounts", "debts", "savings-goals", "investment-accounts", "finances"].map((resource) => ({
+        source: `/api/${resource}`,
+        destination: process.env.NEXT_PUBLIC_API_URL + `/${resource}`,
+      })),
       {
         source: "/api/v1/reminders",
         destination: process.env.NEXT_PUBLIC_API_URL + "/v1/reminders",

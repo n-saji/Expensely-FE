@@ -32,7 +32,16 @@ export type TransactionRow = {
   currency: string;
   displayCurrency: string;
   receiptUrl?: string | null;
-  type: "EXPENSE" | "INCOME";
+  type: "EXPENSE" | "INCOME" | "TRANSFER" | "DEBT_PAYMENT" | "SAVINGS_TRANSFER" | "INVESTMENT_TRANSFER";
+  counterpartyName?: string | null;
+  accountId?: string | null;
+  destinationAccountId?: string | null;
+  debtId?: string | null;
+  savingsGoalId?: string | null;
+  investmentAccountId?: string | null;
+  principalAmount?: number | null;
+  interestAmount?: number | null;
+  notes?: string | null;
 };
 
 type CategoryMeta = {
@@ -127,10 +136,10 @@ export const columns = (
             className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
               type === "EXPENSE"
                 ? "bg-red-500/10 text-red-500"
-                : "bg-green-500/10 text-green-500"
+                : type === "INCOME" ? "bg-green-500/10 text-green-500" : "bg-blue-500/10 text-blue-500"
             }`}
           >
-            {type === "EXPENSE" ? "Expense" : "Income"}
+            {({EXPENSE:"Expense",INCOME:"Income",TRANSFER:"Transfer",DEBT_PAYMENT:"Debt payment",SAVINGS_TRANSFER:"Savings",INVESTMENT_TRANSFER:"Investment"} as Record<string,string>)[type]}
           </span>
         );
       },
@@ -165,7 +174,7 @@ export const columns = (
           "USD";
 
         return (
-          <div className={`font-medium ${row.original.type === "EXPENSE" ? "text-red-500/90" : "text-green-500/90"}`}>
+          <div className={`font-medium ${row.original.type === "INCOME" ? "text-green-500/90" : "text-red-500/90"}`}>
             {currencyMapper(currency)}
             {formatted}
           </div>
@@ -179,7 +188,7 @@ export const columns = (
         const category = categoryMap.get(row.original.categoryId);
         return (
           <CategoryBadge
-            name={row.original.categoryName}
+            name={row.original.categoryName || row.original.counterpartyName || "Uncategorized"}
             icon={category?.icon}
             color={category?.color}
           />

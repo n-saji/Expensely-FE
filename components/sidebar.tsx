@@ -221,6 +221,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Finances</SidebarGroupLabel>
+          <SidebarGroupContent><SidebarMenu>
+            {([ ["/accounts","Accounts"], ["/debts","Debts"], ["/savings","Savings"], ["/investments","Investments"] ] as const).map(([href,label]) => <SidebarMenuItem key={href}><SidebarMenuButton asChild isActive={pathName===href}><Link href={href}><Wallet /><span>{label}</span></Link></SidebarMenuButton></SidebarMenuItem>)}
+          </SidebarMenu></SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             General
           </SidebarGroupLabel>

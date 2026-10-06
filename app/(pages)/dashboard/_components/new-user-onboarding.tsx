@@ -37,6 +37,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import CategoryBadge from "@/components/category-badge";
 import CurrencyDrawer from "@/components/currency-drawer";
+import AccountForm from "@/components/account-form";
 
 interface NewUserOnboardingProps {
   userId: string;
@@ -45,6 +46,7 @@ interface NewUserOnboardingProps {
 }
 
 interface ExpenseFormState {
+  accountId: string;
   categoryId: string;
   description: string;
   amount: string;
@@ -104,18 +106,37 @@ export default function NewUserOnboarding({
   );
 
   const [categoryName, setCategoryName] = useState("");
+  const [accounts, setAccounts] = useState<
+    { id: string; name: string; currency: string; active: boolean }[]
+  >([]);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
 
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [creatingExpense, setCreatingExpense] = useState(false);
   const [expenseForm, setExpenseForm] = useState<ExpenseFormState>({
+    accountId: "",
     categoryId: "",
     description: "",
     amount: "",
     currency: userCurrency || "USD",
     expenseDate: getTodayDateString(),
   });
+
+  const loadAccounts = async () => {
+    try {
+      const response = await api.get("/accounts");
+      setAccounts(
+        response.data.filter((account: { active: boolean }) => account.active),
+      );
+    } catch {
+      setAccounts([]);
+    }
+  };
+  useEffect(() => {
+    void loadAccounts();
+  }, []);
 
   useEffect(() => {
     if (!expenseForm.currency && userCurrency) {
@@ -219,6 +240,10 @@ export default function NewUserOnboarding({
       toast.error("Please select a category");
       return;
     }
+    if (!expenseForm.accountId) {
+      toast.error("Create and select an account before adding an expense");
+      return;
+    }
 
     if (!expenseForm.description.trim()) {
       toast.error("Please enter a description");
@@ -245,14 +270,16 @@ export default function NewUserOnboarding({
         description: expenseForm.description.trim(),
         amount: parsedAmount,
         currency: expenseForm.currency,
-        expenseDate:
+        account: { id: expenseForm.accountId },
+        type: "EXPENSE",
+        transactionDate:
           expenseDate.toISOString().slice(0, 10) +
           "T" +
           new Date().toTimeString().slice(0, 8) +
           ".000Z",
       };
 
-      const response = await api.post("/expenses/create", payload);
+      const response = await api.post("/transactions/create", payload);
 
       if (response.status !== 200) {
         throw new Error("Failed to add expense");
@@ -260,6 +287,7 @@ export default function NewUserOnboarding({
 
       toast.success("First expense added");
       setExpenseForm({
+        accountId: "",
         categoryId: "",
         description: "",
         amount: "",
@@ -344,9 +372,10 @@ export default function NewUserOnboarding({
             Build your financial dashboard in minutes
           </CardTitle>
           <CardDescription className="text-sm md:text-base max-w-3xl">
-            Start by creating an expense category, log your first expense, and
-            set a budget limit. Once your first expense is added, the full
-            analytics dashboard will open automatically.
+            Start by creating the account that holds your money, then add a
+            category, log your first expense, and set a budget. Once your first
+            expense is added, the full analytics dashboard will open
+            automatically.
           </CardDescription>
         </CardHeader>
 
@@ -358,7 +387,11 @@ export default function NewUserOnboarding({
                 Quick setup checklist
               </p>
             </div>
-            <ul className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
+            <ul className="grid gap-2 text-sm text-muted-foreground md:grid-cols-4">
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                Create financial account
+              </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                 Create expense category
@@ -374,7 +407,42 @@ export default function NewUserOnboarding({
             </ul>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <Card className="border-border/70">
+              <CardHeader>
+                <CardTitle className="text-base">Create Account</CardTitle>
+                <CardDescription>
+                  Choose where your income and expenses are recorded.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Dialog open={accountOpen} onOpenChange={setAccountOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full">
+                      {accounts.length
+                        ? "Add Another Account"
+                        : "Create Account"}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create your first account</DialogTitle>
+                      <DialogDescription>
+                        Choose its currency first. All transactions in this
+                        account will follow it.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <AccountForm
+                      defaultCurrency={userCurrency}
+                      onSaved={async () => {
+                        await loadAccounts();
+                        setAccountOpen(false);
+                      }}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
             <Card className="border-border/70">
               <CardHeader>
                 <CardTitle className="text-base">Create Category</CardTitle>
@@ -426,7 +494,10 @@ export default function NewUserOnboarding({
                   <DialogTrigger asChild>
                     <Button
                       className="w-full"
-                      disabled={validExpenseCategories.length === 0}
+                      disabled={
+                        validExpenseCategories.length === 0 ||
+                        accounts.length === 0
+                      }
                     >
                       Add Expense
                     </Button>
@@ -440,6 +511,33 @@ export default function NewUserOnboarding({
                       </DialogDescription>
                     </DialogHeader>
                     <form className="space-y-4" onSubmit={handleCreateExpense}>
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">Account</p>
+                        <Select
+                          value={expenseForm.accountId}
+                          onValueChange={(value) => {
+                            const account = accounts.find(
+                              (item) => item.id === value,
+                            );
+                            setExpenseForm((prev) => ({
+                              ...prev,
+                              accountId: value,
+                              currency: account?.currency || prev.currency,
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select account" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {accounts.map((account) => (
+                              <SelectItem key={account.id} value={account.id}>
+                                {account.name} · {account.currency}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="space-y-2">
                         <p className="text-sm text-muted-foreground">
                           Category
@@ -490,6 +588,7 @@ export default function NewUserOnboarding({
                           }
                           userCurrency={userCurrency}
                           className="w-28"
+                          disabled={Boolean(expenseForm.accountId)}
                         />
                         <Input
                           value={expenseForm.amount}
@@ -524,10 +623,12 @@ export default function NewUserOnboarding({
                     </form>
                   </DialogContent>
                 </Dialog>
-                {validExpenseCategories.length === 0 && (
+                {(validExpenseCategories.length === 0 ||
+                  accounts.length === 0) && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Create at least one category before adding your first
-                    expense.
+                    {accounts.length === 0
+                      ? "Create an account first, then add your first expense."
+                      : "Create at least one category before adding your first expense."}
                   </p>
                 )}
               </CardContent>

@@ -338,7 +338,7 @@ export default function CategoryPage() {
                       <SelectValue placeholder="Select Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categoryTypes.map((category) => (
+                      {categoryTypes.filter((category) => category.value === "expense" || category.value === "income").map((category) => (
                         <SelectItem key={category.value} value={category.value}>
                           {category.label}
                         </SelectItem>
@@ -739,8 +739,7 @@ export default function CategoryPage() {
                   dependencies.recurringExpenseCount > 0 ||
                   dependencies.reminderCount > 0) && (
                   <div className="rounded-lg border border-rose-500/25 bg-rose-500/10 p-3 text-xs text-rose-700 dark:text-rose-300">
-                    <strong>Warning:</strong> Deleting this category will affect
-                    the associated records listed above.
+                    <strong>Warning:</strong> Categories with transactions cannot be deleted because their financial history must be preserved. Remove transaction links first if you still need to delete this category.
                     {dependencies.reminderCount > 0 && (
                       <span className="block mt-1 font-semibold text-rose-800 dark:text-rose-200">
                         Attention: Deleting this category will permanently hard delete all associated reminders.
@@ -766,7 +765,7 @@ export default function CategoryPage() {
                 variant="destructive"
                 className="flex-1"
                 onClick={handleDeleteConfirm}
-                disabled={isFetchingDependencies || isDeleting}
+                disabled={isFetchingDependencies || isDeleting || Boolean(dependencies && (dependencies.expenseCount > 0 || dependencies.incomeCount > 0))}
               >
                 {isDeleting ? <Spinner /> : "Confirm"}
               </Button>

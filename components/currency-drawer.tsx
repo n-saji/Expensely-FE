@@ -10,7 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { currencyCodes, currencyMap } from "@/utils/currencyMapper";
+import {
+  currencyCodes,
+  currencyMap,
+  currencyNames,
+} from "@/utils/currencyMapper";
 
 interface CurrencyDrawerProps {
   value: string;
@@ -39,7 +43,7 @@ export default function CurrencyDrawer({
 
   const formatCurrencyLabel = (code: string) => {
     const symbol = currencyMap[code];
-    return symbol ? `${code} ${symbol}` : code;
+    return symbol ? `${symbol} ${code}` : code;
   };
 
   return (
@@ -53,9 +57,12 @@ export default function CurrencyDrawer({
         {orderedCodes.map((code) => (
           <SelectItem key={code} value={code}>
             <span className="flex items-center gap-2">
+              <span className="w-6 font-medium">
+                {currencyMap[code] || code}
+              </span>
               <span className="font-medium">{code}</span>
               <span className="text-muted-foreground">
-                {currencyMap[code] || code}
+                · {currencyNames[code]}
               </span>
               {userCurrency === code && (
                 <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">

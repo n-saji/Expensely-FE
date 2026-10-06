@@ -85,6 +85,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import CategoryBadge from "@/components/category-badge";
+import FinancialMovementForm, { type MovementRecord, type MovementType } from "@/components/financial-movement-form";
 
 import {
   AlertDialog,
@@ -380,11 +381,12 @@ export default function TransactionPage() {
   // Modals state
   const [transactionToDelete, setTransactionToDelete] = useState<TransactionRow | null>(null);
   const [transactionToEdit, setTransactionToEdit] = useState<TransactionRow | null>(null);
+  const [movementToEdit, setMovementToEdit] = useState<TransactionRow | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [calenderOpen, setCalenderOpen] = useState(false);
   const [openMoreFiltersDialog, setOpenMoreFiltersDialog] = useState(false);
   // Local pending state inside more filters dialog
-  const [pendingTypeFilter, setPendingTypeFilter] = useState<"" | "EXPENSE" | "INCOME">(typeFilter as "" | "EXPENSE" | "INCOME");
+  const [pendingTypeFilter, setPendingTypeFilter] = useState(typeFilter);
 
   // CSV Export Dialog states
   const [openExportDialog, setOpenExportDialog] = useState(false);
@@ -1142,6 +1144,15 @@ export default function TransactionPage() {
     displayCurrency: t.displayCurrency,
     receiptUrl: t.receiptUrl,
     type: t.type,
+    counterpartyName: t.counterpartyName,
+    accountId: t.accountId,
+    destinationAccountId: t.destinationAccountId,
+    debtId: t.debtId,
+    savingsGoalId: t.savingsGoalId,
+    investmentAccountId: t.investmentAccountId,
+    principalAmount: t.principalAmount,
+    interestAmount: t.interestAmount,
+    notes: t.notes,
   });
 
   // Fetch unified transactions list
@@ -1801,6 +1812,7 @@ export default function TransactionPage() {
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem
                     onClick={() => {
+                      if (item.type !== "EXPENSE" && item.type !== "INCOME") { setMovementToEdit(item); return; }
                       setTransactionToEdit(item);
                       setAttachmentEditMode(false);
                       setOpenEditDialog(true);
@@ -1854,6 +1866,11 @@ export default function TransactionPage() {
 
   return (
     <div className="space-y-6 w-full h-full">
+      <Dialog open={!!movementToEdit} onOpenChange={open => !open && setMovementToEdit(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Edit financial movement</DialogTitle></DialogHeader>
+          {movementToEdit && <FinancialMovementForm type={movementToEdit.type as MovementType} initial={movementToEdit as MovementRecord} onCreated={() => setMovementToEdit(null)} />}
+        </DialogContent>
+      </Dialog>
       {/* Top Banner section */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -2179,7 +2196,7 @@ export default function TransactionPage() {
                 </DropdownMenuLabel>
                 <DropdownMenuItem
                   onClick={() => {
-                    setPendingTypeFilter(typeFilter as "" | "EXPENSE" | "INCOME");
+                    setPendingTypeFilter(typeFilter);
                     setOpenMoreFiltersDialog(true);
                   }}
                   className="flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg hover:bg-muted/80 cursor-pointer text-foreground hover:text-foreground transition-all"
@@ -2192,7 +2209,7 @@ export default function TransactionPage() {
                         ? "bg-rose-500/15 text-rose-500"
                         : "bg-emerald-500/15 text-emerald-500"
                     }`}>
-                      {typeFilter === "EXPENSE" ? "Exp" : "Inc"}
+                      {typeFilter.replaceAll("_", " ")}
                     </span>
                   )}
                 </DropdownMenuItem>
@@ -2227,7 +2244,7 @@ export default function TransactionPage() {
                   ? "bg-rose-500/10 border-rose-500/30 text-rose-500"
                   : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
               }`}>
-                {typeFilter === "EXPENSE" ? "Expense Only" : "Income Only"}
+                {typeFilter.replaceAll("_", " ")}
                 <button
                   type="button"
                   onClick={() => updateQueryParams({ transaction_type: null, page: "1" })}
@@ -2554,6 +2571,10 @@ export default function TransactionPage() {
                   <SelectItem value="all-types">All transactions</SelectItem>
                   <SelectItem value="EXPENSE">Expenses only</SelectItem>
                   <SelectItem value="INCOME">Income only</SelectItem>
+                  <SelectItem value="TRANSFER">Transfers</SelectItem>
+                  <SelectItem value="DEBT_PAYMENT">Debt payments</SelectItem>
+                  <SelectItem value="SAVINGS_TRANSFER">Savings</SelectItem>
+                  <SelectItem value="INVESTMENT_TRANSFER">Investments</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -2625,7 +2646,7 @@ export default function TransactionPage() {
       {/* ── More Filters Dialog ── */}
       <Dialog open={openMoreFiltersDialog} onOpenChange={(open) => {
         setOpenMoreFiltersDialog(open);
-        if (!open) setPendingTypeFilter(typeFilter as "" | "EXPENSE" | "INCOME");
+        if (!open) setPendingTypeFilter(typeFilter);
       }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -2642,12 +2663,16 @@ export default function TransactionPage() {
                 Transaction Type
               </Label>
               <div className="grid grid-cols-3 gap-2">
-                {(["", "EXPENSE", "INCOME"] as const).map((t) => {
+                {(["", "EXPENSE", "INCOME", "TRANSFER", "DEBT_PAYMENT", "SAVINGS_TRANSFER", "INVESTMENT_TRANSFER"] as const).map((t) => {
                   const isActive = pendingTypeFilter === t;
                   const labels: Record<string, string> = {
                     "": "All",
                     EXPENSE: "Expense",
                     INCOME: "Income",
+                    TRANSFER: "Transfer",
+                    DEBT_PAYMENT: "Debt payment",
+                    SAVINGS_TRANSFER: "Savings",
+                    INVESTMENT_TRANSFER: "Investment",
                   };
                   const activeClass =
                     t === ""

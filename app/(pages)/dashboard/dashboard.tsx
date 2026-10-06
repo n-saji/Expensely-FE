@@ -57,6 +57,7 @@ import {
   formatAmountCompact,
 } from "@/utils/amount_formatter";
 import { Button } from "@/components/ui/button";
+import FinancialSummaryCards from "@/components/financial-summary-cards";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -1647,6 +1648,8 @@ export default function DashboardPage() {
           </div> */}
         </div>
       </div>
+
+      <FinancialSummaryCards />
 
       {/* ── Edit Mode Toolbar ── */}
       {isMounted && isEditing && (
