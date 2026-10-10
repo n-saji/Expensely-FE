@@ -139,6 +139,13 @@ NEXT_PUBLIC_WS_URL=ws://localhost:8080/ws
 NEXTAUTH_SECRET=your-secret
 NEXT_PUBLIC_CLIENT_ID=your-google-client-id
 NEXT_PUBLIC_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-oauth-app-client-id
+GITHUB_CLIENT_SECRET=your-github-oauth-app-client-secret
+DISCORD_CLIENT_ID=your-discord-application-client-id
+DISCORD_CLIENT_SECRET=your-discord-application-client-secret
+
+# In production, set this to the public site origin (for example https://expensely.store).
+NEXTAUTH_URL=https://your-domain.com
 
 NEXT_MAINTENANCE_MODE=false
 NEXT_WEBSITE_DOWN=false
@@ -148,6 +155,12 @@ Notes:
 
 - `NEXT_PUBLIC_API_URL` is used for Next.js rewrite proxy targets and API requests.
 - `NEXT_PUBLIC_WS_URL` powers in-app real-time notifications.
+- Register `https://your-domain.com/api/auth/callback/github` in the GitHub OAuth app and
+  `https://your-domain.com/api/auth/callback/discord` in the Discord application.
+  Set the matching client ID and secret in the deployment environment for every
+  environment where those sign-in buttons are available. NextAuth reports
+  `error=OAuthCallback` for failures during token exchange or profile loading;
+  inspect the server's `OAUTH_CALLBACK_ERROR` log for the underlying reason.
 - Maintenance flags can lock pages behind maintenance screens.
 
 ## Getting Started
