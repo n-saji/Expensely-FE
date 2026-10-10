@@ -179,7 +179,7 @@ export default function SignUpForm() {
   const passwordStrength = getPasswordStrength(password);
 
   const handleGoogleLogin = async () => {
-    signIn("google", { callbackUrl: "/dashboard" });
+    signIn("google", { callbackUrl: "/auth-handler" });
   };
 
   const onSubmit = async (values: RegisterFormValues) => {
@@ -447,7 +447,7 @@ export default function SignUpForm() {
           variant={"outline"}
           className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
           onClick={() => {
-            signIn("google", { callbackUrl: "/dashboard" });
+            signIn("google", { callbackUrl: "/auth-handler" });
           }}
         >
           <Image
@@ -465,7 +465,7 @@ export default function SignUpForm() {
           variant={"outline"}
           className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
           onClick={() => {
-            signIn("github", { callbackUrl: "/dashboard" });
+            signIn("github", { callbackUrl: "/auth-handler" });
           }}
         >
           <FaGithub className="h-4 w-4 shrink-0 text-neutral-900 dark:text-neutral-100" />
@@ -477,7 +477,7 @@ export default function SignUpForm() {
           variant={"outline"}
           className="w-full flex items-center justify-center gap-1.5 px-2 text-xs"
           onClick={() => {
-            signIn("discord", { callbackUrl: "/dashboard" });
+            signIn("discord", { callbackUrl: "/auth-handler" });
           }}
         >
           <FaDiscord className="h-4 w-4 shrink-0 text-indigo-500" />
