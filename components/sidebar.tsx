@@ -71,7 +71,7 @@ export function AppSidebar() {
     if (user?.profilePicFilePath && !user.profilePictureUrl) {
       const url = user.profilePicFilePath.startsWith("http")
         ? user.profilePicFilePath
-        : `https://expensely-profiles.s3.amazonaws.com/${user.profilePicFilePath}`;
+        : `https://expensely-profiles-993371733162.s3.amazonaws.com/${user.profilePicFilePath}`;
       dispatch(
         setUser({
           ...user,

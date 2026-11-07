@@ -376,7 +376,7 @@ export default function CompleteProfileWizard() {
         }
 
         const updatedUser = picRes.data?.user || picRes.data;
-        const publicUrl = updatedUser?.profilePictureUrl || `https://expensely-profiles.s3.us-east-2.amazonaws.com/${key}`;
+        const publicUrl = updatedUser?.profilePictureUrl || `https://expensely-profiles-993371733162.s3.us-east-2.amazonaws.com/${key}`;
 
         finalFilePath = key;
         finalPictureUrl = publicUrl;
