@@ -92,7 +92,7 @@ export default function AuthHandler() {
           if (!profileData.user.profilePictureUrl && profileData.user.profilePicFilePath) {
             profileData.user.profilePictureUrl = profileData.user.profilePicFilePath.startsWith("http")
               ? profileData.user.profilePicFilePath
-              : `https://expensely-profiles.s3.amazonaws.com/${profileData.user.profilePicFilePath}`;
+              : `https://expensely-profiles-993371733162.s3.amazonaws.com/${profileData.user.profilePicFilePath}`;
           }
 
           dispatch(
