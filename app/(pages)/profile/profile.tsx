@@ -327,7 +327,7 @@ export default function ProfilePage({
       }
 
       const updatedUser = response.data?.user || response.data;
-      const publicUrl = updatedUser?.profilePictureUrl || `https://expensely-profiles.s3.us-east-2.amazonaws.com/${key}`;
+      const publicUrl = updatedUser?.profilePictureUrl || `https://expensely-profiles-993371733162.s3.us-east-2.amazonaws.com/${key}`;
 
       dispatch(
         setUser({
