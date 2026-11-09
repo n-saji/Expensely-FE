@@ -13,17 +13,17 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       "qidkhnousdwexgmgvytk.supabase.co",
-      "expensely-profiles.s3.amazonaws.com",
-      "expensely-profiles.s3.us-east-2.amazonaws.com",
+      "expensely-profiles-993371733162.s3.amazonaws.com",
+      "expensely-profiles-993371733162.s3.us-east-2.amazonaws.com",
     ],
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "expensely-profiles.s3.amazonaws.com",
+        hostname: "expensely-profiles-993371733162.s3.amazonaws.com",
       },
       {
         protocol: "https",
-        hostname: "expensely-profiles.s3.us-east-2.amazonaws.com",
+        hostname: "expensely-profiles-993371733162.s3.us-east-2.amazonaws.com",
       },
       {
         protocol: "https",

@@ -1,3 +1,4 @@
+import { normalizeProfileUrl } from "@/utils/profileUrl";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   DEFAULT_THEME,
@@ -109,7 +110,7 @@ const userSlice = createSlice({
           ? action.payload.alertsEnabled
           : state.alertsEnabled;
       state.profilePictureUrl =
-        action.payload.profilePictureUrl ?? state.profilePictureUrl;
+        normalizeProfileUrl(action.payload.profilePictureUrl ?? state.profilePictureUrl);
       state.profilePicFilePath =
         action.payload.profilePicFilePath ?? state.profilePicFilePath;
       state.profileComplete =

@@ -9,13 +9,17 @@ const handler = NextAuth({
       clientId: process.env.NEXT_PUBLIC_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.NEXT_PUBLIC_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET || "",
     }),
+    // These providers return `iss` in the callback; NextAuth v4 needs the
+    // matching issuer to validate it before exchanging the authorization code.
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID || process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "",
       clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+      issuer: "https://github.com/login/oauth",
     }),
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID || process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || "",
       clientSecret: process.env.DISCORD_CLIENT_SECRET || "",
+      issuer: "https://discord.com",
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,

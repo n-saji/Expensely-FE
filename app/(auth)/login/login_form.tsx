@@ -233,7 +233,7 @@ export default function LoginForm() {
   };
 
   const handleOAuthLogin = (provider: string) => {
-    signIn(provider, { callbackUrl: "/dashboard" }).catch((error) => {
+    signIn(provider, { callbackUrl: "/auth-handler" }).catch((error) => {
       console.error(`${provider} login error:`, error);
       toast.error(`${provider} login failed. Please try again.`);
     });
