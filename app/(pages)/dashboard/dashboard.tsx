@@ -30,6 +30,7 @@ import {
   Plus,
   PieChart as PieChartIcon,
   Activity,
+  Sparkles,
 } from "lucide-react";
 
 import { RootState } from "@/redux/store";
@@ -57,6 +58,7 @@ import {
   formatAmountCompact,
 } from "@/utils/amount_formatter";
 import { Button } from "@/components/ui/button";
+import AiInsightsWidget from "@/components/ai-insights-widget";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -502,6 +504,10 @@ export default function DashboardPage() {
   }
 
   const widgetMeta: Record<string, { title: string; icon: React.ReactNode }> = {
+    ai_insights: {
+      title: "AI Financial Insights",
+      icon: <Sparkles className="h-4 w-4 text-violet-500" />,
+    },
     stats: {
       title: "Hero Stats Summary",
       icon: <Banknote className="h-4 w-4 text-emerald-500" />,
@@ -550,6 +556,7 @@ export default function DashboardPage() {
 
   const defaultLayout: LayoutItem[] = [
     { id: "stats", w: 3, visible: true },
+    { id: "ai_insights", w: 3, visible: true },
     { id: "chart", w: 2, visible: true },
     { id: "reminders", w: 1, visible: true },
     { id: "budgets", w: 2, visible: true },
@@ -1586,6 +1593,8 @@ export default function DashboardPage() {
 
   const renderWidget = (id: string, w: number) => {
     switch (id) {
+      case "ai_insights":
+        return <AiInsightsWidget />;
       case "stats":
         return renderStatsWidget(w);
       case "chart":
