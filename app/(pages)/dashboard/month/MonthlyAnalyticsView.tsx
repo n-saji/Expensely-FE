@@ -987,7 +987,7 @@ export default function MonthlyAnalyticsView({
                   <div className="flex items-start justify-between gap-2 min-w-0">
                     <span className="min-w-0 break-words font-semibold">{tx.description}</span>
                     <span className={`max-w-[45%] break-all text-right font-mono font-semibold ${isExpense ? "text-rose-500" : "text-emerald-500"}`}>
-                      {isExpense ? "-" : "+"}{currencySymbol}{amount.toFixed(2)}
+                      {currencySymbol}{Math.abs(amount).toFixed(2)}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -1034,9 +1034,8 @@ export default function MonthlyAnalyticsView({
                           <CategoryBadge name={tx.categoryName} icon={catMeta?.icon} color={catMeta?.color} />
                         </td>
                         <td className="px-6 py-4 text-right font-mono font-semibold">
-                          <span className={isExpense ? "text-foreground" : "text-emerald-500"}>
-                            {isExpense ? "-" : "+"}
-                            {currencySymbol}{amount.toFixed(2)}
+                          <span className={isExpense ? "text-rose-500" : "text-emerald-500"}>
+                            {currencySymbol}{Math.abs(amount).toFixed(2)}
                           </span>
                         </td>
                       </tr>
@@ -1061,9 +1060,7 @@ export default function MonthlyAnalyticsView({
                   const lastDay = new Date(year, monthNum, 0).getDate();
                   const endDateStr = `${year}-${String(monthNum).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
                   router.push(
-                    isExpense
-                      ? `/expense?start_date=${startDate}&end_date=${endDateStr}`
-                      : `/income?start_date=${startDate}&end_date=${endDateStr}`
+                    `/transaction?start_date=${startDate}&end_date=${endDateStr}&transaction_type=${isExpense ? "EXPENSE" : "INCOME"}`
                   );
                 }}
                 className="text-xs font-semibold gap-1.5 flex items-center hover:bg-muted/10 cursor-pointer"

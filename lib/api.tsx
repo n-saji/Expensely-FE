@@ -164,6 +164,9 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
     if (
       originalRequest.url?.includes("/users/refresh") ||
       originalRequest.url?.includes("/users/login")
@@ -182,15 +185,7 @@ api.interceptors.response.use(
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed → redirect to login
-        if (
-          typeof window !== "undefined" &&
-          !window.location.pathname.includes("/login") &&
-          !window.location.pathname.includes("/")
-        ) {
-          window.location.href = `/login`;
-        }
-
+        forceLogoutToLogin();
         return Promise.reject(refreshError);
       }
     }
