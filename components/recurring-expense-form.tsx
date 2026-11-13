@@ -10,6 +10,8 @@ import { RootState } from "@/redux/store";
 import { CreateRecurringExpenseReq, Recurrence } from "@/global/dto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Form,
@@ -34,7 +36,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { ChevronDown } from "lucide-react";
+import { Bell, ChevronDown, Mail } from "lucide-react";
 import CategoryBadge from "@/components/category-badge";
 import CurrencyDrawer from "@/components/currency-drawer";
 
@@ -44,21 +46,54 @@ function getTomorrowDateString() {
   return tomorrow.toISOString().split("T")[0];
 }
 
-const recurringSchema = z.object({
-  categoryId: z.string().optional(),
-  amount: z.coerce.number().positive("Amount must be greater than 0"),
-  currency: z.string().min(1, "Currency is required"),
-  description: z.string().min(1, "Description is required"),
-  recurrence: z.nativeEnum(Recurrence),
-  date: z
-    .string()
-    .min(1, "Start date is required")
-    .refine((value) => {
-      const selected = new Date(`${value}T00:00:00`);
-      const tomorrow = new Date(`${getTomorrowDateString()}T00:00:00`);
-      return selected >= tomorrow;
-    }, "Start date must be tomorrow or later"),
-});
+const recurringSchema = z
+  .object({
+    categoryId: z.string().optional(),
+    amount: z.coerce.number().positive("Amount must be greater than 0"),
+    currency: z.string().min(1, "Currency is required"),
+    description: z.string().min(1, "Description is required"),
+    recurrence: z.nativeEnum(Recurrence),
+    date: z
+      .string()
+      .min(1, "Start date is required")
+      .refine((value) => {
+        const selected = new Date(`${value}T00:00:00`);
+        const tomorrow = new Date(`${getTomorrowDateString()}T00:00:00`);
+        return selected >= tomorrow;
+      }, "Start date must be tomorrow or later"),
+    emailNotificationEnabled: z.boolean(),
+    inAppNotificationEnabled: z.boolean(),
+    notificationDaysBefore: z.array(z.number().int().min(1).max(365)),
+    customNotificationDays: z.string(),
+  })
+  .superRefine((values, context) => {
+    const customDays = values.customNotificationDays
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
+    const invalidCustomDay = customDays.some((value) => {
+      const parsed = Number(value);
+      return !Number.isInteger(parsed) || parsed < 1 || parsed > 365;
+    });
+    if (invalidCustomDay) {
+      context.addIssue({
+        code: "custom",
+        path: ["customNotificationDays"],
+        message: "Enter whole days from 1 to 365, separated by commas",
+      });
+    }
+    if (
+      (values.emailNotificationEnabled || values.inAppNotificationEnabled) &&
+      values.notificationDaysBefore.length === 0 &&
+      customDays.length === 0
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["notificationDaysBefore"],
+        message: "Select at least one notification time",
+      });
+    }
+  });
 
 type RecurringFormValues = z.infer<typeof recurringSchema>;
 
@@ -96,6 +131,18 @@ export default function RecurringExpenseForm({
       description: initialValues?.description || "",
       recurrence: initialValues?.recurrence || Recurrence.Monthly,
       date: initialValues?.date || tomorrow,
+      emailNotificationEnabled:
+        initialValues?.emailNotificationEnabled || false,
+      inAppNotificationEnabled:
+        initialValues?.inAppNotificationEnabled || false,
+      notificationDaysBefore:
+        initialValues?.notificationDaysBefore?.filter(
+          (days) => days === 1 || days === 7,
+        ) || [],
+      customNotificationDays:
+        initialValues?.notificationDaysBefore
+          ?.filter((days) => days !== 1 && days !== 7)
+          .join(", ") || "",
     },
   });
 
@@ -116,6 +163,10 @@ export default function RecurringExpenseForm({
 
     try {
       setLoading(true);
+      const customDays = data.customNotificationDays
+        .split(",")
+        .map((value) => Number(value.trim()))
+        .filter((value) => Number.isInteger(value));
       await onSubmit({
         categoryId: data.categoryId || "",
         amount: data.amount,
@@ -123,6 +174,11 @@ export default function RecurringExpenseForm({
         description: data.description,
         recurrence: data.recurrence,
         date: data.date,
+        emailNotificationEnabled: data.emailNotificationEnabled,
+        inAppNotificationEnabled: data.inAppNotificationEnabled,
+        notificationDaysBefore: Array.from(
+          new Set([...data.notificationDaysBefore, ...customDays]),
+        ).sort((a, b) => b - a),
       });
       if (showSuccessToast) {
         toast.success(successMessage || "Recurring expense saved successfully");
@@ -173,16 +229,19 @@ export default function RecurringExpenseForm({
                     </FormControl>
                     <SelectContent>
                       {categories.categories
-                        .filter((category) => category.type?.toLowerCase() === "expense")
+                        .filter(
+                          (category) =>
+                            category.type?.toLowerCase() === "expense",
+                        )
                         .map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <CategoryBadge
-                            name={category.name}
-                            icon={category.icon}
-                            color={category.color}
-                          />
-                        </SelectItem>
-                      ))}
+                          <SelectItem key={category.id} value={category.id}>
+                            <CategoryBadge
+                              name={category.name}
+                              icon={category.icon}
+                              color={category.color}
+                            />
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -304,6 +363,115 @@ export default function RecurringExpenseForm({
               </FormItem>
             )}
           />
+
+          <div className="space-y-3 rounded-xl border border-border/60 bg-muted/10 p-4">
+            <div>
+              <FormLabel>Notifications</FormLabel>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Choose one or both delivery methods and multiple advance
+                notices.
+              </p>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="inAppNotificationEnabled"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border border-border/40 bg-background/50 p-3">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-muted-foreground" />
+                    <FormLabel className="font-normal">
+                      In-app notification
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="emailNotificationEnabled"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border border-border/40 bg-background/50 p-3">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <FormLabel className="font-normal">
+                      Email notification
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notificationDaysBefore"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Notify me</FormLabel>
+                  <div className="flex flex-wrap gap-3">
+                    {[
+                      { value: 1, label: "1 day before" },
+                      { value: 7, label: "7 days before" },
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/40 bg-background/50 px-3 py-2 text-sm"
+                      >
+                        <Checkbox
+                          checked={field.value.includes(option.value)}
+                          onCheckedChange={(checked) =>
+                            field.onChange(
+                              checked
+                                ? [...field.value, option.value]
+                                : field.value.filter(
+                                    (value) => value !== option.value,
+                                  ),
+                            )
+                          }
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                  {fieldState.error && (
+                    <p className="text-sm text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="customNotificationDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Custom days before</FormLabel>
+                  <FormControl>
+                    <Input placeholder="For example: 2, 14, 30" {...field} />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Separate multiple custom notices with commas.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="flex w-full">

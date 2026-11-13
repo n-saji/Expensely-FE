@@ -202,6 +202,9 @@ export interface RecurringExpense {
   date: string;
   nextOccurrence: string;
   active: boolean;
+  emailNotificationEnabled: boolean;
+  inAppNotificationEnabled: boolean;
+  notificationDaysBefore: number[];
 }
 
 export interface CreateRecurringExpenseReq {
@@ -211,6 +214,9 @@ export interface CreateRecurringExpenseReq {
   description: string;
   recurrence: Recurrence;
   date: string;
+  emailNotificationEnabled: boolean;
+  inAppNotificationEnabled: boolean;
+  notificationDaysBefore: number[];
 }
 
 export interface UpdateRecurringExpenseReq {
@@ -220,6 +226,9 @@ export interface UpdateRecurringExpenseReq {
   description: string;
   recurrence: Recurrence;
   date: string;
+  emailNotificationEnabled: boolean;
+  inAppNotificationEnabled: boolean;
+  notificationDaysBefore: number[];
 }
 
 export interface Income {
