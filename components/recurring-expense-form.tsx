@@ -165,7 +165,9 @@ export default function RecurringExpenseForm({
       setLoading(true);
       const customDays = data.customNotificationDays
         .split(",")
-        .map((value) => Number(value.trim()))
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .map(Number)
         .filter((value) => Number.isInteger(value));
       await onSubmit({
         categoryId: data.categoryId || "",
