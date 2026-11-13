@@ -332,12 +332,14 @@ export default function TransactionPage() {
   const pageNumber = parsePositiveInt(searchParams.get("page"), 1);
   const pageSize = parsePositiveInt(searchParams.get("limit"), 10);
 
+  const startDateFilter = searchParams.get("start_date");
+  const endDateFilter = searchParams.get("end_date");
   const dateRange = useMemo<DateRange | undefined>(() => {
-    const from = parseDateParam(searchParams.get("start_date"));
-    const to = parseDateParam(searchParams.get("end_date"));
+    const from = parseDateParam(startDateFilter);
+    const to = parseDateParam(endDateFilter);
     if (!from && !to) return undefined;
     return { from, to };
-  }, [searchParams]);
+  }, [startDateFilter, endDateFilter]);
 
   // Overview stats states (Expense)
   const [overview, setOverview] = useState<ExpenseOverview | null>(null);
@@ -399,7 +401,6 @@ export default function TransactionPage() {
   const [attachmentInputKey, setAttachmentInputKey] = useState(0);
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const skipInitialDebouncedFetchRef = useRef(true);
   const searchInputRef = useRef(query);
   const submittedSearchRef = useRef<string | null>(null);
 
@@ -1338,6 +1339,8 @@ export default function TransactionPage() {
   const loadList = async () => {
     try {
       setTableLoading(true);
+      const sortField = sorting[0]?.id;
+      const sortOrder = sorting[0]?.desc ? "desc" : "asc";
       const data = await fetchTransactions({
         userId: user.id,
         fromDate: dateRange?.from
@@ -1350,6 +1353,7 @@ export default function TransactionPage() {
         page: pageNumber,
         limit: pageSize,
         q: query,
+        ...(sortField ? { sortBy: sortField, sortOrder } : {}),
       });
 
       setTransactionsList(data);
@@ -1373,6 +1377,7 @@ export default function TransactionPage() {
     pageNumber,
     pageSize,
     query,
+    sorting,
     refreshTrigger,
   ]);
 
@@ -1455,44 +1460,6 @@ export default function TransactionPage() {
       void fetchMonthlyIncomeOverview();
     }
   }, [user.id, incomeOverviewParams]);
-
-  // Debounced sorting
-  useEffect(() => {
-    if (skipInitialDebouncedFetchRef.current) {
-      skipInitialDebouncedFetchRef.current = false;
-      return;
-    }
-    const sortField = sorting[0]?.id;
-    const sortOrder = sorting[0]?.desc ? "desc" : "asc";
-    setTableLoading(true);
-    const delayDebounceFn = setTimeout(async () => {
-      try {
-        const data = await fetchTransactions({
-          userId: user.id,
-          fromDate: dateRange?.from
-            ? dateRange.from.toISOString().slice(0, 10)
-            : "",
-          toDate: dateRange?.to ? dateRange.to.toISOString().slice(0, 10) : "",
-          category: categoryFilter,
-          transactionType: typeFilter,
-          order: "desc",
-          page: pageNumber,
-          limit: pageSize,
-          q: query,
-          ...(sortField ? { sortBy: sortField, sortOrder } : {}),
-        });
-
-        setTransactionsList(data);
-        setDatas(data.transactions.map(mapTransactionToRow));
-      } catch (error) {
-        console.error("Error fetching sorted transactions", error);
-      } finally {
-        setTableLoading(false);
-      }
-    }, 400);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [sorting]);
 
   // Handle Event listeners
   useEffect(() => {
