@@ -163,6 +163,9 @@ export default function RecurringExpensePage() {
       description: data.description,
       recurrence: data.recurrence,
       date: data.date,
+      emailNotificationEnabled: data.emailNotificationEnabled,
+      inAppNotificationEnabled: data.inAppNotificationEnabled,
+      notificationDaysBefore: data.notificationDaysBefore,
     };
 
     const response = await api.put(
@@ -222,7 +225,9 @@ export default function RecurringExpensePage() {
               side="right"
             >
               <SheetHeader className="p-0">
-                <SheetTitle className="text-xl">Add Recurring Expense</SheetTitle>
+                <SheetTitle className="text-xl">
+                  Add Recurring Expense
+                </SheetTitle>
                 <SheetDescription>
                   Create recurring transactions for fixed, repeatable spending.
                 </SheetDescription>
@@ -283,6 +288,11 @@ export default function RecurringExpensePage() {
                 description: selectedUpdate.description,
                 recurrence: selectedUpdate.recurrence,
                 date: selectedUpdate.date,
+                emailNotificationEnabled:
+                  selectedUpdate.emailNotificationEnabled,
+                inAppNotificationEnabled:
+                  selectedUpdate.inAppNotificationEnabled,
+                notificationDaysBefore: selectedUpdate.notificationDaysBefore,
               }}
               onSubmit={handleUpdateRecurring}
             />

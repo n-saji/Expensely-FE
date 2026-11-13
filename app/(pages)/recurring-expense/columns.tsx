@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Bell, Mail, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import CategoryBadge from "@/components/category-badge";
 
@@ -89,6 +89,31 @@ export const columns = ({
   {
     accessorKey: "nextOccurrence",
     header: "Next Occurrence",
+  },
+  {
+    id: "notifications",
+    header: "Notifications",
+    cell: ({ row }) => {
+      const offsets = row.original.notificationDaysBefore || [];
+      if (offsets.length === 0) {
+        return <span className="text-xs text-muted-foreground">Off</span>;
+      }
+      return (
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            {row.original.inAppNotificationEnabled && (
+              <Bell className="h-3.5 w-3.5" />
+            )}
+            {row.original.emailNotificationEnabled && (
+              <Mail className="h-3.5 w-3.5" />
+            )}
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {offsets.map((days) => `${days}d`).join(", ")} before
+          </span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "active",
