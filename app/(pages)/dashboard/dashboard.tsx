@@ -1594,7 +1594,14 @@ export default function DashboardPage() {
   const renderWidget = (id: string, w: number) => {
     switch (id) {
       case "ai_insights":
-        return <AiInsightsWidget />;
+        return (
+          <AiInsightsWidget
+            userId={user.id}
+            currency={user.currency}
+            overview={overview}
+            incomeOverview={incomeOverview}
+          />
+        );
       case "stats":
         return renderStatsWidget(w);
       case "chart":
